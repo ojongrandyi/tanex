@@ -763,7 +763,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
       }
     }
     setIsCreatingShipment(true);
-    // Piece labels (QSxxxxxx-NN) are stamped from the server-assigned ID in createShipment.
+    // Piece labels (TXxxxxxx-NN) are stamped from the server-assigned ID in createShipment.
     const formattedPieces = shipmentType === 'Vehicle'
       ? [
           {

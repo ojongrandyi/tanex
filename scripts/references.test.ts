@@ -14,7 +14,7 @@ test('generateReference: TX-SL/TKT/INV/CSH + 6 digits', () => {
 });
 
 test('REFERENCE_PATTERN rejects other prefixes and lengths', () => {
-  for (const bad of ['QS-TKT-123456', 'TX-TKT-12345', 'TX-TKT-1234567', 'TX-ABC-123456', 'tx-inv-123456', 'TX-CSH-12345A']) {
+  for (const bad of ['AB-TKT-123456', 'TX-TKT-12345', 'TX-TKT-1234567', 'TX-ABC-123456', 'tx-inv-123456', 'TX-CSH-12345A']) {
     assert.doesNotMatch(bad, REFERENCE_PATTERN, bad);
   }
 });

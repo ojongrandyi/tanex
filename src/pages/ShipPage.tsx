@@ -285,7 +285,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
       countryCode
     });
 
-    // Piece ids and labels (QSxxxxxx-NN) are stamped from the server-assigned ID in createShipment.
+    // Piece ids and labels (TXxxxxxx-NN) are stamped from the server-assigned ID in createShipment.
     const piecesFormatted = piecesList.map((p, idx) => ({
       id: '',
       pieceNumber: idx + 1,

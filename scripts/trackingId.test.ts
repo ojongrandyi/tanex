@@ -53,7 +53,7 @@ test('isValidTrackingId: strict ^TX[2-9A-HJ-NP-Z]{6}$', () => {
   for (const ok of ['TX7K2M9P', 'TXQ4X8TA', 'TX222222', 'TXZZZZZZ']) assert.ok(isValidTrackingId(ok), ok);
   for (const bad of [
     '', 'TX7K2M9', 'TX7K2M9PX', 'tx7k2m9p', 'TX7K2M90', 'TX7K2M9O', 'TX7K2M91', 'TX7K2M9I',
-    'AB7K2M9P', 'QS7K2M9P', 'XY7K2M9P', 'TX 7K2M9P', 'TX7K2M9P-01', 'RTO-TX7K2M9P', 'ABC-2026-ABCDEFGH'
+    'AB7K2M9P', 'XY7K2M9P', 'TX 7K2M9P', 'TX7K2M9P-01', 'RTO-TX7K2M9P', 'ABC-2026-ABCDEFGH'
   ]) assert.ok(!isValidTrackingId(bad), bad);
 });
 
