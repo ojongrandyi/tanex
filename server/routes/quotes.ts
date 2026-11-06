@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { requireAdminAuth } from '../middleware/auth.js';
+import { requestHasPermission } from '../auth/permissions.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
 import { generateUniqueTrackingId } from '../trackingIds.js';
 import { pieceLabel } from '../../src/shared/trackingId.js';
@@ -222,7 +223,7 @@ quotesRouter.patch('/:id/status', (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: `Invalid quote status: ${status}` });
     }
 
-    if (!req.session?.isAdmin && !PUBLIC_SETTABLE_QUOTE_STATUSES.has(status)) {
+    if (!requestHasPermission(req, 'dashboard.view') && !PUBLIC_SETTABLE_QUOTE_STATUSES.has(status)) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
 
@@ -233,7 +234,7 @@ quotesRouter.patch('/:id/status', (req: Request, res: Response) => {
 
     // A customer can only answer a quote that is on offer (the same rule as the public page's
     // Accept button), so a quote that is unpriced, expired, declined or booked can't be flipped.
-    if (!req.session?.isAdmin && row.status !== 'QUOTE_PUBLISHED' && row.status !== 'RATE_PUBLISHED') {
+    if (!requestHasPermission(req, 'dashboard.view') && row.status !== 'QUOTE_PUBLISHED' && row.status !== 'RATE_PUBLISHED') {
       return res.status(409).json({ success: false, error: 'This quote is no longer open.' });
     }
 
@@ -241,7 +242,7 @@ quotesRouter.patch('/:id/status', (req: Request, res: Response) => {
     // past — the moment it was reopened it was already stale/expired again. The client
     // computes a fresh date (today + the configured quote validity window) and sends it
     // here to merge into the persisted pricing blob. Admin only: a customer can't extend a price.
-    if (validUntil && row.pricing_json && req.session?.isAdmin) {
+    if (validUntil && row.pricing_json && requestHasPermission(req, 'dashboard.view')) {
       const pricing = JSON.parse(row.pricing_json);
       pricing.validUntil = validUntil;
       db.prepare('UPDATE quote_requests SET status = ?, pricing_json = ? WHERE id = ?').run(status, JSON.stringify(pricing), id);

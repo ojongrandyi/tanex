@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import session from 'express-session';
 import helmet from 'helmet';
 import compression from 'compression';
 import path from 'path';
@@ -25,7 +24,8 @@ import { messagesRouter } from './routes/messages.js';
 import { mediaRouter } from './routes/media.js';
 import { seoRouter } from './seo.js';
 import { ADMIN_PATH, COMPANY } from '../src/config/brand.js';
-import { requireAdminAuth, SESSION_COOKIE } from './middleware/auth.js';
+import { requireAdminAuth, requireJsonOrMultipart } from './middleware/auth.js';
+import { SqliteSessionStore, createSessionMiddleware } from './auth/sessionStore.js';
 
 dotenv.config(); // reload trigger for tsx watch after .env changes
 
@@ -49,8 +49,7 @@ app.set('trust proxy', 1);
 if (!ADMIN_PROXY_TARGET) {
   // Initialize Persistent SQLite Database
   initDatabase();
-  // First Super Admin on an empty users table (IAM_RBAC_SPEC §8). Login keeps using
-  // ADMIN_PASSWORD_HASH until B.2.
+  // First Super Admin on an empty users table (IAM_RBAC_SPEC §8).
   bootstrapSuperAdmin(db);
   ensureUploadDirs();
 }
@@ -120,24 +119,15 @@ if (ADMIN_PROXY_TARGET) {
     console.error('[server] SESSION_SECRET is not set in .env — admin sessions will not persist reliably across restarts.');
   }
 
-  app.use(session({
-    name: SESSION_COOKIE,
-    secret: process.env.SESSION_SECRET || 'dev-only-insecure-fallback-secret',
-    resave: false,
-    saveUninitialized: false,
-    // Tells express-session to trust the proxy-derived secure-ness (via trust proxy above)
-    // rather than the raw, always-insecure connection this process itself sees — required
-    // alongside app.set('trust proxy') for a secure cookie to actually be set behind one.
-    proxy: true,
-    cookie: {
-      httpOnly: true,
-      sameSite: 'lax',
-      // Only sent over HTTPS once this is actually deployed behind one — forcing it on in
-      // this local http dev setup would silently stop the cookie from ever being sent at all.
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 12 * 60 * 60 * 1000 // 12 hours
-    }
-  }));
+  // Sessions live in the SQLite `sessions` table (IAM_RBAC_SPEC §5.7), so a restart or
+  // redeploy no longer signs everyone out. Cookie settings are in createSessionMiddleware.
+  app.use(createSessionMiddleware(
+    new SqliteSessionStore(db),
+    process.env.SESSION_SECRET || 'dev-only-insecure-fallback-secret'
+  ));
+
+  // State-changing /api requests must be JSON or multipart (IAM_RBAC_SPEC §5.8).
+  app.use('/api', requireJsonOrMultipart);
 
   // Health Check
   app.get('/api/health', (req, res) => {

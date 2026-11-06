@@ -1,34 +1,58 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { getRequestAuth } from '../auth/permissions.js';
+import { hasPermission, type PermissionKey } from '../../src/shared/permissions.js';
 
-declare module 'express-session' {
-  interface SessionData {
-    isAdmin?: boolean;
-  }
-}
+export { SESSION_COOKIE } from '../auth/sessionStore.js';
 
-// This used to also run a second, independent CSRF check here: reject any state-changing
-// request whose Origin header didn't match "this app's own origin", derived from the
-// request itself. In production that derivation proved unreliable across two different
-// approaches (matching req.protocol+host, then host-only) — this app sits behind Hostinger's
-// own edge CDN in front of whatever internal proxying it does to reach the actual Node
-// process, and neither the forwarded scheme nor the forwarded Host header reliably survived
-// that chain intact. The practical effect was every real admin write (delete, status
-// updates, settings saves) getting rejected with a 403 in production, repeatedly, across
-// multiple attempts to fix the derivation — a redundant safety net actively breaking the
-// primary feature it was meant to protect.
-//
-// It's genuinely redundant, not just broken: the session cookie's `sameSite: 'lax'` (see
-// index.ts) already stops the actual CSRF attack this was defending against — a cross-site
-// page cannot get a browser to attach the admin session cookie to a state-changing
-// fetch/XHR/form request at all, so a forged request from another origin never even reaches
-// this middleware with a valid session in the first place. Removed rather than attempting a
-// third derivation; the session check below remains the real gate.
-// Admin session cookie name.
-export const SESSION_COOKIE = 'ngf.sid';
+// An earlier Origin-header CSRF check was removed: behind Hostinger's CDN and proxy chain the
+// forwarded scheme/host didn't survive reliably and it rejected real admin writes. CSRF is
+// covered by the session cookie's sameSite=lax plus requireJsonOrMultipart below
+// (IAM_RBAC_SPEC §5.8).
 
-export function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.session?.isAdmin) {
+/** 401 unless an active user is signed in. */
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  if (!getRequestAuth(req)) {
     return res.status(401).json({ success: false, error: 'Authentication required' });
   }
   next();
+}
+
+/** 401 when signed out, 403 unless the user holds at least one of the keys (any-of). */
+export function requirePermission(...keys: PermissionKey[]): RequestHandler {
+  if (keys.length === 0) throw new Error('requirePermission needs at least one permission key');
+  return (req: Request, res: Response, next: NextFunction) => {
+    const auth = getRequestAuth(req);
+    if (!auth) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    if (!keys.some((k) => hasPermission(auth.permissions, k))) {
+      return res.status(403).json({ success: false, error: 'You do not have permission to do this.' });
+    }
+    next();
+  };
+}
+
+/**
+ * TEMPORARY until B.3 moves every route to its own permission (IAM_RBAC_SPEC §7): the old
+ * "is an admin" gate, now meaning "may open the console dashboard".
+ */
+export const requireAdminAuth: RequestHandler = requirePermission('dashboard.view');
+
+const STATE_CHANGING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+/**
+ * Rejects state-changing /api requests whose Content-Type isn't JSON or multipart (spec §5.8),
+ * which blocks plain cross-site form posts (urlencoded / text/plain). Requests without a
+ * Content-Type and without a body (e.g. logout, most DELETEs) pass.
+ */
+export function requireJsonOrMultipart(req: Request, res: Response, next: NextFunction) {
+  if (!STATE_CHANGING.has(req.method)) return next();
+  const type = (req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+  if (!type) {
+    const length = Number(req.headers['content-length'] || 0);
+    if (length === 0 && !req.headers['transfer-encoding']) return next();
+  } else if (type === 'application/json' || type === 'multipart/form-data') {
+    return next();
+  }
+  res.status(415).json({ success: false, error: 'Unsupported content type.' });
 }

@@ -230,7 +230,7 @@ export function legalDocs({ email, address }: LegalContact): LegalDoc[] {
         {
           heading: 'Cookies we use',
           body: [
-            `We use one essential cookie, ngf.sid. It keeps ${COMPANY_SHORT} staff signed in to our operations console for up to 12 hours. It is not set for visitors to the public website.`,
+            `We use one essential cookie, tx.sid. It keeps ${COMPANY_SHORT} staff signed in to our operations console for up to 12 hours. It is not set for visitors to the public website.`,
             'We do not use analytics or advertising cookies. If we add analytics, we will update this page and ask for your consent where the law requires it.'
           ]
         },

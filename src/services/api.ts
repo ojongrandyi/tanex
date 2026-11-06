@@ -93,7 +93,8 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export const api = {
   // Admin Auth
-  async login(password: string): Promise<{ success: boolean }> {
+  // identifier: email or phone (normalised by the server). Full AuthContext arrives in B.4.
+  async login(identifier: string, password: string): Promise<{ success: boolean }> {
     let res: Response;
     try {
       res = await fetchApi(`${API_BASE}/auth/login`, {
@@ -101,7 +102,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         cache: 'no-store',
-        body: JSON.stringify({ password })
+        body: JSON.stringify({ identifier, password })
       });
     } catch {
       throw new Error("Can't reach the server. Check your connection and try again.");
@@ -113,7 +114,7 @@ export const api = {
       // The hosting CDN has been seen answering with an empty or HTML body. The body is
       // unreliable but the session cookie isn't, so ask the server whether login took.
       if (res.ok && await api.checkSession()) return { success: true };
-      if (res.status === 401) throw new Error('Incorrect password.');
+      if (res.status === 401) throw new Error('Incorrect sign-in details.');
       if (res.status === 429) throw new Error('Too many login attempts. Try again in a few minutes.');
       throw new Error('Sign-in is temporarily unavailable. Please try again in a moment.');
     }
@@ -131,7 +132,8 @@ export const api = {
     try {
       const res = await fetchApi(`${API_BASE}/auth/session`, { credentials: 'include', cache: 'no-store' });
       const json = await res.json();
-      return Boolean(json?.isAdmin);
+      // Signed in as any active user. Per-permission gating of the console comes in B.4.
+      return Boolean(json?.user);
     } catch {
       return false;
     }

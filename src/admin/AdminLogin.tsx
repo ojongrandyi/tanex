@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
+import { Lock, User, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 import { ADMIN_CONSOLE_NAME, LOGO_ALT, LOGO_HEIGHT, LOGO_WHITE, LOGO_WIDTH } from '../config/brand';
 import './AdminLogin.css';
@@ -9,17 +9,18 @@ interface AdminLoginProps {
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password || submitting) return;
+    if (!identifier.trim() || !password || submitting) return;
     setSubmitting(true);
     setError(null);
     try {
-      await api.login(password);
+      await api.login(identifier, password);
       // AdminDataContext only ever fetches shipments/quotes/documents/settings once, on the
       // very first app mount — which, for someone landing straight on #/admin logged out,
       // happened before this session existed and so came back empty/401. A full reload is
@@ -28,9 +29,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
       // through the provider just for this one-time transition.
       window.location.reload();
     } catch (err: any) {
-      // CONTENT §10 wording for a wrong password; other failures (e.g. too many attempts) keep the server's message.
+      // CONTENT §10.1 wording for wrong details; other failures (e.g. too many attempts) keep the server's message.
       const message: string = err?.message || '';
-      setError(/incorrect password/i.test(message) || !message ? 'Incorrect password. Please try again.' : message);
+      setError(/incorrect sign-in/i.test(message) || !message ? 'Incorrect sign-in details. Please try again.' : message);
       setSubmitting(false);
     }
   };
@@ -43,9 +44,23 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
           <ShieldCheck size={22} />
         </div>
         <h1 className="admin-login-title">{ADMIN_CONSOLE_NAME}</h1>
-        <p className="admin-login-sub">Sign in to manage shipments, tracking and documents.</p>
+        <p className="admin-login-sub">Sign in with your work email or phone number.</p>
 
         <form onSubmit={handleSubmit} className="admin-login-form">
+          <div className="admin-login-field">
+            <User size={15} className="admin-login-field-icon" />
+            <input
+              type="text"
+              value={identifier}
+              onChange={(e) => { setIdentifier(e.target.value); setError(null); }}
+              placeholder="Email or phone"
+              aria-label="Email or phone"
+              autoFocus
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+            />
+          </div>
           <div className="admin-login-field">
             <Lock size={15} className="admin-login-field-icon" />
             <input
@@ -54,7 +69,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
               onChange={(e) => { setPassword(e.target.value); setError(null); }}
               placeholder="Password"
               aria-label="Password"
-              autoFocus
               autoComplete="current-password"
             />
           </div>
@@ -66,7 +80,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
             </div>
           )}
 
-          <button type="submit" className="admin-login-submit" disabled={submitting || !password}>
+          <button type="submit" className="admin-login-submit" disabled={submitting || !identifier.trim() || !password}>
             {submitting ? 'Signing in…' : 'Sign in'}
             {!submitting && <ArrowRight size={15} />}
           </button>
