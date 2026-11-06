@@ -691,6 +691,7 @@
 
   .print-doc-logo {
     height: 88px;
+    width: auto;
     max-width: 300px;
     object-fit: contain;
     display: block;

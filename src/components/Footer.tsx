@@ -11,7 +11,7 @@ import {
   Youtube,
   ChevronRight
 } from 'lucide-react';
-import { COMPANY_SHORT, LEGAL_NAME, LOGO_ALT, LOGO_WEB_HEIGHT, LOGO_WEB_WIDTH, LOGO_WHITE_WEB, SOCIAL, SocialNetwork, TAGLINE } from '../config/brand';
+import { COMPANY_SHORT, LEGAL_NAME, LOGO_ALT, LOGO_WORDMARK_WEB_HEIGHT, LOGO_WORDMARK_WEB_WIDTH, LOGO_WORDMARK_WHITE_WEB, SOCIAL, SocialNetwork, TAGLINE } from '../config/brand';
 import { useCompanyContact } from '../utils/useCompanyContact';
 import './Footer.css';
 
@@ -161,9 +161,9 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="ngf-pro-brand-col">
               <a className="ngf-pro-footer-logo" href={hrefFor('home')} onClick={go('home')}>
                 <img
-                  src={LOGO_WHITE_WEB}
-                  width={LOGO_WEB_WIDTH}
-                  height={LOGO_WEB_HEIGHT}
+                  src={LOGO_WORDMARK_WHITE_WEB}
+                  width={LOGO_WORDMARK_WEB_WIDTH}
+                  height={LOGO_WORDMARK_WEB_HEIGHT}
                   loading="lazy"
                   alt={LOGO_ALT}
                   className="ngf-pro-footer-logo-img"

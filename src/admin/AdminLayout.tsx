@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useAdminData } from '../context/AdminDataContext';
 import { api } from '../services/api';
-import { ADMIN_ROLE_LABEL, EMAIL, LOGO_ALT, LOGO_WHITE, TAGLINE } from '../config/brand';
+import { ADMIN_ROLE_LABEL, EMAIL, LOGO_ALT, LOGO_WORDMARK_HEIGHT, LOGO_WORDMARK_WHITE, LOGO_WORDMARK_WIDTH, TAGLINE } from '../config/brand';
 import './AdminLayout.css';
 
 export type AdminViewType =
@@ -138,7 +138,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         <div className="admin-sidebar-header">
           <div className="admin-brand-card" onClick={() => onSelectView('operations-center')}>
             <img
-              src={LOGO_WHITE}
+              src={LOGO_WORDMARK_WHITE}
+              width={LOGO_WORDMARK_WIDTH}
+              height={LOGO_WORDMARK_HEIGHT}
               alt={LOGO_ALT}
               className="admin-brand-logo"
               onError={(e) => {

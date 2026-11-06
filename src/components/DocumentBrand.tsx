@@ -2,7 +2,7 @@
 // tracking ID line, the tamper-evident pouch line and the legal footer. Used by the admin
 // Document Center papers (which become the PDFs).
 import React from 'react';
-import { COMPANY_SHORT, DOMAIN, LEGAL_NAME, LOGO, LOGO_ALT } from '../config/brand';
+import { COMPANY_SHORT, DOMAIN, LEGAL_NAME, LOGO, LOGO_ALT, LOGO_HEIGHT, LOGO_WIDTH } from '../config/brand';
 import { useCompanyContact } from '../utils/useCompanyContact';
 import type { DocumentType } from '../types/admin';
 import type { TransportMode } from '../shared/transportMode';
@@ -31,7 +31,7 @@ export const DocumentHeaderBrand: React.FC<{ className?: string }> = ({ classNam
   const { address, email } = useCompanyContact();
   return (
     <div className={`ngf-doc-brand ${className}`}>
-      <img src={LOGO} alt={LOGO_ALT} className="doc-preview-logo-img" />
+      <img src={LOGO} width={LOGO_WIDTH} height={LOGO_HEIGHT} alt={LOGO_ALT} className="doc-preview-logo-img" />
       <strong className="ngf-doc-legal-name">{LEGAL_NAME}</strong>
       <span className="ngf-doc-contact-line">{[address, email, DOMAIN].filter(Boolean).join(' · ')}</span>
     </div>

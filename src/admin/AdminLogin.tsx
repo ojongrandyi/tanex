@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
-import { ADMIN_CONSOLE_NAME, LOGO_ALT, LOGO_WHITE } from '../config/brand';
+import { ADMIN_CONSOLE_NAME, LOGO_ALT, LOGO_HEIGHT, LOGO_WHITE, LOGO_WIDTH } from '../config/brand';
 import './AdminLogin.css';
 
 interface AdminLoginProps {
@@ -37,7 +37,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
 
   return (
     <div className="admin-login-shell">
-      <img src={LOGO_WHITE} alt={LOGO_ALT} className="admin-login-logo" width={1972} height={592} />
+      <img src={LOGO_WHITE} alt={LOGO_ALT} className="admin-login-logo" width={LOGO_WIDTH} height={LOGO_HEIGHT} />
       <div className="admin-login-card">
         <div className="admin-login-badge">
           <ShieldCheck size={22} />

@@ -16,7 +16,7 @@ import {
 import { QuoteRequest } from '../types/admin';
 import { useAdminData } from '../context/AdminDataContext';
 import { useCompanyContact } from '../utils/useCompanyContact';
-import { COMPANY_SHORT, DOMAIN, LEGAL_NAME, LOGO, LOGO_ALT } from '../config/brand';
+import { COMPANY_SHORT, DOMAIN, LEGAL_NAME, LOGO, LOGO_ALT, LOGO_HEIGHT, LOGO_WIDTH } from '../config/brand';
 import { useCurrency } from '../utils/useCurrency';
 import { useUnitSystem } from '../utils/useUnitSystem';
 import { formatDimensions as formatDims, formatWeight } from '../shared/units';
@@ -389,7 +389,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
       <div className="printable-official-quotation">
         <div className="print-doc-header">
           <div className="print-header-left">
-            <img src={LOGO} alt={LOGO_ALT} className="print-doc-logo" />
+            <img src={LOGO} width={LOGO_WIDTH} height={LOGO_HEIGHT} alt={LOGO_ALT} className="print-doc-logo" />
             <div className="print-company-info">
               <strong>{companyName}</strong>
               {headquartersAddress && <span>{headquartersAddress}</span>}

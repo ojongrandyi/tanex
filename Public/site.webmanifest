@@ -8,19 +8,19 @@
   "theme_color": "#1C120E",
   "icons": [
     {
-      "src": "/brand/icon-192.png?v=6",
+      "src": "/brand/icon-192.png?v=7",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/brand/favicon.png?v=6",
+      "src": "/brand/favicon.png?v=7",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/brand/icon-maskable-512.png?v=6",
+      "src": "/brand/icon-maskable-512.png?v=7",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

@@ -36,7 +36,7 @@ import { SiteImageName } from '../data/siteImages';
 import { GATEWAYS, getGateway, getLanePartners, formatGatewayTime } from '../data/gateways';
 import { useNow } from '../utils/useNow';
 import { useCompanyContact } from '../utils/useCompanyContact';
-import { COMPANY, COMPANY_SHORT, TRACKING_ID_EXAMPLE } from '../config/brand';
+import { COMPANY, COMPANY_SHORT, LOGO_MARK, TRACKING_ID_EXAMPLE } from '../config/brand';
 import { api } from '../services/api';
 import './HomePage.css';
 
@@ -797,7 +797,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
                 <div>
                   <strong className="thermal-brand font-mono">{COMPANY.toUpperCase()}</strong>
                 </div>
-                <img src="/brand/mark.png" alt="" className="thermal-mark" width={40} height={40} loading="lazy" />
+                <img src={LOGO_MARK} alt="" className="thermal-mark" width={40} height={40} loading="lazy" />
               </div>
 
               <div className="thermal-body-grid font-mono">

@@ -123,9 +123,11 @@ thousands of lines. Components are then moved to `--tx-*` as they are redesigned
   - `logo-wordmark.png` + `logo-wordmark-web.webp`: **without the tagline** (the tagline is unreadable at header
     size), for the header;
   - `logo-white.png` / `logo-wordmark-white*.webp`: black parts turned **cream `#FBF6EC`**, orange kept, for dark surfaces;
-  - `mark.png`: the **orange paper plane** (with speed lines) on transparent; favicons, app icons (maskable with
-    padding, on Chocolate 950) and `og-image.jpg` (1200×630: white logo on Chocolate 950 with a subtle cream route
-    line).
+  - `mark.png`: the **orange paper plane** (with speed lines) on transparent; favicons (the 16 px one shows the plane
+    alone), app icons (maskable and Apple touch on Chocolate 950, with padding) and `og-image.jpg` (1200×630: cream
+    logo on Chocolate 950).
+  - Paths and pixel sizes live in `src/config/brand.ts`; bump `BRAND_ASSET_VERSION` (and the `?v=` in `index.html`
+    and `site.webmanifest`) whenever the files are regenerated.
 - Clear space = height of the "T". Minimum widths: wordmark 104 px, full lockup 160 px.
 - Never stretch, recolour the orange, add effects, or place on busy photos without a chocolate overlay.
 

@@ -1,11 +1,11 @@
 // Prepares brand assets and responsive photos from the untouched originals in images/.
-// The originals are not kept in git (repo size); copy them back into images/ before running.
+// The photo originals are not kept in git (repo size); copy them back into images/ before running.
 // Licence records stay in images/*/SOURCES.md.
 // Run with: node scripts/optimize-images.mjs            (everything)
-//           node scripts/optimize-images.mjs --brand    (logos, mark, icons and OG image only)
+//           node scripts/optimize-images.mjs --brand    (logos, wordmarks, mark, icons and OG image only)
 //           node scripts/optimize-images.mjs --icons    (favicon and app icons only)
-// Outputs: Public/brand/* (logo, logo-white, mark, icons, OG image) and Public/images/site/* (WebP + JPG per width),
-// plus src/data/siteImages.ts (the manifest <ResponsiveImage> reads).
+// Outputs: Public/brand/* (logos, wordmarks, mark, icons, OG image) and Public/images/site/* (WebP + JPG
+// per width), plus src/data/siteImages.ts (the manifest <ResponsiveImage> reads).
 import sharp from 'sharp';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -27,118 +27,163 @@ fs.mkdirSync(BRAND_OUT, { recursive: true });
 fs.mkdirSync(PHOTO_OUT, { recursive: true });
 
 // ---------------------------------------------------------------------------------------------
-// Logo: the supplied logo (images/queenscargo.png, 2030x775) is NOT transparent. It is an RGB PNG
-// with a light-grey/white checkerboard (about RGB 230-255, neutral) baked into the pixels, so the
-// background is keyed out here:
-//  1. Light, neutral pixels connected to the canvas edge are removed (flood fill), so light
-//     pixels inside the artwork (highlights on the globe and parcel) are never touched. The thin
-//     white outlines around the letters are the same colour as the checkerboard's white squares
-//     and touch it, so they go with the background.
-//  2. Enclosed pockets of checkerboard (letter counters such as the inside of the O) and leftover
-//     bits of the white outline are removed too; they are told apart from highlights by size, by
-//     the two checkerboard tones, by not being ringed by red, or by lying wholly within a few px
-//     of removed background (pinched-off outline tips).
-//  3. A narrow band along every cut edge is un-blended from white (colour-to-alpha), so the
-//     anti-aliased rims of the red and black parts keep a smooth edge with no pink or grey fringe.
-// Red pixels and the black wordmark are only touched in that edge band.
+// Logo (BRAND_GUIDE §6). Source: images/tanex files/logo.png, 1080x1080 RGB on plain white, NOT
+// transparent. The artwork (about 540x200 px in the middle of the canvas) is "Tan" in black, "Ex"
+// in orange, an orange paper plane with three speed lines, and the tagline in dark grey below.
+// The logo contains no white artwork, so every white area is background:
+//  1. Light pixels connected to the canvas edge are background (flood fill). Enclosed light
+//     regions (letter counters: a, e, o, D, R...) are found the same way and removed too.
+//  2. Pixels within EDGE_BAND px of removed background get a soft alpha ramp: alpha follows how
+//     far the pixel is from white, and its colour is un-blended from white, so anti-aliased rims
+//     keep their true black/orange colour and show no white halo on dark surfaces.
+//  3. The opaque artwork is split into connected parts. Specks smaller than SPECK_MAX px (the
+//     source has a stray dot under "World") are dropped; the rest are sorted into wordmark,
+//     tagline and mark (plane + speed lines) by position.
 // ---------------------------------------------------------------------------------------------
-const LOGO_SRC = 'queenscargo.png';
-const BG_MIN = 222;        // a background pixel's darkest channel is at least this light...
-const BG_SPREAD = 18;      // ...and its channels differ by less than this (neutral grey/white)
-const EDGE_BAND = 2;       // px along cut edges that are un-blended from white
-const POCKET_MIN = 150;    // enclosed light areas at least this big may be checkerboard pockets
-const FRINGE_LIGHT = 180;  // edge pixels lighter than this fade out completely by BG_MIN
-const SLIVER = 3;          // kept light regions lying wholly this close to removed background are outline remnants
-const RIM_RED = 30;       // a pocket's rim pixel counts as red from this redness (pink anti-aliasing included)
+const LOGO_SRC = 'tanex files/logo.png';
+const LIGHT_MIN = 235;   // a pixel whose darkest channel is at least this light can be background
+const BG_WHITE = 250;    // ...and from this light it is fully transparent
+const INK_FLOOR = 24;    // darkest channel of the solid inks (black ~9, orange's blue ~4-16): fully opaque
+const EDGE_BAND = 3;     // px along cut edges that get the soft alpha ramp
+const SPECK_MAX = 40;    // opaque parts smaller than this are stray specks (smallest real glyph: ~150 px)
+const CORE_ALPHA = 90;   // alpha from which a pixel seeds a part (fainter rims join the nearest part)
+// Measured on the 1080x1080 source: rows 580-605 are empty between the wordmark and the tagline;
+// the "x" starts at column 580, the speed lines at 662 and the plane at 679.
+const TAGLINE_TOP = 592;
+const MARK_LEFT = 655;
+const PLANE_LEFT = 675;   // the plane alone, without the speed lines (16 px favicon)
+const CREAM = { r: 0xfb, g: 0xf6, b: 0xec };   // Cream, BRAND_GUIDE §2
+const CHOCOLATE_950 = '#1C120E';              // darkest brand surface, BRAND_GUIDE §2
 
-const isBackgroundLike = (r, g, b) => Math.min(r, g, b) >= BG_MIN && Math.max(r, g, b) - Math.min(r, g, b) < BG_SPREAD;
+const lightness = (data, i) => Math.min(data[i], data[i + 1], data[i + 2]);
 
-async function loadTransparentLogo(input) {
-  const { data, info } = await sharp(input).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+// 8-neighbour distance (px) from the nearest set pixel of `mask`, up to maxD (255 = further).
+function distanceFrom(mask, W, H, maxD) {
+  const N = W * H;
+  const dist = new Uint8Array(N).fill(255);
+  let frontier = [];
+  for (let p = 0; p < N; p++) if (mask[p]) { dist[p] = 0; frontier.push(p); }
+  for (let d = 1; d <= maxD; d++) {
+    const next = [];
+    for (const p of frontier) {
+      const x = p % W, y = (p - x) / W;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const q = ny * W + nx;
+        if (dist[q] === 255) { dist[q] = d; next.push(q); }
+      }
+    }
+    frontier = next;
+  }
+  return dist;
+}
+
+// Steps 1-2: returns RGBA pixels with the white keyed out.
+async function keyOutWhite(input) {
+  const { data: rgb, info } = await sharp(input).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width: W, height: H } = info;
   const N = W * H;
-  const bgLike = new Uint8Array(N);
-  for (let p = 0; p < N; p++) bgLike[p] = isBackgroundLike(data[p * 4], data[p * 4 + 1], data[p * 4 + 2]) ? 1 : 0;
+  const light = new Uint8Array(N);
+  for (let p = 0; p < N; p++) light[p] = lightness(rgb, p * 3) >= LIGHT_MIN ? 1 : 0;
 
-  // Connected light regions (4-neighbour). Each region is cleared if it touches the edge or looks
-  // like a checkerboard pocket (big enough and containing both tones of the pattern).
+  // Flood fill every light region (4-neighbour); edge-connected = background, enclosed = counter.
   const removed = new Uint8Array(N);
-  const kept = [];
   const seen = new Uint8Array(N);
   const stack = new Int32Array(N);
+  let counters = 0;
   for (let start = 0; start < N; start++) {
-    if (!bgLike[start] || seen[start]) continue;
+    if (!light[start] || seen[start]) continue;
     const region = [];
-    let top = 0, touchesEdge = false, darkTone = 0, lightTone = 0, rimRed = 0, rim = 0;
+    let top = 0, touchesEdge = false;
     stack[top++] = start; seen[start] = 1;
     while (top) {
       const p = stack[--top];
       region.push(p);
       const x = p % W, y = (p - x) / W;
       if (x === 0 || y === 0 || x === W - 1 || y === H - 1) touchesEdge = true;
-      const lo = Math.min(data[p * 4], data[p * 4 + 1], data[p * 4 + 2]);
-      if (lo < 246) darkTone++; else lightTone++;
-      for (const q of [x > 0 ? p - 1 : -1, x < W - 1 ? p + 1 : -1, y > 0 ? p - W : -1, y < H - 1 ? p + W : -1]) {
-        if (q < 0) continue;
-        if (bgLike[q]) { if (!seen[q]) { seen[q] = 1; stack[top++] = q; } continue; }
-        rim++;
-        if (redness(data[q * 4], data[q * 4 + 1], data[q * 4 + 2]) >= RIM_RED) rimRed++;
-      }
+      if (x > 0 && light[p - 1] && !seen[p - 1]) { seen[p - 1] = 1; stack[top++] = p - 1; }
+      if (x < W - 1 && light[p + 1] && !seen[p + 1]) { seen[p + 1] = 1; stack[top++] = p + 1; }
+      if (y > 0 && light[p - W] && !seen[p - W]) { seen[p - W] = 1; stack[top++] = p - W; }
+      if (y < H - 1 && light[p + W] && !seen[p + W]) { seen[p + W] = 1; stack[top++] = p + W; }
     }
-    const pocket = region.length >= POCKET_MIN && darkTone >= region.length * 0.1 && lightTone >= region.length * 0.1;
-    // Leftover bits of the white letter outline sit between black/grey parts; highlights on the
-    // globe, parcel and crown are ringed by red and stay.
-    const outlineBit = rimRed < rim * 0.5;
-    if (touchesEdge || pocket || outlineBit) for (const p of region) removed[p] = 1;
-    else kept.push(region);
+    if (!touchesEdge) counters++;
+    for (const p of region) removed[p] = 1;
   }
 
-  // Distance (in px, 8-neighbour) from the nearest removed pixel, up to maxD (255 = further).
-  const distanceFromRemoved = (maxD) => {
-    const dist = new Uint8Array(N).fill(255);
-    let frontier = [];
-    for (let p = 0; p < N; p++) if (removed[p]) { dist[p] = 0; frontier.push(p); }
-    for (let d = 1; d <= maxD; d++) {
-      const next = [];
-      for (const p of frontier) {
-        const x = p % W, y = (p - x) / W;
-        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-          const nx = x + dx, ny = y + dy;
-          if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-          const q = ny * W + nx;
-          if (dist[q] === 255) { dist[q] = d; next.push(q); }
-        }
-      }
-      frontier = next;
-    }
-    return dist;
-  };
-
-  // Pinched-off tips of the white outline (e.g. where it tapers between the crown and its band)
-  // are ringed by red but lie wholly within SLIVER px of removed background; highlights do not.
-  const near = distanceFromRemoved(SLIVER);
-  for (const region of kept) if (region.every((p) => near[p] <= SLIVER)) for (const p of region) removed[p] = 1;
-
-  const dist = distanceFromRemoved(EDGE_BAND);
-
+  const band = distanceFrom(removed, W, H, EDGE_BAND);
+  const out = Buffer.alloc(N * 4);
   for (let p = 0; p < N; p++) {
-    const i = p * 4;
-    if (removed[p]) { data[i] = data[i + 1] = data[i + 2] = data[i + 3] = 0; continue; }
-    if (dist[p] > EDGE_BAND) continue;
-    // Colour-to-alpha against white: the least alpha that explains the pixel as artwork over white.
-    const r = data[i], g = data[i + 1], b = data[i + 2];
-    let a = (255 - Math.min(r, g, b)) / 255;
-    // Light neutral rim pixels are checkerboard blended into the edge: fade them out fully.
-    const lo = Math.min(r, g, b);
-    if (Math.max(r, g, b) - lo < BG_SPREAD && lo > FRINGE_LIGHT) a *= (BG_MIN - lo) / (BG_MIN - FRINGE_LIGHT);
-    if (a <= 0.01) { data[i] = data[i + 1] = data[i + 2] = data[i + 3] = 0; continue; }
-    if (a < 1) {
-      const unblend = (c) => Math.max(0, Math.min(255, Math.round((c - 255 * (1 - a)) / a)));
-      data[i] = unblend(r); data[i + 1] = unblend(g); data[i + 2] = unblend(b);
-      data[i + 3] = Math.round(a * 255);
+    const s = p * 3, o = p * 4;
+    let r = rgb[s], g = rgb[s + 1], b = rgb[s + 2];
+    let a = 1;
+    if (band[p] <= EDGE_BAND) {
+      // Soft ramp: fully transparent from BG_WHITE, fully opaque at INK_FLOOR, then un-blend from white.
+      a = Math.max(0, Math.min(1, (BG_WHITE - lightness(rgb, s)) / (BG_WHITE - INK_FLOOR)));
+      if (a <= 0.004) continue; // stays transparent
+      const unblend = (c) => Math.max(0, Math.min(255, Math.round(255 - (255 - c) / a)));
+      r = unblend(r); g = unblend(g); b = unblend(b);
     }
+    out[o] = r; out[o + 1] = g; out[o + 2] = b; out[o + 3] = Math.round(a * 255);
   }
-  return sharp(data, { raw: { width: W, height: H, channels: 4 } }).png().toBuffer();
+  console.log(`  logo: ${W}x${H}, ${counters} enclosed counters keyed out`);
+  return { data: out, W, H };
+}
+
+// Step 3: labels the opaque parts. Core pixels (alpha >= CORE_ALPHA) form 8-connected parts; fainter
+// rim pixels join the nearest part. Returns the label per pixel (0 = none) and each part's box.
+function labelParts({ data, W, H }) {
+  const N = W * H;
+  const label = new Int32Array(N);
+  const parts = [null];
+  for (let start = 0; start < N; start++) {
+    if (label[start] || data[start * 4 + 3] < CORE_ALPHA) continue;
+    const id = parts.length;
+    const part = { id, n: 0, x0: W, y0: H, x1: -1, y1: -1 };
+    const stack = [start];
+    label[start] = id;
+    while (stack.length) {
+      const p = stack.pop();
+      const x = p % W, y = (p - x) / W;
+      part.n++;
+      part.x0 = Math.min(part.x0, x); part.x1 = Math.max(part.x1, x);
+      part.y0 = Math.min(part.y0, y); part.y1 = Math.max(part.y1, y);
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const q = ny * W + nx;
+        if (!label[q] && data[q * 4 + 3] >= CORE_ALPHA) { label[q] = id; stack.push(q); }
+      }
+    }
+    parts.push(part);
+  }
+  // Rim pixels: breadth-first from the labelled parts through any non-transparent pixel.
+  let frontier = [];
+  for (let p = 0; p < N; p++) if (label[p]) frontier.push(p);
+  while (frontier.length) {
+    const next = [];
+    for (const p of frontier) {
+      const x = p % W, y = (p - x) / W;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const q = ny * W + nx;
+        if (!label[q] && data[q * 4 + 3] > 0) { label[q] = label[p]; next.push(q); }
+      }
+    }
+    frontier = next;
+  }
+  return { label, parts };
+}
+
+// Copy of the image keeping only the pixels whose part passes `keep`; everything else transparent.
+function selectParts(img, { label, parts }, keep) {
+  const out = Buffer.alloc(img.data.length);
+  for (let p = 0; p < img.W * img.H; p++) {
+    const part = parts[label[p]];
+    if (part && keep(part)) img.data.copy(out, p * 4, p * 4, p * 4 + 4);
+  }
+  return sharp(out, { raw: { width: img.W, height: img.H, channels: 4 } }).png().toBuffer();
 }
 
 // Crops to the artwork's bounding box (every pixel with alpha > 0).
@@ -155,124 +200,132 @@ async function trimTransparent(pngBuffer) {
   return sharp(pngBuffer).extract({ left: minX, top: minY, width: maxX - minX + 1, height: maxY - minY + 1 }).png().toBuffer();
 }
 
-// How strongly a pixel reads as the logo's red (0 = neutral grey/black/white).
-const redness = (r, g, b) => r - Math.max(g, b);
-const RED_MIN = 60;
-
-// Reversed logo for dark surfaces: every non-red pixel becomes white; red stays red.
-async function toWhiteVersion(pngBuffer) {
+// Reversed logo for dark surfaces: neutral (black/grey) pixels become cream; the orange keeps its
+// colour. Pixels part-way between are mixed by their saturation.
+async function toCreamVersion(pngBuffer) {
   const { data, info } = await sharp(pngBuffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   for (let i = 0; i < data.length; i += 4) {
-    if (redness(data[i], data[i + 1], data[i + 2]) < RED_MIN) {
-      data[i] = 255; data[i + 1] = 255; data[i + 2] = 255;
-    }
+    if (!data[i + 3]) continue;
+    const chroma = Math.max(data[i], data[i + 1], data[i + 2]) - Math.min(data[i], data[i + 1], data[i + 2]);
+    const w = Math.max(0, Math.min(1, (chroma - 40) / 80)); // 1 = orange, 0 = neutral
+    data[i] = Math.round(w * data[i] + (1 - w) * CREAM.r);
+    data[i + 1] = Math.round(w * data[i + 1] + (1 - w) * CREAM.g);
+    data[i + 2] = Math.round(w * data[i + 2] + (1 - w) * CREAM.b);
   }
   return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer();
 }
 
-// Icon mark: the red globe that stands in for the apostrophe of QUEEN'S, with its orbit arrow and
-// parcel, centred on a transparent square. Measured on the 2030x775 original: everything inside the
-// globe circle and the parcel outline is kept, plus the red orbit arrow inside MARK; the black N and S
-// beside it and the red CARGO below are dropped. Edges of the red parts fade softly.
-const GLOBE = { cx: 1620, cy: 295, r: 150 };
-// The parcel's outline (its bottom tip dips between CARGO's letters; the S starts just right of it).
-const PARCEL = [[1622, 322], [1772, 322], [1772, 428], [1696, 462], [1624, 432]];
-const CARGO_TOP = 448; // red below this, outside the globe and parcel, belongs to CARGO
-const MARK = { left: 1440, top: 140, width: 492, height: 322 }; // stops above CARGO
+const CLEAR = { r: 0, g: 0, b: 0, alpha: 0 };
 
-function insidePolygon(x, y, points) {
-  let inside = false;
-  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-    const [xi, yi] = points[i], [xj, yj] = points[j];
-    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
+// Pads to a square, centred, on transparent.
+async function toSquare(pngBuffer) {
+  const { width, height } = await sharp(pngBuffer).metadata();
+  const side = Math.max(width, height);
+  return sharp(pngBuffer).extend({
+    top: Math.floor((side - height) / 2), bottom: Math.ceil((side - height) / 2),
+    left: Math.floor((side - width) / 2), right: Math.ceil((side - width) / 2),
+    background: CLEAR,
+  }).png().toBuffer();
 }
 
-async function cropMark(pngBuffer) {
-  const { data, info } = await sharp(pngBuffer).extract(MARK).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  for (let y = 0; y < info.height; y++) for (let x = 0; x < info.width; x++) {
-    const i = (y * info.width + x) * 4;
-    const sx = MARK.left + x, sy = MARK.top + y;
-    if (Math.hypot(sx - GLOBE.cx, sy - GLOBE.cy) <= GLOBE.r) continue;
-    if (insidePolygon(sx, sy, PARCEL)) continue;
-    if (sy >= CARGO_TOP) { data[i + 3] = 0; continue; }
-    const red = redness(data[i], data[i + 1], data[i + 2]);
-    if (red < RED_MIN) data[i + 3] = 0;
-    else if (red < RED_MIN + 40) data[i + 3] = Math.round(data[i + 3] * (red - RED_MIN) / 40); // soft edge
+// Resizes the flat-colour mark to `side` px. Shrinking is a plain Lanczos resize. The plane is only
+// ~149 px wide in the source, so icons larger than that (until the owner supplies a vector original,
+// tracker #101) are enlarged smoothly and the alpha edge is then re-sharpened to a ~1 px ramp, which
+// keeps the flat triangles and bars crisp instead of blurry. Logos are never enlarged.
+async function resizeMark(squareMark, side) {
+  const { width } = await sharp(squareMark).metadata();
+  if (side <= width) return sharp(squareMark).resize(side, side, { kernel: 'lanczos3' }).png().toBuffer();
+  const scale = side / width;
+  const { data, info } = await sharp(squareMark).resize(side, side, { kernel: 'cubic' })
+    .raw().toBuffer({ resolveWithObject: true });
+  for (let i = 3; i < data.length; i += 4) {
+    const a = data[i] / 255;
+    data[i] = Math.round(255 * Math.max(0, Math.min(1, (a - 0.5) * scale + 0.5)));
   }
   return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer();
-}
-
-async function buildSquareMark(transparent) {
-  const mark = await trimTransparent(await cropMark(transparent));
-  const markMeta = await sharp(mark).metadata();
-  const side = Math.max(markMeta.width, markMeta.height);
-  return sharp(mark)
-    .extend({
-      top: Math.floor((side - markMeta.height) / 2), bottom: Math.ceil((side - markMeta.height) / 2),
-      left: Math.floor((side - markMeta.width) / 2), right: Math.ceil((side - markMeta.width) / 2),
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-    .png().toBuffer();
 }
 
 // Browser, home-screen and PWA icons, all rendered straight from the square mark at their exact
-// size (never resized from another icon). `inset` is the share of the canvas the mark may fill.
-const CLEAR = { r: 0, g: 0, b: 0, alpha: 0 };
+// size. `inset` is the share of the canvas the mark may fill; `bg` fills the whole square.
 const ICONS = [
-  // Tab icons sit on a white rounded tile so the red mark stays visible on dark browser tabs.
-  { file: 'favicon-16.png', size: 16, inset: 1, bg: '#ffffff', tile: true },  // browser tab (standard DPI)
-  { file: 'favicon-32.png', size: 32, inset: 0.94, bg: '#ffffff', tile: true }, // browser tab (retina), taskbar
-  { file: 'icon-192.png', size: 192, inset: 0.92, bg: CLEAR },        // Android home screen, manifest
-  { file: 'favicon.png', size: 512, inset: 0.92, bg: CLEAR },         // manifest, install splash
-  { file: 'icon-maskable-512.png', size: 512, inset: 0.64, bg: '#ffffff' }, // Android adaptive: fits the 80% safe circle
-  { file: 'apple-touch-icon.png', size: 180, inset: 0.76, bg: '#ffffff' },  // iOS fills transparency with black, so white
+  // At 16 px the three speed lines blur into a smudge, so that size shows the plane alone.
+  { file: 'favicon-16.png', size: 16, inset: 1, plane: true }, // browser tab (standard DPI)
+  { file: 'favicon-32.png', size: 32, inset: 1 },             // browser tab (retina), taskbar
+  { file: 'icon-192.png', size: 192, inset: 0.9 },            // Android home screen, manifest
+  { file: 'favicon.png', size: 512, inset: 0.9 },             // manifest, install splash
+  // Android adaptive icon: the plane sits well inside the 80% safe circle.
+  { file: 'icon-maskable-512.png', size: 512, inset: 0.56, bg: CHOCOLATE_950 },
+  // iOS fills transparency with black, so the tile is Chocolate 950.
+  { file: 'apple-touch-icon.png', size: 180, inset: 0.7, bg: CHOCOLATE_950 },
 ];
 
-async function buildIcons(squareMark) {
-  for (const { file, size, inset, bg, tile } of ICONS) {
+async function buildIcons({ squareMark, squarePlane }) {
+  for (const { file, size, inset, bg, plane } of ICONS) {
     const inner = Math.round(size * inset);
     const edge = size - inner;
-    let icon = sharp(squareMark)
-      .resize(inner, inner, { fit: 'contain', background: CLEAR, kernel: 'lanczos3' })
+    let icon = sharp(await resizeMark(plane ? squarePlane : squareMark, inner))
       .extend({ top: Math.floor(edge / 2), bottom: Math.ceil(edge / 2), left: Math.floor(edge / 2), right: Math.ceil(edge / 2), background: CLEAR });
-    if (tile) {
-      const r = Math.round(size * 0.22);
-      const card = Buffer.from(`<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" rx="${r}" fill="${bg}"/></svg>`);
-      icon = sharp(card).composite([{ input: await icon.png().toBuffer() }]);
-    } else if (bg !== CLEAR) {
-      icon = sharp(await icon.png().toBuffer()).flatten({ background: bg });
-    }
+    if (bg) icon = sharp(await icon.png().toBuffer()).flatten({ background: bg });
     // Full-colour PNG for the tiny sizes: palette quantising visibly bands 16/32 px edges.
     const png = size <= 32 ? { compressionLevel: 9 } : { palette: true, quality: 95, effort: 10, compressionLevel: 9 };
     await icon.png(png).toFile(path.join(BRAND_OUT, file));
   }
 }
 
-const LOGO_PNG = { palette: true, quality: 90, effort: 10, compressionLevel: 9 };
-const OG_BACKGROUND = '#181818'; // --ngf-ink-950, the dark hero/footer surface
-const OG_LOGO_WIDTH = 900;
+const LOGO_PNG = { palette: true, quality: 95, effort: 10, compressionLevel: 9 };
+// Header/footer WebP height: 2x the tallest CSS height the wordmark is shown at (footer, 56 px).
+const WORDMARK_WEB_HEIGHT = 112;
+const OG_SIZE = { width: 1200, height: 630 };
+
+async function writeSized(buffer, file, options) {
+  const out = path.join(BRAND_OUT, file);
+  const img = sharp(buffer);
+  await (file.endsWith('.webp') ? img.webp(options) : img.png(options)).toFile(out);
+  const { width, height } = await sharp(out).metadata();
+  console.log(`  ${file.padEnd(30)} ${width}x${height}`);
+}
+
+async function loadLogoParts() {
+  const img = await keyOutWhite(path.join(SRC, LOGO_SRC));
+  const parts = labelParts(img);
+  const real = (p) => p.n >= SPECK_MAX;
+  const dropped = parts.parts.slice(1).filter((p) => !real(p));
+  if (dropped.length) console.log(`  dropped ${dropped.length} speck(s): ${dropped.map((p) => `${p.n}px at ${p.x0},${p.y0}`).join('; ')}`);
+  const lockup = await trimTransparent(await selectParts(img, parts, real));
+  const wordmark = await trimTransparent(await selectParts(img, parts, (p) => real(p) && p.y1 < TAGLINE_TOP));
+  const mark = await trimTransparent(await selectParts(img, parts, (p) => real(p) && p.y1 < TAGLINE_TOP && p.x0 >= MARK_LEFT));
+  const plane = await trimTransparent(await selectParts(img, parts, (p) => real(p) && p.y1 < TAGLINE_TOP && p.x0 >= PLANE_LEFT));
+  return { lockup, wordmark, squareMark: await toSquare(mark), squarePlane: await toSquare(plane) };
+}
 
 async function buildBrand() {
-  const transparent = await loadTransparentLogo(path.join(SRC, LOGO_SRC));
-  const trimmed = await trimTransparent(transparent);
-  await sharp(trimmed).png(LOGO_PNG).toFile(path.join(BRAND_OUT, 'logo.png'));
+  const { lockup, wordmark, squareMark, squarePlane } = await loadLogoParts();
 
-  const white = await toWhiteVersion(trimmed);
-  await sharp(white).png(LOGO_PNG).toFile(path.join(BRAND_OUT, 'logo-white.png'));
+  await writeSized(lockup, 'logo.png', LOGO_PNG);
+  const lockupCream = await toCreamVersion(lockup);
+  await writeSized(lockupCream, 'logo-white.png', LOGO_PNG);
 
-  const squareMark = await buildSquareMark(transparent);
-  await sharp(squareMark).png(LOGO_PNG).toFile(path.join(BRAND_OUT, 'mark.png'));
-  await buildIcons(squareMark);
+  await writeSized(wordmark, 'logo-wordmark.png', LOGO_PNG);
+  const wordmarkCream = await toCreamVersion(wordmark);
+  await writeSized(wordmarkCream, 'logo-wordmark-white.png', LOGO_PNG);
+  const webH = Math.min(WORDMARK_WEB_HEIGHT, (await sharp(wordmark).metadata()).height);
+  for (const [buf, file] of [[wordmark, 'logo-wordmark-web.webp'], [wordmarkCream, 'logo-wordmark-white-web.webp']]) {
+    const small = await sharp(buf).resize({ height: webH, kernel: 'lanczos3' }).png().toBuffer();
+    await writeSized(small, file, { quality: 92, alphaQuality: 100, effort: 6 });
+  }
 
-  // OG image 1200x630: reversed logo centred on the brand Ink. Never upscaled.
-  const { width: logoW } = await sharp(white).metadata();
-  const ogLogo = await sharp(white).resize({ width: Math.min(OG_LOGO_WIDTH, logoW), kernel: 'lanczos3' }).png().toBuffer();
-  await sharp({ create: { width: 1200, height: 630, channels: 4, background: OG_BACKGROUND } })
+  await writeSized(squareMark, 'mark.png', LOGO_PNG);
+  await buildIcons({ squareMark, squarePlane });
+
+  // OG image 1200x630: cream lockup centred on Chocolate 950 at its own size (never enlarged).
+  const { width: lw, height: lh } = await sharp(lockupCream).metadata();
+  const fit = Math.min(1, (OG_SIZE.width * 0.7) / lw, (OG_SIZE.height * 0.6) / lh);
+  const ogLogo = fit < 1 ? await sharp(lockupCream).resize({ width: Math.round(lw * fit), kernel: 'lanczos3' }).png().toBuffer() : lockupCream;
+  await sharp({ create: { ...OG_SIZE, channels: 4, background: CHOCOLATE_950 } })
     .composite([{ input: ogLogo, gravity: 'centre' }])
-    .flatten({ background: OG_BACKGROUND })
-    .jpeg({ quality: 88, mozjpeg: true }).toFile(path.join(BRAND_OUT, 'og-image.jpg'));
+    .flatten({ background: CHOCOLATE_950 })
+    .jpeg({ quality: 90, mozjpeg: true }).toFile(path.join(BRAND_OUT, 'og-image.jpg'));
+  console.log(`  og-image.jpg                   1200x630 (logo ${Math.round(lw * fit)} px wide)`);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -384,10 +437,10 @@ export type SiteImageName = keyof typeof SITE_IMAGES;
 
 // --icons rebuilds only the icon set, leaving the logos, OG image and photos untouched.
 if (process.argv.includes('--icons')) {
-  await buildIcons(await buildSquareMark(await loadTransparentLogo(path.join(SRC, LOGO_SRC))));
+  await buildIcons(await loadLogoParts());
   console.log('Icons done.');
 } else if (process.argv.includes('--brand')) {
-  // --brand rebuilds logos, mark, icons and the OG image, leaving the photos untouched.
+  // --brand rebuilds logos, wordmarks, mark, icons and the OG image, leaving the photos untouched.
   await buildBrand();
   console.log('Brand done.');
 } else {

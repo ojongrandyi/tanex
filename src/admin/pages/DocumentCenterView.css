@@ -12,6 +12,7 @@
 
 .doc-preview-logo-img {
   height: 76px;
+  width: auto;
   max-width: 280px;
   object-fit: contain;
   display: block;
@@ -909,6 +910,7 @@
 
 .doc-preview-logo-img {
   height: 72px;
+  width: auto;
   max-width: 320px;
   object-fit: contain;
   display: block;
