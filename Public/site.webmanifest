@@ -1,11 +1,11 @@
 {
-  "name": "Queens Cargo",
-  "short_name": "Queens Cargo",
-  "description": "Queens Cargo moves express parcels, freight, vehicles and high-value cargo worldwide, with one tracking ID, live milestones and signed proof of delivery.",
+  "name": "TanEx",
+  "short_name": "TanEx",
+  "description": "TanEx picks up from your door and delivers across Buea, Limbe and Douala by bike, between cities by truck, and worldwide by air, sea, rail and road, with one tracking ID.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#181818",
+  "background_color": "#FBF6EC",
+  "theme_color": "#1C120E",
   "icons": [
     {
       "src": "/brand/icon-192.png?v=6",

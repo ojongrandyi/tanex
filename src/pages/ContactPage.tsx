@@ -48,7 +48,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, initialGat
   const [tracking, setTracking] = useState('');
   const [gatewayCode, setGatewayCode] = useState(getGateway(initialGateway) ? initialGateway : '');
   const [message, setMessage] = useState('');
-  // The server's reference (QS-TKT-######) and the email it was sent with.
+  // The server's reference (TX-TKT-######) and the email it was sent with.
   const [ticket, setTicket] = useState<{ id: string; email: string } | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -66,7 +66,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, initialGat
       return;
     }
 
-    // The server stores the message and issues the QS-TKT reference.
+    // The server stores the message and issues the TX-TKT reference.
     setSubmitting(true);
     try {
       const saved = await api.submitContactMessage({

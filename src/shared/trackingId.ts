@@ -1,17 +1,17 @@
 // Tracking IDs (BRAND_GUIDE §7): the prefix plus 6 characters, exactly 8 in total,
-// e.g. QS7K2M9P. Shared by the browser and the server (tsconfig.server.json compiles it too),
+// e.g. TX7K2M9P. Shared by the browser and the server (tsconfig.server.json compiles it too),
 // so every place that creates, validates or looks up an ID follows the same rules.
 import { TRACKING_PREFIX } from '../config/brand.js';
 
 // No 0/O or 1/I, so an ID read aloud or off a label can't be misread.
 export const TRACKING_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-// The total is fixed at 8; the random part is what the prefix leaves (6 for QS).
+// The total is fixed at 8; the random part is what the prefix leaves (6 for TX).
 export const ID_LENGTH = 8;
 export const SUFFIX_LENGTH = ID_LENGTH - TRACKING_PREFIX.length;
 
 export const TRACKING_ID_PATTERN = new RegExp(`^${TRACKING_PREFIX}[2-9A-HJ-NP-Z]{${SUFFIX_LENGTH}}$`);
-// Multi-piece child label: the parent ID plus a 2-digit piece number, e.g. QS7K2M9P-01.
-// The dash is optional so a label typed without it (QS7K2M9P01) still resolves.
+// Multi-piece child label: the parent ID plus a 2-digit piece number, e.g. TX7K2M9P-01.
+// The dash is optional so a label typed without it (TX7K2M9P01) still resolves.
 const PIECE_LABEL_PATTERN = new RegExp(`^(${TRACKING_PREFIX}[2-9A-HJ-NP-Z]{${SUFFIX_LENGTH}})-?(\\d{2})$`);
 
 // Any dash punctuation (hyphen, en/em dash, ...), since IDs get pasted from documents and emails.
@@ -35,8 +35,8 @@ export function generateTrackingId(randomIndex: RandomIndex = webCryptoIndex): s
   return TRACKING_PREFIX + suffix;
 }
 
-// Trims, upper-cases and strips spaces and dashes: "qs 7k2-m9p" -> "QS7K2M9P". A trailing
-// piece number on a full 8-character ID keeps its dash: "qs7k2m9p - 01" -> "QS7K2M9P-01".
+// Trims, upper-cases and strips spaces and dashes: "tx 7k2-m9p" -> "TX7K2M9P". A trailing
+// piece number on a full 8-character ID keeps its dash: "tx7k2m9p - 01" -> "TX7K2M9P-01".
 export function normalizeTrackingInput(input: string): string {
   const compact = input.trim().toUpperCase().replace(/\s+/g, '').replace(DASHES, '-');
   const piece = /^(.+?)-(\d{2})$/.exec(compact);
@@ -59,7 +59,7 @@ export interface PieceLabel {
   piece: number;
 }
 
-// Parses a child label such as QS7K2M9P-01. Input is normalised first; returns null for
+// Parses a child label such as TX7K2M9P-01. Input is normalised first; returns null for
 // anything that isn't a piece label (including a bare 8-character ID and piece 00).
 export function parsePieceLabel(input: string): PieceLabel | null {
   const match = PIECE_LABEL_PATTERN.exec(normalizeTrackingInput(input));
@@ -71,7 +71,7 @@ export function parsePieceLabel(input: string): PieceLabel | null {
 export interface ParsedTrackingInput {
   /** The 8-character shipment ID the input resolves to. */
   trackingId: string;
-  /** Piece number when the input was a child label such as QS7K2M9P-01. */
+  /** Piece number when the input was a child label such as TX7K2M9P-01. */
   piece?: number;
 }
 
@@ -84,7 +84,7 @@ export function parseTrackingInput(input: string): ParsedTrackingInput | null {
   return child ? { trackingId: child.parentId, piece: child.piece } : null;
 }
 
-// Child label for piece `n` of a shipment: QS7K2M9P-01.
+// Child label for piece `n` of a shipment: TX7K2M9P-01.
 export function pieceLabel(trackingId: string, piece: number): string {
   return `${trackingId}-${String(piece).padStart(2, '0')}`;
 }

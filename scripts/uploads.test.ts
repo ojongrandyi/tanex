@@ -59,10 +59,10 @@ test('uploads: saved under a random name in the right folder; foreign names are 
   assert.ok(filePath && fs.existsSync(filePath));
   assert.deepEqual(fs.readFileSync(filePath!), WEBP);
 
-  for (const evil of ['../queenscargo.db', '..\queenscargo.db', 'x.webp', `${saved.id}.svg`, `../images/${saved.fileName}`, '']) {
+  for (const evil of ['../tanex.db', '..\tanex.db', 'x.webp', `${saved.id}.svg`, `../images/${saved.fileName}`, '']) {
     assert.equal(resolveUploadPath('images', evil), null, evil);
   }
-  deleteUpload('proofs', '../../queenscargo.db'); // ignored, never resolved
+  deleteUpload('proofs', '../../tanex.db'); // ignored, never resolved
   deleteUpload('proofs', saved.fileName);
   assert.equal(fs.existsSync(filePath!), false);
   deleteUpload('proofs', saved.fileName); // already gone: no throw

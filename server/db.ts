@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import path from 'path';
 import fs from 'fs';
-import { EMAIL, LEGAL_NAME } from '../src/config/brand.js';
+import { EMAIL, HQ_ADDRESS, LEGAL_NAME } from '../src/config/brand.js';
 
 // DB_PATH lets a real deployment point the database file somewhere OUTSIDE the directory
 // git/the deploy process manages, e.g. a persistent storage path a host provides separately
@@ -16,7 +16,7 @@ export const dataDir = process.env.DB_PATH
   ? path.dirname(process.env.DB_PATH)
   : path.join(process.cwd(), 'data');
 
-export const DB_FILE = 'queenscargo.db';
+export const DB_FILE = 'tanex.db';
 
 // The admin-subdomain deployment runs in proxy mode (ADMIN_PROXY_TARGET, see server/index.ts)
 // and never touches a database — every route file still does a static `import { db } from
@@ -339,7 +339,7 @@ export function initDatabase() {
   try { db.exec(`ALTER TABLE shipments ADD COLUMN handling_requirements_json TEXT;`); } catch (e) {}
   try { db.exec(`ALTER TABLE shipments ADD COLUMN pickup_window TEXT;`); } catch (e) {}
   try { db.exec(`ALTER TABLE shipments ADD COLUMN internal_pricing_note TEXT;`); } catch (e) {}
-  // Returns (BRAND_GUIDE §7): a return is its own shipment row with its own QS ID.
+  // Returns (BRAND_GUIDE §7): a return is its own shipment row with its own TX ID.
   // return_leg_json on the original points at it; return_of_tracking on the return points back.
   try { db.exec(`ALTER TABLE shipments ADD COLUMN return_leg_json TEXT;`); } catch (e) {}
   try { db.exec(`ALTER TABLE shipments ADD COLUMN return_of_tracking TEXT;`); } catch (e) {}
@@ -381,14 +381,15 @@ export function initDatabase() {
   const settingCheck = db.prepare('SELECT value_json FROM settings WHERE key = ?').get('general');
   if (!settingCheck) {
     db.prepare(`INSERT OR REPLACE INTO settings (key, value_json) VALUES (?, ?)`).run('general', JSON.stringify({
-      // Phone, address and licence line stay empty until the owner supplies them (CLAUDE.md §2);
-      // the public site hides any element whose value is empty.
+      // Only seeded into a NEW database; an existing one keeps its saved values. Phone and licence
+      // line stay empty (the public site falls back to brand.ts or hides them). XAF has no rate yet,
+      // so prices keep showing in USD until the admin enters one in Settings.
       companyName: LEGAL_NAME,
       supportPhone: '',
       dispatchEmail: EMAIL,
-      headquartersAddress: '',
+      headquartersAddress: HQ_ADDRESS,
       dotNumber: '',
-      displayCurrency: 'USD',
+      displayCurrency: 'XAF',
       piiMaskingEnabled: true,
       mapVisibility: 'CITY',
       cloakInternalNotes: true,

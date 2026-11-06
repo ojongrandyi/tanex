@@ -1,4 +1,4 @@
-// Non-tracking reference numbers (BRAND_GUIDE §7): a prefix plus 6 digits, e.g. QS-SL-892401.
+// Non-tracking reference numbers (BRAND_GUIDE §7): a prefix plus 6 digits, e.g. TX-SL-892401.
 // They aren't tracking IDs, so they're not bound by the 8-character rule. Shared by the browser
 // and the server.
 import { REFERENCE_PREFIX } from '../config/brand.js';
@@ -7,13 +7,15 @@ export const REFERENCE_PREFIXES = {
   seal: `${REFERENCE_PREFIX}-SL-`,
   ticket: `${REFERENCE_PREFIX}-TKT-`,
   invoice: `${REFERENCE_PREFIX}-INV-`,
+  // Cash and mobile-money ledger entries (courier collections and handovers, phase G).
+  cash: `${REFERENCE_PREFIX}-CSH-`,
 } as const;
 
 export type ReferenceKind = keyof typeof REFERENCE_PREFIXES;
 
-export const REFERENCE_PATTERN = new RegExp(`^${REFERENCE_PREFIX}-(SL|TKT|INV)-\\d{6}$`);
+export const REFERENCE_PATTERN = new RegExp(`^${REFERENCE_PREFIX}-(SL|TKT|INV|CSH)-\\d{6}$`);
 
-// 6 random digits (leading zeros allowed, as in QS-INV-004091). Rejection sampling keeps
+// 6 random digits (leading zeros allowed, as in TX-INV-004091). Rejection sampling keeps
 // every value equally likely.
 export function generateReference(kind: ReferenceKind): string {
   const buf = new Uint32Array(1);

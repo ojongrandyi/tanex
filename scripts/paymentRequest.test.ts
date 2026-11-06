@@ -9,12 +9,12 @@ const paypal = { type: 'paypal', details: { email: 'payments@example.com' } };
 const btc = { type: 'bitcoin', label: 'BTC wallet', details: { network: 'Bitcoin', address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq' }, instructions: 'Send the exact amount.' };
 
 test('payment request: valid input is normalised', () => {
-  const res = validatePaymentRequest({ amount: '120.005', chargeReason: '  Customs   duty – Invoice QS-INV-104233 ', dueDate: '2026-11-01', methods: [paypal, { ...btc, id: 'keep-me' }] }, newId);
+  const res = validatePaymentRequest({ amount: '120.005', chargeReason: '  Customs   duty – Invoice TX-INV-104233 ', dueDate: '2026-11-01', methods: [paypal, { ...btc, id: 'keep-me' }] }, newId);
   assert.ok(res.ok);
   if (!res.ok) return;
   assert.equal(res.value.amount, 120.01);
   assert.equal(res.value.currency, 'USD'); // default (D-6)
-  assert.equal(res.value.chargeReason, 'Customs duty – Invoice QS-INV-104233');
+  assert.equal(res.value.chargeReason, 'Customs duty – Invoice TX-INV-104233');
   assert.equal(res.value.methods.length, 2);
   assert.match(res.value.methods[0].id, /^gen-/);
   assert.equal(res.value.methods[1].id, 'keep-me'); // ids stay stable across edits
@@ -47,11 +47,11 @@ test('payment request: duplicate or malformed account ids are replaced', () => {
 
 test('public view: only this request’s accounts, no internal fields', () => {
   const stored: ShipmentPayment = {
-    id: 'p1', trackingNumber: 'QS7K2M9P', amount: 120, currency: 'USD', chargeReason: 'Customs duty', dueDate: null,
+    id: 'p1', trackingNumber: 'TX7K2M9P', amount: 120, currency: 'USD', chargeReason: 'Customs duty', dueDate: null,
     invoiceDocumentId: 'INV-2026-00321', customerNote: 'Pay within 48 hours.', status: 'AWAITING_PAYMENT',
     createdAt: 't', updatedAt: 't', paidAt: null,
     methods: [
-      { id: 'a1', type: 'paypal', label: null, details: { email: 'payments@example.com', link: 'https://paypal.me/queenscargo' }, instructions: null },
+      { id: 'a1', type: 'paypal', label: null, details: { email: 'payments@example.com', link: 'https://paypal.me/tanex' }, instructions: null },
       { id: 'a2', type: 'bitcoin', label: 'BTC wallet', details: { network: 'Bitcoin', address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq' }, instructions: 'Send the exact amount.' },
       { id: 'a3', type: 'giftcard' as any, label: null, details: {}, instructions: null }, // unknown type never shown
     ],

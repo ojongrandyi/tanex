@@ -15,7 +15,7 @@ import {
   Phone,
   Mail
 } from 'lucide-react';
-import { ADMIN_URL, COMPANY_SHORT, EMAIL, LEGAL_NAME } from '../../config/brand';
+import { ADMIN_URL, COMPANY_SHORT, EMAIL, HQ_ADDRESS, LEGAL_NAME } from '../../config/brand';
 import { useAdminData } from '../../context/AdminDataContext';
 import './SettingsView.css';
 import { CURRENCY_NAMES, DISPLAY_CURRENCIES, formatMoney, resolveCurrency, type DisplayCurrency } from '../../shared/currency';
@@ -149,7 +149,7 @@ export const SettingsView: React.FC = () => {
     setCompanyName(LEGAL_NAME);
     setSupportPhone('');
     setDispatchEmail(EMAIL);
-    setHeadquarters('');
+    setHeadquarters(HQ_ADDRESS);
     setDotNumber('');
     setPiiMasking(true);
     setMapVisibility('CITY');
@@ -158,7 +158,7 @@ export const SettingsView: React.FC = () => {
     setFuelRate('8.5');
     setQuoteValidityDays('14');
     setOversizeLengthThreshold(60);
-    setDisplayCurrency('USD');
+    setDisplayCurrency('XAF');
     setAutoGenLabel(true);
     setAutoGenReceipt(true);
     setSignatureStampUrl('');

@@ -75,7 +75,7 @@ export interface QuoteRequest {
   // Internal Admin Area
   internalNotes?: string;
   pricing?: QuoteRequestPricing;
-  convertedShipmentId?: string; // Linked shipment e.g. QS7K2M9P
+  convertedShipmentId?: string; // Linked shipment e.g. TX7K2M9P
 }
 
 export interface AuditLogEntry {
@@ -102,7 +102,7 @@ export interface AdminDocument {
   id: string; // e.g. LBL-2026-00881, REC-2026-00481, INV-2026-00321, BOL-2026-00184
   docType: DocumentType;
   title: string;
-  shipmentTracking: string; // e.g. QS7K2M9P
+  shipmentTracking: string; // e.g. TX7K2M9P
   
   // Parties
   senderName: string;
@@ -203,8 +203,8 @@ export interface AdminSettings {
   autoGenReceipt?: boolean;
   // Display currency (tracker 2.7): amounts are stored in USD and shown in this currency at the
   // admin-entered rate (units per 1 USD). No rate for a non-USD currency = prices stay in USD.
-  displayCurrency?: 'USD' | 'NGN' | 'GBP' | 'EUR';
-  exchangeRates?: Partial<Record<'NGN' | 'GBP' | 'EUR', number>>;
+  displayCurrency?: 'USD' | 'XAF' | 'NGN' | 'GBP' | 'EUR';
+  exchangeRates?: Partial<Record<'XAF' | 'NGN' | 'GBP' | 'EUR', number>>;
 }
 
 export type ContactMessageStatus = 'NEW' | 'READ' | 'RESOLVED';

@@ -218,7 +218,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
   const activeGatewayTime = formatGatewayTime(activeGateway.timeZone, now);
   const activeGatewayLanes = getLanePartners(activeGateway.code).map((code) => getGateway(code)?.city ?? code);
 
-  // Stored as a message in the admin inbox; the server issues the QS-TKT reference.
+  // Stored as a message in the admin inbox; the server issues the TX-TKT reference.
   const handleCallbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cbName.trim() || !cbPhone.trim() || cbSubmitting) return;
@@ -270,8 +270,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
             </div>
 
             <h1 className="corp-hero-title">
-              Faster Moves, <br />
-              <span className="ngf-highlight">Bigger Reach.</span>
+              From your door <br />
+              <span className="ngf-highlight">to the world.</span>
             </h1>
 
             <p className="corp-hero-subtitle">

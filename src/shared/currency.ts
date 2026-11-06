@@ -1,15 +1,16 @@
 // Money display (tracker 2.7). Shared by the browser and the server.
 //
 // Amounts are stored in USD — every existing record is. The admin picks a display currency in
-// Settings (USD, NGN, GBP or EUR) and enters its exchange rate; prices are converted for
+// Settings (USD, XAF, NGN, GBP or EUR) and enters its exchange rate; prices are converted for
 // display and admin price inputs are converted back to USD. A non-USD currency without a valid
 // rate keeps showing USD, so a $350 quote can never appear as ₦350.
 
-export const DISPLAY_CURRENCIES = ['USD', 'NGN', 'GBP', 'EUR'] as const;
+export const DISPLAY_CURRENCIES = ['USD', 'XAF', 'NGN', 'GBP', 'EUR'] as const;
 export type DisplayCurrency = typeof DISPLAY_CURRENCIES[number];
 
 export const CURRENCY_NAMES: Record<DisplayCurrency, string> = {
   USD: 'US dollar',
+  XAF: 'Central African CFA franc',
   NGN: 'Nigerian naira',
   GBP: 'British pound',
   EUR: 'Euro',
@@ -43,7 +44,8 @@ export function resolveCurrency(settings: CurrencySettings | null | undefined): 
 export function formatMoney(usdAmount: unknown, resolved: ResolvedCurrency, options: { decimals?: number } = {}): string {
   const n = typeof usdAmount === 'string' ? parseFloat(usdAmount) : typeof usdAmount === 'number' ? usdAmount : NaN;
   const amount = Number.isFinite(n) ? n * resolved.rate : 0;
-  const decimals = options.decimals ?? 2;
+  // XAF has no minor units, so it is shown without decimals unless a caller asks otherwise.
+  const decimals = options.decimals ?? (resolved.currency === 'XAF' ? 0 : 2);
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: resolved.currency,

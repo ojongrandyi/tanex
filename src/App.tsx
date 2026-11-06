@@ -79,20 +79,21 @@ interface PageMeta {
   description: string;
 }
 
+// Wording from CONTENT.md §1.1 (English only until the i18n layer, task D.3).
 const DEFAULT_DESCRIPTION =
-  `${COMPANY} moves express parcels, freight, vehicles and high-value cargo worldwide, with one tracking ID, live milestones and signed proof of delivery.`;
+  `${COMPANY} picks up from your door and delivers across Buea, Limbe and Douala by bike, between cities by truck, and worldwide by air, sea, rail and road, with one tracking ID.`;
 
 const PAGE_META: Record<string, PageMeta> = {
-  home: { title: `${COMPANY} | Worldwide Express, Freight & Secure Cargo`, description: DEFAULT_DESCRIPTION },
-  track: { title: `Track a Shipment | ${COMPANY}`, description: `Enter your 8-character ${COMPANY_SHORT} tracking ID to see live milestones, location and delivery status.` },
-  services: { title: `Logistics Services | ${COMPANY}`, description: 'Priority express, scheduled air, ocean and road freight, vehicle shipping and secure high-value transport, worldwide.' },
-  quote: { title: `Get a Rate Quote | ${COMPANY}`, description: "Tell us what you're moving and where. A logistics coordinator will send your rate." },
-  ship: { title: `Book a Shipment | ${COMPANY}`, description: 'Book a pickup, build a multi-piece shipment and get your tracking ID in minutes.' },
-  about: { title: `About Us | ${COMPANY}`, description: `Who we are, how we work and why shippers around the world trust ${COMPANY_SHORT} with cargo that matters.` },
-  locations: { title: `Global Network | ${COMPANY}`, description: `The gateways and trade lanes that connect ${COMPANY_SHORT} shipments across Europe, the Middle East, Asia, the Americas and Oceania.` },
-  help: { title: `Help Centre | ${COMPANY}`, description: 'Answers on tracking, booking, customs, documents and deliveries.' },
-  contact: { title: `Contact Us | ${COMPANY}`, description: `Talk to a ${COMPANY_SHORT} coordinator, any time zone, any day.` },
-  legal: { title: `Policies | ${COMPANY}`, description: 'Privacy, terms of service, shipping terms and accessibility.' },
+  home: { title: `${COMPANY} | Door-to-Door Delivery in Cameroon & Worldwide Shipping`, description: DEFAULT_DESCRIPTION },
+  track: { title: `Track a Shipment | ${COMPANY}`, description: `Enter your 8-character ${COMPANY_SHORT} tracking ID to see where your parcel is, including live rider location for in-town deliveries.` },
+  services: { title: `Logistics Services | ${COMPANY}`, description: 'Air, maritime, rail and road freight, warehousing, and same-city bike delivery in Buea, Limbe and Douala.' },
+  quote: { title: `Get a Quote | ${COMPANY}`, description: "Tell us what you're sending and where. Our team will send you a clear price." },
+  ship: { title: `Book a Shipment | ${COMPANY}`, description: 'Book a collection, add every piece and get your tracking ID straight away.' },
+  about: { title: `About ${COMPANY}`, description: `Who we are, how we work, and the team behind ${COMPANY_SHORT} in Buea.` },
+  locations: { title: `Our Network | ${COMPANY}`, description: "From our base in Buea and the gateway of Douala to the world's main trade hubs." },
+  help: { title: `Help Centre | ${COMPANY}`, description: 'Answers on tracking, bike delivery, booking, customs, payments and documents.' },
+  contact: { title: `Contact Us | ${COMPANY}`, description: `Talk to the ${COMPANY_SHORT} team in Buea by email, phone or WhatsApp.` },
+  legal: { title: `Policies | ${COMPANY}`, description: 'Privacy, terms of service, shipping terms, cookies and accessibility.' },
 };
 
 function setPageMeta({ title, description }: PageMeta) {

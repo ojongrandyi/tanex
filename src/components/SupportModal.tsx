@@ -29,7 +29,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  // The server's ticket reference (QS-TKT-######) and the values it was opened with.
+  // The server's ticket reference (TX-TKT-######) and the values it was opened with.
   const [ticket, setTicket] = useState<{ id: string; trackingNumber: string; email: string } | null>(null);
 
   // Each opening starts from the shipment it was opened for.

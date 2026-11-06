@@ -21,7 +21,7 @@
 
 ## Phase A: Separation & rebrand foundation (PROMPTS A1–A4)
 - [x] A.1 Safety net: branch `tanex`; remove every git remote; baseline `npm run build` + `npm test`; old-brand inventory (chat only).
-- [ ] A.2 Brand config: `src/config/brand.ts` (TanEx, Tanex SARL, taglines EN/FR, email, domain, HQ, `TX`, references incl. `TX-CSH`, `SMARTSUPP_KEY = ''`); `references.ts`; tests; default DB `tanex.db`; package `tanex`; `.env.example`; health name; settings defaults (XAF); `index.html` meta/OG/JSON-LD; `site.webmanifest`.
+- [x] A.2 Brand config: `src/config/brand.ts` (TanEx, Tanex SARL, taglines EN/FR, email, domain, HQ, `TX`, references incl. `TX-CSH`, `SMARTSUPP_KEY = ''`); `references.ts`; tests; default DB `tanex.db`; package `tanex`; `.env.example`; health name; settings defaults (XAF); `index.html` meta/OG/JSON-LD; `site.webmanifest`.
 - [ ] A.3 Logo and icons from `images/tanex files/logo.png` (white keyed out): full lockup, wordmark (no tagline), light-on-dark versions, paper-plane mark, favicons, app icons, OG image.
 - [ ] A.4 Brand sweep = zero previous-brand hits (source, docs, Public, dist); remove the previous brand's logo/source files; `images/tanex files/` committed.
 
@@ -112,7 +112,7 @@ Numbers stay stable (docs refer to them). #100+ are TanEx items; lower numbers a
 | 106 | **Local delivery setup** (entered by the admin in the console): zones per city, rates, express surcharge, average speeds; terms for paying COD money to senders. | G.2, G.9 |
 | 107 | **Company MTN MoMo and Orange Money accounts** (name, number, merchant code), entered in the console. | E.6, G.8 |
 | 108 | A **native French reviewer** for CONTENT_FR and the French UI. | D.3, J.4 |
-| 109 | **Live chat:** TanEx's own Smartsupp key (the previous one is not TanEx's) or keep chat off. | A.2 |
+| 109 | **Live chat:** TanEx's own Smartsupp key (the previous one is not TanEx's) or keep chat off. Chat is **off** since A.2 (`SMARTSUPP_KEY = ''`). | A.2 |
 | 110 | Keep the console at `/private-user/`? (Assumed yes.) | B.4 |
 | 111 | **Social media profile URLs.** The flyer shows the handle `Tanex_2025` on Facebook, Instagram and LinkedIn; send the exact profile links (no icons until then). | E.1 |
 | 112 | **Lawyer review under Cameroonian law** (privacy under Law No. 2024/017, terms, shipping terms, liability, claims window, COD terms). Replaces #11/#37 wording. | E.4, J.4 |
@@ -178,6 +178,7 @@ Numbers stay stable (docs refer to them). #100+ are TanEx items; lower numbers a
 | 2026-11-06 | Owner facts from `images/tanex files/info.png` | Phones +237 651 05 93 45 / +237 691 19 46 63; offices Buea (Check Point, opposite Molyko Omnisport Stadium, head office) and Douala (Kotto, La Canadienne); hours 9:00–16:00; slogan "Saving Situations"; Buea delivery "from 500 FCFA"; handle Tanex_2025. Applied to CLAUDE.md, PROMPTS, TANEX_PLAN, CONTENT, CONTENT_FR. New questions #118–#121. |
 | 2026-11-06 | Journey revision | Owner asked for 3D/GSAP across the whole homepage with a bike carrying the visitor down the page: MOTION_3D_SPEC rewritten (Stage, chapters 0–8, route rail, budgets), CONTENT/CONTENT_FR §2.10, PROMPTS C1/E1 and phase H (H0–H7), TANEX_PLAN, BRAND_GUIDE updated. |
 | 2026-11-06 | A.1 | Docs committed on branch `tanex`; old remote removed; old local databases moved out of the project. Baseline: `npm run build` 0 TS errors (main JS 108.2 KB gzip, console chunk 90.7 KB gzip), `npm test` 60/60 pass. Old-brand inventory taken (chat only; feeds A.2/A.4, including the old tagline in index.html). New repo https://github.com/ojrandy/tanexSarl started with one fresh-history commit (no earlier history pushed). |
+| 2026-11-06 | A.2 | `brand.ts`: TanEx / Tanex SARL, taglines EN+FR, tanexsarl.com, info@, HQ + `OFFICES` (Buea, Douala), `PHONE`/`PHONE_2` (E.164) + `formatPhone()` (used by `useCompanyContact`), `OPENING_HOURS` (days empty) + `formatOpeningHours()`, prefixes `TX`, `SMARTSUPP_KEY = ''` (chat off, #109); WhatsApp/social stay ''. `references.ts` adds `TX-CSH` (cash ledger). DB file `tanex.db`; package `tanex` (lockfile name fields only); `.env.example` with tanex-data paths + commented `SUPER_ADMIN_*`/`SMTP_*`. New-DB settings: Tanex SARL, info@tanexsarl.com, HQ address, **XAF**; existing databases untouched. XAF added to display currencies (0 decimals; prices stay in USD until a rate is entered, #17). `index.html` meta/OG/Twitter/JSON-LD (adds PostalAddress Buea CM) and `site.webmanifest` (#1C120E / #FBF6EC); `PAGE_META` = CONTENT §1.1; home H1 swapped from the old tagline to CONTENT §2.1's (rest of the hero is E.1). Old-brand comments/test fixtures renamed. Verified: build 0 TS errors, `npm test` 65/65; on a scratch DB, shipment created via the console API got `TXKTEMNQ`, public track resolved it (also as `tx kte-mnq` and `TXKTEMNQ-01`), `QS…` rejected, contact ticket `TX-TKT-215848`, health `TanEx API`. Still old: logo/OG/icon files (A.3), `optimize-images.mjs` logo source and CSS header comments (A.4). |
 
 ---
 

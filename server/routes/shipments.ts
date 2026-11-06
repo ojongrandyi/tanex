@@ -168,8 +168,8 @@ shipmentsRouter.get('/', requireAdminAuth, (req: Request, res: Response) => {
 // GET /api/shipments/:trackingNumber — admin only, unmasked (public lookups use /api/track/:id)
 shipmentsRouter.get('/:trackingNumber', requireAdminAuth, (req: Request, res: Response) => {
   try {
-    // Accepts "qs 7k2-m9p" and child labels (QS7K2M9P-01 -> QS7K2M9P); anything else is looked
-    // up as typed, so records created before the QS format can still be opened here.
+    // Accepts "tx 7k2-m9p" and child labels (TX7K2M9P-01 -> TX7K2M9P); anything else is looked
+    // up as typed, so records created before the TX format can still be opened here.
     const raw = (req.params.trackingNumber as string).trim().toUpperCase();
     const tracking = parseTrackingInput(raw)?.trackingId ?? raw;
     const row = db.prepare('SELECT * FROM shipments WHERE tracking_number = ? AND deleted_at_ts IS NULL').get(tracking) as any;
@@ -472,7 +472,7 @@ shipmentsRouter.patch('/:trackingNumber/status', requireAdminAuth, (req: Request
 
 // POST /api/shipments/:trackingNumber/return (Return to origin)
 //
-// A return gets its own new QS ID, linked to the original (BRAND_GUIDE §7). It's created here
+// A return gets its own new TX ID, linked to the original (BRAND_GUIDE §7). It's created here
 // as a real shipment row so the return is stored, trackable publicly and covered by the same
 // uniqueness check as every other ID: origin/destination and sender/recipient are swapped,
 // pieces are relabelled, and each side records the link (return_leg_json / return_of_tracking).

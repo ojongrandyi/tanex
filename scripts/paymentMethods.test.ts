@@ -29,16 +29,16 @@ test('UK sort code and US routing number', () => {
 test('email, https link, phone, SWIFT, cashtag, handle', () => {
   assert.equal(validateEmail('pay@example.com').ok, true);
   assert.equal(validateEmail('pay@example').ok, false);
-  assert.equal(validateHttpsUrl('https://paypal.me/queenscargo').ok, true);
-  assert.equal(validateHttpsUrl('http://paypal.me/queenscargo').ok, false);
+  assert.equal(validateHttpsUrl('https://paypal.me/tanex').ok, true);
+  assert.equal(validateHttpsUrl('http://paypal.me/tanex').ok, false);
   assert.equal(validateHttpsUrl('javascript:alert(1)').ok, false);
   assert.equal(value(validatePhone('+1 (555) 010-0000')), '+15550100000');
   assert.equal(validatePhone('12345').ok, false);
   assert.equal(value(validateSwift('nwbk gb 2l')), 'NWBKGB2L');
   assert.equal(validateSwift('NWBKGB2LXX').ok, false);
-  assert.equal(value(validateCashtag('QueensPay')), '$QueensPay');
+  assert.equal(value(validateCashtag('TanexPay')), '$TanexPay');
   assert.equal(validateCashtag('$123').ok, false);
-  assert.equal(value(validateHandle('queens-pay')), '@queens-pay');
+  assert.equal(value(validateHandle('tanex-pay')), '@tanex-pay');
   assert.equal(validateHandle('@a b').ok, false);
 });
 
@@ -67,16 +67,16 @@ test('registry: 17 types, no gift cards, every type has fields and a label', () 
 });
 
 test('validatePaymentDetails: required, either/or, normalising, unknown keys dropped', () => {
-  const uk = validatePaymentDetails('uk_bank', { accountName: ' Queens  Ltd ', bankName: 'Example Bank', sortCode: '123456', accountNumber: '1234 5678', evil: '<script>' });
+  const uk = validatePaymentDetails('uk_bank', { accountName: ' Tanex  SARL ', bankName: 'Example Bank', sortCode: '123456', accountNumber: '1234 5678', evil: '<script>' });
   assert.ok(uk.ok);
-  if (uk.ok) assert.deepEqual(uk.details, { accountName: 'Queens Ltd', bankName: 'Example Bank', sortCode: '12-34-56', accountNumber: '12345678' });
+  if (uk.ok) assert.deepEqual(uk.details, { accountName: 'Tanex SARL', bankName: 'Example Bank', sortCode: '12-34-56', accountNumber: '12345678' });
 
   const missing = validatePaymentDetails('uk_bank', { accountName: 'X' });
   assert.ok(!missing.ok && missing.errors.sortCode && missing.errors.bankName);
 
-  const zelle = validatePaymentDetails('zelle', { accountName: 'Queens Cargo' });
+  const zelle = validatePaymentDetails('zelle', { accountName: 'Tanex SARL' });
   assert.ok(!zelle.ok && /email or Zelle phone/.test(zelle.errors._form));
-  assert.ok(validatePaymentDetails('zelle', { accountName: 'Queens Cargo', phone: '+1 555 010 0000' }).ok);
+  assert.ok(validatePaymentDetails('zelle', { accountName: 'Tanex SARL', phone: '+1 555 010 0000' }).ok);
 
   const paypalWrongHost = validatePaymentDetails('paypal', { link: 'https://evil.example/paypal.me' });
   assert.ok(!paypalWrongHost.ok && paypalWrongHost.errors.link);
@@ -87,13 +87,13 @@ test('validatePaymentDetails: required, either/or, normalising, unknown keys dro
   const badNet = validatePaymentDetails('usdt', { network: 'Dogecoin', address: 'x' });
   assert.ok(!badNet.ok && badNet.errors.network);
 
-  const wire = validatePaymentDetails('intl_wire', { beneficiary: 'Queens Cargo', bankName: 'B', swift: 'NWBKGB2L', country: 'United Kingdom', iban: 'GB82WEST12345698765433' });
+  const wire = validatePaymentDetails('intl_wire', { beneficiary: 'Tanex SARL', bankName: 'B', swift: 'NWBKGB2L', country: 'United Kingdom', iban: 'GB82WEST12345698765433' });
   assert.ok(!wire.ok && wire.errors.iban);
 });
 
 test('customerMethodView: link, QR, warning and note per type', () => {
-  const cash = customerMethodView('cashapp', { cashtag: '$QueensPay', accountName: 'Queens Cargo' });
-  assert.deepEqual(cash.link, { label: 'Open Cash App', url: 'https://cash.app/$QueensPay' });
+  const cash = customerMethodView('cashapp', { cashtag: '$TanexPay', accountName: 'Tanex SARL' });
+  assert.deepEqual(cash.link, { label: 'Open Cash App', url: 'https://cash.app/$TanexPay' });
   const usdt = customerMethodView('usdt', { network: 'TRC20 (Tron)', address: 'TJRabPrwbZy45sbavfcjinPJC18kjpRTv8' }, 'USDT (main wallet)');
   assert.equal(usdt.label, 'USDT (main wallet)');
   assert.equal(usdt.qr, 'TJRabPrwbZy45sbavfcjinPJC18kjpRTv8');

@@ -1,5 +1,5 @@
 import { useAdminData } from '../context/AdminDataContext';
-import { EMAIL, PHONE, WHATSAPP, HQ_ADDRESS } from '../config/brand';
+import { EMAIL, PHONE, WHATSAPP, HQ_ADDRESS, formatPhone } from '../config/brand';
 
 export interface CompanyContact {
   /** '' when unknown: callers must hide the element rather than show a placeholder. */
@@ -23,7 +23,7 @@ export function useCompanyContact(): CompanyContact {
   const { settings } = useAdminData();
   const phone = clean(settings.supportPhone) || PHONE;
   return {
-    phone,
+    phone: formatPhone(phone),
     phoneHref: phone ? `tel:${phone.replace(/[^0-9+]/g, '')}` : '',
     whatsapp: WHATSAPP,
     email: clean(settings.dispatchEmail) || EMAIL,
