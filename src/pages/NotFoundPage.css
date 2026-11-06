@@ -1,0 +1,83 @@
+/* Page not found (404), CONTENT §1.1a */
+
+.ngf-page-notfound {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 60vh;
+  padding: 5rem 0 6rem;
+  background-color: var(--ngf-slate-50);
+  color: var(--ngf-ink-900);
+}
+
+.ngf-notfound-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 40rem;
+}
+
+.ngf-notfound-eyebrow {
+  margin: 0 0 0.75rem;
+  font-family: var(--ngf-font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ngf-accent-700);
+}
+
+.ngf-page-notfound h1 {
+  margin: 0 0 1rem;
+  font-family: var(--ngf-font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+
+.ngf-notfound-sub {
+  margin: 0 0 2rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--ngf-slate-600);
+}
+
+.ngf-notfound-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.ngf-notfound-help {
+  margin: 2rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--ngf-slate-600);
+}
+
+.ngf-notfound-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ngf-primary-700);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ngf-notfound-link:hover,
+.ngf-notfound-link:focus-visible {
+  color: var(--ngf-primary-900);
+}
+
+@media (max-width: 480px) {
+  .ngf-page-notfound {
+    padding: 3.5rem 0 4rem;
+  }
+
+  .ngf-notfound-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
