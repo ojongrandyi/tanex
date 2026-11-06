@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import path from 'path';
 import fs from 'fs';
 import { EMAIL, HQ_ADDRESS, LEGAL_NAME } from '../src/config/brand.js';
+import { initIamSchema } from './auth/schema.js';
 
 // DB_PATH lets a real deployment point the database file somewhere OUTSIDE the directory
 // git/the deploy process manages, e.g. a persistent storage path a host provides separately
@@ -297,6 +298,11 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_payment_proofs_payment ON payment_proofs (payment_id);
     CREATE INDEX IF NOT EXISTS idx_payment_proofs_status ON payment_proofs (status, created_at);
   `);
+
+  // 11-18. Staff accounts, roles, permissions, sessions, password resets and audit log
+  // (docs/IAM_RBAC_SPEC.md §3). Also syncs the permission catalogue and seeds the roles on a
+  // database that has none. The first Super Admin is created by server/auth/bootstrap.ts.
+  initIamSchema(db);
 
   // Safe dynamic migrations for existing databases. Must run after every CREATE TABLE above
   // (shipments through settings) — these ALTER statements target quote_requests, documents

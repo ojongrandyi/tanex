@@ -12,5 +12,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["server/**/*.ts", "src/shared/**/*.ts"]
+  "include": ["server/**/*.ts", "src/shared/**/*.ts", "scripts/create-super-admin.ts"]
 }

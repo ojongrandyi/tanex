@@ -7,7 +7,8 @@ import compression from 'compression';
 import path from 'path';
 import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { initDatabase, dataDir, dbPath } from './db.js';
+import { initDatabase, dataDir, dbPath, db } from './db.js';
+import { bootstrapSuperAdmin } from './auth/bootstrap.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { shipmentsRouter } from './routes/shipments.js';
 import { shipmentImagesRouter } from './routes/shipmentImages.js';
@@ -48,6 +49,9 @@ app.set('trust proxy', 1);
 if (!ADMIN_PROXY_TARGET) {
   // Initialize Persistent SQLite Database
   initDatabase();
+  // First Super Admin on an empty users table (IAM_RBAC_SPEC §8). Login keeps using
+  // ADMIN_PASSWORD_HASH until B.2.
+  bootstrapSuperAdmin(db);
   ensureUploadDirs();
 }
 

@@ -14,7 +14,8 @@
     "postinstall": "npm run build",
     "start": "node dist-server/server/index.js",
     "preview": "vite preview",
-    "test": "node --import tsx --test scripts/*.test.ts"
+    "test": "node --import tsx --test scripts/*.test.ts",
+    "create-super-admin": "node dist-server/scripts/create-super-admin.js"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
