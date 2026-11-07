@@ -1,6 +1,6 @@
 // Audit trail for staff actions and sign-ins (docs/IAM_RBAC_SPEC.md §5.9). before/after should
 // hold only the changed fields; anything that looks like a secret is dropped before writing.
-import type { Request } from 'express';
+import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import type { DatabaseSync } from 'node:sqlite';
 import crypto from 'crypto';
 import { db } from './db.js';
@@ -74,3 +74,47 @@ export function audit(
     console.error(`[audit] could not record ${action}:`, err);
   }
 }
+
+type FromReq<T> = (req: Request, res: Response) => T;
+
+/**
+ * Route middleware: writes one audit row when the response finishes with a 2xx/3xx status, so
+ * a route only needs `audited(...)` in its middleware list. The entity id comes from `entityId`
+ * or, for ids the handler creates, from `res.locals.auditEntityId`. With `signedInOnly` (public
+ * routes that staff also use) anonymous calls are not recorded.
+ */
+export function audited(
+  action: string,
+  entityType: string,
+  entityId: FromReq<string | null | undefined> | null,
+  summary: string | FromReq<string>,
+  options: { after?: FromReq<unknown>; signedInOnly?: boolean } = {}
+): RequestHandler {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Express puts the parent's params back once the router is done, which is before
+    // 'finish'; keep this route's params for the callbacks.
+    const params = { ...req.params };
+    res.on('finish', () => {
+      if (res.statusCode >= 400) return;
+      if (options.signedInOnly && !getRequestAuth(req)) return;
+      const outer = req.params;
+      req.params = params;
+      try {
+        const id = (res.locals.auditEntityId as string | undefined) ?? entityId?.(req, res) ?? null;
+        const text = typeof summary === 'string' ? summary : summary(req, res);
+        audit(req, action, entityType, id ? String(id) : null, text, undefined, options.after?.(req, res));
+      } catch (err) {
+        console.error(`[audit] could not record ${action}:`, err);
+      } finally {
+        req.params = outer;
+      }
+    });
+    next();
+  };
+}
+
+/** The `:param` value from the URL, upper-cased for tracking numbers. */
+export const param = (name: string, upper = false): FromReq<string | null> => (req) => {
+  const v = (req.params as Record<string, string | undefined>)[name];
+  return v ? (upper ? v.trim().toUpperCase() : v) : null;
+};

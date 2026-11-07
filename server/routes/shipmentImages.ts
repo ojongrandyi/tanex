@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
-import { requireAdminAuth } from '../middleware/auth.js';
+import { requirePermission } from '../middleware/auth.js';
+import { audited, param } from '../audit.js';
 import { IMAGE_CONTENT_TYPES, deleteUpload, resolveUploadPath, saveImageUpload } from '../uploads.js';
 
 // Package images (docs/update.md B.2). Mounted on /api/shipments next to shipmentsRouter, which
@@ -83,7 +84,7 @@ export function deleteAllShipmentImages(tracking: string) {
 }
 
 // GET /api/shipments/:trackingNumber/images (admin): every image, hidden ones included.
-shipmentImagesRouter.get('/:trackingNumber/images', requireAdminAuth, (req: Request, res: Response) => {
+shipmentImagesRouter.get('/:trackingNumber/images', requirePermission('shipments.view'), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
@@ -94,7 +95,8 @@ shipmentImagesRouter.get('/:trackingNumber/images', requireAdminAuth, (req: Requ
 });
 
 // POST /api/shipments/:trackingNumber/images (admin): { image: base64, caption, isPublic?, width?, height? }
-shipmentImagesRouter.post('/:trackingNumber/images', requireAdminAuth, (req: Request, res: Response) => {
+shipmentImagesRouter.post('/:trackingNumber/images', requirePermission('shipments.edit'),
+  audited('shipment.image_add', 'shipment', param('trackingNumber', true), 'Package photo added'), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
@@ -126,7 +128,8 @@ shipmentImagesRouter.post('/:trackingNumber/images', requireAdminAuth, (req: Req
 });
 
 // PUT /api/shipments/:trackingNumber/images/order (admin): { ids: [...] } in the new order.
-shipmentImagesRouter.put('/:trackingNumber/images/order', requireAdminAuth, (req: Request, res: Response) => {
+shipmentImagesRouter.put('/:trackingNumber/images/order', requirePermission('shipments.edit'),
+  audited('shipment.image_reorder', 'shipment', param('trackingNumber', true), 'Package photos reordered'), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
@@ -152,7 +155,8 @@ shipmentImagesRouter.put('/:trackingNumber/images/order', requireAdminAuth, (req
 });
 
 // PATCH /api/shipments/:trackingNumber/images/:imageId (admin): { caption?, isPublic? }
-shipmentImagesRouter.patch('/:trackingNumber/images/:imageId', requireAdminAuth, (req: Request, res: Response) => {
+shipmentImagesRouter.patch('/:trackingNumber/images/:imageId', requirePermission('shipments.edit'),
+  audited('shipment.image_update', 'shipment', param('trackingNumber', true), (req) => `Package photo ${req.params.imageId} updated`), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
@@ -175,7 +179,8 @@ shipmentImagesRouter.patch('/:trackingNumber/images/:imageId', requireAdminAuth,
 });
 
 // DELETE /api/shipments/:trackingNumber/images/:imageId (admin): removes the row and the file.
-shipmentImagesRouter.delete('/:trackingNumber/images/:imageId', requireAdminAuth, (req: Request, res: Response) => {
+shipmentImagesRouter.delete('/:trackingNumber/images/:imageId', requirePermission('shipments.edit'),
+  audited('shipment.image_delete', 'shipment', param('trackingNumber', true), (req) => `Package photo ${req.params.imageId} deleted`), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
@@ -191,7 +196,7 @@ shipmentImagesRouter.delete('/:trackingNumber/images/:imageId', requireAdminAuth
 
 // GET /api/shipments/:trackingNumber/images/:imageId/file (admin): the image itself, visible or
 // not, for previews in the console. /api responses are already no-store (server/index.ts).
-shipmentImagesRouter.get('/:trackingNumber/images/:imageId/file', requireAdminAuth, (req: Request, res: Response) => {
+shipmentImagesRouter.get('/:trackingNumber/images/:imageId/file', requirePermission('shipments.view'), (req: Request, res: Response) => {
   const tracking = trackingParam(req);
   const row = db.prepare('SELECT file_name FROM shipment_images WHERE id = ? AND tracking_number = ?').get(req.params.imageId as string, tracking) as { file_name: string } | undefined;
   const filePath = row && resolveUploadPath('images', row.file_name);

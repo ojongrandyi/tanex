@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
+import { requestHasPermission } from '../auth/permissions.js';
 
 export const statsRouter = Router();
 
-// GET /api/stats (Live dashboard metrics)
+// GET /api/stats (Live dashboard metrics). Mounted behind dashboard.view; each figure is
+// only included when the user may view what it counts (IAM_RBAC_SPEC §7).
 statsRouter.get('/', (req: Request, res: Response) => {
   try {
     // deleted_at_ts IS NULL everywhere here — a soft-deleted (trashed) shipment shouldn't
@@ -29,12 +31,21 @@ statsRouter.get('/', (req: Request, res: Response) => {
       exceptionsCount,
       pendingQuotesCount,
       totalDocumentsCount,
-      submittedProofsCount,
-      onTimeRate: 98.6,
-      networkEfficiency: 99.1
+      submittedProofsCount
     };
 
-    res.json({ success: true, data: stats });
+    const can = (key: Parameters<typeof requestHasPermission>[1]) => requestHasPermission(req, key);
+    const visible: Partial<typeof stats> = {};
+    if (can('shipments.view')) {
+      Object.assign(visible, {
+        totalShipments, inTransitCount, outForDeliveryCount, deliveredCount, exceptionsCount
+      });
+    }
+    if (can('quotes.view')) visible.pendingQuotesCount = pendingQuotesCount;
+    if (can('documents.view')) visible.totalDocumentsCount = totalDocumentsCount;
+    if (can('payments.view')) visible.submittedProofsCount = submittedProofsCount;
+
+    res.json({ success: true, data: visible });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }

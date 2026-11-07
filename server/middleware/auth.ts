@@ -32,12 +32,6 @@ export function requirePermission(...keys: PermissionKey[]): RequestHandler {
   };
 }
 
-/**
- * TEMPORARY until B.3 moves every route to its own permission (IAM_RBAC_SPEC §7): the old
- * "is an admin" gate, now meaning "may open the console dashboard".
- */
-export const requireAdminAuth: RequestHandler = requirePermission('dashboard.view');
-
 const STATE_CHANGING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 /**

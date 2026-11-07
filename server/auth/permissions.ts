@@ -4,6 +4,7 @@
 import type { Request } from 'express';
 import type { DatabaseSync } from 'node:sqlite';
 import { db } from '../db.js';
+import { ADMIN_ROLE_LABEL } from '../../src/config/brand.js';
 import { ALL_PERMISSIONS, hasPermission, type PermissionKey } from '../../src/shared/permissions.js';
 
 const COURIER_APP: PermissionKey = 'courier.app';
@@ -102,4 +103,13 @@ export function requestHasPermission(req: Request, ...keys: PermissionKey[]): bo
   const auth = getRequestAuth(req);
   if (!auth) return false;
   return keys.some((k) => hasPermission(auth.permissions, k));
+}
+
+/**
+ * Name written on records a staff member creates (event "recorded by", document "generated
+ * by", …): the signed-in user's display name, or the generic role label for anonymous calls
+ * and older code paths. displayOperator() keeps rows from before accounts readable.
+ */
+export function actorName(req: Request): string {
+  return getRequestAuth(req)?.user.displayName || ADMIN_ROLE_LABEL;
 }

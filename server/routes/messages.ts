@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
-import { requireAdminAuth } from '../middleware/auth.js';
+import { requirePermission } from '../middleware/auth.js';
+import { audited, param } from '../audit.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
 import { generateReference } from '../../src/shared/references.js';
 import { getGateway } from '../../src/data/gateways.js';
@@ -75,7 +76,7 @@ messagesRouter.post('/', publicWriteLimiter, (req: Request, res: Response) => {
 });
 
 // GET /api/messages — admin inbox, newest first.
-messagesRouter.get('/', requireAdminAuth, (req: Request, res: Response) => {
+messagesRouter.get('/', requirePermission('messages.view'), (req: Request, res: Response) => {
   try {
     const rows = db.prepare('SELECT * FROM contact_messages ORDER BY created_at_ts DESC').all();
     res.json({ success: true, count: rows.length, data: rows.map(formatMessage) });
@@ -85,7 +86,8 @@ messagesRouter.get('/', requireAdminAuth, (req: Request, res: Response) => {
 });
 
 // PATCH /api/messages/:id/status — admin marks a message read or resolved.
-messagesRouter.patch('/:id/status', requireAdminAuth, (req: Request, res: Response) => {
+messagesRouter.patch('/:id/status', requirePermission('messages.manage'),
+  audited('message.status', 'message', param('id'), (req) => `Status set to ${req.body?.status}`, { after: (req) => ({ status: req.body?.status }) }), (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const { status } = req.body || {};

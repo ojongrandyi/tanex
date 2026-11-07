@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { db } from '../db.js';
-import { requireAdminAuth } from '../middleware/auth.js';
+import { requirePermission } from '../middleware/auth.js';
+import { audited, param } from '../audit.js';
 import { PaymentStatus, ShipmentPayment, validatePaymentRequest } from '../../src/shared/paymentRequest.js';
 import { setDocumentPaymentStatus } from './documents.js';
 import { deleteProofsForShipment } from './paymentProofs.js';
@@ -57,7 +58,7 @@ function activeShipmentExists(tracking: string): boolean {
 }
 
 // GET /api/shipments/:trackingNumber/payment (admin): the request, or null when there is none.
-shipmentPaymentsRouter.get('/:trackingNumber/payment', requireAdminAuth, (req: Request, res: Response) => {
+shipmentPaymentsRouter.get('/:trackingNumber/payment', requirePermission('payments.view'), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
@@ -70,7 +71,8 @@ shipmentPaymentsRouter.get('/:trackingNumber/payment', requireAdminAuth, (req: R
 // PUT /api/shipments/:trackingNumber/payment (admin): creates the request, or replaces its amount,
 // reason, dates, note, invoice link and accounts. A new request starts as AWAITING_PAYMENT; an
 // existing one keeps its status (status changes go through POST .../payment/status).
-shipmentPaymentsRouter.put('/:trackingNumber/payment', requireAdminAuth, (req: Request, res: Response) => {
+shipmentPaymentsRouter.put('/:trackingNumber/payment', requirePermission('payments.manage'),
+  audited('payment.request_save', 'shipment', param('trackingNumber', true), 'Payment request saved'), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
@@ -118,7 +120,9 @@ const STATUS_ACTIONS: Record<string, { from: PaymentStatus[]; to: PaymentStatus 
 
 // POST /api/shipments/:trackingNumber/payment/status (admin): { action: 'cancel' | 'mark_paid' | 'reopen' }.
 // Marking paid also marks the linked invoice PAID; reopening a paid request sets it back to PENDING.
-shipmentPaymentsRouter.post('/:trackingNumber/payment/status', requireAdminAuth, (req: Request, res: Response) => {
+shipmentPaymentsRouter.post('/:trackingNumber/payment/status', requirePermission('payments.manage'),
+  audited('payment.request_status', 'shipment', param('trackingNumber', true), (req) => `Payment request status set to ${req.body?.status}`,
+    { after: (req) => ({ status: req.body?.status }) }), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
@@ -148,7 +152,8 @@ shipmentPaymentsRouter.post('/:trackingNumber/payment/status', requireAdminAuth,
 });
 
 // DELETE /api/shipments/:trackingNumber/payment (admin): removes the request, its accounts and any proofs sent for it.
-shipmentPaymentsRouter.delete('/:trackingNumber/payment', requireAdminAuth, (req: Request, res: Response) => {
+shipmentPaymentsRouter.delete('/:trackingNumber/payment', requirePermission('payments.manage'),
+  audited('payment.request_delete', 'shipment', param('trackingNumber', true), 'Payment request removed'), (req: Request, res: Response) => {
   try {
     const tracking = trackingParam(req);
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });

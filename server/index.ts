@@ -9,22 +9,10 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { initDatabase, dataDir, dbPath, db } from './db.js';
 import { bootstrapSuperAdmin } from './auth/bootstrap.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
-import { shipmentsRouter } from './routes/shipments.js';
-import { shipmentImagesRouter } from './routes/shipmentImages.js';
-import { shipmentPaymentsRouter } from './routes/shipmentPayments.js';
-import { quotesRouter } from './routes/quotes.js';
-import { documentsRouter } from './routes/documents.js';
-import { settingsRouter } from './routes/settings.js';
-import { trackRouter } from './routes/track.js';
-import { trackProofRouter } from './routes/trackProof.js';
-import { paymentsRouter } from './routes/paymentProofs.js';
-import { statsRouter } from './routes/stats.js';
-import { authRouter } from './routes/auth.js';
-import { messagesRouter } from './routes/messages.js';
-import { mediaRouter } from './routes/media.js';
 import { seoRouter } from './seo.js';
+import { registerApiRoutes } from './apiRoutes.js';
 import { ADMIN_PATH, COMPANY } from '../src/config/brand.js';
-import { requireAdminAuth, requireJsonOrMultipart } from './middleware/auth.js';
+import { requirePermission, requireJsonOrMultipart } from './middleware/auth.js';
 import { SqliteSessionStore, createSessionMiddleware } from './auth/sessionStore.js';
 
 dotenv.config(); // reload trigger for tsx watch after .env changes
@@ -146,7 +134,7 @@ if (ADMIN_PROXY_TARGET) {
   // host is wiping untracked files on every deploy — the same thing that would be silently
   // destroying the database each time. If the timestamp survives a redeploy, it isn't. Safe
   // to remove once that's confirmed one way or the other. Admin-only: it reveals server paths.
-  app.get('/api/diag/storage', requireAdminAuth, (req, res) => {
+  app.get('/api/diag/storage', requirePermission('settings.manage'), (req, res) => {
     try {
       const markerPath = path.join(dataDir, '.persistence-check.json');
       let marker: { firstSeen: string; checkedAt: string };
@@ -174,45 +162,8 @@ if (ADMIN_PROXY_TARGET) {
     }
   });
 
-  // API Routes
-  // login/logout/session-check are necessarily unauthenticated (that's the point of them);
-  // shipments and quotes are mixed public+admin routers, so each gates its own admin-only
-  // routes internally — see the requireAdminAuth calls inside those two files. Documents,
-  // settings and stats have no public use at all (confirmed by a full grep of the frontend
-  // before this change), so it's simpler and harder to accidentally get wrong to gate them
-  // wholesale here at the mount point instead of touching every route inside those files.
-  app.use('/api/auth', authRouter);
-  // Package images: admin-only routes under /api/shipments/:id/images, each gated individually.
-  app.use('/api/shipments', shipmentImagesRouter);
-  // Payment request per shipment (admin-only routes under /api/shipments/:id/payment).
-  app.use('/api/shipments', shipmentPaymentsRouter);
-  app.use('/api/shipments', shipmentsRouter);
-  app.use('/api/quotes', quotesRouter);
-  // documents is ALSO mixed public+admin (the public booking flow in ShipPage.tsx
-  // auto-generates a BOL right after booking) — gated per-route inside documents.ts instead
-  // of wholesale here, same reasoning as shipments/quotes.
-  app.use('/api/documents', documentsRouter);
-  // Not gated wholesale — GET is public (the public site needs to read company
-  // identity/display-toggle fields like companyName/supportPhone/piiMaskingEnabled), and the
-  // settings blob has nothing sensitive in it (no secrets, just business info and display
-  // toggles whose enforcement already happens server-side regardless of who can see the
-  // toggle's value). PUT is gated per-route inside settings.ts instead.
-  app.use('/api/settings', settingsRouter);
-  // Proof of payment from the track page (public, its own rate limit), then the track lookup.
-  app.use('/api/track', trackProofRouter);
-  app.use('/api/track', trackRouter);
-  // Contact form: POST is public (rate-limited); list and status changes are gated per-route.
-  app.use('/api/messages', messagesRouter);
-  // Public package images (/media/<id>.<ext>); outside /api so they can be cached.
-  app.use(mediaRouter);
-  app.use('/api/stats', requireAdminAuth, statsRouter);
-  // Admin Payments page: proofs of payment and their private screenshots (update F.5).
-  app.use('/api/payments', requireAdminAuth, paymentsRouter);
-
-  // 404 for anything under /api that didn't match a route above.
-  app.use('/api', (req: Request, res: Response) => {
-    res.status(404).json({ success: false, error: 'Not found.' });
-  });
+  // API routes (server/apiRoutes.ts), ending with a JSON 404 for unknown /api paths.
+  registerApiRoutes(app);
 }
 
 // Serve the built React frontend (dist/, produced by `vite build`) so this one process is

@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
-import { requireAdminAuth } from '../middleware/auth.js';
-import { requestHasPermission } from '../auth/permissions.js';
+import { requirePermission } from '../middleware/auth.js';
+import { actorName, getRequestAuth, requestHasPermission } from '../auth/permissions.js';
+import { audited, param } from '../audit.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
 import { generateUniqueTrackingId } from '../trackingIds.js';
 import { pieceLabel } from '../../src/shared/trackingId.js';
-import { ADMIN_ROLE_LABEL } from '../../src/config/brand.js';
 import { parseTransportMode } from '../../src/shared/transportMode.js';
 import { eventTime } from '../eventTime.js';
 
@@ -81,7 +81,7 @@ function formatQuote(row: any, includeInternalNotes: boolean = true) {
 // and was being fetched in full by the public site's own quote-lookup search (see the fix in
 // App.tsx alongside this change), meaning any visitor's browser downloaded every other
 // customer's quote data just by searching for a quote ID.
-quotesRouter.get('/', requireAdminAuth, (req: Request, res: Response) => {
+quotesRouter.get('/', requirePermission('quotes.view'), (req: Request, res: Response) => {
   try {
     const rows = db.prepare('SELECT * FROM quote_requests ORDER BY created_at_ts DESC').all();
     const quotes = rows.map(r => formatQuote(r));
@@ -199,12 +199,13 @@ const publishHandler = (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
-quotesRouter.put('/:id/publish', requireAdminAuth, publishHandler);
-quotesRouter.patch('/:id/publish', requireAdminAuth, publishHandler);
+const publishAudit = audited('quote.publish', 'quote', param('id'), 'Rate published');
+quotesRouter.put('/:id/publish', requirePermission('quotes.manage'), publishAudit, publishHandler);
+quotesRouter.patch('/:id/publish', requirePermission('quotes.manage'), publishAudit, publishHandler);
 
 // PATCH /api/quotes/:id/status (Record customer decision / re-open / mark under review)
 //
-// Deliberately NOT fully gated behind requireAdminAuth: PublicQuoteResultPage.tsx calls this
+// Deliberately NOT fully gated behind a permission: PublicQuoteResultPage.tsx calls this
 // so a real customer can Accept/Decline their own quote from the public result page. There's
 // no per-customer ownership check on a quote ID (same bearer-ID trust model this whole app
 // already uses for tracking numbers), so an unauthenticated caller is restricted to ONLY the
@@ -214,7 +215,9 @@ const VALID_QUOTE_STATUSES = new Set([
   'NEW', 'UNDER_REVIEW', 'QUOTE_PUBLISHED', 'RATE_PUBLISHED', 'ACCEPTED', 'DECLINED', 'EXPIRED', 'CONVERTED'
 ]);
 const PUBLIC_SETTABLE_QUOTE_STATUSES = new Set(['ACCEPTED', 'DECLINED']);
-quotesRouter.patch('/:id/status', (req: Request, res: Response) => {
+quotesRouter.patch('/:id/status',
+  audited('quote.status', 'quote', param('id'), (req) => `Status set to ${req.body?.status}`, { signedInOnly: true, after: (req) => ({ status: req.body?.status }) }),
+  (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const { status, validUntil } = req.body;
@@ -223,8 +226,10 @@ quotesRouter.patch('/:id/status', (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: `Invalid quote status: ${status}` });
     }
 
-    if (!requestHasPermission(req, 'dashboard.view') && !PUBLIC_SETTABLE_QUOTE_STATUSES.has(status)) {
-      return res.status(401).json({ success: false, error: 'Authentication required' });
+    if (!requestHasPermission(req, 'quotes.manage') && !PUBLIC_SETTABLE_QUOTE_STATUSES.has(status)) {
+      return getRequestAuth(req)
+        ? res.status(403).json({ success: false, error: 'You do not have permission to do this.' })
+        : res.status(401).json({ success: false, error: 'Authentication required' });
     }
 
     const row: any = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(id);
@@ -234,7 +239,7 @@ quotesRouter.patch('/:id/status', (req: Request, res: Response) => {
 
     // A customer can only answer a quote that is on offer (the same rule as the public page's
     // Accept button), so a quote that is unpriced, expired, declined or booked can't be flipped.
-    if (!requestHasPermission(req, 'dashboard.view') && row.status !== 'QUOTE_PUBLISHED' && row.status !== 'RATE_PUBLISHED') {
+    if (!requestHasPermission(req, 'quotes.manage') && row.status !== 'QUOTE_PUBLISHED' && row.status !== 'RATE_PUBLISHED') {
       return res.status(409).json({ success: false, error: 'This quote is no longer open.' });
     }
 
@@ -242,7 +247,7 @@ quotesRouter.patch('/:id/status', (req: Request, res: Response) => {
     // past — the moment it was reopened it was already stale/expired again. The client
     // computes a fresh date (today + the configured quote validity window) and sends it
     // here to merge into the persisted pricing blob. Admin only: a customer can't extend a price.
-    if (validUntil && row.pricing_json && requestHasPermission(req, 'dashboard.view')) {
+    if (validUntil && row.pricing_json && requestHasPermission(req, 'quotes.manage')) {
       const pricing = JSON.parse(row.pricing_json);
       pricing.validUntil = validUntil;
       db.prepare('UPDATE quote_requests SET status = ?, pricing_json = ? WHERE id = ?').run(status, JSON.stringify(pricing), id);
@@ -263,7 +268,8 @@ quotesRouter.patch('/:id/status', (req: Request, res: Response) => {
 // built (geocoded origin/destination, sender, recipient, cargo), which are persisted as sent.
 // The tracking ID is always generated here, since the server is the authority
 // (BRAND_GUIDE §7), and returned for the client to adopt.
-quotesRouter.post('/:id/convert', requireAdminAuth, (req: Request, res: Response) => {
+quotesRouter.post('/:id/convert', requirePermission('quotes.manage'), requirePermission('shipments.create'),
+  audited('quote.convert', 'quote', param('id'), (_req, res) => `Converted to shipment ${res.locals.convertedTracking ?? ''}`.trim()), (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const quoteRow: any = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(id);
@@ -387,7 +393,7 @@ quotesRouter.post('/:id/convert', requireAdminAuth, (req: Request, res: Response
       'Origin Gateway',
       createdTime.timestamp,
       `Consignment generated from approved quote ${q.id}. Linear Code 128 barcode assigned.`,
-      `Converted by ${ADMIN_ROLE_LABEL}. Tariff: ${q.pricing?.finalPrice || '350.00'}`,
+      `Converted by ${actorName(req)}. Tariff: ${q.pricing?.finalPrice || '350.00'}`,
       0, 1, 1, 1,
       createdTime.occurredAtTs, createdTime.timeZone
     );
@@ -397,6 +403,9 @@ quotesRouter.post('/:id/convert', requireAdminAuth, (req: Request, res: Response
     // two silently diverged on the next refetch) and record the resulting shipment's tracking
     // number so the quote detail view can link back to it after a reload.
     db.prepare(`UPDATE quote_requests SET status = 'CONVERTED', converted_shipment_id = ? WHERE id = ?`).run(trackingNumber, id);
+    const converter = getRequestAuth(req);
+    if (converter) db.prepare('UPDATE shipments SET created_by = ? WHERE tracking_number = ?').run(converter.user.id, trackingNumber);
+    res.locals.convertedTracking = trackingNumber;
 
     const createdShipment = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(trackingNumber);
     res.status(201).json({ success: true, trackingNumber, data: createdShipment });

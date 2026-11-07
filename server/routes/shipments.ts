@@ -2,7 +2,9 @@ import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { syncTimeBasedProgress, shipmentTransportMode } from '../progress.js';
 import { eventTime } from '../eventTime.js';
-import { requireAdminAuth } from '../middleware/auth.js';
+import { requirePermission } from '../middleware/auth.js';
+import { actorName, getRequestAuth } from '../auth/permissions.js';
+import { audited, param } from '../audit.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
 import { generateUniqueTrackingId } from '../trackingIds.js';
 import { parseTrackingInput, pieceLabel } from '../../src/shared/trackingId.js';
@@ -130,7 +132,7 @@ function formatShipment(row: any) {
 // GET /api/shipments (All consignments with optional search & filter) — admin only, unmasked.
 // Excludes soft-deleted shipments by default; pass ?trash=true to see the recoverable trash
 // list instead (see DELETE below — nothing here is ever hard-deleted by the admin UI anymore).
-shipmentsRouter.get('/', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.get('/', requirePermission('shipments.view'), (req: Request, res: Response) => {
   try {
     const { search, status, trash } = req.query;
     const wantsTrash = trash === 'true';
@@ -166,7 +168,7 @@ shipmentsRouter.get('/', requireAdminAuth, (req: Request, res: Response) => {
 });
 
 // GET /api/shipments/:trackingNumber — admin only, unmasked (public lookups use /api/track/:id)
-shipmentsRouter.get('/:trackingNumber', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.get('/:trackingNumber', requirePermission('shipments.view'), (req: Request, res: Response) => {
   try {
     // Accepts "tx 7k2-m9p" and child labels (TX7K2M9P-01 -> TX7K2M9P); anything else is looked
     // up as typed, so records created before the TX format can still be opened here.
@@ -188,7 +190,8 @@ shipmentsRouter.get('/:trackingNumber', requireAdminAuth, (req: Request, res: Re
 // endpoint the public booking flow (ShipPage.tsx -> api.submitPublicShipment) posts to, not
 // just the admin's CreateShipmentView. Rate-limited instead, since nothing else stops this
 // being scripted/spammed without a session requirement to fall back on.
-shipmentsRouter.post('/', publicWriteLimiter, (req: Request, res: Response) => {
+shipmentsRouter.post('/', publicWriteLimiter,
+  audited('shipment.create', 'shipment', null, 'Shipment created in the console', { signedInOnly: true }), (req: Request, res: Response) => {
   try {
     const s = req.body;
     // The server is the authority on tracking IDs (BRAND_GUIDE §7): any trackingNumber in the
@@ -270,6 +273,11 @@ shipmentsRouter.post('/', publicWriteLimiter, (req: Request, res: Response) => {
       parseTransportMode(s.transportMode) ?? null
     );
 
+    // Booked by a signed-in staff member: record who (public bookings stay NULL).
+    const creator = getRequestAuth(req);
+    if (creator) db.prepare('UPDATE shipments SET created_by = ? WHERE tracking_number = ?').run(creator.user.id, trackingNumber);
+    res.locals.auditEntityId = trackingNumber;
+
     // Insert Pieces
     const insertPiece = db.prepare(`
       INSERT INTO shipment_pieces (
@@ -342,7 +350,9 @@ shipmentsRouter.post('/', publicWriteLimiter, (req: Request, res: Response) => {
 });
 
 // PATCH /api/shipments/:trackingNumber/status (Quick update)
-shipmentsRouter.patch('/:trackingNumber/status', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.patch('/:trackingNumber/status', requirePermission('tracking.update'),
+  audited('shipment.status', 'shipment', param('trackingNumber', true), (req) => `Status set to ${req.body?.newStatus || req.body?.status}`,
+    { after: (req) => ({ status: req.body?.newStatus || req.body?.status }) }), (req: Request, res: Response) => {
   try {
     const tracking = (req.params.trackingNumber as string).trim().toUpperCase();
     const newStatus = req.body.newStatus || req.body.status;
@@ -445,8 +455,8 @@ shipmentsRouter.patch('/:trackingNumber/status', requireAdminAuth, (req: Request
         INSERT INTO tracking_events (
           id, shipment_tracking, status, title, location, facility,
           timestamp, description, operator_notes, delay_flag, completed, current_flag, sort_order,
-          occurred_at_ts, time_zone
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          recorded_by, occurred_at_ts, time_zone
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         `e-${Date.now()}`,
         tracking,
@@ -459,6 +469,7 @@ shipmentsRouter.patch('/:trackingNumber/status', requireAdminAuth, (req: Request
         notes || null,
         newStatus === 'EXCEPTION' ? 1 : 0,
         1, 1, eventCount + 1,
+        actorName(req),
         statusTime.occurredAtTs, statusTime.timeZone
       );
     }
@@ -476,10 +487,11 @@ shipmentsRouter.patch('/:trackingNumber/status', requireAdminAuth, (req: Request
 // as a real shipment row so the return is stored, trackable publicly and covered by the same
 // uniqueness check as every other ID: origin/destination and sender/recipient are swapped,
 // pieces are relabelled, and each side records the link (return_leg_json / return_of_tracking).
-shipmentsRouter.post('/:trackingNumber/return', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.post('/:trackingNumber/return', requirePermission('tracking.update'),
+  audited('shipment.return', 'shipment', param('trackingNumber', true), (req) => `Return to origin created: ${String(req.body?.reason ?? '').slice(0, 200)}`), (req: Request, res: Response) => {
   const tracking = (req.params.trackingNumber as string).trim().toUpperCase();
   const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 200) : '';
-  const operator = typeof req.body?.operator === 'string' && req.body.operator.trim() ? req.body.operator.trim().slice(0, 80) : 'Administrator';
+  const operator = actorName(req);
   if (!reason) {
     return res.status(400).json({ success: false, error: 'A return reason is required.' });
   }
@@ -610,7 +622,8 @@ shipmentsRouter.post('/:trackingNumber/return', requireAdminAuth, (req: Request,
 });
 
 // POST /api/shipments/:trackingNumber/events (Add tracking event)
-shipmentsRouter.post('/:trackingNumber/events', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.post('/:trackingNumber/events', requirePermission('tracking.update'),
+  audited('shipment.event_add', 'shipment', param('trackingNumber', true), (req) => `Tracking event added: ${req.body?.title || req.body?.status || 'checkpoint'}`), (req: Request, res: Response) => {
   try {
     const tracking = (req.params.trackingNumber as string).trim().toUpperCase();
     const e = req.body;
@@ -649,7 +662,7 @@ shipmentsRouter.post('/:trackingNumber/events', requireAdminAuth, (req: Request,
       e.internalNote || e.operatorNotes || null,
       e.delayFlag ? 1 : 0,
       1, 1, eventCount + 1,
-      e.recordedBy || null,
+      actorName(req),
       time.occurredAtTs, time.timeZone
     );
 
@@ -677,7 +690,8 @@ shipmentsRouter.post('/:trackingNumber/events', requireAdminAuth, (req: Request,
 // The "Edit / Correct Tracking Event" modal previously only mutated the shipment object
 // directly in local React state with no backend call at all — the correction looked saved
 // but vanished on the next refetch. This persists the correction and records what changed.
-shipmentsRouter.patch('/:trackingNumber/events/:eventId', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.patch('/:trackingNumber/events/:eventId', requirePermission('tracking.update'),
+  audited('shipment.event_correct', 'shipment', param('trackingNumber', true), (req) => `Tracking event ${req.params.eventId} corrected`), (req: Request, res: Response) => {
   try {
     const tracking = (req.params.trackingNumber as string).trim().toUpperCase();
     const { eventId } = req.params as { eventId: string };
@@ -728,7 +742,7 @@ shipmentsRouter.patch('/:trackingNumber/events/:eventId', requireAdminAuth, (req
       occurredAtTs,
       timeZone,
       e.description || null,
-      e.correctionAudit ? JSON.stringify(e.correctionAudit) : eventRow.correction_audit_json,
+      e.correctionAudit ? JSON.stringify({ ...e.correctionAudit, operator: actorName(req) }) : eventRow.correction_audit_json,
       eventId,
       tracking
     );
@@ -755,7 +769,8 @@ shipmentsRouter.patch('/:trackingNumber/events/:eventId', requireAdminAuth, (req
 });
 
 // PUT /api/shipments/:trackingNumber (Full update)
-shipmentsRouter.put('/:trackingNumber', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.put('/:trackingNumber', requirePermission('shipments.edit'),
+  audited('shipment.update', 'shipment', param('trackingNumber', true), (req) => `Shipment edited: ${Object.keys(req.body || {}).join(', ').slice(0, 300)}`), (req: Request, res: Response) => {
   try {
     const tracking = (req.params.trackingNumber as string).trim().toUpperCase();
     const s = req.body;
@@ -865,7 +880,8 @@ shipmentsRouter.put('/:trackingNumber', requireAdminAuth, (req: Request, res: Re
 // fully intact, so "Restore" below can always bring it back exactly as it was. Nothing here
 // permanently destroys data anymore; see the /permanent route for the one explicit action
 // that still does, which the trash UI gates behind its own separate confirmation.
-shipmentsRouter.delete('/:trackingNumber', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.delete('/:trackingNumber', requirePermission('shipments.delete'),
+  audited('shipment.delete', 'shipment', param('trackingNumber', true), 'Moved to trash'), (req: Request, res: Response) => {
   try {
     const tracking = (req.params.trackingNumber as string).trim().toUpperCase();
     const row = db.prepare('SELECT 1 FROM shipments WHERE tracking_number = ? AND deleted_at_ts IS NULL').get(tracking);
@@ -880,7 +896,8 @@ shipmentsRouter.delete('/:trackingNumber', requireAdminAuth, (req: Request, res:
 });
 
 // POST /api/shipments/:trackingNumber/restore — undoes a soft delete.
-shipmentsRouter.post('/:trackingNumber/restore', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.post('/:trackingNumber/restore', requirePermission('shipments.delete'),
+  audited('shipment.restore', 'shipment', param('trackingNumber', true), 'Restored from trash'), (req: Request, res: Response) => {
   try {
     const tracking = (req.params.trackingNumber as string).trim().toUpperCase();
     const row = db.prepare('SELECT 1 FROM shipments WHERE tracking_number = ? AND deleted_at_ts IS NOT NULL').get(tracking);
@@ -899,7 +916,8 @@ shipmentsRouter.post('/:trackingNumber/restore', requireAdminAuth, (req: Request
 // destroys a shipment's data. Only ever reachable from the trash view (a shipment must already
 // be soft-deleted first), as a deliberate second step — never the direct result of the
 // ordinary "Delete" button.
-shipmentsRouter.delete('/:trackingNumber/permanent', requireAdminAuth, (req: Request, res: Response) => {
+shipmentsRouter.delete('/:trackingNumber/permanent', requirePermission('shipments.delete'),
+  audited('shipment.delete_permanent', 'shipment', param('trackingNumber', true), 'Permanently deleted'), (req: Request, res: Response) => {
   try {
     const tracking = (req.params.trackingNumber as string).trim().toUpperCase();
     const row = db.prepare('SELECT 1 FROM shipments WHERE tracking_number = ? AND deleted_at_ts IS NOT NULL').get(tracking);

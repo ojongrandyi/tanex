@@ -21,7 +21,7 @@ const { db } = await import('../server/db.ts');
 const { initIamSchema } = await import('../server/auth/schema.ts');
 const { SqliteSessionStore, createSessionMiddleware, COURIER_SESSION_MS, STAFF_SESSION_MS } = await import('../server/auth/sessionStore.ts');
 const { createAuthRouter, LOCKOUT_MS } = await import('../server/routes/auth.ts');
-const { requireAuth, requirePermission, requireAdminAuth, requireJsonOrMultipart } = await import('../server/middleware/auth.ts');
+const { requireAuth, requirePermission, requireJsonOrMultipart } = await import('../server/middleware/auth.ts');
 const { stripSecrets } = await import('../server/audit.ts');
 const { normalizeIdentifier } = await import('../src/shared/identifier.ts');
 
@@ -59,7 +59,6 @@ async function startApp(conn: DatabaseSync = db): Promise<TestApp> {
   app.use('/api/auth', createAuthRouter());
   app.get('/api/any', requireAuth, (_req, res) => { res.json({ ok: true }); });
   app.get('/api/dash', requirePermission('dashboard.view'), (_req, res) => { res.json({ ok: true }); });
-  app.get('/api/legacy', requireAdminAuth, (_req, res) => { res.json({ ok: true }); });
   app.post('/api/edit', requirePermission('dashboard.view', 'shipments.edit'), (_req, res) => { res.json({ ok: true }); });
   const server = app.listen(0);
   await new Promise<void>((r) => server.once('listening', () => r()));
@@ -255,7 +254,6 @@ test('401 when signed out; 403 without the permission; any-of; courier-only gets
 
   assert.equal((await get(app, '/api/any')).status, 401);
   assert.equal((await get(app, '/api/dash')).status, 401);
-  assert.equal((await get(app, '/api/legacy')).status, 401);
 
   const rider = await login(app, 'rider@example.test');
   assertLifetime(rider.res.headers.getSetCookie().join(';'), COURIER_SESSION_MS);
@@ -263,7 +261,6 @@ test('401 when signed out; 403 without the permission; any-of; courier-only gets
   assert.equal(riderAgain.status, 200);
   assertLifetime(riderAgain.headers.getSetCookie().join(';'), COURIER_SESSION_MS, 'rolling keeps 7 days');
   assert.equal((await get(app, '/api/dash', rider.cookie!)).status, 403);
-  assert.equal((await get(app, '/api/legacy', rider.cookie!)).status, 403);
 
   const editor = await login(app, 'editor@example.test');
   assertLifetime(editor.res.headers.getSetCookie().join(';'), STAFF_SESSION_MS);

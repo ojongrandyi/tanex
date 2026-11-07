@@ -6,7 +6,10 @@ import { db } from '../db.js';
 import { deleteUpload, IMAGE_CONTENT_TYPES, resolveUploadPath } from '../uploads.js';
 import { eventTime } from '../eventTime.js';
 import { setDocumentPaymentStatus } from './documents.js';
-import { ADMIN_ROLE_LABEL, OPERATIONS_CENTRE } from '../../src/config/brand.js';
+import { requirePermission } from '../middleware/auth.js';
+import { actorName } from '../auth/permissions.js';
+import { audited, param } from '../audit.js';
+import { OPERATIONS_CENTRE } from '../../src/config/brand.js';
 import { PROOF_LIMITS, PROOF_STATUSES } from '../../src/shared/paymentProof.js';
 import type { AdminPaymentProof, ProofStatus, PublicProofStatus } from '../../src/shared/paymentProof.js';
 
@@ -43,7 +46,7 @@ export function deleteProofsForShipment(tracking: string) {
   for (const row of rows) deleteUpload('proofs', row.file_name);
 }
 
-// ---- Admin Payments page (docs/update.md F.5). Mounted on /api/payments behind requireAdminAuth. ----
+// ---- Admin Payments page (docs/update.md F.5). Mounted on /api/payments; each route checks its permission. ----
 
 export const paymentsRouter = Router();
 
@@ -96,7 +99,7 @@ export function getProof(id: string): AdminPaymentProof | null {
 
 // GET /api/payments/proofs?status=SUBMITTED|APPROVED|REJECTED (all when omitted), newest first.
 // Proofs of shipments in the trash are left out, like the rest of the console.
-paymentsRouter.get('/proofs', (req: Request, res: Response) => {
+paymentsRouter.get('/proofs', requirePermission('payments.view'), (req: Request, res: Response) => {
   try {
     const status = typeof req.query.status === 'string' ? req.query.status.toUpperCase() : '';
     if (status && !(PROOF_STATUSES as readonly string[]).includes(status)) {
@@ -112,7 +115,7 @@ paymentsRouter.get('/proofs', (req: Request, res: Response) => {
 });
 
 // GET /api/payments/proofs/:id/file: the private screenshot. Never cached, never sniffed.
-paymentsRouter.get('/proofs/:id/file', (req: Request, res: Response) => {
+paymentsRouter.get('/proofs/:id/file', requirePermission('payments.view'), (req: Request, res: Response) => {
   try {
     const row = db.prepare('SELECT file_name FROM payment_proofs WHERE id = ?').get(req.params.id as string) as { file_name: string } | undefined;
     const filePath = row ? resolveUploadPath('proofs', row.file_name) : null;
@@ -132,7 +135,7 @@ paymentsRouter.get('/proofs/:id/file', (req: Request, res: Response) => {
 type ReviewPaymentRow = { id: string; status: string; charge_reason: string; invoice_document_id: string | null };
 
 /** "Payment confirmed" event on the shipment's timeline (D-8). Its status stays what it is. */
-function addPaymentConfirmedEvent(tracking: string, chargeReason: string) {
+function addPaymentConfirmedEvent(tracking: string, chargeReason: string, recordedBy: string) {
   const ship = db.prepare(`
     SELECT status, current_location_city, current_location_state, current_location_lat, current_location_lng
     FROM shipments WHERE tracking_number = ?`).get(tracking) as {
@@ -153,7 +156,7 @@ function addPaymentConfirmedEvent(tracking: string, chargeReason: string) {
   `).run(
     `e-pay-${crypto.randomUUID()}`, tracking, ship.status, 'Payment confirmed', location, OPERATIONS_CENTRE,
     time.timestamp, `Payment received for: ${chargeReason}.`, 'Recorded when a proof of payment was approved.',
-    count + 1, ADMIN_ROLE_LABEL, time.occurredAtTs, time.timeZone,
+    count + 1, recordedBy, time.occurredAtTs, time.timeZone,
   );
 }
 
@@ -172,7 +175,8 @@ function reviewable(id: string): { proof: ProofRow; payment: ReviewPaymentRow | 
 // POST /api/payments/proofs/:id/approve { addTrackingEvent?: boolean (default true, D-8) }
 // The request becomes PAID (paid_at set), its linked invoice is marked PAID, and optionally a
 // public "Payment confirmed" event is added. Only while the request is awaiting payment or under review.
-paymentsRouter.post('/proofs/:id/approve', (req: Request, res: Response) => {
+paymentsRouter.post('/proofs/:id/approve', requirePermission('payments.manage'),
+  audited('payment.proof_approve', 'payment_proof', param('id'), 'Proof of payment approved'), (req: Request, res: Response) => {
   try {
     const found = reviewable(req.params.id as string);
     if ('error' in found) return res.status(found.error[0]).json({ success: false, error: found.error[1] });
@@ -189,7 +193,7 @@ paymentsRouter.post('/proofs/:id/approve', (req: Request, res: Response) => {
       db.prepare("UPDATE payment_proofs SET status = 'APPROVED', reviewed_at = ? WHERE id = ?").run(now, proof.id);
       db.prepare("UPDATE shipment_payments SET status = 'PAID', paid_at = ?, updated_at = ? WHERE id = ?").run(now, now, payment.id);
       if (payment.invoice_document_id) setDocumentPaymentStatus(payment.invoice_document_id, 'PAID');
-      if (addEvent) addPaymentConfirmedEvent(proof.tracking_number, payment.charge_reason);
+      if (addEvent) addPaymentConfirmedEvent(proof.tracking_number, payment.charge_reason, actorName(req));
       db.exec('COMMIT');
     } catch (err) {
       db.exec('ROLLBACK');
@@ -204,7 +208,8 @@ paymentsRouter.post('/proofs/:id/approve', (req: Request, res: Response) => {
 // POST /api/payments/proofs/:id/reject { reason } — the reason is shown to the customer. A request
 // under review goes back to AWAITING_PAYMENT once no other proof is waiting, so the customer can
 // send a new one.
-paymentsRouter.post('/proofs/:id/reject', (req: Request, res: Response) => {
+paymentsRouter.post('/proofs/:id/reject', requirePermission('payments.manage'),
+  audited('payment.proof_reject', 'payment_proof', param('id'), 'Proof of payment rejected'), (req: Request, res: Response) => {
   try {
     const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().replace(/\s+/g, ' ') : '';
     if (reason.length < PROOF_LIMITS.rejectReasonMin || reason.length > PROOF_LIMITS.rejectReasonMax) {

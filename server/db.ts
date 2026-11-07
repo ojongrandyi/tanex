@@ -364,6 +364,8 @@ export function initDatabase() {
   try { db.exec(`ALTER TABLE tracking_events ADD COLUMN time_zone TEXT;`); } catch (e) {}
   // Mode the customer asked for on a quote (tracker 2.8); carried onto the shipment on convert.
   try { db.exec(`ALTER TABLE quote_requests ADD COLUMN transport_mode TEXT;`); } catch (e) {}
+  // Staff user id that booked the shipment in the console (IAM_RBAC_SPEC §7); NULL for public bookings.
+  try { db.exec(`ALTER TABLE shipments ADD COLUMN created_by TEXT;`); } catch (e) {}
 
   // Backfill existing rows so they don't all collapse to "unknown, sort last": preserve
   // today's best-effort relative order (by rowid, which reflects insertion order) as a

@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
-import { requireAdminAuth } from '../middleware/auth.js';
+import { requirePermission } from '../middleware/auth.js';
+import { actorName } from '../auth/permissions.js';
+import { audited, param } from '../audit.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
-import { ADMIN_ROLE_LABEL, LEGAL_NAME } from '../../src/config/brand.js';
+import { LEGAL_NAME } from '../../src/config/brand.js';
 
 export const documentsRouter = Router();
 
@@ -55,7 +57,7 @@ function formatDoc(row: any) {
 }
 
 // GET /api/documents (List all documents with optional filter)
-documentsRouter.get('/', requireAdminAuth, (req: Request, res: Response) => {
+documentsRouter.get('/', requirePermission('documents.view'), (req: Request, res: Response) => {
   try {
     const { docType, status, search } = req.query;
     let query = 'SELECT * FROM documents';
@@ -100,7 +102,7 @@ documentsRouter.get('/', requireAdminAuth, (req: Request, res: Response) => {
 });
 
 // GET /api/documents/:id
-documentsRouter.get('/:id', requireAdminAuth, (req: Request, res: Response) => {
+documentsRouter.get('/:id', requirePermission('documents.view'), (req: Request, res: Response) => {
   try {
     const row = db.prepare('SELECT * FROM documents WHERE id = ?').get(req.params.id as string);
     if (!row) {
@@ -115,12 +117,14 @@ documentsRouter.get('/:id', requireAdminAuth, (req: Request, res: Response) => {
 // POST /api/documents/generate (Generate new document)
 // Deliberately NOT gated: ShipPage.tsx's public booking flow auto-generates a BOL right
 // after a customer books a shipment, via this same endpoint. Rate-limited instead.
-documentsRouter.post('/generate', publicWriteLimiter, (req: Request, res: Response) => {
+documentsRouter.post('/generate', publicWriteLimiter,
+  audited('document.create', 'document', null, (req) => `Document generated: ${req.body?.docType || 'BILL_OF_LADING'}`, { signedInOnly: true }), (req: Request, res: Response) => {
   try {
     const d = req.body;
     const prefix = d.docType === 'SHIPPING_LABEL' ? 'LBL' : d.docType === 'RECEIPT' ? 'REC' : d.docType === 'INVOICE' ? 'INV' : d.docType === 'INSURANCE' ? 'INS' : 'BOL';
     const randNum = Math.floor(10000 + Math.random() * 90000);
     const id = d.id || `${prefix}-2026-${randNum}`;
+    res.locals.auditEntityId = id;
     const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
@@ -128,7 +132,7 @@ documentsRouter.post('/generate', publicWriteLimiter, (req: Request, res: Respon
       {
         version: 1,
         createdDate: `${dateStr} ${timeStr}`,
-        generatedBy: ADMIN_ROLE_LABEL,
+        generatedBy: actorName(req),
         notes: 'Master document generated.'
       }
     ];
@@ -203,7 +207,8 @@ documentsRouter.post('/generate', publicWriteLimiter, (req: Request, res: Respon
 });
 
 // POST /api/documents/:id/regenerate (Create revised document version)
-documentsRouter.post('/:id/regenerate', requireAdminAuth, (req: Request, res: Response) => {
+documentsRouter.post('/:id/regenerate', requirePermission('documents.manage'),
+  audited('document.regenerate', 'document', param('id'), 'New document version generated'), (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const { notes, ...d } = req.body;
@@ -222,7 +227,7 @@ documentsRouter.post('/:id/regenerate', requireAdminAuth, (req: Request, res: Re
       {
         version: nextVersion,
         createdDate: `${dateStr} ${timeStr}`,
-        generatedBy: ADMIN_ROLE_LABEL,
+        generatedBy: actorName(req),
         notes: notes || `Regenerated version ${nextVersion} with revised parameters.`
       },
       ...currentDoc.versionHistory
@@ -287,7 +292,8 @@ documentsRouter.post('/:id/regenerate', requireAdminAuth, (req: Request, res: Re
 });
 
 // PATCH /api/documents/:id/status (Toggle cancel / active)
-documentsRouter.patch('/:id/status', requireAdminAuth, (req: Request, res: Response) => {
+documentsRouter.patch('/:id/status', requirePermission('documents.manage'),
+  audited('document.status', 'document', param('id'), (req) => `Status set to ${req.body?.status}`, { after: (req) => ({ status: req.body?.status }) }), (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const { status } = req.body;
@@ -322,7 +328,8 @@ export function setDocumentPaymentStatus(id: string, paymentStatus: 'PAID' | 'PE
 }
 
 // PATCH /api/documents/:id/payment-status (Toggle paid / pending)
-documentsRouter.patch('/:id/payment-status', requireAdminAuth, (req: Request, res: Response) => {
+documentsRouter.patch('/:id/payment-status', requirePermission('documents.manage'),
+  audited('document.payment_status', 'document', param('id'), (req) => `Payment status set to ${req.body?.paymentStatus}`, { after: (req) => ({ paymentStatus: req.body?.paymentStatus }) }), (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const { paymentStatus } = req.body;
@@ -341,7 +348,8 @@ documentsRouter.patch('/:id/payment-status', requireAdminAuth, (req: Request, re
 });
 
 // DELETE /api/documents/:id
-documentsRouter.delete('/:id', requireAdminAuth, (req: Request, res: Response) => {
+documentsRouter.delete('/:id', requirePermission('documents.manage'),
+  audited('document.delete', 'document', param('id'), 'Document deleted'), (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     db.prepare('DELETE FROM documents WHERE id = ?').run(id);
