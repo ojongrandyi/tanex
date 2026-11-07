@@ -544,7 +544,8 @@ facilities). Replaces the previous list in `src/data/gateways.ts` during E.6.
 > The single-password strings above are superseded by §10.1 once phase B ships.
 
 ### 10.1 Staff sign-in and accounts (added 2026-11-06, IAM_RBAC_SPEC §9)
-- **Login:** `TanEx Operations Console` · `Sign in with your work email or phone number.` · fields `Email or phone` · `Password` · button `Sign in` · busy `Signing in…` · error `Incorrect sign-in details. Please try again.` · locked `Too many attempts. Try again in 15 minutes or ask an administrator.` · link `Forgot password?`
+- **Login:** `TanEx Operations Console` · `Sign in with your work email or phone number.` · fields `Email or phone` · `Password` · button `Sign in` · busy `Signing in…` · error `Incorrect sign-in details. Please try again.` · link `Forgot password?`
+  - A locked account (5 wrong passwords, 15 minutes) shows the same error as any failed sign-in; there is no separate lockout message (decided 2026-11-07, tracker #123). The per-IP limit keeps `Too many login attempts. Try again in a few minutes.`
 - **Forced change:** `Choose a new password` · `For your security, set your own password before you continue.` · `New password` · `Confirm new password` · hint `At least 10 characters.` · button `Save and continue`
 - **Forgot:** `Reset your password` · `Enter your work email. If it matches an account, we'll send a reset link.` · success `If that email has an account, a reset link is on its way.`
 - **Users:** `Users` · `Add user` · columns `Name` · `Email / phone` · `Roles` · `Status` · `Last sign-in` · statuses `Active` · `Disabled` · actions `Edit` · `Reset password` · `Disable` · `Enable` · `Sign out everywhere` · temp-password dialog `Temporary password` · `Shown once. Share it securely; they'll choose their own at first sign-in.` · `Copy` · `Send on WhatsApp`
