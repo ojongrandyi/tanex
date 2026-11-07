@@ -54,7 +54,20 @@ export const AUTH_TEXT = {
     current: 'Current password',
     next: 'New password',
     confirm: 'Confirm new password',
-    passwordChanged: 'Password changed. Your other devices have been signed out.'
+    passwordChanged: 'Password changed. Your other devices have been signed out.',
+    sessions: {
+      title: 'Where you are signed in',
+      thisDevice: 'This device',
+      lastActive: (when: string) => `Last active ${when}`,
+      signedIn: (when: string) => `Signed in ${when}`,
+      unknownDevice: 'Unknown device',
+      on: 'on',
+      signOutOthers: 'Sign out other devices',
+      confirmSignOutOthers: 'Sign out on every other device? This device stays signed in.',
+      signedOut: (n: number) => `Signed out on ${n} other device${n === 1 ? '' : 's'}.`,
+      none: 'You are only signed in on this device.',
+      loading: 'Loading…'
+    }
   },
   courier: {
     title: 'Courier app coming soon',

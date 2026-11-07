@@ -1,12 +1,13 @@
 // My account (docs/IAM_RBAC_SPEC.md §9): the signed-in user's name, language and password,
-// and sign out. Avatar and an active-sessions list are not built yet (the sessions API,
-// GET /api/users/:id/sessions, exists since B.5).
+// where you are signed in, and sign out. Avatar, job title and bio (the blog author profile)
+// are added with the blog phase (tracker F.1).
 import React, { useState } from 'react';
 import { CheckCircle2, AlertCircle, LogOut, UserCircle, KeyRound } from 'lucide-react';
 import { api } from '../../services/api';
 import { useAuth } from '../../auth/AuthContext';
 import { AUTH_TEXT, passwordErrorText } from '../../auth/strings';
 import { newPasswordProblem } from '../AuthScreens';
+import { MySessions } from '../components/MySessions';
 import './AccountView.css';
 
 const T = AUTH_TEXT.account;
@@ -151,6 +152,8 @@ export const AccountView: React.FC = () => {
           </div>
         </form>
       </section>
+
+      <MySessions />
 
       <div className="tx-account-signout">
         <button type="button" className="tx-account-btn" onClick={() => { logout(); }}>

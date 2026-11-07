@@ -35,6 +35,17 @@ export interface SessionUser {
   mustChangePassword: boolean;
 }
 
+/** One signed-in device (GET /api/auth/sessions, GET /api/users/:id/sessions). */
+export interface UserSession {
+  createdAt: number;
+  lastSeenAt: number | null;
+  expiresAt: number;
+  ip: string | null;
+  userAgent: string | null;
+  /** The session making the request. */
+  current: boolean;
+}
+
 /** A staff account as the Users screen sees it (GET /api/users). */
 export interface StaffUser {
   id: string;
@@ -265,6 +276,19 @@ export const api = {
     });
     const json = await handleResponse<any>(res);
     return json?.user ?? null;
+  },
+
+  /** The signed-in user's own active sessions (My account). */
+  async getMySessions(): Promise<UserSession[]> {
+    const res = await fetchApi(`${API_BASE}/auth/sessions`, { credentials: 'include', cache: 'no-store' });
+    return handleResponse<UserSession[]>(res);
+  },
+
+  /** Signs the signed-in user out on every other device; returns how many sessions ended. */
+  async signOutOtherSessions(): Promise<number> {
+    const res = await fetchApi(`${API_BASE}/auth/sessions`, { method: 'DELETE', credentials: 'include' });
+    const data = await handleResponse<{ signedOut: number }>(res);
+    return Number(data?.signedOut) || 0;
   },
 
   /** Asks for a reset link (B.6). The server answers the same whether or not the email has an account. */

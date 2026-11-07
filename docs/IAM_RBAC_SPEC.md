@@ -108,6 +108,7 @@ roles belong to the Super Admin (except the locked Super Admin role).
 | `GET /api/auth/session` | public | `{ user: { id, displayName, email, phone, locale, roles, permissions, mustChangePassword } | null, passwordReset }` (`passwordReset`: the sign-in screen may offer "Forgot password?"; false until B.6) |
 | `POST /api/auth/change-password` | session | `{ currentPassword, newPassword }`; clears `must_change_password` |
 | `PATCH /api/auth/me` | session | `{ displayName?, locale? }`: own name (1–80 chars) and language (`en`/`fr`) only; audited `user.update_self` (added B.4) |
+| `GET /api/auth/sessions`, `DELETE /api/auth/sessions` | session | own active sessions (no session ids; `current` marks this one) and "Sign out other devices" (keeps this session); audited `auth.sessions_revoke_others` (added after B.5) |
 | `POST /api/auth/forgot` | public (rate-limited) | emails a reset link when SMTP is set; always answers the same |
 | `POST /api/auth/reset` | public (token) | token is random 32 bytes, stored hashed, 30 min, single use |
 | `GET/POST /api/users`, `GET/PATCH /api/users/:id` | `users.view` / `users.manage` | create (returns the temporary password once), edit, roles, disable/enable. An account can only be changed by someone holding all of its permissions; no self-disable (added B.5) |

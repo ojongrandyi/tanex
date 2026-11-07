@@ -363,3 +363,22 @@ test('public writes made while signed in are audited; anonymous ones are not', a
   assert.equal(row.entity_id, id);
   assert.equal(row.actor_user_id, 'usr_sa');
 });
+
+test('own sessions (My account): list without ids, sign out other devices keeps this one', async () => {
+  assert.equal((await call('GET', '/api/auth/sessions')).status, 401);
+  assert.equal((await call('DELETE', '/api/auth/sessions')).status, 401);
+  const here = await signIn('people@example.test');
+  const other = await signIn('people@example.test');
+  const list = (await json(await call('GET', '/api/auth/sessions', here))).data;
+  assert.ok(list.length >= 2);
+  assert.equal(list.filter((s: any) => s.current).length, 1);
+  assert.ok(list.every((s: any) => !('sid' in s)));
+  const res = await json(await call('DELETE', '/api/auth/sessions', here));
+  assert.ok(res.data.signedOut >= 1);
+  assert.ok((await json(await call('GET', '/api/auth/session', here))).user);
+  assert.equal((await json(await call('GET', '/api/auth/session', other))).user, null);
+  const left = (await json(await call('GET', '/api/auth/sessions', here))).data;
+  assert.equal(left.length, 1);
+  assert.equal(left[0].current, true);
+  assert.equal(lastAudit('auth.sessions_revoke_others').entity_id, 'usr_people');
+});

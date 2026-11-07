@@ -139,3 +139,37 @@
 .tx-account-signout {
   display: flex;
 }
+
+/* Where you are signed in (B.5 follow-up) */
+.tx-account-sessions {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tx-account-sessions li {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ngf-ink-900);
+}
+
+.tx-account-sessions .tx-account-meta {
+  display: block;
+  margin: 0.15rem 0 0;
+}
+
+.tx-account-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--ngf-success-50);
+  color: var(--ngf-success-700);
+}

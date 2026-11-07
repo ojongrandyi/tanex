@@ -202,6 +202,42 @@ export function createAuthRouter(): Router {
     res.json({ success: true, user: fresh ? sessionUser(fresh) : null });
   });
 
+  // GET /api/auth/sessions: the signed-in user's own active sessions (My account). The session
+  // id itself is never returned; `current` marks the one making this request.
+  router.get('/sessions', (req: Request, res: Response) => {
+    const auth = getRequestAuth(req);
+    if (!auth) return res.status(401).json({ success: false, error: 'Authentication required' });
+    const rows = db.prepare(`
+      SELECT sid, created_at_ts, last_seen_ts, expires_at_ts, ip, user_agent FROM sessions
+      WHERE user_id = ? AND expires_at_ts > ? ORDER BY COALESCE(last_seen_ts, created_at_ts) DESC
+    `).all(auth.user.id, Date.now()) as unknown as {
+      sid: string; created_at_ts: number; last_seen_ts: number | null; expires_at_ts: number; ip: string | null; user_agent: string | null;
+    }[];
+    res.set('Cache-Control', 'no-store');
+    res.json({
+      success: true,
+      data: rows.map((r) => ({
+        createdAt: r.created_at_ts,
+        lastSeenAt: r.last_seen_ts,
+        expiresAt: r.expires_at_ts,
+        ip: r.ip,
+        userAgent: r.user_agent,
+        current: r.sid === req.sessionID
+      }))
+    });
+  });
+
+  // DELETE /api/auth/sessions: signs the user out on every other device; keeps this session.
+  router.delete('/sessions', (req: Request, res: Response) => {
+    const auth = getRequestAuth(req);
+    if (!auth) return res.status(401).json({ success: false, error: 'Authentication required' });
+    const result = db.prepare('DELETE FROM sessions WHERE user_id = ? AND sid <> ?').run(auth.user.id, req.sessionID ?? '');
+    const count = Number(result.changes);
+    audit(req, 'auth.sessions_revoke_others', 'user', auth.user.id,
+      `Signed out on other devices (${count} session${count === 1 ? '' : 's'})`);
+    res.json({ success: true, data: { signedOut: count } });
+  });
+
   // POST /api/auth/change-password  { currentPassword, newPassword }
   router.post('/change-password', async (req: Request, res: Response) => {
     try {

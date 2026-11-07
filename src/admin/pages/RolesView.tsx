@@ -1,7 +1,7 @@
 // Roles (docs/IAM_RBAC_SPEC.md §9): list of roles; editor with the permission checklist grouped
 // by area, "Users with this role" count, system roles marked, Super Admin read-only. The
 // catalogue comes from src/shared/permissions.ts (the same list the server syncs at boot).
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertCircle, CheckCircle2, Lock, Plus } from 'lucide-react';
 import { api, type StaffRole } from '../../services/api';
 import { useAuth } from '../../auth/AuthContext';
@@ -51,9 +51,14 @@ export const RolesView: React.FC = () => {
   const role = roles?.find((r) => r.id === selected) ?? null;
   const creating = selected === NEW;
 
-  const select = (id: string, list = roles) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const select = (id: string, list = roles, reveal = false) => {
     setSelected(id);
     setNotice(null);
+    // One column (≤ 900 px): the editor sits under the list, so bring it into view.
+    if (reveal && window.matchMedia('(max-width: 900px)').matches) {
+      window.setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+    }
     const r = list?.find((x) => x.id === id);
     setDraft(r ? { name: r.name, description: r.description, permissions: [...r.permissions] }
       : { name: '', description: '', permissions: [] });
@@ -116,7 +121,7 @@ export const RolesView: React.FC = () => {
       <div className="tx-iam-card">
         <div className="tx-iam-toolbar" style={{ marginBottom: '0.75rem' }}>
           <strong>{T.title}</strong>
-          <button type="button" className="tx-iam-btn small primary" onClick={() => select(NEW)}>
+          <button type="button" className="tx-iam-btn small primary" onClick={() => select(NEW, roles, true)}>
             <Plus size={14} aria-hidden="true" />
             <span>{T.add}</span>
           </button>
@@ -126,7 +131,7 @@ export const RolesView: React.FC = () => {
             {roles.map((r) => (
               <li key={r.id}>
                 <button type="button" className="tx-roles-item" aria-current={r.id === selected ? 'true' : undefined}
-                  onClick={() => select(r.id)}>
+                  onClick={() => select(r.id, roles, true)}>
                   <strong>
                     {r.isLocked && <Lock size={12} aria-hidden="true" style={{ marginRight: 4 }} />}
                     {r.name}
@@ -140,7 +145,7 @@ export const RolesView: React.FC = () => {
         )}
       </div>
 
-      <div className="tx-iam-card">
+      <div className="tx-iam-card" ref={editorRef} style={{ scrollMarginTop: '4.5rem' }}>
         {!creating && !role && <p className="tx-iam-muted">{T.selectPrompt}</p>}
 
         {role?.isLocked && (

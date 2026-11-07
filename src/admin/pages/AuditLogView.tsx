@@ -7,6 +7,7 @@ import { api, type AuditEntry, type AuditFilters, type AuditPage } from '../../s
 import { IAM_TEXT, iamErrorText } from '../../auth/strings';
 import { formatEventTimestamp, zonedTimeToUtc } from '../../shared/timeZones';
 import { OFFICE_TIME_ZONE } from '../../config/brand';
+import { displayIp } from '../components/MySessions';
 import './IamViews.css';
 
 const T = IAM_TEXT.audit;
@@ -40,7 +41,7 @@ const Detail: React.FC<{ entry: AuditEntry }> = ({ entry }) => {
       ) : (
         <p className="tx-iam-muted" style={{ margin: '0.5rem 0 0' }}>{T.noDetail}</p>
       )}
-      {entry.ip && <p className="tx-iam-sub" style={{ marginTop: '0.4rem' }}>{T.ip}: {entry.ip}</p>}
+      {entry.ip && <p className="tx-iam-sub" style={{ marginTop: '0.4rem' }}>{T.ip}: {displayIp(entry.ip)}</p>}
     </>
   );
 };
@@ -174,7 +175,8 @@ export const AuditLogView: React.FC = () => {
               {data.items.map((entry) => {
                 const isOpen = open === entry.id;
                 return (
-                  <tr key={entry.id}>
+                  <React.Fragment key={entry.id}>
+                  <tr className={isOpen ? 'is-open' : undefined}>
                     <td data-label={T.columns.when}>{formatEventTimestamp(entry.at, OFFICE_TIME_ZONE)}</td>
                     <td data-label={T.columns.person}>{entry.actorUserId ? entry.actorName : (entry.actorName || T.notSignedIn)}</td>
                     <td data-label={T.columns.action}><span className="tx-audit-action">{entry.action}</span></td>
@@ -190,9 +192,15 @@ export const AuditLogView: React.FC = () => {
                         {isOpen ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
                       </button>
                       {entry.summary}
-                      {isOpen && <Detail entry={entry} />}
                     </td>
                   </tr>
+                  {/* Full-width row so before/after has room at every width. */}
+                  {isOpen && (
+                    <tr className="tx-audit-detail-row">
+                      <td colSpan={5}><Detail entry={entry} /></td>
+                    </tr>
+                  )}
+                  </React.Fragment>
                 );
               })}
             </tbody>

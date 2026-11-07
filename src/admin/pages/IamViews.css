@@ -43,6 +43,14 @@
   background: var(--ngf-white);
 }
 
+/* One height for text, select and date controls so filter rows line up. */
+.tx-iam-input,
+.tx-iam-field input:not([type='checkbox']),
+.tx-iam-field select {
+  height: 2.5rem;
+  line-height: 1.2;
+}
+
 .tx-iam-field textarea {
   resize: vertical;
   min-height: 3.5rem;
@@ -447,6 +455,29 @@
 @media (max-width: 640px) {
   .tx-audit-detail {
     grid-template-columns: 1fr;
+  }
+}
+
+.tx-iam-table tr.is-open td {
+  border-bottom: 0;
+}
+
+.tx-audit-detail-row td {
+  padding-top: 0;
+}
+
+@media (max-width: 767px) {
+  /* On cards the detail belongs to the card above it. */
+  .tx-iam-table tr.is-open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+  .tx-iam-table tr.tx-audit-detail-row {
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
 }
 
