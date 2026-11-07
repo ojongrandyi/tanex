@@ -2,11 +2,11 @@
  * Hybrid Geocoding & Address Intelligence Service
  * Combines dynamic OpenStreetMap / Nominatim live address resolution (worldwide, free text)
  * with an instant in-memory cache and two offline tables: the global gateway network
- * (src/data/gateways.ts) and the U.S. metro list.
+ * (src/data/routingHubs.ts) and the U.S. metro list.
  * Resolves exact pickup/delivery coordinates, formatted addresses, and gateway facilities.
  */
 
-import { GATEWAYS, getGateway, type Gateway } from '../data/gateways.js';
+import { ROUTING_HUBS as GATEWAYS, getRoutingHub as getGateway, type RoutingHub as Gateway } from '../data/routingHubs.js';
 import { US_STATE_ZONES, timeZoneForPlace } from '../shared/timeZones.js';
 
 export interface GeoLocationResult {

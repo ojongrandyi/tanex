@@ -13,7 +13,7 @@
  */
 
 import { US_METRO_DATABASE, GLOBAL_GATEWAY_DATABASE, GeoLocationResult } from './geocodingService.js';
-import { GATEWAYS, type Gateway } from '../data/gateways.js';
+import { ROUTING_HUBS as GATEWAYS, type RoutingHub as Gateway } from '../data/routingHubs.js';
 import { greatCirclePoints, unwrapLongitudes, type LatLngTuple } from '../utils/greatCircle.js';
 import { parseTransportMode, type TransportMode } from '../shared/transportMode.js';
 

@@ -25,22 +25,23 @@ import { AdminViewType } from '../AdminLayout';
 import { resolveLocation, resolveLocationPrecise } from '../../services/geocodingService';
 import './TrackingEventsView.css';
 import { ADMIN_ROLE_LABEL, COMPANY_SHORT, displayOperator } from '../../config/brand';
-import { GATEWAYS } from '../../data/gateways';
+import { NETWORK_POINTS } from '../../data/gateways';
 import { WeightText } from '../../components/forms/UnitControls';
 import { formatInZone, isValidTimeZone, timeZoneForPlace, utcOffsetLabel, zonedTimeToUtc } from '../../shared/timeZones';
 import { SHIPMENT_STATUS_OPTIONS, knownStatusLabel, shipmentStatusLabel } from '../../shared/shipmentStatus';
 
-// Preset event locations: the global gateway network, each with its IANA time zone.
-const NETWORK_LOCATIONS = GATEWAYS.map((g) => ({
+// Preset event locations: TanEx locations and the gateways (CONTENT §9), each with its IANA time
+// zone. TanEx offices and delivery cities are named as TanEx's; gateways keep "City Gateway (CODE)".
+const NETWORK_LOCATIONS = NETWORK_POINTS.map((g) => ({
   city: g.city,
   state: g.iso,
   timezone: g.timeZone,
-  facility: `${g.city} Gateway (${g.code})`
+  facility: g.kind === 'tanex' && g.code !== 'DLA' ? `${COMPANY_SHORT} ${g.name}` : `${g.city} Gateway (${g.code})`
 }));
 
 // Time zones offered for an event's local time: every gateway zone, plus a few others and UTC.
 const EVENT_TIME_ZONES = Array.from(new Set([
-  ...GATEWAYS.map((g) => g.timeZone),
+  ...NETWORK_POINTS.map((g) => g.timeZone),
   'America/Denver',
   'America/Phoenix',
   'UTC'

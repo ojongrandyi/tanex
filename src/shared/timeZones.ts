@@ -2,7 +2,7 @@
 // Events store the instant (occurred_at_ts) and the IANA zone of where they happened; the
 // display is the local wall-clock time there plus its UTC offset, e.g. "3:04 PM UTC+1".
 
-import { GATEWAYS } from '../data/gateways.js';
+import { ROUTING_HUBS as GATEWAYS } from '../data/routingHubs.js';
 
 // Zone suffixes written by the pre-worldwide system ("August 20, 2026 · 4:35 PM CT").
 export const LEGACY_ZONE_ABBREVIATIONS: Record<string, string> = {
