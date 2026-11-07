@@ -19,7 +19,8 @@ import { QuoteRequest } from './types/admin';
 import { api } from './services/api';
 import { simulationEngine } from './services/simulationEngine';
 import { ADMIN_CONSOLE_NAME, ADMIN_PATH, COMPANY, COMPANY_SHORT, isAdminPathname } from './config/brand';
-import { matchPath, pagePath } from './router/routes';
+import { ROUTES, matchPath, pagePath } from './router/routes';
+import { FRENCH_PAGES_INDEXABLE, NOT_FOUND_TITLE, pageMetaText, type PageMetaText } from './shared/pageMeta';
 import { hrefFor, isLocalAdminHash, navigate, subscribe, useRoute } from './router/navigation';
 import './styles/global.css';
 
@@ -77,29 +78,11 @@ function setRobotsNoIndex(enabled: boolean) {
   }
 }
 
-// Page titles and meta descriptions (CONTENT.md §1.1). The defaults also live in index.html,
-// which is what crawlers and link previews see before the app runs.
-interface PageMeta {
-  title: string;
-  description: string;
-}
-
-// Wording from CONTENT.md §1.1 (English only until the i18n layer, task D.3).
-const DEFAULT_DESCRIPTION =
-  `${COMPANY} picks up from your door and delivers across Buea, Limbe and Douala by bike, between cities by truck, and worldwide by air, sea, rail and road, with one tracking ID.`;
-
-const PAGE_META: Record<string, PageMeta> = {
-  home: { title: `${COMPANY} | Door-to-Door Delivery in Cameroon & Worldwide Shipping`, description: DEFAULT_DESCRIPTION },
-  track: { title: `Track a Shipment | ${COMPANY}`, description: `Enter your 8-character ${COMPANY_SHORT} tracking ID to see where your parcel is, including live rider location for in-town deliveries.` },
-  services: { title: `Logistics Services | ${COMPANY}`, description: 'Air, maritime, rail and road freight, warehousing, and same-city bike delivery in Buea, Limbe and Douala.' },
-  quote: { title: `Get a Quote | ${COMPANY}`, description: "Tell us what you're sending and where. Our team will send you a clear price." },
-  ship: { title: `Book a Shipment | ${COMPANY}`, description: 'Book a collection, add every piece and get your tracking ID straight away.' },
-  about: { title: `About ${COMPANY}`, description: `Who we are, how we work, and the team behind ${COMPANY_SHORT} in Buea.` },
-  locations: { title: `Our Network | ${COMPANY}`, description: "From our base in Buea and the gateway of Douala to the world's main trade hubs." },
-  help: { title: `Help Centre | ${COMPANY}`, description: 'Answers on tracking, bike delivery, booking, customs, payments and documents.' },
-  contact: { title: `Contact Us | ${COMPANY}`, description: `Talk to the ${COMPANY_SHORT} team in Buea by email, phone or WhatsApp.` },
-  legal: { title: `Policies | ${COMPANY}`, description: 'Privacy, terms of service, shipping terms, cookies and accessibility.' },
-};
+// Page titles and meta descriptions (CONTENT §1.1 / CONTENT_FR §1.1) come from the shared table
+// src/shared/pageMeta.ts, which the server also injects into index.html (server/render/pageMeta.ts)
+// so crawlers and link previews see them before the app runs. This keeps the tab title right
+// when the page changes in the browser.
+type PageMeta = PageMetaText;
 
 function setPageMeta({ title, description }: PageMeta) {
   document.title = title;
@@ -173,22 +156,26 @@ function MainAppContent() {
 
   // Per-page <title> and meta description (CONTENT.md §1.1)
   useEffect(() => {
-    const meta: Record<string, PageMeta> = {
-      ...PAGE_META,
-      'track-result': {
-        title: liveShipment ? `Tracking ${liveShipment.trackingNumber} | ${COMPANY}` : PAGE_META.track.title,
-        description: PAGE_META.track.description,
-      },
-      'quote-result': {
-        title: currentQuote ? `Quote ${currentQuote.id} | ${COMPANY}` : PAGE_META.quote.title,
-        description: PAGE_META.quote.description,
-      },
-      admin: { title: ADMIN_CONSOLE_NAME, description: DEFAULT_DESCRIPTION },
-      'not-found': { title: `Page Not Found | ${COMPANY}`, description: DEFAULT_DESCRIPTION },
-    };
-    setPageMeta(meta[currentPage] || PAGE_META.home);
+    const lang = route?.lang ?? 'en';
+    const home = pageMetaText('home', lang);
+    let meta: PageMeta;
+    if (currentPage === 'track-result') {
+      const track = pageMetaText('track', lang);
+      meta = { title: liveShipment ? `Tracking ${liveShipment.trackingNumber} | ${COMPANY}` : track.title, description: track.description };
+    } else if (currentPage === 'quote-result') {
+      const quote = pageMetaText('quote', lang);
+      meta = { title: currentQuote ? `Quote ${currentQuote.id} | ${COMPANY}` : quote.title, description: quote.description };
+    } else if (currentPage === 'admin') {
+      meta = { title: ADMIN_CONSOLE_NAME, description: home.description };
+    } else if (currentPage === 'not-found') {
+      meta = { title: NOT_FOUND_TITLE[lang], description: home.description };
+    } else {
+      const known = ROUTES.find((r) => r.id === currentPage);
+      meta = known ? pageMetaText(known.id, lang) : home;
+    }
+    setPageMeta(meta);
     // French paths render English until the i18n layer (D.3), so they stay out of the index.
-    setRobotsNoIndex(currentPage === 'admin' || currentPage === 'not-found' || isAdminPath() || route?.lang === 'fr');
+    setRobotsNoIndex(currentPage === 'admin' || currentPage === 'not-found' || isAdminPath() || (lang === 'fr' && !FRENCH_PAGES_INDEXABLE));
   }, [currentPage, liveShipment, currentQuote, route?.lang]);
 
   // Page from the address: first load, every navigate(), back/forward (src/router/navigation.ts).

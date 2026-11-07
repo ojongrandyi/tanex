@@ -41,7 +41,7 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 | Blog | Blog \| TanEx | Actualités, guides et conseils d'expédition de l'équipe TanEx. |
 
 ### 1.1a Page introuvable (404)
-- **Sur-titre :** `Erreur 404` · **H1 :** `Page introuvable`
+- **Titre :** `Page introuvable | TanEx` (noindex ; **à confirmer**, ajouté avec D.2) · **Sur-titre :** `Erreur 404` · **H1 :** `Page introuvable`
 - **Texte :** `La page que vous cherchez n'existe pas ou a été déplacée. Vérifiez l'adresse ou utilisez l'un des liens ci-dessous.`
 - **Boutons :** `Retour à l'accueil` · `Suivre un envoi` · **Aide :** `Besoin d'aide ?` → `Contactez-nous`
 

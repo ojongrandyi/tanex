@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { ADMIN_PATH, SITE_URL } from '../src/config/brand.js';
+import { sitemapXml } from './render/pageMeta.js';
 
 // robots.txt, sitemap.xml and crawler headers (tracker 6.4). The public site and the admin
 // console are the same Node app on the same host; the admin is the ADMIN_PATH (/private-user/).
@@ -15,10 +16,6 @@ function isAdminRequest(req: Request): boolean {
   return p === ADMIN_PREFIX || p.startsWith(`${ADMIN_PREFIX}/`);
 }
 
-// Pages are real paths since D.1 (src/router/routes.ts). The sitemap still lists only the home
-// page: task D.2 builds it from the route table with hreflang alternates and canonicals.
-const SITEMAP_PATHS = ['/'];
-
 export const seoRouter = Router();
 
 // Belt and braces for the admin path: a header works before any HTML or JS runs (App.tsx adds
@@ -33,11 +30,9 @@ seoRouter.get('/robots.txt', (req: Request, res: Response) => {
   res.send(`User-agent: *\nDisallow: /api/\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 });
 
+// Every public page in English and French with xhtml:link alternates, built from the route table
+// (server/render/pageMeta.ts). The console path is never in it.
 seoRouter.get('/sitemap.xml', (req: Request, res: Response) => {
-  const urls = SITEMAP_PATHS
-    .map((p) => `  <url>\n    <loc>${SITE_URL}${p}</loc>\n  </url>`)
-    .join('\n');
-  res.type('application/xml').send(
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
-  );
+  res.type('application/xml').setHeader('Cache-Control', 'public, max-age=3600');
+  res.send(sitemapXml());
 });

@@ -11,7 +11,8 @@ import { bootstrapSuperAdmin } from './auth/bootstrap.js';
 import { startOutboxWorker } from './mail/outbox.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { seoRouter } from './seo.js';
-import { publicPages } from './publicPages.js';
+import { publicPages, sendIndex } from './publicPages.js';
+import { createIndexRenderer } from './render/pageMeta.js';
 import { registerApiRoutes } from './apiRoutes.js';
 import { ADMIN_PATH, COMPANY } from '../src/config/brand.js';
 import { isAllowedOrigin } from './cors.js';
@@ -182,6 +183,9 @@ if (ADMIN_PROXY_TARGET) {
 // always re-checked so a new deploy shows up at once; logos and photos (/brand, /images) for 30
 // days (give a replaced file a new name or a ?v= query); anything else for an hour.
 const distDir = path.join(process.cwd(), 'dist');
+const indexHtmlPath = path.join(distDir, 'index.html');
+// index.html read once, then rendered per page with its meta (server/render/pageMeta.ts).
+const renderIndex = createIndexRenderer(indexHtmlPath);
 
 // Admin console at ADMIN_PATH (/private-user/): the same index.html as the public site, and
 // App.tsx opens the console from the path. Express routes ignore case and the trailing slash,
@@ -195,14 +199,14 @@ app.get(ADMIN_ROUTE, (req: Request, res: Response, next: NextFunction) => {
     res.redirect(301, `${ADMIN_PATH}${query}`);
     return;
   }
-  res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.sendFile(path.join(distDir, 'index.html'), (err) => {
-    if (err) next(err);
-  });
+  sendIndex(res, next, renderIndex, { kind: 'admin' }, indexHtmlPath);
 });
 
-app.use(express.static(distDir, {
+// index.html is never served as a plain file: `/` and `/index.html` go through publicPages()
+// below, so they get their meta (and /index.html its 301 to /).
+const serveStatic = express.static(distDir, {
+  index: false,
   setHeaders: (res, filePath) => {
     const rel = path.relative(distDir, filePath).split(path.sep).join('/');
     if (rel.startsWith('assets/')) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
@@ -210,10 +214,14 @@ app.use(express.static(distDir, {
     else if (rel.startsWith('images/') || rel.startsWith('brand/')) res.setHeader('Cache-Control', 'public, max-age=2592000');
     else res.setHeader('Cache-Control', 'public, max-age=3600');
   },
-}));
+});
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.path === '/index.html') return next();
+  serveStatic(req, res, next);
+});
 
 // Public pages by path, after the static files so a real file always wins.
-app.use(publicPages(path.join(distDir, 'index.html')));
+app.use(publicPages(renderIndex, indexHtmlPath));
 
 // Anything not matched above is a 404. Browsers get the app with status 404, which shows the
 // "Page not found" page (NotFoundPage, chosen from the path in App.tsx); other requests
@@ -222,9 +230,8 @@ app.use(publicPages(path.join(distDir, 'index.html')));
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(404).setHeader('Cache-Control', 'no-cache');
   if ((req.method === 'GET' || req.method === 'HEAD') && (req.get('Accept') || '').includes('text/html')) {
-    res.sendFile(path.join(distDir, 'index.html'), (err) => {
-      if (err) next(err);
-    });
+    const lang = req.path === '/fr' || req.path.startsWith('/fr/') ? 'fr' : 'en';
+    sendIndex(res, next, renderIndex, { kind: 'not-found', lang }, indexHtmlPath);
     return;
   }
   res.type('text/plain').send('Not found');

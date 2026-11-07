@@ -9,6 +9,7 @@ import type { AddressInfo } from 'node:net';
 import express from 'express';
 import { ROUTES, buildPath, legacyHashToPath, matchPath, pagePath } from '../src/router/routes.ts';
 import { publicPages } from '../server/publicPages.ts';
+import { createIndexRenderer } from '../server/render/pageMeta.ts';
 import { quoteUrl } from '../server/mail/urls.ts';
 
 test('every live route round-trips through buildPath and matchPath, in both languages', () => {
@@ -79,12 +80,13 @@ test('quote emails link to the path URL', () => {
   assert.match(quoteUrl('QR-2026-00001'), /^https:\/\/[^/]+\/quote\/QR-2026-00001$/);
 });
 
-// Server: the same index.html for every known page, 301 for non-canonical spellings, 404 otherwise.
+// Server: index.html with the page's own head (server/render/pageMeta.ts) for every known page,
+// 301 for non-canonical spellings, 404 otherwise.
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tanex-router-test-'));
 const indexPath = path.join(tmpDir, 'index.html');
-fs.writeFileSync(indexPath, '<!doctype html><title>app</title>');
+fs.writeFileSync(indexPath, '<!doctype html><html lang="en"><head><!-- tx:head --><title>app</title><!-- /tx:head --></head><body>app</body></html>');
 const app = express();
-app.use(publicPages(indexPath));
+app.use(publicPages(createIndexRenderer(indexPath), indexPath));
 app.use((req, res) => res.status(404).send('Not found'));
 const server = app.listen(0);
 const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
@@ -100,7 +102,11 @@ test('server: known public paths answer 200 with the app', async () => {
     const res = await fetch(base + p, { redirect: 'manual' });
     assert.equal(res.status, 200, p);
     assert.equal(res.headers.get('cache-control'), 'no-cache', p);
-    assert.match(await res.text(), /<title>app<\/title>/, p);
+    const html = await res.text();
+    assert.match(html, /<body>app<\/body>/, p);
+    assert.match(html, /<title>[^<]*TanEx[^<]*<\/title>/, p);
+    assert.doesNotMatch(html, /<title>app<\/title>/, p);
+    assert.match(html, new RegExp(`<html lang="${p.startsWith('/fr/') ? 'fr' : 'en'}"`), p);
   }
 });
 
