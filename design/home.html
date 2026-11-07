@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en" class="guides">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TanEx Home Mock</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../src/assets/fonts/fonts.css">
+<link rel="stylesheet" href="tx.css">
+<style>
+  /* Homepage mock (C.1). Copy: CONTENT §1.2, §1.3, §2.1–§2.10. Layout: MOTION_3D_SPEC §5–§8. */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--tx-cream-100); font: 400 var(--tx-fs-body)/1.6 var(--tx-font-body); color: var(--tx-choc-900); -webkit-font-smoothing: antialiased; position: relative; overflow-x: hidden; }
+  img { max-width: 100%; }
+  a { color: inherit; }
+  .wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+  .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---------- Header ---------- */
+  .util { border-bottom: 1px solid rgb(217 194 181 / .14); font: 500 .78rem/1 var(--tx-font-mono); color: var(--tx-choc-200); letter-spacing: .02em; }
+  .util .wrap { display: flex; gap: 28px; height: 40px; align-items: center; }
+  .util span { display: inline-flex; gap: 8px; align-items: center; }
+  .util svg { width: 14px; height: 14px; }
+  .util .push { margin-left: auto; }
+  .hdr .wrap { display: flex; align-items: center; height: 84px; gap: 36px; }
+  .hdr .logo img { height: 34px; width: auto; display: block; }
+  .nav { display: flex; gap: 26px; font-weight: 500; font-size: .95rem; }
+  .nav a { text-decoration: none; color: var(--tx-cream-100); display: inline-flex; align-items: center; gap: 3px; opacity: .9; }
+  .nav a svg { width: 14px; height: 14px; opacity: .6; }
+  .hdr .right { margin-left: auto; display: flex; gap: 18px; align-items: center; }
+  .lang { font: 600 .8rem/1 var(--tx-font-mono); color: var(--tx-choc-200); letter-spacing: .06em; }
+  .lang b { color: var(--tx-cream-100); }
+  .menu-btn { display: none; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgb(217 194 181 / .3); background: transparent; color: var(--tx-cream-100); place-items: center; }
+  .menu-btn svg { width: 20px; height: 20px; }
+  .progress { display: none; }
+
+  /* ---------- Chapters ---------- */
+  .ch { position: relative; padding: 136px 0; }
+  .grid { display: grid; gap: 24px 64px; grid-template-columns: 7fr 5fr; grid-template-areas: "intro lane" "rest lane"; align-items: start; }
+  .L .grid { grid-template-columns: 5fr 7fr; grid-template-areas: "lane intro" "lane rest"; }
+  .wide-lane .grid { grid-template-columns: 4fr 8fr; }
+  .intro, .rest, .lane { min-width: 0; }
+  .intro { grid-area: intro; } .rest { grid-area: rest; } .lane { grid-area: lane; align-self: stretch; position: relative; min-height: 420px; }
+  .lane > svg, .lane .art { width: 100%; height: 100%; display: block; }
+  .ch h2 { margin-bottom: 22px; }
+  .chap-h { font-size: var(--tx-fs-h1); line-height: 1.06; letter-spacing: -.03em; }
+  .caption { font: 500 .8rem/1.4 var(--tx-font-mono); letter-spacing: .02em; color: var(--tx-text-muted); }
+
+  /* guides: where the 3D bike rides (lane) and chapter tags */
+  .tag { display: none; }
+  .guides .lane { outline: 1.5px dashed rgb(244 136 0 / .75); outline-offset: 10px; border-radius: 4px; }
+  .guides .lane::before { content: attr(data-lane); position: absolute; top: -34px; left: 0; z-index: 3; font: 600 .66rem/1 var(--tx-font-mono); letter-spacing: .12em; color: var(--tx-choc-950); background: var(--tx-orange-500); padding: 5px 8px; border-radius: 3px; text-transform: uppercase; white-space: nowrap; }
+  .guides .tag { display: inline-block; position: absolute; top: 24px; left: 40px; z-index: 4; font: 600 .66rem/1 var(--tx-font-mono); letter-spacing: .12em; text-transform: uppercase; padding: 6px 9px; border-radius: 3px; background: rgb(28 18 14 / .86); color: var(--tx-cream-100); border: 1px solid rgb(244 136 0 / .6); }
+  .tx-dark.ch .tag, .tx-dark .tag { background: rgb(255 252 247 / .1); }
+
+  /* ---------- Hero ---------- */
+  .s-hero { background: var(--tx-choc-950); padding: 0; overflow: hidden; }
+  .s-hero .stage { position: relative; padding: 88px 0 150px; }
+  .s-hero .grid { grid-template-columns: 7fr 5fr; align-items: center; }
+  .s-hero .lane { min-height: 520px; }
+  .s-hero h1 { font-size: var(--tx-fs-display); margin: 0 0 28px; }
+  .s-hero h1 .l2 { display: block; }
+  .s-hero .tx-lead { color: var(--tx-choc-200); margin-bottom: 36px; }
+  .track-lbl { font: 600 .82rem/1 var(--tx-font-body); color: var(--tx-cream-100); display: block; margin-bottom: 10px; }
+  .hero-btns { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
+  .facts { list-style: none; padding: 0; margin: 34px 0 0; display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: .9rem; color: var(--tx-choc-200); }
+  .facts li { display: inline-flex; gap: 8px; align-items: center; }
+  .facts svg { width: 16px; height: 16px; color: var(--tx-cream-300); }
+  .mount { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; width: 100%; --mount: #241712; --mount2: #2A1B16; pointer-events: none; }
+  .pause { position: absolute; left: 40px; bottom: 30px; z-index: 2; display: inline-flex; gap: 8px; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 999px; background: rgb(28 18 14 / .7); border: 1px solid rgb(217 194 181 / .25); color: var(--tx-cream-100); font: 500 .8rem/1 var(--tx-font-body); }
+  .pause svg { width: 13px; height: 13px; }
+  .hero-cap { position: absolute; right: 40px; bottom: 36px; z-index: 2; color: var(--tx-choc-200); }
+  .globe-art { --globe: #2A1B16; --globe-grid: rgb(217 194 181 / .12); --globe-rim: rgb(217 194 181 / .25); --land: #9C7360; --hub: #EDDFC4; }
+
+  /* ---------- Services ---------- */
+  .s-services { background: var(--tx-cream-100); }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 28px; }
+  .s-services .tx-card { background: var(--tx-cream-50); box-shadow: none; }
+  .s-services .tx-card--lit { background: #FFF; box-shadow: var(--tx-shadow-lift); }
+  .dots { position: absolute; right: 0; top: 0; display: flex; flex-direction: column; gap: 10px; font: 600 .7rem/1 var(--tx-font-mono); color: var(--tx-choc-400); }
+  .dots span { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--tx-choc-200); }
+  .dots .on { background: var(--tx-choc-900); border-color: var(--tx-choc-900); color: var(--tx-cream-100); }
+
+  /* ---------- Bike chapter ---------- */
+  .s-bike { background: var(--tx-choc-900); }
+  .s-bike .grid { grid-template-columns: 6fr 6fr; }
+  .s-bike h2 { font-size: var(--tx-fs-display); line-height: 1.02; letter-spacing: -.035em; }
+  .steps { display: flex; align-items: center; gap: 0; margin: 34px 0 30px; flex-wrap: wrap; }
+  .steps .tx-chip { min-height: 34px; padding: 0 14px; font-size: .86rem; }
+  .steps .ln { width: 34px; height: 0; border-top: 2px dashed rgb(217 194 181 / .35); }
+  .price { font: 700 clamp(1.25rem, 1rem + .8vw, 1.6rem)/1.25 var(--tx-font-display); letter-spacing: -.015em; margin: 0 0 26px; color: var(--tx-cream-100); }
+  .price .mono { font-family: var(--tx-font-mono); font-weight: 600; letter-spacing: 0; }
+  .points { list-style: none; padding: 0; margin: 0 0 34px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; }
+  .points li { display: flex; gap: 12px; align-items: flex-start; font-size: .95rem; line-height: 1.45; color: var(--tx-text-muted); }
+  .points .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--tx-icon-bg); display: grid; place-items: center; flex: none; color: var(--tx-text); }
+  .points .ic svg { width: 18px; height: 18px; }
+  .cta-row { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .bike-art { --frame: #4A3128; --cowl: #5F4034; --engine: #38241D; --seat: #140D0A; --vest: #5F4034; --helmet: #7B5545; --trouser: #0F0A08; --shadow: rgb(0 0 0 / .35); --tyre: #0F0A08; --bar: #0F0A08; }
+  .orbit { position: absolute; inset: auto 4% 5% 4%; height: 26%; border: 1.5px dashed rgb(217 194 181 / .22); border-radius: 50%; }
+
+  /* ---------- Truck ---------- */
+  .s-truck { background: var(--tx-cream-200); }
+  .checks { list-style: none; padding: 0; margin: 0 0 34px; display: grid; gap: 12px; }
+  .checks li { display: flex; gap: 12px; align-items: center; font-weight: 500; }
+  .checks svg { width: 18px; height: 18px; padding: 3px; border-radius: 50%; background: var(--tx-choc-900); color: var(--tx-cream-100); flex: none; box-sizing: content-box; }
+
+  /* ---------- Network ---------- */
+  .s-network { background: var(--tx-choc-950); padding-bottom: 96px; }
+  .legend { list-style: none; padding: 0; margin: 28px 0 32px; display: flex; flex-wrap: wrap; gap: 12px 26px; font-size: .9rem; color: var(--tx-choc-200); }
+  .legend li { display: inline-flex; gap: 10px; align-items: center; }
+  .lg-base { width: 12px; height: 12px; border-radius: 50%; background: var(--tx-orange-500); box-shadow: 0 0 0 3px var(--tx-choc-950), 0 0 0 4.5px var(--tx-orange-500); }
+  .lg-gw { width: 10px; height: 10px; border-radius: 50%; background: var(--tx-cream-300); }
+  .lg-lane { width: 26px; border-top: 2px dashed var(--tx-orange-500); }
+  .map { margin-top: 72px; position: relative; border-radius: var(--tx-radius-card); background: var(--tx-choc-900); border: 1px solid rgb(217 194 181 / .12); overflow: hidden; aspect-ratio: 1000 / 440; }
+  .map svg { width: 100%; height: 100%; display: block; --land: #5F4034; }
+  .map .zoom { position: absolute; right: 16px; top: 16px; display: grid; border-radius: 10px; overflow: hidden; border: 1px solid rgb(217 194 181 / .2); }
+  .map .zoom span { width: 36px; height: 36px; display: grid; place-items: center; background: var(--tx-choc-950); color: var(--tx-cream-100); font: 600 1rem/1 var(--tx-font-body); }
+  .map .zoom span + span { border-top: 1px solid rgb(217 194 181 / .2); }
+  .map-note { display: none; }
+  .guides .map-note { display: block; position: absolute; left: 16px; top: 16px; font: 600 .66rem/1.5 var(--tx-font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--tx-choc-950); background: var(--tx-orange-500); padding: 5px 8px; border-radius: 3px; max-width: 60%; }
+  .region { font: 600 11px var(--tx-font-mono); letter-spacing: .1em; fill: #BF9C8A; text-transform: uppercase; }
+
+  /* ---------- Smart labels ---------- */
+  .s-labels { background: var(--tx-cream-100); }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 30px 0 30px; }
+  .tile { background: #FFF; border: 1px solid var(--tx-choc-100); border-radius: var(--tx-radius-card); padding: 18px 18px 16px; }
+  .tile b { display: block; font: 800 1.35rem/1.1 var(--tx-font-display); letter-spacing: -.02em; margin-bottom: 6px; }
+  .tile span { font-size: .85rem; color: var(--tx-choc-600); }
+  .label { max-width: 380px; background: #FFF; border-radius: 6px; box-shadow: var(--tx-shadow-lift); font: 500 .74rem/1.5 var(--tx-font-mono); color: var(--tx-choc-950); overflow: hidden; }
+  .label .lh { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 2px solid var(--tx-choc-950); font-weight: 600; letter-spacing: .14em; }
+  .label .lh img { height: 18px; width: auto; }
+  .label dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; }
+  .label dl div { padding: 8px 16px; border-bottom: 1px solid var(--tx-choc-100); }
+  .label dl div:nth-child(odd) { border-right: 1px solid var(--tx-choc-100); }
+  .label dt { font-size: .62rem; letter-spacing: .12em; color: var(--tx-choc-500); }
+  .label dd { margin: 0; font-weight: 600; }
+  .label .bc { padding: 14px 16px 12px; text-align: center; }
+  .label .bc svg { width: 100%; height: 64px; display: block; }
+  .label .bc p { margin: 6px 0 0; letter-spacing: .14em; font-weight: 600; }
+  .scan { position: absolute; left: 50%; top: 52%; width: 46%; height: 3px; background: var(--tx-orange-500); box-shadow: 0 0 18px 4px rgb(244 136 0 / .45); border-radius: 2px; transform: translateX(-6%) rotate(-13deg); }
+
+  /* ---------- Contact ---------- */
+  .s-contact { background: var(--tx-cream-50); }
+  .s-contact .grid { grid-template-columns: 8fr 4fr; grid-template-areas: "intro lane" "rest lane"; }
+  .contact-cols { display: grid; grid-template-columns: 1fr 1.05fr; gap: 40px; align-items: start; }
+  .channels { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+  .channels li { display: grid; grid-template-columns: 40px 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--tx-choc-100); align-items: start; }
+  .channels .ic { width: 40px; height: 40px; border-radius: 50%; background: var(--tx-choc-50); display: grid; place-items: center; }
+  .channels .ic svg { width: 18px; height: 18px; }
+  .channels small { display: block; font-size: .78rem; color: var(--tx-choc-600); font-weight: 500; }
+  .channels strong { font-weight: 600; font-size: .98rem; }
+  .form { background: #FFF; border: 1px solid var(--tx-choc-100); border-radius: var(--tx-radius-card); padding: 28px; display: grid; gap: 18px; box-shadow: var(--tx-shadow); }
+  .park-art { position: absolute; inset: auto 0 0 0; }
+
+  /* ---------- FAQ + Blog ---------- */
+  .s-faq { background: var(--tx-cream-100); }
+  .faq-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; }
+  .faq-intro { position: sticky; top: 40px; align-self: start; }
+  details { border-bottom: 1px solid var(--tx-choc-100); }
+  details:first-of-type { border-top: 1px solid var(--tx-choc-100); }
+  summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 24px; padding: 22px 0; font: 700 1.1rem/1.35 var(--tx-font-display); letter-spacing: -.01em; }
+  summary::-webkit-details-marker { display: none; }
+  summary svg { width: 22px; height: 22px; flex: none; transition: transform .25s var(--tx-ease); }
+  details[open] summary svg { transform: rotate(45deg); }
+  details p { margin: -6px 0 22px; color: var(--tx-choc-600); max-width: 60ch; }
+  .s-blog { background: var(--tx-cream-100); padding-top: 0; }
+  .blog-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; padding-top: 96px; border-top: 1px solid var(--tx-choc-100); margin-bottom: 36px; }
+  .posts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .post { border-radius: var(--tx-radius-card); background: #FFF; border: 1px solid var(--tx-choc-100); overflow: hidden; }
+  .post .img { aspect-ratio: 16 / 10; background: repeating-linear-gradient(135deg, var(--tx-cream-200) 0 10px, var(--tx-cream-300) 10px 11px); display: grid; place-items: center; font: 600 .66rem/1 var(--tx-font-mono); letter-spacing: .12em; color: var(--tx-choc-500); text-transform: uppercase; }
+  .post .body { padding: 20px; display: grid; gap: 10px; }
+  .post .bar { height: 12px; border-radius: 6px; background: var(--tx-choc-100); }
+  .post .bar.t { height: 18px; background: var(--tx-choc-200); }
+  .post .bar.s { width: 40%; }
+  .post .bar.m { width: 75%; }
+  .blog-note { margin-top: 16px; }
+
+  /* ---------- Footer ---------- */
+  .s-footer { background: var(--tx-choc-950); padding: 0 0 36px; color: var(--tx-cream-100); }
+  .arrive { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; align-items: end; padding: 120px 0 88px; border-bottom: 1px solid rgb(217 194 181 / .12); }
+  .arrive .lane { min-height: 300px; grid-area: auto; }
+  .arrive h2 { font-size: var(--tx-fs-display); line-height: 1.02; letter-spacing: -.035em; margin: 0 0 18px; }
+  .arrive p { color: var(--tx-choc-200); font-size: 1.15rem; margin: 0; max-width: 34ch; }
+  .door-art { --wall: #2A1B16; --door-frame: #4A3128; --door: #5F4034; --door-line: #4A3128; --step: #4A3128; --knob: #EDDFC4; --lamp: #FFE9CC;
+              --frame: #4A3128; --cowl: #5F4034; --engine: #38241D; --vest: #5F4034; --helmet: #7B5545; --shadow: rgb(0 0 0 / .4); --kraft: #E2CFA8; }
+  .trust { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; padding: 56px 0; border-bottom: 1px solid rgb(217 194 181 / .12); }
+  .trust b { display: block; font: 700 1.02rem/1.3 var(--tx-font-display); margin-bottom: 6px; }
+  .trust span { color: var(--tx-choc-200); font-size: .92rem; }
+  .foot-main { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 40px; padding: 64px 0 48px; }
+  .foot-main img { height: 36px; width: auto; display: block; margin-bottom: 18px; }
+  .foot-main .tagl { font: 700 1.05rem/1.3 var(--tx-font-display); margin: 0 0 12px; }
+  .foot-main .desc { color: var(--tx-choc-200); font-size: .92rem; margin: 0 0 18px; max-width: 38ch; }
+  .slogan { font: 600 .7rem/1 var(--tx-font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--tx-choc-300); }
+  .foot-main h3 { font: 600 .72rem/1 var(--tx-font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--tx-choc-300); margin: 6px 0 18px; }
+  .foot-main ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 11px; font-size: .92rem; }
+  .foot-main a { text-decoration: none; color: var(--tx-cream-100); opacity: .88; }
+  .offices { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; padding: 32px 0; border-top: 1px solid rgb(217 194 181 / .12); border-bottom: 1px solid rgb(217 194 181 / .12); font-size: .92rem; color: var(--tx-choc-200); }
+  .offices b { display: block; color: var(--tx-cream-100); font-weight: 600; margin-bottom: 4px; }
+  .bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 28px; font-size: .85rem; color: var(--tx-choc-300); gap: 16px; }
+  .bottom .mk { width: 54px; height: 33px; }
+
+  /* ---------- Route rail (desktop) ---------- */
+  .rail { position: absolute; top: 0; right: 28px; width: 20px; z-index: 20; pointer-events: none; }
+  .rail .line { position: absolute; left: 9px; width: 0; border-left: 2px dashed rgb(156 115 96 / .55); }
+  .rail a { position: absolute; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--tx-cream-100); border: 2px solid var(--tx-choc-400); pointer-events: auto; }
+  .rail a.done { background: var(--tx-choc-400); }
+  .rail a.on { width: 34px; height: 34px; left: -7px; margin-top: -10px; background: var(--tx-orange-500); border: 0; display: grid; place-items: center; color: var(--tx-choc-950); box-shadow: 0 0 0 4px rgb(244 136 0 / .2); }
+  .rail a.on svg { width: 19px; height: 19px; }
+  .rail a .lb { position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 600 .68rem/1 var(--tx-font-mono); letter-spacing: .08em; text-transform: uppercase; background: var(--tx-choc-950); color: var(--tx-cream-100); padding: 6px 8px; border-radius: 4px; display: none; }
+  .rail a.on .lb { display: block; }
+
+  /* ---------- Mobile (≤ 760 px) ---------- */
+  @media (max-width: 760px) {
+    .wrap { padding: 0 16px; }
+    .util, .nav, .hdr .right .tx-btn, .rail { display: none; }
+    .hdr { position: sticky; top: 0; z-index: 30; background: var(--tx-choc-950); }
+    .hdr .wrap { height: 64px; }
+    .hdr .logo img { height: 28px; }
+    .menu-btn { display: grid; }
+    .progress { display: block; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; background: rgb(217 194 181 / .15); }
+    .progress i { position: absolute; left: 0; top: 0; bottom: 0; width: 22%; background: var(--tx-orange-500); }
+    .progress b { position: absolute; top: -10px; left: 22%; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%; background: var(--tx-orange-500); color: var(--tx-choc-950); display: grid; place-items: center; }
+    .progress b svg { width: 14px; height: 14px; }
+    .ch { padding: 72px 0; }
+    .ch .grid, .ch.L .grid, .ch.wide-lane .grid, .s-hero .grid, .s-bike .grid, .s-contact .grid { grid-template-columns: 1fr; grid-template-areas: "intro" "lane" "rest"; gap: 28px; }
+    .lane, .s-hero .lane { min-height: 0; height: 250px; }
+    .guides .lane { outline-offset: 4px; }
+    .guides .lane::before { top: 6px; left: 6px; }
+    .guides .tag { left: 16px; top: 14px; }
+    .s-hero .stage { padding: 56px 0 120px; }
+    .hero-btns .tx-btn { flex: 1 1 100%; }
+    .pause { left: 16px; bottom: 20px; }
+    .hero-cap { display: none; }
+    .tx-track { padding-left: .8rem; }
+    .cards, .points, .contact-cols, .faq-grid, .posts, .trust, .offices { grid-template-columns: 1fr; }
+    .cards { gap: 14px; }
+    .dots { flex-direction: row; top: auto; bottom: 0; right: auto; left: 0; }
+    .tiles { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .tile { padding: 12px; } .tile b { font-size: 1rem; } .tile span { font-size: .75rem; }
+    .map { margin-top: 40px; aspect-ratio: 4 / 3; }
+    .map svg { width: 180%; margin-left: -55%; }
+    .faq-grid { gap: 24px; } .faq-intro { position: static; }
+    .blog-head { padding-top: 56px; flex-direction: column; align-items: start; }
+    .arrive { grid-template-columns: 1fr; gap: 24px; padding: 72px 0 48px; }
+    .arrive .lane { height: 220px; min-height: 0; order: 2; }
+    .trust { gap: 20px; padding: 40px 0; }
+    .foot-main { grid-template-columns: 1fr 1fr; gap: 32px 20px; padding: 48px 0 32px; }
+    .foot-main .brand { grid-column: 1 / -1; }
+    .bottom { flex-direction: column; align-items: start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Route rail (MOTION §7): unrolled here so every chapter dot sits beside its section; fixed to the viewport in the build -->
+<nav class="rail" aria-label="Page sections" id="rail"><span class="line"></span></nav>
+
+<!-- 0 · Hero + header (dark) -->
+<section class="s-hero tx-dark" id="door" data-ch="Your door">
+  <div class="util"><div class="wrap">
+    <span><svg class="tx-icon"><use href="#i-phone"/></svg>+237 651 05 93 45</span>
+    <span><svg class="tx-icon"><use href="#i-mail"/></svg>info@tanexsarl.com</span>
+    <span><svg class="tx-icon"><use href="#i-clock"/></svg>Open 9:00 AM – 4:00 PM</span>
+    <span class="push"><svg class="tx-icon"><use href="#i-pin"/></svg>Buea · Douala</span>
+  </div></div>
+  <header class="hdr"><div class="wrap">
+    <a class="logo" href="#door"><img src="../Public/brand/logo-wordmark-white-web.webp" width="446" height="112" alt="TanEx"></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#">Track</a><a href="#">Services<svg class="tx-icon"><use href="#i-chev"/></svg></a><a href="#">Ship<svg class="tx-icon"><use href="#i-chev"/></svg></a>
+      <a href="#">Network</a><a href="#">About</a><a href="#">Blog</a><a href="#">Contact</a>
+    </nav>
+    <div class="right">
+      <span class="lang"><b>EN</b> | FR</span>
+      <a class="tx-btn tx-btn--ghost tx-btn--sm" href="#">Get a Quote</a>
+      <button class="menu-btn" aria-label="Menu"><svg class="tx-icon"><use href="#i-menu"/></svg></button>
+    </div>
+  </div><div class="progress" aria-hidden="true"><i></i><b><svg class="tx-icon"><use href="#i-moto"/></svg></b></div></header>
+
+  <div class="stage">
+    <span class="tag">Ch 0 · Your door · 100 vh, not pinned · poster = globe</span>
+    <div class="wrap grid">
+      <div class="intro">
+        <p class="tx-eyebrow">Door-to-door · Cameroon &amp; worldwide</p>
+        <h1 class="tx-display">From your door <span class="l2"><span class="tx-em">to the world.</span></span></h1>
+        <p class="tx-lead">Same-day bike delivery across Buea, Limbe and Douala, trucks between cities, and air, sea, rail and road freight to anywhere you need to reach. One tracking ID, from pickup to proof of delivery.</p>
+        <label class="track-lbl" for="trk">Track a shipment</label>
+        <form class="tx-track" onsubmit="return false">
+          <svg class="tx-icon lead"><use href="#i-search"/></svg>
+          <input id="trk" placeholder="Enter your tracking ID, e.g. TX7K2M9P" autocomplete="off">
+          <button class="tx-btn tx-btn--primary">Track</button>
+        </form>
+      </div>
+      <div class="lane" data-lane="3D lane · globe → dive to the door">
+        <svg class="art globe-art" viewBox="0 0 400 400" aria-hidden="true">
+          <use href="#globe" x="30" y="40" width="340" height="340"/>
+          <use href="#mark" x="268" y="66" width="62" height="38"/>
+        </svg>
+      </div>
+      <div class="rest">
+        <div class="hero-btns">
+          <a class="tx-btn tx-btn--primary tx-btn--lg" href="#">Get a Quote</a>
+          <a class="tx-btn tx-btn--secondary tx-btn--lg" href="#">Book a bike delivery</a>
+        </div>
+        <ul class="facts">
+          <li><svg class="tx-icon"><use href="#i-check"/></svg>Live rider tracking in town</li>
+          <li><svg class="tx-icon"><use href="#i-check"/></svg>Photo proof of delivery</li>
+          <li><svg class="tx-icon"><use href="#i-check"/></svg>English &amp; French support</li>
+        </ul>
+      </div>
+    </div>
+    <svg class="mount" aria-hidden="true"><use href="#mount" width="100%" height="100%"/></svg>
+    <button class="pause"><svg class="tx-icon"><use href="#i-pause"/></svg>Pause motion</button>
+    <span class="hero-cap caption">It starts at your door.</span>
+  </div>
+</section>
+
+<!-- 1 · Services (lane left, road) -->
+<section class="ch L wide-lane s-services" id="services" data-ch="Services">
+  <span class="tag">Ch 1 · Services · pinned 250 vh (mobile ≈ 150)</span>
+  <div class="wrap grid">
+    <div class="intro">
+      <p class="tx-eyebrow">Our services</p>
+      <h2 class="tx-h1 chap-h">Every way to move it, under <span class="tx-em">one roof</span></h2>
+      <p class="tx-lead">From a document across Buea to a container across the ocean, choose the mode that fits your cargo. We handle the booking, the paperwork and every hand-off.</p>
+    </div>
+    <div class="lane" data-lane="3D lane · bike rides the road">
+      <svg class="art" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <path d="M200 0C320 120 320 220 200 320S80 520 200 620 320 820 200 900" fill="none" stroke="#EDE1DA" stroke-width="54" stroke-linecap="round"/>
+        <path d="M200 0C320 120 320 220 200 320S80 520 200 620 320 820 200 900" fill="none" stroke="#F48800" stroke-width="2.5" stroke-dasharray="10 12"/>
+        <use href="#bike-side" x="40" y="380" width="220" height="143"/>
+      </svg>
+      <div class="dots" aria-hidden="true"><span>1</span><span>2</span><span class="on">3</span><span>4</span><span>5</span><span>6</span></div>
+    </div>
+    <div class="rest">
+      <div class="cards">
+        <article class="tx-card"><div class="tx-card__icon"><svg class="tx-icon"><use href="#i-plane"/></svg></div><h3>Air freight</h3><p>Fast international shipping for documents, parcels and urgent cargo, with customs documents prepared for you.</p><a class="tx-link" href="#">Air freight<svg class="tx-icon"><use href="#i-arrow"/></svg></a></article>
+        <article class="tx-card"><div class="tx-card__icon"><svg class="tx-icon"><use href="#i-ship"/></svg></div><h3>Maritime freight</h3><p>Full (FCL) and shared (LCL) container shipping for heavier and larger loads, through Cameroon's ports.</p><a class="tx-link" href="#">Maritime freight<svg class="tx-icon"><use href="#i-arrow"/></svg></a></article>
+        <article class="tx-card tx-card--lit"><div class="tx-card__icon"><svg class="tx-icon"><use href="#i-train"/></svg></div><h3>Rail freight</h3><p>Cost-effective inland transport for heavy and bulk cargo on routes served by rail.</p><a class="tx-link" href="#">Rail freight<svg class="tx-icon"><use href="#i-arrow"/></svg></a></article>
+        <article class="tx-card"><div class="tx-card__icon"><svg class="tx-icon"><use href="#i-truck"/></svg></div><h3>Road freight</h3><p>Trucks and vans between cities in Cameroon and across borders in the region.</p><a class="tx-link" href="#">Road freight<svg class="tx-icon"><use href="#i-arrow"/></svg></a></article>
+        <article class="tx-card"><div class="tx-card__icon"><svg class="tx-icon"><use href="#i-warehouse"/></svg></div><h3>Warehousing</h3><p>Secure storage, stock checks, packing and dispatch when you're ready.</p><a class="tx-link" href="#">Warehousing<svg class="tx-icon"><use href="#i-arrow"/></svg></a></article>
+        <article class="tx-card"><div class="tx-card__icon"><svg class="tx-icon"><use href="#i-moto"/></svg></div><h3>Local delivery</h3><p>Bike couriers across Buea, Limbe and Douala, with live tracking and photo proof.</p><a class="tx-link" href="#">Book a bike delivery<svg class="tx-icon"><use href="#i-arrow"/></svg></a></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Bike delivery (dark, lane right) -->
+<section class="ch s-bike tx-dark" id="in-town" data-ch="In town">
+  <span class="tag">Ch 2 · In town · pinned 200 vh (mobile ≈ 120, 3 fixed angles)</span>
+  <div class="wrap grid">
+    <div class="intro">
+      <p class="tx-eyebrow">In-town delivery</p>
+      <h2>Across town, while you <span class="tx-em">watch.</span></h2>
+      <p class="tx-lead">Need something taken from one side of Buea to the other? A TanEx rider collects it from your door and takes it straight to the recipient. You follow the ride live on the map, and you get a photo and a name when it's delivered.</p>
+    </div>
+    <div class="lane" data-lane="3D lane · bike centre stage, camera orbits">
+      <div class="orbit"></div>
+      <svg class="art bike-art" viewBox="0 0 360 300" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><use href="#bike-3q" width="360" height="300"/></svg>
+    </div>
+    <div class="rest">
+      <div class="steps" aria-label="Delivery steps">
+        <span class="tx-chip tx-chip--active tx-chip--plain">Picked up</span><span class="ln"></span>
+        <span class="tx-chip tx-chip--outline tx-chip--plain">On the way</span><span class="ln"></span>
+        <span class="tx-chip tx-chip--outline tx-chip--plain">Delivered</span>
+      </div>
+      <p class="price">Anywhere in Buea from <span class="mono">500 FCFA.</span></p>
+      <ul class="points">
+        <li><span class="ic"><svg class="tx-icon"><use href="#i-users"/></svg></span>Riders in Buea, Limbe and Douala</li>
+        <li><span class="ic"><svg class="tx-icon"><use href="#i-nav"/></svg></span>Live location while on the way</li>
+        <li><span class="ic"><svg class="tx-icon"><use href="#i-wallet"/></svg></span>Pay cash on delivery or by Mobile Money</li>
+        <li><span class="ic"><svg class="tx-icon"><use href="#i-camera"/></svg></span>Photo proof on every delivery</li>
+      </ul>
+      <div class="cta-row">
+        <a class="tx-btn tx-btn--primary tx-btn--lg" href="#">Book a bike delivery</a>
+        <a class="tx-link" href="#">How pricing works<svg class="tx-icon"><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Truck (cream, lane left) -->
+<section class="ch L s-truck" id="city-to-city" data-ch="City to city">
+  <span class="tag">Ch 3 · City to city · pinned 150 vh (mobile ≈ 90)</span>
+  <div class="wrap grid">
+    <div class="intro">
+      <p class="tx-eyebrow">City to city</p>
+      <h2 class="tx-h1 chap-h">Bigger loads, between <span class="tx-em">cities.</span></h2>
+      <p class="tx-lead">When it won't fit on a bike, our trucks and vans carry it between Limbe, Buea, Douala and beyond. We collect, load with care and deliver to the door, with the same tracking ID all the way.</p>
+    </div>
+    <div class="lane" data-lane="3D lane · truck drives the route">
+      <svg class="art" viewBox="0 0 500 460" aria-hidden="true" style="--mount:#D9C2B5;--mount2:#EDE1DA">
+        <use href="#mount" x="40" y="40" width="300" height="110"/>
+        <path d="M80 360C110 280 140 220 180 180S330 250 380 300 450 250 480 200" fill="none" stroke="#D9C2B5" stroke-width="34" stroke-linecap="round"/>
+        <path d="M80 360C110 280 140 220 180 180S330 250 380 300" fill="none" stroke="#2A1B16" stroke-width="2.5" stroke-dasharray="8 9"/>
+        <path d="M380 300C410 330 450 250 480 200" fill="none" stroke="#9C7360" stroke-width="2.5" stroke-dasharray="3 7"/>
+        <use href="#truck-side" x="214" y="166" width="150" height="75" transform="rotate(20 289 203)"/>
+        <g font-family="JetBrains Mono" font-weight="600" font-size="13" letter-spacing="1.2" fill="#2A1B16">
+          <circle cx="80" cy="360" r="11" fill="#2A1B16"/><path d="M75 360l4 4 7-8" stroke="#FBF6EC" stroke-width="2" fill="none"/><text x="58" y="395">LIMBE</text>
+          <circle cx="180" cy="180" r="11" fill="#2A1B16"/><path d="M175 180l4 4 7-8" stroke="#FBF6EC" stroke-width="2" fill="none"/><text x="158" y="160">BUEA</text>
+          <circle cx="380" cy="300" r="12" fill="#F48800"/><circle cx="380" cy="300" r="18" fill="none" stroke="#F48800" stroke-width="1.5"/><text x="350" y="340">DOUALA</text>
+          <text x="392" y="176" fill="#7B5545">AND BEYOND</text>
+        </g>
+      </svg>
+      <p class="caption" style="position:absolute;left:0;bottom:-6px;margin:0">Too big for the bike? The truck takes it from here.</p>
+    </div>
+    <div class="rest">
+      <ul class="checks">
+        <li><svg class="tx-icon"><use href="#i-check"/></svg>Furniture, stock and pallets</li>
+        <li><svg class="tx-icon"><use href="#i-check"/></svg>Collection and delivery at both ends</li>
+        <li><svg class="tx-icon"><use href="#i-check"/></svg>Tracked city to city</li>
+      </ul>
+      <a class="tx-btn tx-btn--primary tx-btn--lg" href="#">Get a truck quote</a>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Global network (dark, lane right, then the real map) -->
+<section class="ch s-network tx-dark" id="world" data-ch="The world">
+  <span class="tag">Ch 4 · The world · pinned 150 vh, then releases to the map</span>
+  <div class="wrap grid">
+    <div class="intro">
+      <p class="tx-eyebrow">Our network</p>
+      <h2 class="tx-h1 chap-h">From Buea to the world's trade <span class="tx-em">hubs</span></h2>
+      <p class="tx-lead">Our base is in Buea, with the port and airport of Douala as our gateway to the world. From there we connect to the main hubs of Europe, Africa, the Middle East, Asia and the Americas.</p>
+    </div>
+    <div class="lane" data-lane="3D lane · globe, plane flies the arc">
+      <svg class="art globe-art" viewBox="0 0 400 400" aria-hidden="true">
+        <use href="#globe" x="20" y="20" width="360" height="360"/>
+        <use href="#mark" x="170" y="62" width="48" height="29"/>
+      </svg>
+    </div>
+    <div class="rest">
+      <ul class="legend">
+        <li><span class="lg-base"></span>TanEx base</li>
+        <li><span class="lg-gw"></span>Gateway</li>
+        <li><span class="lg-lane"></span>Trade lane</li>
+      </ul>
+      <a class="tx-btn tx-btn--ghost" href="#">See our network<svg class="tx-icon"><use href="#i-arrow"/></svg></a>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="map" role="img" aria-label="Network map">
+      <svg viewBox="0 0 1000 440" aria-hidden="true">
+        <g fill="url(#tx-dots)">
+          <path d="M120 60 300 50 340 90 300 150 260 190 230 220 200 200 170 160 120 130 80 90Z"/>
+          <path d="M280 240 340 250 370 290 350 350 320 410 300 420 295 360 275 300Z"/>
+          <path d="M470 70 560 60 590 90 560 130 520 140 480 130 465 105Z"/>
+          <path d="M470 160 560 150 600 190 620 220 590 260 580 320 550 370 525 370 510 320 500 270 470 240 455 200Z"/>
+          <path d="M580 50 850 50 900 90 880 140 820 180 780 210 720 200 680 190 640 170 600 140 590 100Z"/>
+          <path d="M690 190 720 200 705 250Z"/>
+          <path d="M820 300 900 290 920 340 870 370 820 350Z"/>
+        </g>
+        <g fill="none" stroke="#F48800" stroke-width="1.8" stroke-dasharray="5 6">
+          <path d="M527 250Q510 160 506 104"/><path d="M527 250Q600 190 653 181"/><path d="M527 250Q700 120 836 161"/>
+          <path d="M527 250Q400 150 294 129"/><path d="M527 250Q450 300 372 339"/><path d="M527 250Q560 300 578 348"/>
+        </g>
+        <g fill="#EDDFC4"><circle cx="506" cy="104" r="4"/><circle cx="653" cy="181" r="4"/><circle cx="836" cy="161" r="4"/><circle cx="294" cy="129" r="4"/><circle cx="372" cy="339" r="4"/><circle cx="578" cy="348" r="4"/></g>
+        <circle cx="521" cy="244" r="4" fill="#EDDFC4"/>
+        <circle cx="527" cy="250" r="6" fill="#F48800"/><circle cx="527" cy="250" r="11" fill="none" stroke="#F48800" stroke-width="1.5"/>
+        <g class="region"><text x="476" y="52">Europe</text><text x="640" y="214">Middle East</text><text x="820" y="200">Asia</text><text x="196" y="250">Americas</text><text x="470" y="400">Africa</text></g>
+      </svg>
+      <div class="zoom" aria-hidden="true"><span>+</span><span>−</span></div>
+      <span class="map-note">Existing Leaflet network map, restyled · lanes illustrative until the owner confirms CONTENT §9 (#105)</span>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · Smart labels (cream, lane left) -->
+<section class="ch L s-labels" id="label" data-ch="Smart label">
+  <span class="tag">Ch 5 · Smart label · pinned 120 vh (mobile ≈ 70)</span>
+  <div class="wrap grid">
+    <div class="intro">
+      <p class="tx-eyebrow">Smart labels</p>
+      <h2 class="tx-h1 chap-h">One label. Every <span class="tx-em">checkpoint.</span></h2>
+      <p class="tx-lead">Every TanEx parcel carries a barcode label linked to its tracking ID. Each scan, at pickup, at our office, at the gateway, through customs and at the door, updates your tracking page.</p>
+    </div>
+    <div class="lane" data-lane="3D lane · parcel turns to its label">
+      <svg class="art" viewBox="0 0 300 260" aria-hidden="true"><use href="#parcel" y="10" width="300" height="240"/></svg>
+      <span class="scan" aria-hidden="true"></span>
+      <p class="caption" style="position:absolute;left:0;bottom:-6px;margin:0">Every step, one label: TX7K2M9P.</p>
+    </div>
+    <div class="rest">
+      <div class="tiles">
+        <div class="tile"><b>8-character</b><span>Tracking ID</span></div>
+        <div class="tile"><b>Every piece</b><span>Individually labelled</span></div>
+        <div class="tile"><b>Live</b><span>Status updates</span></div>
+      </div>
+      <div class="label" aria-label="Example label">
+        <div class="lh"><span>TANEX</span><img src="../Public/brand/mark.png" alt="" width="154" height="154"></div>
+        <dl>
+          <div><dt>ORIGIN</dt><dd>DLA (DOUALA)</dd></div>
+          <div><dt>DESTINATION</dt><dd>CDG (PARIS)</dd></div>
+          <div><dt>WEIGHT</dt><dd>12.5 KG</dd></div>
+          <div><dt>SERVICE</dt><dd>AIR FREIGHT</dd></div>
+        </dl>
+        <div class="bc"><svg id="barcode" viewBox="0 0 300 64" preserveAspectRatio="none" aria-hidden="true"></svg><p>TRACKING ID: TX7K2M9P</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · Get in touch (lane right, bike parks) -->
+<section class="ch s-contact" id="contact" data-ch="Contact">
+  <span class="tag">Ch 6 · Contact · not pinned · Stage still while typing</span>
+  <div class="wrap grid">
+    <div class="intro">
+      <h2 class="tx-h1 chap-h">Get in touch <span class="tx-em">with us</span></h2>
+      <p class="tx-lead">Questions about a delivery, a price or a partnership? Send us a message and the TanEx team will get back to you.</p>
+    </div>
+    <div class="lane" data-lane="3D lane · bike parks, idle wheel">
+      <svg class="art" viewBox="0 0 400 520" aria-hidden="true"><use href="#bike-side" x="0" y="300" width="400" height="260"/></svg>
+    </div>
+    <div class="rest">
+      <div class="contact-cols">
+        <ul class="channels">
+          <li><span class="ic"><svg class="tx-icon"><use href="#i-phone"/></svg></span><div><small>Call</small><strong>+237 651 05 93 45</strong></div></li>
+          <li><span class="ic"><svg class="tx-icon"><use href="#i-phone"/></svg></span><div><small>Call</small><strong>+237 691 19 46 63</strong></div></li>
+          <li><span class="ic"><svg class="tx-icon"><use href="#i-mail"/></svg></span><div><small>Email</small><strong>info@tanexsarl.com</strong></div></li>
+          <li><span class="ic"><svg class="tx-icon"><use href="#i-pin"/></svg></span><div><small>Visit us in Buea</small><strong>Check Point, opposite Molyko Omnisport Stadium, Buea, Cameroon</strong></div></li>
+          <li><span class="ic"><svg class="tx-icon"><use href="#i-pin"/></svg></span><div><small>Visit us in Douala</small><strong>Kotto, La Canadienne, Douala, Cameroon</strong></div></li>
+          <li><span class="ic"><svg class="tx-icon"><use href="#i-clock"/></svg></span><div><small>Open</small><strong>9:00 AM – 4:00 PM</strong></div></li>
+        </ul>
+        <form class="form" onsubmit="return false">
+          <div class="tx-field"><label class="tx-label" for="c-n">Name</label><input class="tx-input" id="c-n"></div>
+          <div class="tx-field"><label class="tx-label" for="c-p">Phone or email</label><input class="tx-input" id="c-p"></div>
+          <div class="tx-field"><label class="tx-label" for="c-m">Message</label><textarea class="tx-input" id="c-m"></textarea></div>
+          <button class="tx-btn tx-btn--secondary tx-btn--lg">Send message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · FAQ + Blog (no lane; Stage dimmed) -->
+<section class="ch s-faq" id="faq">
+  <span class="tag">Ch 7 · FAQ + Blog · not pinned · Stage dimmed / hidden on mobile</span>
+  <div class="wrap faq-grid">
+    <div class="faq-intro">
+      <p class="tx-eyebrow">Common questions</p>
+      <h2 class="tx-h1 chap-h">Frequently asked questions</h2>
+    </div>
+    <div>
+      <details open><summary>Do I need an account to track a shipment?<svg class="tx-icon"><use href="#i-plus"/></svg></summary><p>No. Enter your 8-character tracking ID (for example TX7K2M9P) on the Track page. Personal details are hidden for privacy.</p></details>
+      <details><summary>Where do you deliver in town?<svg class="tx-icon"><use href="#i-plus"/></svg></summary><p>Our riders deliver within Buea, Limbe and Douala, for example from one Buea neighbourhood to another. Choose your city and areas when you book to see the price.</p></details>
+      <details><summary>Can I follow my rider live?<svg class="tx-icon"><use href="#i-plus"/></svg></summary><p>Yes. Once your parcel is picked up, your tracking page shows the rider's position on the map until it's delivered.</p></details>
+      <details><summary>How can I pay?<svg class="tx-icon"><use href="#i-plus"/></svg></summary><p>Pay in cash to the rider, or by MTN Mobile Money or Orange Money to the TanEx company accounts shown when you book. Other payment options are available for international shipments.</p></details>
+      <details><summary>Do you ship internationally?<svg class="tx-icon"><use href="#i-plus"/></svg></summary><p>Yes. We ship worldwide by air, sea, rail and road, and prepare the export documents with you.</p></details>
+      <details><summary>Can I write to you in French?<svg class="tx-icon"><use href="#i-plus"/></svg></summary><p>Yes. Our team works in English and French.</p></details>
+    </div>
+  </div>
+</section>
+<section class="ch s-blog" id="blog">
+  <div class="wrap">
+    <div class="blog-head">
+      <div><p class="tx-eyebrow">From the blog</p><h2 class="tx-h1 chap-h" style="margin:0">News and shipping tips</h2></div>
+      <a class="tx-link" href="#">All articles<svg class="tx-icon"><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="posts" aria-hidden="true">
+      <div class="post"><div class="img">Cover image</div><div class="body"><div class="bar s"></div><div class="bar t"></div><div class="bar t m"></div><div class="bar"></div></div></div>
+      <div class="post"><div class="img">Cover image</div><div class="body"><div class="bar s"></div><div class="bar t"></div><div class="bar t m"></div><div class="bar"></div></div></div>
+      <div class="post"><div class="img">Cover image</div><div class="body"><div class="bar s"></div><div class="bar t"></div><div class="bar t m"></div><div class="bar"></div></div></div>
+    </div>
+    <p class="caption blog-note">Latest 3 published posts in the current language. The section is hidden when there are none: no sample posts.</p>
+  </div>
+</section>
+
+<!-- 8 · Footer (dark, arrival at a door) -->
+<footer class="s-footer tx-dark" id="delivered" data-ch="Delivered">
+  <div class="wrap">
+    <div class="arrive">
+      <div class="lane" data-lane="3D lane · bike stops at the door">
+        <svg class="art door-art" viewBox="0 0 440 300" aria-hidden="true">
+          <use href="#door" x="250" y="20" width="190" height="280"/>
+          <use href="#bike-side" x="0" y="118" width="280" height="182"/>
+          <use href="#parcel" x="292" y="246" width="56" height="45"/>
+        </svg>
+      </div>
+      <div>
+        <h2><span class="tx-em">Delivered.</span></h2>
+        <p>From your door to the world, and back to a door.</p>
+      </div>
+    </div>
+    <div class="trust">
+      <div><b>Door to world.</b><span>Across town, across Cameroon, across the world.</span></div>
+      <div><b>Live tracking.</b><span>Follow your rider on the map in town.</span></div>
+      <div><b>Photo proof.</b><span>Every delivery recorded with a photo and a name.</span></div>
+      <div><b>English &amp; French.</b><span>Our team serves you in both.</span></div>
+    </div>
+    <div class="foot-main">
+      <div class="brand">
+        <img src="../Public/brand/logo-wordmark-white-web.webp" width="446" height="112" alt="TanEx">
+        <p class="tagl">From Your Door to the World</p>
+        <p class="desc">Bike delivery across town, trucks between cities, and air, sea, rail and road freight to the world, with one tracking ID from the first door to the last.</p>
+        <span class="slogan">Saving Situations</span>
+      </div>
+      <div><h3>Services</h3><ul><li><a href="#">Air freight</a></li><li><a href="#">Maritime freight</a></li><li><a href="#">Rail freight</a></li><li><a href="#">Road freight</a></li><li><a href="#">Warehousing</a></li><li><a href="#">Local delivery</a></li></ul></div>
+      <div><h3>Company</h3><ul><li><a href="#">About TanEx</a></li><li><a href="#">Our network</a></li><li><a href="#">Blog</a></li><li><a href="#">Contact</a></li></ul></div>
+      <div><h3>Support</h3><ul><li><a href="#">Track a shipment</a></li><li><a href="#">Book a bike delivery</a></li><li><a href="#">Help centre</a></li><li><a href="#">Get a Quote</a></li></ul></div>
+      <div><h3>Legal</h3><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Shipping Terms</a></li><li><a href="#">Cookie Policy</a></li><li><a href="#">Accessibility</a></li></ul></div>
+    </div>
+    <div class="offices">
+      <div><b>Buea (head office)</b>Check Point, opposite Molyko Omnisport Stadium, Buea, Cameroon</div>
+      <div><b>Douala</b>Kotto, La Canadienne, Douala, Cameroon</div>
+      <div><b>Call +237 651 05 93 45 · +237 691 19 46 63</b>Open 9:00 AM – 4:00 PM</div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 Tanex SARL. All rights reserved.</span>
+      <svg class="mk" aria-hidden="true"><use href="#mark"/></svg>
+      <span class="lang"><b>EN</b> | FR</span>
+    </div>
+  </div>
+</footer>
+
+<script src="sprite.js"></script>
+<script>
+(function () {
+  var html = document.documentElement;
+  if (/[?&]guides=0/.test(location.search)) html.classList.remove('guides');
+
+  /* Barcode for the demo label (illustrative; the build uses jsbarcode with the real ID) */
+  var bc = document.getElementById('barcode'), s = 'TX7K2M9P', x = 6, out = '';
+  for (var i = 0; i < 46; i++) {
+    var c = s.charCodeAt(i % s.length) + i * 7, w = 1 + (c % 3) * 1.6;
+    if (i % 2 === 0) out += '<rect x="' + x.toFixed(1) + '" y="0" width="' + w.toFixed(1) + '" height="64" fill="#1C120E"/>';
+    x += w + 1.4 + ((c >> 2) % 2) * 1.8;
+  }
+  bc.setAttribute('viewBox', '0 0 ' + (x + 6).toFixed(0) + ' 64'); bc.innerHTML = out;
+
+  /* Route rail: one dot per chapter, beside its section. Current chapter for this mock: "In town". */
+  var rail = document.getElementById('rail'), line = rail.querySelector('.line');
+  var chapters = [].slice.call(document.querySelectorAll('[data-ch]'));
+  function layoutRail() {
+    [].slice.call(rail.querySelectorAll('a')).forEach(function (a) { a.remove(); });
+    var tops = chapters.map(function (el) { return el.offsetTop + (el.id === 'door' ? 220 : 140); });
+    line.style.top = tops[0] + 'px'; line.style.height = (tops[tops.length - 1] - tops[0]) + 'px';
+    chapters.forEach(function (el, i) {
+      var a = document.createElement('a'); a.href = '#' + el.id; a.style.top = tops[i] + 'px';
+      a.className = i < 2 ? 'done' : i === 2 ? 'on' : '';
+      a.innerHTML = (i === 2 ? '<svg class="tx-icon"><use href="#i-moto"/></svg>' : '') + '<span class="lb">' + el.dataset.ch + '</span>';
+      a.setAttribute('aria-label', el.dataset.ch); rail.appendChild(a);
+    });
+  }
+
+  /* Mobile progress bar follows scroll (in the phone preview) */
+  var bar = document.querySelector('.progress i'), bike = document.querySelector('.progress b');
+  function onScroll() {
+    var p = Math.min(1, scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight));
+    var v = (4 + p * 92).toFixed(1) + '%'; bar.style.width = v; bike.style.left = v;
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+
+  /* Report height to direction.html (iframe preview) and accept the guides toggle */
+  function report() { layoutRail(); onScroll(); parent !== window && parent.postMessage({ type: 'tx-height', h: document.documentElement.scrollHeight }, '*'); }
+  addEventListener('message', function (e) { if (e.data && e.data.type === 'tx-guides') { html.classList.toggle('guides', !!e.data.on); report(); } });
+  addEventListener('load', report); addEventListener('resize', report);
+  if (document.fonts) document.fonts.ready.then(report);
+})();
+</script>
+</body>
+</html>
