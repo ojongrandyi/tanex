@@ -127,6 +127,10 @@
   gap: 1.25rem;
 }
 
+.settings-form-wrapper[hidden] {
+  display: none;
+}
+
 .settings-card-section {
   background: #ffffff;
   border: 1px solid #e2e8f0;

@@ -46,6 +46,36 @@ export interface UserSession {
   current: boolean;
 }
 
+/** One outbox row (GET /api/mail/status); bodies are never sent to the browser. */
+export interface OutboxItem {
+  id: string;
+  to: string;
+  subject: string;
+  templateKey: string;
+  locale: string;
+  status: 'QUEUED' | 'SENDING' | 'SENT' | 'FAILED';
+  attempts: number;
+  lastError: string | null;
+  relatedType: string | null;
+  relatedId: string | null;
+  createdAt: number;
+  sentAt: number | null;
+  nextAttemptAt: number | null;
+}
+
+export interface MailStatus {
+  enabled: boolean;
+  host: string | null;
+  port: number | null;
+  secure: boolean | null;
+  user: string | null;
+  from: string | null;
+  replyTo: string | null;
+  summary: { queued: number; failed: number; sentLast24h: number; lastSentAt: number | null };
+  failed: OutboxItem[];
+  recent: OutboxItem[];
+}
+
 /** A staff account as the Users screen sees it (GET /api/users). */
 export interface StaffUser {
   id: string;
@@ -297,6 +327,41 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
+    });
+    await handleResponse<unknown>(res);
+  },
+
+  /** Sets a new password with the token from an emailed reset link (B.6). Errors carry `code`. */
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const res = await fetchApi(`${API_BASE}/auth/reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify({ token, newPassword })
+    });
+    await handleResponse<unknown>(res);
+  },
+
+  // Settings → Email (NOTIFICATIONS_SPEC §3): status needs settings.view, test/retry settings.manage.
+  async getMailStatus(): Promise<MailStatus> {
+    const res = await fetchApi(`${API_BASE}/mail/status`, { credentials: 'include', cache: 'no-store' });
+    return handleResponse<MailStatus>(res);
+  },
+
+  async sendTestEmail(to?: string): Promise<{ id: string; sent: boolean; error: string | null }> {
+    const res = await fetchApi(`${API_BASE}/mail/test`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(to ? { to } : {})
+    });
+    return handleResponse<{ id: string; sent: boolean; error: string | null }>(res);
+  },
+
+  async retryEmail(id: string): Promise<void> {
+    const res = await fetchApi(`${API_BASE}/mail/outbox/${encodeURIComponent(id)}/retry`, {
+      method: 'POST',
+      credentials: 'include'
     });
     await handleResponse<unknown>(res);
   },

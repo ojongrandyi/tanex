@@ -13,6 +13,10 @@ import {
 } from '../auth/passwords.js';
 import { getRequestAuth, isCourierOnly, loadAuth, resetRequestAuth, type RequestAuth } from '../auth/permissions.js';
 import { COURIER_SESSION_MS, SESSION_COOKIE, STAFF_SESSION_MS } from '../auth/sessionStore.js';
+import { consumeResetToken, createResetToken, findResetUser, findValidToken } from '../auth/passwordReset.js';
+import { mailEnabled } from '../mail/mailer.js';
+import { queueEmail } from '../mail/outbox.js';
+import { passwordResetUrl } from '../mail/urls.js';
 
 export const MAX_FAILED_LOGINS = 5;
 export const LOCKOUT_MS = 15 * 60 * 1000;
@@ -20,17 +24,18 @@ export const LOCKOUT_MS = 15 * 60 * 1000;
 // Same text for every failure (unknown account, wrong password, locked, disabled), so the
 // answer never tells a guesser which part was wrong or that an account exists.
 const SIGN_IN_FAILED = 'Incorrect sign-in details.';
+// One answer for an unknown, used, replaced or expired reset link, or a disabled account.
+const RESET_LINK_INVALID = 'This reset link is invalid or has expired.';
 
 export const DISPLAY_NAME_MAX = 80;
 const LOCALES: readonly string[] = ['en', 'fr'];
 
 /**
- * Whether the sign-in screen may offer "Forgot password?". The reset email needs the mailer and
- * the forgot/reset routes (tracker B.6); until those exist this stays false, so the link is never
- * shown without a working reset behind it. B.6 replaces it with "SMTP is configured".
+ * Whether the sign-in screen may offer "Forgot password?": only when email is configured
+ * (SMTP_HOST), so the link is never shown without a working reset behind it.
  */
 export function passwordResetAvailable(): boolean {
-  return false;
+  return mailEnabled();
 }
 
 interface LoginRow {
@@ -75,6 +80,23 @@ export function createAuthRouter(): Router {
     standardHeaders: true,
     legacyHeaders: false,
     message: { success: false, error: 'Too many login attempts. Try again in a few minutes.' }
+  });
+
+  // Reset links: per IP, 10 requests and 10 new-password attempts per hour. The per-account
+  // limit (passwordReset.ts) covers one inbox being flooded from many addresses.
+  const forgotLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many attempts. Please wait a while and try again.' }
+  });
+  const resetLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many attempts. Please wait a while and try again.' }
   });
 
   // POST /api/auth/login  { identifier, password }
@@ -236,6 +258,75 @@ export function createAuthRouter(): Router {
     audit(req, 'auth.sessions_revoke_others', 'user', auth.user.id,
       `Signed out on other devices (${count} session${count === 1 ? '' : 's'})`);
     res.json({ success: true, data: { signedOut: count } });
+  });
+
+  // POST /api/auth/forgot  { email }: emails a reset link to an active account with that email.
+  // Always the same answer (and the work happens after it is sent), so the reply and its timing
+  // never tell whether an account exists. Does nothing while email is off.
+  router.post('/forgot', forgotLimiter, (req: Request, res: Response) => {
+    const { email } = req.body || {};
+    res.json({ success: true });
+
+    try {
+      if (!mailEnabled() || typeof email !== 'string' || email.length > 254) return;
+      const id = normalizeIdentifier(email);
+      if (!id || id.kind !== 'email') return;
+      const user = findResetUser(db, id.value);
+      if (!user) {
+        audit(req, 'auth.password_reset_request', 'user', null,
+          'Password reset requested for an address with no active account', undefined, undefined,
+          { actor: { userId: null, name: 'anonymous' } });
+        return;
+      }
+      const actor = { userId: user.id, name: user.display_name };
+      const token = createResetToken(db, user.id);
+      if (!token) {
+        audit(req, 'auth.password_reset_request', 'user', user.id,
+          'Password reset requested; no email sent (hourly limit reached)', undefined, undefined, { actor });
+        return;
+      }
+      const queued = queueEmail({
+        to: user.email,
+        template: 'auth.reset',
+        locale: user.locale === 'fr' ? 'fr' : 'en',
+        vars: { url: passwordResetUrl(token) },
+        related: { type: 'user', id: user.id }
+      });
+      audit(req, 'auth.password_reset_request', 'user', user.id,
+        queued ? 'Password reset link emailed' : 'Password reset requested; the email could not be queued',
+        undefined, undefined, { actor });
+    } catch (err) {
+      console.error('[auth] forgot-password failed:', err);
+    }
+  });
+
+  // POST /api/auth/reset  { token, newPassword }: sets a new password with an emailed link.
+  // Single use; signs the account out everywhere; the user then signs in with the new password.
+  router.post('/reset', resetLimiter, async (req: Request, res: Response) => {
+    try {
+      const { token, newPassword } = req.body || {};
+      if (typeof token !== 'string' || typeof newPassword !== 'string' || !newPassword) {
+        return res.status(400).json({ success: false, code: 'INVALID_TOKEN', error: RESET_LINK_INVALID });
+      }
+      const user = findValidToken(db, token);
+      if (!user) return res.status(400).json({ success: false, code: 'INVALID_TOKEN', error: RESET_LINK_INVALID });
+
+      const problem = checkNewPassword(newPassword, { email: user.email, phone: user.phone });
+      if (problem) {
+        return res.status(400).json({ success: false, code: problem.toUpperCase(), error: PASSWORD_PROBLEM_MESSAGES[problem] });
+      }
+
+      const hash = await hashPassword(newPassword);
+      if (!consumeResetToken(db, token, user.id, hash)) {
+        return res.status(400).json({ success: false, code: 'INVALID_TOKEN', error: RESET_LINK_INVALID });
+      }
+      audit(req, 'auth.password_reset', 'user', user.id, 'Password reset with an emailed link; signed out everywhere',
+        undefined, undefined, { actor: { userId: user.id, name: user.display_name } });
+      res.json({ success: true });
+    } catch (err) {
+      console.error('[auth] reset-password failed:', err);
+      res.status(500).json({ success: false, error: 'Could not reset the password.' });
+    }
   });
 
   // POST /api/auth/change-password  { currentPassword, newPassword }

@@ -1,0 +1,65 @@
+/* Settings → Email (B.6). Tables, chips, buttons and notices come from IamViews.css. */
+
+.tx-mail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tx-mail-facts,
+.tx-mail-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.tx-mail-facts dt,
+.tx-mail-figures dt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ngf-slate-600);
+}
+
+.tx-mail-facts dd,
+.tx-mail-figures dd {
+  margin: 0.15rem 0 0;
+  color: var(--ngf-ink-900);
+  overflow-wrap: anywhere;
+}
+
+.tx-mail-figures dd {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.tx-mail-figures {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.tx-mail-figures dd.tx-mail-date {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.tx-mail-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  color: var(--ngf-ink-900);
+}
+
+.tx-mail-test {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.tx-mail-test .tx-iam-field {
+  flex: 1 1 240px;
+  max-width: 420px;
+}

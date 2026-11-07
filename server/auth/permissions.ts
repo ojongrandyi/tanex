@@ -101,7 +101,8 @@ export function resetRequestAuth(req: Request): void {
 /** True when the signed-in user holds at least one of the keys. */
 export function requestHasPermission(req: Request, ...keys: PermissionKey[]): boolean {
   const auth = getRequestAuth(req);
-  if (!auth) return false;
+  // A temporary password must be replaced before the account can use any permission.
+  if (!auth || auth.user.mustChangePassword) return false;
   return keys.some((k) => hasPermission(auth.permissions, k));
 }
 

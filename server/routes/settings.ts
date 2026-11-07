@@ -43,7 +43,7 @@ function pickFields(settings: Record<string, unknown>, fields: readonly string[]
 
 function isStaff(req: Request): boolean {
   const auth = getRequestAuth(req);
-  return Boolean(auth && auth.permissions.length > 0 && !isCourierOnly(auth.permissions));
+  return Boolean(auth && !auth.user.mustChangePassword && auth.permissions.length > 0 && !isCourierOnly(auth.permissions));
 }
 
 function readSettings(): Record<string, unknown> {

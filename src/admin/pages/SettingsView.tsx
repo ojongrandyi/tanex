@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import {
   Building,
   Shield,
@@ -18,7 +18,11 @@ import {
 import { ADMIN_URL, COMPANY_SHORT, EMAIL, HQ_ADDRESS, LEGAL_NAME } from '../../config/brand';
 import { useAdminData } from '../../context/AdminDataContext';
 import { usePermission } from '../../auth/AuthContext';
+import { MAIL_TEXT } from '../../auth/strings';
 import './SettingsView.css';
+
+// Settings → Email (B.6), loaded when its tab is opened.
+const EmailSettingsPanel = lazy(() => import('../components/EmailSettingsPanel'));
 import { CURRENCY_NAMES, DISPLAY_CURRENCIES, formatMoney, resolveCurrency, type DisplayCurrency } from '../../shared/currency';
 import { MeasureInput, useUnitLabels } from '../../components/forms/UnitControls';
 
@@ -104,7 +108,7 @@ export const SettingsView: React.FC = () => {
   };
 
   // Active Category Tab
-  const [activeTab, setActiveTab] = useState<'GENERAL' | 'PRIVACY' | 'TARIFF' | 'DOCUMENTS' | 'HUBS'>('GENERAL');
+  const [activeTab, setActiveTab] = useState<'GENERAL' | 'PRIVACY' | 'TARIFF' | 'DOCUMENTS' | 'HUBS' | 'EMAIL'>('GENERAL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Handle Save
@@ -190,7 +194,7 @@ export const SettingsView: React.FC = () => {
           <p>Manage company identity, public tracking privacy, pricing defaults, and document rules.</p>
         </div>
 
-        {canManageSettings && (
+        {canManageSettings && activeTab !== 'EMAIL' && (
           <div className="settings-header-actions">
             <button
               type="button"
@@ -253,10 +257,26 @@ export const SettingsView: React.FC = () => {
           <Server size={16} />
           <span>Gateway Hub Telemetry</span>
         </button>
+
+        <button
+          className={`settings-tab-btn ${activeTab === 'EMAIL' ? 'active' : ''}`}
+          onClick={() => setActiveTab('EMAIL')}
+        >
+          <Mail size={16} />
+          <span>{MAIL_TEXT.tab}</span>
+        </button>
       </div>
 
+      {/* Email has its own actions (test, retry) and nothing to save with the form below. */}
+      {activeTab === 'EMAIL' && (
+        <Suspense fallback={<p className="tx-iam-muted">{MAIL_TEXT.loading}</p>}>
+          <EmailSettingsPanel />
+        </Suspense>
+      )}
+
+
       {/* Settings Content Grid */}
-      <form onSubmit={handleSaveAll} className="settings-form-wrapper">
+      <form onSubmit={handleSaveAll} className="settings-form-wrapper" hidden={activeTab === 'EMAIL'}>
         {/* =========================================================================
             SECTION 1: COMPANY & CARRIER PROFILE
             ========================================================================= */}

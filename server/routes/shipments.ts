@@ -3,7 +3,7 @@ import { db } from '../db.js';
 import { syncTimeBasedProgress, shipmentTransportMode } from '../progress.js';
 import { eventTime } from '../eventTime.js';
 import { requirePermission } from '../middleware/auth.js';
-import { actorName, getRequestAuth } from '../auth/permissions.js';
+import { actorName, getRequestAuth, requestHasPermission } from '../auth/permissions.js';
 import { audited, param } from '../audit.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
 import { generateUniqueTrackingId } from '../trackingIds.js';
@@ -190,10 +190,24 @@ shipmentsRouter.get('/:trackingNumber', requirePermission('shipments.view'), (re
 // endpoint the public booking flow (ShipPage.tsx -> api.submitPublicShipment) posts to, not
 // just the admin's CreateShipmentView. Rate-limited instead, since nothing else stops this
 // being scripted/spammed without a session requirement to fall back on.
+// What a booking from the public site (no shipments.create) may set: it starts as booked or
+// received, at most 15 % progress, every piece in the same status, and no internal pricing note.
+// Staff bookings from the console keep every field they send.
+const PUBLIC_BOOKING_STATUSES = new Set(['AWAITING_PICKUP', 'RECEIVED']);
+function boundPublicBooking(req: Request, body: any): any {
+  if (requestHasPermission(req, 'shipments.create')) return body;
+  const status = PUBLIC_BOOKING_STATUSES.has(body.status) ? body.status : 'RECEIVED';
+  const progress = Math.min(Math.max(Number(body.progressPercent) || 15, 0), 15);
+  const pieces = Array.isArray(body.pieces)
+    ? body.pieces.map((p: any) => ({ ...(p && typeof p === 'object' ? p : {}), status, statusText: undefined }))
+    : body.pieces;
+  return { ...body, status, progressPercent: progress, internalPricingNote: undefined, pieces };
+}
+
 shipmentsRouter.post('/', publicWriteLimiter,
   audited('shipment.create', 'shipment', null, 'Shipment created in the console', { signedInOnly: true }), (req: Request, res: Response) => {
   try {
-    const s = req.body;
+    const s = boundPublicBooking(req, req.body && typeof req.body === 'object' ? req.body : {});
     // The server is the authority on tracking IDs (BRAND_GUIDE §7): any trackingNumber in the
     // body is ignored and the ID comes back in the response for the client to adopt. This
     // route is public, so a caller must never be able to choose its own ID.

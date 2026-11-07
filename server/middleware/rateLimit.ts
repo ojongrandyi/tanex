@@ -24,3 +24,14 @@ export const paymentProofLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, code: 'RATE_LIMITED', error: 'Too many attempts. Please wait a while and try again.' }
 });
+
+// Public look-ups by reference that return a customer's own details (GET /api/quotes/:id).
+// Quote references have only 90,000 values per year, so without a limit a script could walk
+// through them. Generous for a real customer, slow for enumeration.
+export const publicLookupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests. Please try again in a few minutes.' }
+});

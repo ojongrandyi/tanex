@@ -69,7 +69,12 @@ SMTP_USER=info@tanexsarl.com
 SMTP_PASS=<mailbox password>
 MAIL_FROM="TanEx <info@tanexsarl.com>"
 MAIL_STAFF_ALERTS_TO=info@tanexsarl.com
+# Optional: MAIL_REPLY_TO; APP_URL (base of links in emails, default https://tanexsarl.com;
+# set it only for a staging copy). Links never use the request Host header.
 ```
+Without `SMTP_HOST` email is off: nothing is queued and "Forgot password?" is hidden (the server log says so
+at start). With it, emails wait in the `email_outbox` table and are sent every 30 s, retried after 1, 5, 15 and
+60 min; failures show under Settings → Email.
 Leave unset: `SEED_DEMO_DATA` (ignored; no demo data ships) and `ADMIN_PROXY_TARGET` (unused proxy mode).
 
 Generate secrets locally:

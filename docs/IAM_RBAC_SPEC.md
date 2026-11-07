@@ -105,7 +105,7 @@ roles belong to the Super Admin (except the locked Super Admin role).
 |---|---|---|
 | `POST /api/auth/login` | public (rate-limited) | `{ identifier, password }` |
 | `POST /api/auth/logout` | session | |
-| `GET /api/auth/session` | public | `{ user: { id, displayName, email, phone, locale, roles, permissions, mustChangePassword } | null, passwordReset }` (`passwordReset`: the sign-in screen may offer "Forgot password?"; false until B.6) |
+| `GET /api/auth/session` | public | `{ user: { id, displayName, email, phone, locale, roles, permissions, mustChangePassword } | null, passwordReset }` (`passwordReset`: the sign-in screen may offer "Forgot password?"; true when email is on, B.6). While `mustChangePassword`, every other console route answers 403 `PASSWORD_CHANGE_REQUIRED` (B.6) |
 | `POST /api/auth/change-password` | session | `{ currentPassword, newPassword }`; clears `must_change_password` |
 | `PATCH /api/auth/me` | session | `{ displayName?, locale? }`: own name (1–80 chars) and language (`en`/`fr`) only; audited `user.update_self` (added B.4) |
 | `GET /api/auth/sessions`, `DELETE /api/auth/sessions` | session | own active sessions (no session ids; `current` marks this one) and "Sign out other devices" (keeps this session); audited `auth.sessions_revoke_others` (added after B.5) |

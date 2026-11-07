@@ -5,6 +5,8 @@ import { audited, param } from '../audit.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
 import { generateReference } from '../../src/shared/references.js';
 import { getGateway } from '../../src/data/gateways.js';
+import { isDeliverableAddress, queueEmail } from '../mail/outbox.js';
+import { cleanVar } from '../mail/layout.js';
 
 export const messagesRouter = Router();
 
@@ -69,6 +71,17 @@ messagesRouter.post('/', publicWriteLimiter,
         id, created_at_ts, status, name, email, phone, subject, priority, tracking_number, gateway_code, message
       ) VALUES (?, ?, 'NEW', ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, Date.now(), name, email, phone, subject, priority, trackingNumber, gatewayCode, message);
+
+    // contact.received to the customer (NOTIFICATIONS_SPEC §4) when they gave an email.
+    if (email && isDeliverableAddress(email)) {
+      queueEmail({
+        to: email,
+        template: 'contact.received',
+        locale: body.locale === 'fr' ? 'fr' : 'en',
+        vars: { name: cleanVar(name), ref: id },
+        related: { type: 'message', id }
+      });
+    }
 
     res.locals.auditEntityId = id;
     const created = db.prepare('SELECT * FROM contact_messages WHERE id = ?').get(id);

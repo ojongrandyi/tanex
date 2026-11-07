@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { EMAIL, HQ_ADDRESS, LEGAL_NAME } from '../src/config/brand.js';
 import { initIamSchema } from './auth/schema.js';
+import { createMailTables } from './mail/outbox.js';
 
 // DB_PATH lets a real deployment point the database file somewhere OUTSIDE the directory
 // git/the deploy process manages, e.g. a persistent storage path a host provides separately
@@ -303,6 +304,9 @@ export function initDatabase() {
   // (docs/IAM_RBAC_SPEC.md §3). Also syncs the permission catalogue and seeds the roles on a
   // database that has none. The first Super Admin is created by server/auth/bootstrap.ts.
   initIamSchema(db);
+
+  // 19. Email outbox (docs/NOTIFICATIONS_SPEC.md §3), sent by server/mail/outbox.ts.
+  createMailTables(db);
 
   // Safe dynamic migrations for existing databases. Must run after every CREATE TABLE above
   // (shipments through settings) — these ALTER statements target quote_requests, documents

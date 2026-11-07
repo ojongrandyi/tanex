@@ -8,10 +8,12 @@ import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { initDatabase, dataDir, dbPath, db } from './db.js';
 import { bootstrapSuperAdmin } from './auth/bootstrap.js';
+import { startOutboxWorker } from './mail/outbox.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { seoRouter } from './seo.js';
 import { registerApiRoutes } from './apiRoutes.js';
 import { ADMIN_PATH, COMPANY } from '../src/config/brand.js';
+import { isAllowedOrigin } from './cors.js';
 import { requirePermission, requireJsonOrMultipart } from './middleware/auth.js';
 import { SqliteSessionStore, createSessionMiddleware } from './auth/sessionStore.js';
 
@@ -40,6 +42,8 @@ if (!ADMIN_PROXY_TARGET) {
   // First Super Admin on an empty users table (IAM_RBAC_SPEC §8).
   bootstrapSuperAdmin(db);
   ensureUploadDirs();
+  // Sends queued emails every 30 s; logs once whether email is on (NOTIFICATIONS_SPEC §3).
+  startOutboxWorker(db);
 }
 
 // Middleware
@@ -68,8 +72,9 @@ app.use(seoRouter);
 // credentialed requests) — the admin session cookie has to actually reach the API for
 // auth to work at all. In dev the Vite proxy makes this same-origin anyway, but this also
 // covers hitting the API directly against its own port.
+// Only the site's own origins may read API answers with credentials (server/cors.ts).
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => callback(null, isAllowedOrigin(origin)),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

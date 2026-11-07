@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Lock, User, ShieldCheck, ArrowRight, AlertCircle, Mail, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Lock, User, ShieldCheck, ArrowRight, AlertCircle, Mail, CheckCircle2, KeyRound } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../auth/AuthContext';
-import { AUTH_TEXT } from '../auth/strings';
+import { AUTH_TEXT, passwordErrorText } from '../auth/strings';
+import { checkNewPassword } from '../shared/passwordPolicy';
 import { ADMIN_CONSOLE_NAME, LOGO_ALT, LOGO_HEIGHT, LOGO_WHITE, LOGO_WIDTH } from '../config/brand';
 import './AdminLogin.css';
 
@@ -42,7 +43,29 @@ const T = AUTH_TEXT.login;
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
   const { refresh, passwordReset } = useAuth();
-  const [mode, setMode] = useState<'sign-in' | 'forgot'>('sign-in');
+  // An emailed reset link opens the console at #reset=<token> (server/mail/urls.ts).
+  const [resetToken, setResetToken] = useState<string | null>(readResetToken);
+  const [mode, setMode] = useState<'sign-in' | 'forgot' | 'reset'>(() => (resetToken ? 'reset' : 'sign-in'));
+
+  // A reset link opened in a tab that already shows the console only changes the hash.
+  useEffect(() => {
+    const onHash = () => {
+      const token = readResetToken();
+      if (token) {
+        setResetToken(token);
+        setMode('reset');
+      }
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  // Take the token out of the address bar and history as soon as it has been read.
+  useEffect(() => {
+    if (resetToken && /^#reset=/.test(window.location.hash)) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }, [resetToken]);
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +94,15 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
 
   if (mode === 'forgot') {
     return <ForgotPassword onBack={() => setMode('sign-in')} />;
+  }
+  if (mode === 'reset' && resetToken) {
+    return (
+      <ResetPassword
+        token={resetToken}
+        onDone={() => { setResetToken(null); setMode('sign-in'); }}
+        onAskAgain={passwordReset ? () => { setResetToken(null); setMode('forgot'); } : undefined}
+      />
+    );
   }
 
   return (
@@ -179,6 +211,102 @@ const ForgotPassword: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <button type="button" className="tx-auth-link" onClick={onBack}>
         {F.back}
       </button>
+    </AuthCard>
+  );
+};
+
+/** The token from a #reset=<token> link, or null. */
+function readResetToken(): string | null {
+  // Characters after the token (a full stop a mail app kept in the link) are ignored.
+  const m = /^#reset=([A-Za-z0-9_-]{20,100})/.exec(window.location.hash);
+  return m ? m[1] : null;
+}
+
+const R = AUTH_TEXT.reset;
+
+const ResetPassword: React.FC<{ token: string; onDone: () => void; onAskAgain?: () => void }> = ({ token, onDone, onAskAgain }) => {
+  const [next, setNext] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [invalid, setInvalid] = useState(false);
+  const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submitting) return;
+    // Same local checks as the forced change; the server also refuses the account's email/phone.
+    if (checkNewPassword(next, {}) === 'too_short') return setError(AUTH_TEXT.password.tooShort);
+    if (next !== confirm) return setError(AUTH_TEXT.password.mismatch);
+    setSubmitting(true);
+    setError(null);
+    try {
+      await api.resetPassword(token, next);
+      setDone(true);
+    } catch (err: any) {
+      if (err?.code === 'INVALID_TOKEN') setInvalid(true);
+      setError(err?.status === 429 ? T.tooMany : passwordErrorText(err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const field = (value: string, set: (v: string) => void, label: string, autoFocus = false) => (
+    <div className="admin-login-field">
+      <Lock size={15} className="admin-login-field-icon" aria-hidden="true" />
+      <input
+        type="password"
+        value={value}
+        onChange={(e) => { set(e.target.value); setError(null); }}
+        placeholder={label}
+        aria-label={label}
+        autoComplete="new-password"
+        autoFocus={autoFocus}
+      />
+    </div>
+  );
+
+  return (
+    <AuthCard icon={<KeyRound size={22} />} title={R.title} intro={R.intro}>
+      {done ? (
+        <>
+          <div className="tx-auth-success" role="status">
+            <CheckCircle2 size={14} aria-hidden="true" />
+            <span>{R.done}</span>
+          </div>
+          <button type="button" className="admin-login-submit" onClick={onDone}>
+            {R.signIn}
+            <ArrowRight size={15} aria-hidden="true" />
+          </button>
+        </>
+      ) : invalid ? (
+        <>
+          <AuthError message={R.invalid} />
+          {onAskAgain && (
+            <button type="button" className="admin-login-submit" onClick={onAskAgain}>
+              {R.askAgain}
+            </button>
+          )}
+          <button type="button" className="tx-auth-link" onClick={onDone}>
+            {F.back}
+          </button>
+        </>
+      ) : (
+        <>
+          <form onSubmit={handleSubmit} className="admin-login-form">
+            {field(next, setNext, R.next, true)}
+            {field(confirm, setConfirm, R.confirm)}
+            <p className="tx-auth-hint">{R.hint}</p>
+            <AuthError message={error} />
+            <button type="submit" className="admin-login-submit" disabled={submitting || !next || !confirm}>
+              {submitting ? R.busy : R.submit}
+            </button>
+          </form>
+          <button type="button" className="tx-auth-link" onClick={onDone}>
+            {F.back}
+          </button>
+        </>
+      )}
     </AuthCard>
   );
 };

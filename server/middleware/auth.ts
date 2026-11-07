@@ -25,6 +25,11 @@ export function requirePermission(...keys: PermissionKey[]): RequestHandler {
     if (!auth) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
+    // A temporary password must be replaced first (IAM_RBAC_SPEC §5.5); /api/auth/* stays open
+    // so the user can change it, see their session and sign out.
+    if (auth.user.mustChangePassword) {
+      return res.status(403).json({ success: false, code: 'PASSWORD_CHANGE_REQUIRED', error: 'Change your temporary password first.' });
+    }
     if (!keys.some((k) => hasPermission(auth.permissions, k))) {
       return res.status(403).json({ success: false, error: 'You do not have permission to do this.' });
     }

@@ -3,11 +3,27 @@ import { db } from '../db.js';
 import { requirePermission } from '../middleware/auth.js';
 import { actorName, getRequestAuth, requestHasPermission } from '../auth/permissions.js';
 import { audited, param } from '../audit.js';
-import { publicWriteLimiter } from '../middleware/rateLimit.js';
+import { publicLookupLimiter, publicWriteLimiter } from '../middleware/rateLimit.js';
 import { generateUniqueTrackingId } from '../trackingIds.js';
 import { pieceLabel } from '../../src/shared/trackingId.js';
 import { parseTransportMode } from '../../src/shared/transportMode.js';
 import { eventTime } from '../eventTime.js';
+import { isDeliverableAddress, queueEmail } from '../mail/outbox.js';
+import { cleanVar } from '../mail/layout.js';
+import { quoteUrl } from '../mail/urls.js';
+import crypto from 'crypto';
+
+// Quote references QR-YYYY-##### (CLAUDE.md §2), random, unique in the table.
+function newQuoteId(): string {
+  const year = new Date().getFullYear();
+  const exists = db.prepare('SELECT 1 FROM quote_requests WHERE id = ?');
+  let id = '';
+  for (let i = 0; i < 10; i++) {
+    id = `QR-${year}-${crypto.randomInt(10000, 100000)}`;
+    if (!exists.get(id)) break;
+  }
+  return id;
+}
 
 export const quotesRouter = Router();
 
@@ -95,7 +111,7 @@ quotesRouter.get('/', requirePermission('quotes.view'), (req: Request, res: Resp
 // quote" flow on the public site now calls (a customer who has their own quote ID looking up
 // their own submission), scoped to exactly one record instead of the full list. Strips
 // internalNotes (admin-only notes about the customer, not the customer's own data).
-quotesRouter.get('/:id', (req: Request, res: Response) => {
+quotesRouter.get('/:id', publicLookupLimiter, (req: Request, res: Response) => {
   try {
     const row = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(req.params.id as string);
     if (!row) {
@@ -112,9 +128,10 @@ quotesRouter.get('/:id', (req: Request, res: Response) => {
 quotesRouter.post('/', publicWriteLimiter,
   audited('quote.create', 'quote', null, 'Quote request submitted while signed in', { signedInOnly: true }), (req: Request, res: Response) => {
   try {
-    const q = req.body;
-    const randomSuffix = Math.floor(10000 + Math.random() * 90000);
-    const id = q.id || `QR-2026-${randomSuffix}`;
+    const q = req.body && typeof req.body === 'object' ? req.body : {};
+    // The server always assigns the reference; an id sent by the browser is ignored (it would
+    // otherwise choose the text of the confirmation email's subject).
+    const id = newQuoteId();
     res.locals.auditEntityId = id;
     const createdAt = `${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
 
@@ -163,6 +180,18 @@ quotesRouter.post('/', publicWriteLimiter,
       Date.now(),
       parseTransportMode(q.transportMode) ?? null
     );
+
+    // quote.received to the customer (NOTIFICATIONS_SPEC §4), only for an address they typed.
+    const typedEmail = typeof (q.customerEmail || q.requesterEmail) === 'string' ? String(q.customerEmail || q.requesterEmail).trim() : '';
+    if (isDeliverableAddress(typedEmail)) {
+      queueEmail({
+        to: typedEmail,
+        template: 'quote.received',
+        locale: q.locale === 'fr' ? 'fr' : 'en',
+        vars: { name: cleanVar(customerName), ref: id, url: quoteUrl(id) },
+        related: { type: 'quote', id }
+      });
+    }
 
     const created = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(id);
     res.status(201).json({ success: true, data: formatQuote(created) });

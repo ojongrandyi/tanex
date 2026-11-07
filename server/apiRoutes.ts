@@ -17,6 +17,7 @@ import { mediaRouter } from './routes/media.js';
 import { usersRouter } from './routes/users.js';
 import { rolesRouter, permissionsRouter } from './routes/roles.js';
 import { auditRouter } from './routes/auditLog.js';
+import { mailRouter } from './routes/mail.js';
 import { requirePermission } from './middleware/auth.js';
 
 /**
@@ -31,6 +32,8 @@ export function registerApiRoutes(app: Express): void {
   app.use('/api/roles', rolesRouter);
   app.use('/api/permissions', permissionsRouter);
   app.use('/api/audit', auditRouter);
+  // Settings → Email: status and failed list (settings.view), test and retry (settings.manage).
+  app.use('/api/mail', mailRouter);
   // Package images (/api/shipments/:id/images) and the payment request per shipment
   // (/api/shipments/:id/payment), each route gated individually.
   app.use('/api/shipments', shipmentImagesRouter);

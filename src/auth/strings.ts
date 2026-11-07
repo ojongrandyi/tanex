@@ -22,6 +22,20 @@ export const AUTH_TEXT = {
     done: 'If that email has an account, a reset link is on its way.',
     back: 'Back to sign in'
   },
+  // Opened from the emailed reset link (B.6, owner to confirm).
+  reset: {
+    title: 'Set a new password',
+    intro: 'Choose a new password for your TanEx account.',
+    next: 'New password',
+    confirm: 'Confirm new password',
+    hint: 'At least 10 characters.',
+    submit: 'Save new password',
+    busy: 'Saving…',
+    done: 'Your password has been changed. Sign in with your new password.',
+    signIn: 'Sign in',
+    invalid: 'This reset link is invalid or has expired. Ask for a new one.',
+    askAgain: 'Ask for a new link'
+  },
   forced: {
     title: 'Choose a new password',
     intro: 'For your security, set your own password before you continue.',
@@ -84,6 +98,7 @@ export const AUTH_TEXT = {
 export function passwordErrorText(err: unknown): string {
   const e = err as { message?: string; code?: string } | null;
   switch (e?.code) {
+    case 'INVALID_TOKEN': return AUTH_TEXT.reset.invalid;
     case 'WRONG_PASSWORD': return AUTH_TEXT.password.wrongCurrent;
     case 'TOO_SHORT': return AUTH_TEXT.password.tooShort;
     case 'SAME_AS_IDENTIFIER': return AUTH_TEXT.password.sameAsIdentifier;
@@ -211,3 +226,37 @@ export function iamErrorText(err: unknown): string {
   const e = err as { message?: string; code?: string } | null;
   return (e?.code && IAM_TEXT.errors[e.code]) || e?.message || 'Something went wrong. Please try again.';
 }
+
+// Settings → Email (NOTIFICATIONS_SPEC §3; B.6 additions, owner to confirm). English only until D.3.
+export const MAIL_TEXT = {
+  tab: 'Email',
+  title: 'Email',
+  intro: 'Emails to customers and staff go out from the company mailbox. They wait in a queue and are tried again if sending fails.',
+  on: 'Email is on',
+  off: 'Email is off',
+  offHint: 'Add the mail settings (SMTP_HOST, SMTP_USER, SMTP_PASS, MAIL_FROM) to the server and restart the app. Until then no emails are sent and "Forgot password?" is hidden.',
+  fields: { server: 'Server', sender: 'Sender', replyTo: 'Reply-to', account: 'Signs in as' },
+  summary: { queued: 'Waiting to send', failed: 'Failed', sent24h: 'Sent in the last 24 hours', lastSent: 'Last sent' },
+  never: 'Never',
+  test: {
+    title: 'Send a test email',
+    to: 'Send to',
+    submit: 'Send test email',
+    busy: 'Sending…',
+    sent: (to: string) => `Test email sent to ${to}.`,
+    failed: (error: string) => `The test email could not be sent: ${error}. It will be tried again automatically.`
+  },
+  failedList: {
+    title: 'Failed emails',
+    empty: 'No failed emails.',
+    retry: 'Try again',
+    retried: 'Queued again.',
+    notRetryable: "Password reset emails can't be sent again. Ask for a new link instead."
+  },
+  recent: { title: 'Recent emails', empty: 'No emails yet.' },
+  columns: { to: 'To', subject: 'Subject', status: 'Status', attempts: 'Attempts', error: 'Last error', created: 'Queued' },
+  status: { QUEUED: 'Waiting', SENDING: 'Sending', SENT: 'Sent', FAILED: 'Failed' } as Record<string, string>,
+  refresh: 'Refresh',
+  loading: 'Loading…',
+  manageOnly: 'Sending a test email needs the permission to manage settings.'
+};
