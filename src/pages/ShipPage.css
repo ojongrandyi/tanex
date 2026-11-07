@@ -179,7 +179,7 @@
 .mobile-step-tag {
   font-size: 0.6875rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   background: var(--ngf-accent-50);
   padding: 0.2rem 0.5rem;
   border-radius: var(--ngf-radius-sm);
@@ -276,7 +276,7 @@
 
 .step-nav-item:hover {
   border-color: var(--ngf-accent-300);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .step-nav-item.active {
@@ -288,7 +288,7 @@
 
 .step-nav-item.active .step-num {
   background: var(--ngf-accent-500);
-  color: var(--ngf-white);
+  color: var(--tx-on-accent);
 }
 
 .step-nav-item.completed {
@@ -348,7 +348,7 @@
   height: 44px;
   border-radius: var(--ngf-radius-lg);
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
   display: flex;
   align-items: center;
@@ -379,7 +379,7 @@
 .add-piece-btn {
   background: var(--ngf-accent-50);
   border: 1px solid var(--ngf-accent-300);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   padding: 0.5rem 1rem;
   border-radius: var(--ngf-radius-md);
   font-size: 0.8125rem;
@@ -393,7 +393,7 @@
 
 .add-piece-btn:hover {
   background: var(--ngf-accent-500);
-  color: var(--ngf-white);
+  color: var(--tx-on-accent);
   border-color: var(--ngf-accent-500);
 }
 
@@ -438,7 +438,7 @@
 }
 
 .ngf-input:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   background: var(--ngf-white);
   box-shadow: 0 0 0 3px rgba(var(--ngf-accent-rgb), 0.12);
 }
@@ -632,7 +632,7 @@
   top: 12px;
   right: 12px;
   background: var(--ngf-accent-100);
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   font-size: 0.6875rem;
   font-weight: 800;
   padding: 0.2rem 0.5rem;
@@ -654,7 +654,7 @@
 .serv-transit {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .serv-rate-status {
@@ -791,7 +791,7 @@
   font-size: 0.6875rem;
   font-weight: 800;
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
   padding: 0.2rem 0.5rem;
   border-radius: var(--ngf-radius-sm);
@@ -969,7 +969,7 @@
   font-size: 0.875rem;
   line-height: 1.5;
   margin: 0;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
 }
 
 .confirm-barcode-block {
@@ -997,7 +997,7 @@
 .barcode-service {
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .barcode-render-stage {
@@ -1125,7 +1125,7 @@
   font-family: var(--ngf-font-mono);
   font-size: 1.125rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   background: var(--ngf-accent-50);
   border: 1px solid var(--ngf-accent-200);
   width: 42px;
@@ -1243,7 +1243,7 @@
   .step-badge-mini {
     font-size: 0.6875rem;
     font-weight: 800;
-    color: var(--ngf-accent-500);
+    color: var(--tx-accent-text);
     background: var(--ngf-accent-50);
     padding: 0.15rem 0.4rem;
     border-radius: 4px;
@@ -1461,6 +1461,7 @@
 .service-option-card:focus-visible {
   outline: 3px solid var(--ngf-accent-400);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 .tender-card {

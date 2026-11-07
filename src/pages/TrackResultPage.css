@@ -1409,7 +1409,7 @@
 .accent-dispatch-btn {
   background: var(--ngf-accent-500) !important;
   border-color: var(--ngf-accent-400) !important;
-  color: #ffffff !important;
+  color: var(--tx-on-accent) !important;
   font-weight: 800;
   box-shadow: 0 4px 14px rgba(var(--ngf-accent-rgb), 0.3);
 }

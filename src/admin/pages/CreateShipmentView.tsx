@@ -2943,7 +2943,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                             </span>
                           </div>
                           <div className="opt-radio-circle">
-                            {petIsBrachycephalic && <span className="opt-radio-dot" style={{ backgroundColor: '#D3070B' }} />}
+                            {petIsBrachycephalic && <span className="opt-radio-dot" style={{ backgroundColor: 'var(--tx-accent-text)' }} />}
                           </div>
                         </div>
                         <p className="opt-desc">

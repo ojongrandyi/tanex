@@ -168,7 +168,7 @@
 .stat-title {
   font-size: 0.9375rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .stat-subtitle {
@@ -256,7 +256,7 @@
 
 .pillar-icon-box.accent {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -404,7 +404,7 @@
 
 .division-icon-wrap.accent {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -550,7 +550,7 @@
 
 .timeline-icon-bubble.accent {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 2px solid var(--ngf-accent-200);
 }
 
@@ -581,7 +581,7 @@
 }
 
 .timeline-stage-tag.active {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .timeline-card h3 {
@@ -612,7 +612,7 @@
 .timeline-milestone-stat.active {
   background: rgba(var(--ngf-accent-rgb), 0.1);
   border-color: rgba(var(--ngf-accent-rgb), 0.3);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 /* ============================================================
@@ -938,4 +938,9 @@
   .about-floating-badge p {
     font-size: 0.75rem;
   }
+}
+
+/* Accent icons on the dark compliance band stay Orange 500 (the shared .text-accent is for light surfaces). */
+.c-badge-item .text-accent {
+  color: var(--tx-orange-500);
 }

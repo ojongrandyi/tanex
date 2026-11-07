@@ -438,7 +438,7 @@
 .map-speed-btn.active {
   background: var(--ngf-accent-500);
   border-color: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   box-shadow: 0 0 8px rgba(var(--ngf-accent-rgb), 0.6);
   font-weight: 800;
 }

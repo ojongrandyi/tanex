@@ -202,7 +202,7 @@
 
 .admin-nav-btn.active .nav-btn-icon-wrap {
   background: var(--ngf-accent-500, var(--ngf-accent-500));
-  color: #ffffff;
+  color: var(--tx-on-accent);
   box-shadow: 0 2px 8px rgba(var(--ngf-accent-rgb), 0.35);
 }
 
@@ -256,7 +256,7 @@
   padding: 0.15rem 0.55rem;
   border-radius: 9999px;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   margin-left: auto;
   letter-spacing: 0.04em;
   box-shadow: 0 2px 8px rgba(var(--ngf-accent-rgb), 0.4);
@@ -499,7 +499,7 @@
 
 .universal-search-input:focus {
   background: #ffffff;
-  border-color: var(--ngf-accent-500, var(--ngf-accent-500));
+  border-color: var(--ngf-accent-500, var(--tx-accent-text));
   box-shadow: 0 0 0 3px rgba(var(--ngf-accent-rgb), 0.12);
 }
 
@@ -822,7 +822,7 @@
 
 .menu-popover-links .menu-exit-link:hover {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
 }
 
 /* ==========================================================================
@@ -890,6 +890,7 @@
 .ngf-load-retry:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 /* New proof of payment toast (update G.3): clickable, sits above the shipment toast if both show. */

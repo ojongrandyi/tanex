@@ -5,6 +5,7 @@ import { greatCircleSegments } from '../utils/greatCircle';
 import { GATEWAYS, TRADE_LANES, getGateway } from '../data/gateways';
 import 'leaflet/dist/leaflet.css';
 import './HomeNetworkMap.css';
+import { BRAND_COLORS } from '../config/brand';
 
 interface HomeNetworkMapProps {
   activeCode: string;
@@ -71,7 +72,7 @@ export const HomeNetworkMap: React.FC<HomeNetworkMapProps> = ({ activeCode, onSe
       const b = getGateway(to);
       if (!a || !b) return;
       L.polyline(greatCircleSegments([a.lat, a.lng], [b.lat, b.lng]), {
-        color: '#D3070B',
+        color: BRAND_COLORS.orange,
         weight: 2,
         opacity: 0.7,
         dashArray: '6, 8',

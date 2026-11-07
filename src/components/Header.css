@@ -63,11 +63,16 @@
 }
 
 .text-accent {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .text-emerald {
   color: #10b981;
+}
+
+/* Icons on the dark utility bar stay Orange 500 (.text-accent is for light surfaces). */
+.ngf-topbar .text-accent {
+  color: var(--tx-orange-500);
 }
 
 /* ============================================================
@@ -116,7 +121,7 @@
 }
 
 .ngf-fallback-logo .text-accent {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   margin-left: 0.15rem;
 }
 
@@ -140,11 +145,11 @@
 }
 
 .ngf-nav-link:hover {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .ngf-nav-link.active {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .ngf-nav-link.active::after {
@@ -170,7 +175,7 @@
   align-items: center;
   gap: 0.5rem;
   background: linear-gradient(135deg, var(--ngf-accent-500) 0%, var(--ngf-accent-500) 100%);
-  color: var(--ngf-white);
+  color: var(--tx-on-accent);
   padding: 0.6875rem 1.25rem;
   border-radius: var(--ngf-radius-md);
   font-size: 0.875rem;
@@ -205,13 +210,13 @@
 .ngf-mobile-toggle-btn:hover {
   background: var(--ngf-accent-50);
   border-color: var(--ngf-accent-300);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .ngf-mobile-toggle-btn.is-active {
   background: var(--ngf-accent-50);
   border-color: var(--ngf-accent-500);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 /* ============================================================
@@ -301,7 +306,7 @@
 
 .drawer-close-btn:hover {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border-color: var(--ngf-accent-300);
 }
 
@@ -346,7 +351,7 @@
 
 .action-icon-wrap.accent {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -382,7 +387,7 @@
 
 .drawer-action-card:hover .action-arrow {
   transform: translateX(3px);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 /* Navigation List Section */
@@ -438,21 +443,21 @@
 }
 
 .drawer-link:hover .link-icon {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .drawer-link.active {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border-left: 3px solid var(--ngf-accent-500);
 }
 
 .drawer-link.active .link-icon {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .drawer-link.active .link-chevron {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 /* Drawer Footer Hotline Box */
@@ -494,7 +499,7 @@
   gap: 0.5rem;
   width: 100%;
   background: linear-gradient(135deg, var(--ngf-accent-500) 0%, var(--ngf-accent-500) 100%);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   padding: 0.75rem;
   border-radius: var(--ngf-radius-md);
   font-size: 0.875rem;

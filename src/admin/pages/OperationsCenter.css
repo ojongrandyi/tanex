@@ -317,7 +317,7 @@
 
 .table-search-input:focus {
   background: #ffffff;
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.12);
 }
 
@@ -367,7 +367,7 @@
 
 .ops-btn-primary {
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   padding: 0.4rem 0.9rem;
   border-radius: 6px;
@@ -502,7 +502,7 @@
 
 .ops-service-pill.express {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -544,7 +544,7 @@
 .ops-route-dest {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   white-space: nowrap;
 }
 
@@ -679,7 +679,7 @@
   background: var(--ngf-accent-50);
   border: 1px solid var(--ngf-accent-200);
   border-radius: 9999px;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   font-size: 0.71rem;
   font-weight: 700;
   cursor: pointer;

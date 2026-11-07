@@ -113,7 +113,7 @@
 }
 
 .preset-icon-car { color: #2563eb; }
-.preset-icon-pkg { color: var(--ngf-accent-500); }
+.preset-icon-pkg { color: var(--tx-accent-text); }
 .preset-icon-tech { color: #7c3aed; }
 .preset-icon-pet { color: #e11d48; }
 
@@ -200,7 +200,7 @@
 
 .step-pill.current .step-index {
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
 }
 
 .step-pill.current .step-text {
@@ -296,7 +296,7 @@
   display: inline-flex;
   font-size: 0.65rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   background: var(--ngf-accent-50);
   border: 1px solid var(--ngf-accent-200);
   padding: 0.15rem 0.55rem;
@@ -420,7 +420,7 @@
 .input-field input:focus,
 .input-field select:focus,
 .input-field textarea:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.12);
 }
 
@@ -477,7 +477,7 @@
   height: 18px;
   border-radius: 50%;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -551,7 +551,7 @@
 }
 
 .party-tag.blue { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
-.party-tag.purple { background: var(--ngf-accent-50); border: 1px solid var(--ngf-accent-200); color: var(--ngf-accent-600); }
+.party-tag.purple { background: var(--ngf-accent-50); border: 1px solid var(--ngf-accent-200); color: var(--tx-accent-text); }
 
 .save-address-checkbox {
   display: inline-flex;
@@ -738,7 +738,7 @@
 
 .condition-custom-input:focus {
   outline: none;
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 3px rgba(var(--ngf-accent-rgb), 0.12);
 }
 
@@ -783,7 +783,7 @@
 .condition-chip-btn.active {
   background: var(--ngf-accent-50);
   border-color: var(--ngf-accent-500);
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   font-weight: 700;
 }
 
@@ -821,7 +821,7 @@
   height: 36px;
   border-radius: 8px;
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-100);
   display: flex;
   align-items: center;
@@ -1475,7 +1475,7 @@
   border-radius: 9999px;
   font-size: 0.8125rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--tx-on-accent);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(var(--ngf-accent-rgb), 0.25);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1618,7 +1618,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-size: 0.9rem;
   font-weight: 700;
   flex-shrink: 0;
@@ -1669,7 +1669,7 @@
 
 .summary-service-pill.express {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -1711,7 +1711,7 @@
 .price-lead-label {
   font-size: 0.65rem;
   font-weight: 800;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -1719,14 +1719,14 @@
 .price-currency-tag {
   font-size: 0.65rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .price-big-amount {
   display: flex;
   align-items: baseline;
   gap: 0.15rem;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
 }
 
 .currency-symbol {
@@ -1987,7 +1987,7 @@
 
 .action-btn.primary {
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   box-shadow: 0 2px 8px rgba(var(--ngf-accent-rgb), 0.25);
 }
@@ -2121,7 +2121,7 @@
 }
 
 .bridge-pill svg {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 /* ==========================================================================
@@ -2408,7 +2408,7 @@
 
 .vmodal-input-row input:focus {
   outline: none;
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
 }
 
 .vmodal-add-btn {
@@ -2466,7 +2466,7 @@
 
 .vmodal-preset-chip:hover {
   border-color: var(--ngf-accent-500);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   background: var(--ngf-accent-50);
   transform: translateY(-1px);
 }
@@ -2576,7 +2576,7 @@
   gap: 0.4rem;
   font-size: 0.72rem;
   font-weight: 800;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -2644,7 +2644,7 @@
 
 .brachy-badge.active {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   border-color: var(--ngf-accent-300);
 }
 

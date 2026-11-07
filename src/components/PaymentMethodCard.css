@@ -46,6 +46,7 @@
 .ngf-pm-card-toggle:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
   border-radius: 8px;
 }
 
@@ -165,7 +166,7 @@
   padding: 0.5rem 0.9rem;
   border-radius: 8px;
   background: var(--ngf-accent-600);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
@@ -240,6 +241,7 @@
 .ngf-pm-card-link:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 .ngf-sr-only {

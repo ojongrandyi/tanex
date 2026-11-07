@@ -85,6 +85,14 @@ New tokens use the **`--tx-*`** prefix in `src/styles/tokens.css`:
 --tx-border, --tx-border-on-dark, --tx-focus (orange-500 ring + 2px choc-950 offset);
 --tx-success-*, --tx-info-*, --tx-warning-*, --tx-danger-*, --tx-grey-*;
 ```
+**Implemented (C.2)** in `src/styles/tokens.css`, which also holds the type scale (`--tx-fs-*`), spacing
+(`--tx-space-1…10`, 4 px base), radii, shadows, motion (`--tx-ease*`, `--tx-dur*`) and focus (`--tx-focus-ring`) tokens.
+Role tokens have a light default and a **`.tx-dark`** context that redefines them (`--tx-bg`, `--tx-surface`,
+`--tx-text`, `--tx-text-muted`, `--tx-accent-text`, `--tx-border*`, `--tx-field-bg`, `--tx-icon-bg`), so a component
+works in either section type. **`--tx-accent-text`** is Orange 700 on light and Orange 500 inside `.tx-dark`: use it
+for every orange-toned text or meaningful icon. Where CSS variables can't reach (Leaflet lines, SVG gradient stops,
+canvas) use `BRAND_COLORS` in `src/config/brand.ts`.
+
 **Migration:** the existing `--ngf-*` tokens are kept as **aliases that point at the new `--tx-*` values**
 (e.g. `--ngf-accent-500: var(--tx-orange-500)`), so every existing page re-skins at once without touching
 thousands of lines. Components are then moved to `--tx-*` as they are redesigned; the aliases are deleted at the end

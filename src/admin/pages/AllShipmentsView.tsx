@@ -24,6 +24,7 @@ import { RecentlyDeletedModal } from '../components/RecentlyDeletedModal';
 import './AllShipmentsView.css';
 import { WeightText } from '../../components/forms/UnitControls';
 import { canonicalStatus, shipmentStatusLabel, shipmentStatusTone, type StatusTone } from '../../shared/shipmentStatus';
+import { BRAND_COLORS } from '../../config/brand';
 
 // Badge colours per status family (names come from CONTENT §6.3).
 const STATUS_CHIP: Record<StatusTone, { className: string; dot: string }> = {
@@ -232,8 +233,8 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
               <defs>
                 <linearGradient id="spark-grad-accent" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#D3070B" stopOpacity="0.32" />
-                  <stop offset="100%" stopColor="#D3070B" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor={BRAND_COLORS.orange} stopOpacity="0.32" />
+                  <stop offset="100%" stopColor={BRAND_COLORS.orange} stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <path
@@ -243,7 +244,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
               <path
                 d="M0,36 C25,36 40,24 60,30 C80,36 100,26 120,32 C135,36 145,18 160,32"
                 fill="none"
-                stroke="#D3070B"
+                stroke={BRAND_COLORS.orange}
                 strokeWidth="1.8"
                 strokeLinecap="round"
               />

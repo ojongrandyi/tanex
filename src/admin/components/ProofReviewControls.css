@@ -67,6 +67,7 @@
 .proof-review-btn:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 .proof-review-reject label {

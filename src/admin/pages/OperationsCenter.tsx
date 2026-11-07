@@ -20,6 +20,7 @@ import { WeightText } from '../../components/forms/UnitControls';
 import { shipmentStatusLabel, shipmentStatusTone, type StatusTone } from '../../shared/shipmentStatus';
 import { GATEWAYS } from '../../data/gateways';
 import { NewProofsPanel } from '../components/NewProofsPanel';
+import { BRAND_COLORS } from '../../config/brand';
 
 // Badge colours per status family (names come from CONTENT §6.3).
 const OPS_STATUS_CHIP: Record<StatusTone, { className: string; dot: string }> = {
@@ -177,8 +178,8 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
               <defs>
                 <linearGradient id="ops-spark-accent" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#D3070B" stopOpacity="0.32" />
-                  <stop offset="100%" stopColor="#D3070B" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor={BRAND_COLORS.orange} stopOpacity="0.32" />
+                  <stop offset="100%" stopColor={BRAND_COLORS.orange} stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <path
@@ -188,7 +189,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
               <path
                 d="M0,36 C25,36 40,24 60,30 C80,36 100,26 120,32 C135,36 145,18 160,32"
                 fill="none"
-                stroke="#D3070B"
+                stroke={BRAND_COLORS.orange}
                 strokeWidth="1.8"
                 strokeLinecap="round"
               />
@@ -248,7 +249,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             </div>
             <span className="ops-card-label">PENDING QUOTES</span>
           </div>
-          <strong className="ops-card-number" style={{ color: pendingQuotes.length > 0 ? '#D3070B' : '#181818' }}>
+          <strong className="ops-card-number" style={{ color: pendingQuotes.length > 0 ? 'var(--tx-accent-text)' : 'var(--tx-text)' }}>
             {pendingQuotes.length}
           </strong>
           <span className="ops-card-subtext">
@@ -259,8 +260,8 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
               <defs>
                 <linearGradient id="ops-spark-amber" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={pendingQuotes.length > 0 ? '#D3070B' : '#10b981'} stopOpacity="0.32" />
-                  <stop offset="100%" stopColor={pendingQuotes.length > 0 ? '#D3070B' : '#10b981'} stopOpacity="0.0" />
+                  <stop offset="0%" stopColor={pendingQuotes.length > 0 ? BRAND_COLORS.orange : '#10b981'} stopOpacity="0.32" />
+                  <stop offset="100%" stopColor={pendingQuotes.length > 0 ? BRAND_COLORS.orange : '#10b981'} stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <path
@@ -270,7 +271,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
               <path
                 d="M0,42 C30,42 55,38 80,40 C105,42 125,34 140,22 C148,16 154,26 160,36"
                 fill="none"
-                stroke={pendingQuotes.length > 0 ? '#D3070B' : '#10b981'}
+                stroke={pendingQuotes.length > 0 ? BRAND_COLORS.orange : '#10b981'}
                 strokeWidth="1.8"
                 strokeLinecap="round"
               />
@@ -291,7 +292,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             </div>
             <span className="ops-card-label">EXCEPTIONS & HOLDS</span>
           </div>
-          <strong className="ops-card-number" style={{ color: exceptionCount > 0 ? '#dc2626' : '#181818' }}>
+          <strong className="ops-card-number" style={{ color: exceptionCount > 0 ? 'var(--tx-danger-600)' : 'var(--tx-text)' }}>
             {exceptionCount}
           </strong>
           <span className="ops-card-subtext">

@@ -159,7 +159,7 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   border-radius: 8px;
   padding: 0.65rem 1.15rem;
@@ -214,7 +214,7 @@
 }
 
 .quote-search-input:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   background: #ffffff;
 }
 
@@ -246,7 +246,7 @@
 }
 
 .filter-select:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
 }
 
 /* ==========================================================================
@@ -314,7 +314,7 @@
 }
 
 .quote-id-txt {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-weight: 700;
 }
 
@@ -401,7 +401,7 @@
 .btn-review-row:hover {
   background: var(--ngf-accent-500);
   border-color: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
 }
 
 .quotes-table-footer {
@@ -500,7 +500,7 @@
   gap: 0.45rem;
   background: none;
   border: none;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
@@ -593,7 +593,7 @@
 }
 
 .route-node small {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-weight: 600;
   font-size: 0.78rem;
 }
@@ -613,7 +613,7 @@
 }
 
 .route-divider-arrow .arrow {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 /* Parties Grid */
@@ -778,7 +778,7 @@
 }
 
 .piece-id-tag {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-weight: 700;
   font-size: 0.75rem;
 }
@@ -920,7 +920,7 @@
 }
 
 .validity-date-input:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.1);
 }
 
@@ -959,7 +959,7 @@
 }
 
 .internal-notes-textarea:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   background: #ffffff;
 }
 
@@ -980,7 +980,7 @@
   justify-content: center;
   gap: 0.5rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   border-radius: 8px;
   padding: 0.85rem;
@@ -1303,7 +1303,7 @@
   align-items: center;
   gap: 0.4rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   border-radius: 6px;
   padding: 0.55rem 1.15rem;
@@ -1329,7 +1329,7 @@
 .form-section-title {
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-top: 0.25rem;
@@ -1364,7 +1364,7 @@
 }
 
 .modal-input:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
 }
 
 @media (max-width: 900px) {

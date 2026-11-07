@@ -7,21 +7,35 @@
 }
 
 html {
-  font-family: var(--ngf-font-sans);
+  font-family: var(--tx-font-body);
   font-size: 16px;
   line-height: 1.5;
-  color: var(--ngf-slate-800);
-  background-color: var(--ngf-slate-50);
+  color: var(--tx-text);
+  background-color: var(--tx-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
 }
 
+/* Cream page, chocolate text (BRAND_GUIDE §4.4). */
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--tx-bg);
+  color: var(--tx-text);
 }
+
+::selection {
+  background-color: var(--tx-selection);
+  color: var(--tx-choc-950);
+}
+
+/* French typography helpers (BRAND_GUIDE §5). The non-breaking spaces before : ; ! ? come from
+   the i18n helper; these cover quotation marks and long words in narrow columns. */
+:lang(fr) q { quotes: '«\00a0' '\00a0»' '“' '”'; }
+:lang(fr) :is(p, li, dd, td) { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
+.tx-nowrap { white-space: nowrap; }
 
 #root {
   display: flex;
@@ -42,12 +56,13 @@ button {
   background: none;
 }
 
-/* Keyboard focus ring (tracker 6.5). :focus-visible shows it for keyboard users only, not on mouse
-   clicks. :where() keeps specificity at zero, so a component's own focus style still wins. The
-   brand red is 5.5:1 on white and 3.2:1 on Ink, above the 3:1 minimum for focus indicators. */
+/* Keyboard focus ring (BRAND_GUIDE §9): 2 px orange ring with a 2 px chocolate offset, so it shows
+   on cream (chocolate 15:1) and on chocolate (orange 7.3:1). :focus-visible shows it for keyboard
+   users only. :where() keeps specificity at zero, so a component's own focus style still wins. */
 :where(a, button, [role="button"], [tabindex], summary, select, input, textarea):focus-visible {
-  outline: 2px solid var(--ngf-color-focus);
+  outline: 2px solid var(--tx-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 /* "Skip to main content": hidden until focused by the first Tab press (Header.tsx). */
@@ -58,8 +73,8 @@ button {
   z-index: 10000;
   padding: 0.75rem 1.25rem;
   border-radius: var(--ngf-radius-md);
-  background: var(--ngf-ink-950);
-  color: var(--ngf-white);
+  background: var(--tx-choc-950);
+  color: var(--tx-cream-100);
   font-weight: 600;
   font-size: 0.9375rem;
   transform: translateY(-200%);

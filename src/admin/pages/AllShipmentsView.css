@@ -57,7 +57,7 @@
   gap: 0.45rem;
   padding: 0.65rem 1.15rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   border-radius: 0.55rem;
   font-size: 0.8125rem;
@@ -214,7 +214,7 @@
 
 /* Color Tokens */
 .text-blue { color: #2563eb !important; }
-.text-accent { color: var(--ngf-accent-500) !important; }
+.text-accent { color: var(--tx-accent-text) !important; }
 .text-red { color: #dc2626 !important; }
 .text-emerald { color: #059669 !important; }
 .text-slate { color: #64748b !important; }
@@ -251,7 +251,7 @@
 
 .toolbar-search-box:focus-within {
   background: #ffffff;
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 3px rgba(var(--ngf-accent-rgb), 0.12);
 }
 
@@ -361,7 +361,7 @@
 }
 
 .service-dropdown:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 3px rgba(var(--ngf-accent-rgb), 0.12);
   background: #ffffff;
 }
@@ -496,7 +496,7 @@
 
 .service-pill.express {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -538,7 +538,7 @@
 .route-dest {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   white-space: nowrap;
 }
 
@@ -688,7 +688,7 @@
   background: var(--ngf-accent-50);
   border: 1px solid var(--ngf-accent-200);
   border-radius: 9999px;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   font-size: 0.71rem;
   font-weight: 700;
   cursor: pointer;
@@ -934,7 +934,7 @@
 
 .form-field input:focus,
 .form-field select:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.15);
 }
 
@@ -973,7 +973,7 @@
   border-radius: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--tx-on-accent);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(var(--ngf-accent-rgb), 0.25);
 }
@@ -993,7 +993,7 @@
   border-radius: 0.3rem;
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   cursor: pointer;
   margin-top: 0.15rem;
   transition: all 0.12s ease;
@@ -1001,7 +1001,7 @@
 
 .pieces-manifest-btn:hover {
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border-color: var(--ngf-accent-500);
 }
 
@@ -1043,7 +1043,7 @@
 }
 
 .status-highlight {
-  color: var(--ngf-accent-500) !important;
+  color: var(--tx-accent-text) !important;
 }
 
 .pieces-cards-grid {

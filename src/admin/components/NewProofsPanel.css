@@ -11,6 +11,7 @@
 .ngf-new-proofs h2:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 .ngf-new-proofs .new-proofs-pill-active {
@@ -129,6 +130,7 @@
 .new-proofs-more:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 .new-proof-thumb-zoom {

@@ -160,7 +160,7 @@
 }
 
 .tracking-search-input:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 3px rgba(var(--ngf-accent-rgb), 0.12);
 }
 
@@ -237,12 +237,12 @@
 .shipment-quick-pill.active {
   background: var(--ngf-accent-50);
   border-color: var(--ngf-accent-500);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   box-shadow: 0 0 0 1px var(--ngf-accent-500);
 }
 
 .shipment-quick-pill.active strong {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 /* ==========================================================================
@@ -436,7 +436,7 @@
   gap: 0.45rem;
   padding: 0.65rem 1rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   border-radius: 0.5rem;
   font-size: 0.8125rem;
@@ -482,7 +482,7 @@
   align-items: center;
   gap: 0.4rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -776,7 +776,7 @@
   padding: 0.45rem 0.75rem;
   border-radius: 0.45rem;
   font-size: 0.75rem;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
 }
 
 /* Provenance Footer */
@@ -895,7 +895,7 @@
   gap: 0.35rem;
   font-size: 0.78rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .modal-select-input,
@@ -915,7 +915,7 @@
 .modal-select-input:focus,
 .modal-text-input:focus,
 .modal-textarea:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.15);
 }
 
@@ -1023,7 +1023,7 @@
   gap: 0.45rem;
   padding: 0.65rem 1.25rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   border-radius: 0.5rem;
   font-size: 0.8125rem;

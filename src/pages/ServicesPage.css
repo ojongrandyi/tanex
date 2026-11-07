@@ -185,7 +185,7 @@
 }
 
 .service-nav-btn.active .nav-btn-badge {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .nav-btn-title {
@@ -220,7 +220,7 @@
 .service-pill-tag {
   font-size: 0.6875rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   background: var(--ngf-accent-50);
   border: 1px solid var(--ngf-accent-200);
   padding: 0.25rem 0.625rem;
@@ -272,7 +272,7 @@
 
 .time-icon-box.accent {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -473,7 +473,7 @@
 
 .tier-tag.fast {
   background: rgba(var(--ngf-accent-rgb), 0.1);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .tier-tag.popular {
@@ -505,6 +505,7 @@
 
 .table-action-btn:hover {
   background: var(--ngf-accent-500);
+  color: var(--tx-on-accent);
 }
 
 /* ============================================================
@@ -541,7 +542,7 @@
 
 .industry-pill-btn:hover {
   border-color: var(--ngf-accent-400);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .industry-pill-btn.active {
@@ -586,7 +587,7 @@
 .ind-subtag {
   font-size: 0.625rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   letter-spacing: 0.08em;
   display: block;
   margin-bottom: 0.2rem;
@@ -736,7 +737,7 @@
 }
 
 .icon-emerald { background: rgba(16, 185, 129, 0.1); color: #059669; }
-.icon-accent { background: var(--ngf-accent-50); color: var(--ngf-accent-500); }
+.icon-accent { background: var(--ngf-accent-50); color: var(--tx-accent-text); }
 .icon-purple { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
 .icon-sky { background: rgba(2, 132, 199, 0.1); color: #0284c7; }
 
@@ -747,7 +748,7 @@
 }
 
 .tag-emerald { color: #059669; }
-.tag-accent { color: var(--ngf-accent-500); }
+.tag-accent { color: var(--tx-accent-text); }
 .tag-purple { color: #7c3aed; }
 .tag-sky { color: #0284c7; }
 
@@ -799,7 +800,7 @@
 .lifecycle-eyebrow {
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   letter-spacing: 0.1em;
   display: block;
   margin-bottom: 0.5rem;
@@ -845,7 +846,7 @@
 .step-num {
   font-size: 1.5rem;
   font-weight: 900;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   margin-bottom: 1rem;
 }
 

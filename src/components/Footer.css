@@ -35,7 +35,7 @@
   height: 46px;
   border-radius: var(--ngf-radius-lg);
   background-color: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
   display: flex;
   align-items: center;
@@ -132,7 +132,8 @@
 .ngf-pro-footer-logo:focus-visible,
 .ngf-pro-links-list a:focus-visible {
   outline: 2px solid var(--ngf-accent-500);
-  outline-offset: 3px;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
   border-radius: 2px;
 }
 
@@ -174,7 +175,7 @@
 
 .pro-social-btn:hover {
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border-color: var(--ngf-accent-500);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(var(--ngf-accent-rgb), 0.3);
@@ -327,7 +328,8 @@
 
 .pro-bottom-link:focus-visible {
   outline: 2px solid var(--ngf-accent-500);
-  outline-offset: 3px;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
   border-radius: 2px;
 }
 

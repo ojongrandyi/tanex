@@ -189,7 +189,7 @@
 }
 
 .terminal-tab-btn:hover {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   background: var(--ngf-accent-50);
 }
 
@@ -232,7 +232,7 @@
 }
 
 .terminal-input:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   background: var(--ngf-white);
   box-shadow: 0 0 0 4px rgba(var(--ngf-accent-rgb), 0.15);
 }
@@ -294,7 +294,7 @@
 }
 
 .terminal-textarea:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   background: var(--ngf-white);
   box-shadow: 0 0 0 4px rgba(var(--ngf-accent-rgb), 0.15);
 }
@@ -374,7 +374,7 @@
 }
 
 .quick-chip-btn:hover span {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .recent-chip-btn {
@@ -467,7 +467,7 @@
 
 .ref-icon-box.accent {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -829,7 +829,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .batch-metrics-row {
@@ -1014,4 +1014,9 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Accent icon on the dark support card stays Orange 500 (the shared .text-accent is for light surfaces). */
+.support-phone-badge .text-accent {
+  color: var(--tx-orange-500);
 }

@@ -1,119 +1,300 @@
 /* =========================================================================
-   Design system tokens (BRAND_GUIDE.md §4)
-   Palette: graphite black #060606 and brand red #D3070B.
-   Primary = graphite, Accent = brand red (500 = #D3070B),
-   Ink = deep surfaces. Status colours stay semantic, never brand colours.
+   TanEx design tokens (docs/BRAND_GUIDE.md §4, §5, §9; approved direction design/tx.css)
+   Palette: dark chocolate, cream, a small amount of orange (logo orange #F48800).
+   - Components use the --tx-* tokens, ideally the role tokens (--tx-bg, --tx-text, --tx-accent …).
+   - The legacy --ngf-* names further down are aliases of --tx-* so existing pages re-skin. They are
+     deleted in tracker task I.3; do not use them in new code.
+   - Status colours (success, info, warning, danger) are semantic, never brand colours.
+   Contrast rules (BRAND_GUIDE §4.2): text on orange is always chocolate (--tx-on-accent); orange text
+   only on dark surfaces; on light surfaces orange-toned text uses --tx-accent-text (Orange 700).
    ========================================================================= */
 :root {
-  /* Brand: Primary (graphite, from the logo black) */
-  --ngf-primary-50: #FAFAFA;
-  --ngf-primary-100: #F4F4F4;
-  --ngf-primary-200: #E5E5E5;
-  --ngf-primary-300: #D4D4D4;
-  --ngf-primary-400: #A1A1A1;
-  --ngf-primary-500: #737373;
-  --ngf-primary-600: #525252;
-  --ngf-primary-700: #404040;
-  --ngf-primary-800: #262626;
-  --ngf-primary-900: #171717;
+  /* ---- Chocolate ---- */
+  --tx-choc-50: #F7F1EE;
+  --tx-choc-100: #EDE1DA;
+  --tx-choc-200: #D9C2B5;
+  --tx-choc-300: #BF9C8A;
+  --tx-choc-400: #9C7360;
+  --tx-choc-500: #7B5545;
+  --tx-choc-600: #5F4034;
+  --tx-choc-700: #4A3128;
+  --tx-choc-800: #38241D;
+  --tx-choc-900: #2A1B16;
+  --tx-choc-950: #1C120E;
 
-  /* Brand: Accent (brand red; 500 is #D3070B). On Ink backgrounds use 400 for
-     small text; 500 only for large text, icons and buttons (3.21:1 on Ink 950). */
-  --ngf-accent-50: #FFF2F0;
-  --ngf-accent-100: #FFE2DE;
-  --ngf-accent-200: #FFCBC3;
-  --ngf-accent-300: #FFA598;
-  --ngf-accent-400: #FF6758;
-  --ngf-accent-500: #D3070B;
-  --ngf-accent-600: #B70005;
-  --ngf-accent-700: #950003;
-  --ngf-accent-800: #740002;
-  --ngf-accent-900: #540001;
+  /* ---- Cream ---- */
+  --tx-cream-50: #FFFCF7;
+  --tx-cream-100: #FBF6EC;
+  --tx-cream-200: #F5ECDB;
+  --tx-cream-300: #EDDFC4;
+  --tx-cream-400: #E2CFA8;
 
-  /* Brand: Ink (dark hero, footer, admin sidebar) */
-  --ngf-ink-950: #181818;
-  --ngf-ink-900: #1F1F1F;
-  --ngf-ink-800: #282828;
-  --ngf-ink-700: #333333;
+  /* ---- Orange (500 measured from the logo) ---- */
+  --tx-orange-50: #FFF6EB;
+  --tx-orange-100: #FFE9CC;
+  --tx-orange-200: #FFD199;
+  --tx-orange-300: #FFB55C;
+  --tx-orange-400: #FF9F2E;
+  --tx-orange-500: #F48800;
+  --tx-orange-600: #C76A00;
+  --tx-orange-700: #9A5200;
+  --tx-orange-800: #723C00;
 
-  /* RGB triplets for translucent brand colours: rgba(var(--ngf-accent-rgb), 0.2) */
-  --ngf-accent-rgb: 211, 7, 11;
-  --ngf-ink-rgb: 24, 24, 24;
-  --ngf-primary-rgb: 23, 23, 23;
+  --tx-white: #FFFFFF;
 
-  /* Semantic status colours (shipment states) */
-  --ngf-success-50: #ecfdf5;   /* Delivered */
-  --ngf-success-100: #d1fae5;
-  --ngf-success-500: #10b981;
-  --ngf-success-600: #059669;
-  --ngf-success-700: #047857;
+  /* RGB triplets for translucent colours: rgb(var(--tx-choc-950-rgb) / .5) */
+  --tx-choc-950-rgb: 28 18 14;
+  --tx-orange-500-rgb: 244 136 0;
+  --tx-cream-100-rgb: 251 246 236;
 
-  --ngf-warning-50: #fffbeb;   /* Delayed / exception pending */
-  --ngf-warning-100: #fef3c7;
-  --ngf-warning-200: #fde68a;
-  --ngf-warning-500: #f59e0b;
-  --ngf-warning-600: #d97706;
-  --ngf-warning-700: #b45309;
+  /* ---- Semantic status colours (shipment states; never brand colours) ---- */
+  --tx-success-50: #ECFDF5;   /* Delivered */
+  --tx-success-100: #D1FAE5;
+  --tx-success-500: #10B981;
+  --tx-success-600: #059669;
+  --tx-success-700: #047857;
 
-  --ngf-danger-50: #fef2f2;    /* Exception / held */
-  --ngf-danger-100: #fee2e2;
-  --ngf-danger-500: #ef4444;
-  --ngf-danger-600: #dc2626;
+  --tx-info-50: #EFF6FF;      /* In transit */
+  --tx-info-100: #DBEAFE;
+  --tx-info-200: #BFDBFE;
+  --tx-info-500: #3B82F6;
+  --tx-info-600: #2563EB;
+  --tx-info-700: #1D4ED8;
 
-  --ngf-info-50: #eff6ff;      /* In transit */
-  --ngf-info-100: #dbeafe;
-  --ngf-info-200: #bfdbfe;
-  --ngf-info-500: #3b82f6;
-  --ngf-info-600: #2563eb;
-  --ngf-info-700: #1d4ed8;
+  --tx-warning-50: #FFFBEB;   /* Delayed */
+  --tx-warning-100: #FEF3C7;
+  --tx-warning-200: #FDE68A;
+  --tx-warning-500: #F59E0B;
+  --tx-warning-600: #D97706;
+  --tx-warning-700: #B45309;
+  --tx-warning-800: #7A5400;  /* text on warning-100 */
 
-  /* Neutrals */
-  --ngf-slate-900: #0f172a;
-  --ngf-slate-800: #1e293b;
-  --ngf-slate-700: #334155;
-  --ngf-slate-600: #475569;
-  --ngf-slate-500: #64748b;
-  --ngf-slate-400: #94a3b8;
-  --ngf-slate-300: #cbd5e1;
-  --ngf-slate-200: #e2e8f0;
-  --ngf-slate-100: #f1f5f9;
-  --ngf-slate-50: #f8fafc;
-  --ngf-white: #ffffff;
+  --tx-danger-50: #FEF2F2;    /* On hold / exception */
+  --tx-danger-100: #FEE2E2;
+  --tx-danger-500: #EF4444;
+  --tx-danger-600: #DC2626;
+  --tx-danger-700: #B3261E;
 
-  /* Role aliases: prefer these in new components */
-  --ngf-color-bg: var(--ngf-white);
-  --ngf-color-surface: var(--ngf-slate-50);
-  --ngf-color-text: var(--ngf-primary-900);
-  --ngf-color-muted: var(--ngf-primary-600);
-  --ngf-color-brand: var(--ngf-primary-900);
-  --ngf-color-brand-contrast: var(--ngf-white);
-  --ngf-color-accent: var(--ngf-accent-500);
-  --ngf-color-border: var(--ngf-slate-200);
-  --ngf-color-focus: var(--ngf-accent-500);
+  /* Neutral greys: neutral states only (cancelled, draft). UI chrome uses chocolate tints. */
+  --tx-grey-50: #F7F7F6;
+  --tx-grey-100: #EEECEA;
+  --tx-grey-200: #DEDBD8;
+  --tx-grey-400: #9A9692;
+  --tx-grey-600: #55524F;
+  --tx-grey-800: #2C2A28;
 
-  /* Typography */
-  --ngf-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --ngf-font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
-  --ngf-font-mono: 'JetBrains Mono', monospace;
+  /* ---- Typography ---- */
+  --tx-font-display: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --tx-font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tx-font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
-  /* Layout & Spacing */
-  --ngf-container-max: 1280px;
+  /* Fluid type scale (BRAND_GUIDE §5): Display 44→76, H1 36→56, H2 28→40, H3 20→26, body 16→18 */
+  --tx-fs-display: clamp(2.75rem, 1.6rem + 4.2vw, 4.75rem);
+  --tx-fs-h1: clamp(2.25rem, 1.6rem + 2.4vw, 3.5rem);
+  --tx-fs-h2: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
+  --tx-fs-h3: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+  --tx-fs-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --tx-fs-small: 0.875rem;
+  --tx-fs-xs: 0.75rem;
+  --tx-lh-tight: 1.1;
+  --tx-lh-heading: 1.15;
+  --tx-lh-body: 1.6;
+  --tx-tracking-heading: -0.02em;
+  --tx-tracking-eyebrow: 0.14em;
+  --tx-measure: 70ch;
+
+  /* ---- Spacing (4 px base) ---- */
+  --tx-space-1: 4px;
+  --tx-space-2: 8px;
+  --tx-space-3: 12px;
+  --tx-space-4: 16px;
+  --tx-space-5: 24px;
+  --tx-space-6: 32px;
+  --tx-space-7: 48px;
+  --tx-space-8: 64px;
+  --tx-space-9: 96px;
+  --tx-space-10: 128px;
+
+  /* ---- Layout ---- */
+  --tx-container: 1280px;
+  --tx-container-wide: 1440px;
+  --tx-gutter: 24px;
+  --tx-gutter-mobile: 16px;
+  --tx-header-h: 72px;
+
+  /* ---- Radii ---- */
+  --tx-radius-xs: 6px;
+  --tx-radius-input: 10px;
+  --tx-radius-card: 14px;
+  --tx-radius-lg: 20px;
+  --tx-radius-xl: 24px;
+  --tx-radius-pill: 999px;
+
+  /* ---- Elevation: soft, warm, tinted with chocolate ---- */
+  --tx-shadow-sm: 0 1px 2px rgb(28 18 14 / 0.06);
+  --tx-shadow: 0 1px 2px rgb(28 18 14 / 0.06), 0 8px 24px rgb(28 18 14 / 0.08);
+  --tx-shadow-md: 0 2px 4px rgb(28 18 14 / 0.06), 0 6px 14px rgb(28 18 14 / 0.07);
+  --tx-shadow-lift: 0 24px 48px rgb(28 18 14 / 0.14);
+
+  /* ---- Motion ---- */
+  --tx-ease: cubic-bezier(0.65, 0, 0.35, 1);       /* in-out: state changes */
+  --tx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);    /* entrances, hovers */
+  --tx-dur-fast: 150ms;
+  --tx-dur: 200ms;
+  --tx-dur-slow: 350ms;
+  --tx-dur-reveal: 600ms;
+
+  /* ---- Focus: 2 px orange ring with a 2 px chocolate offset (BRAND_GUIDE §9) ---- */
+  --tx-focus: var(--tx-orange-500);
+  --tx-focus-offset: var(--tx-choc-950);
+  --tx-focus-ring: 0 0 0 2px var(--tx-focus-offset), 0 0 0 4px var(--tx-focus);
+
+  /* ---- Fixed roles (BRAND_GUIDE §4.3) ---- */
+  --tx-surface-dark: var(--tx-choc-950);
+  --tx-surface-dark-2: var(--tx-choc-900);
+  --tx-text-on-dark: var(--tx-cream-100);
+  --tx-text-muted-on-dark: var(--tx-choc-200);
+  --tx-border-on-dark: rgb(217 194 181 / 0.16);
+  --tx-accent-text-on-light: var(--tx-orange-700);
+  --tx-on-accent: var(--tx-choc-950);
+  --tx-selection: var(--tx-orange-200);
+}
+
+/* Role tokens, light context (default). Components use these so they work in either context. */
+:root, .tx-light {
+  --tx-bg: var(--tx-cream-100);
+  --tx-bg-alt: var(--tx-cream-200);
+  --tx-surface: var(--tx-white);
+  --tx-text: var(--tx-choc-900);
+  --tx-text-muted: var(--tx-choc-600);
+  --tx-accent: var(--tx-orange-500);
+  --tx-accent-hover: var(--tx-orange-400);
+  --tx-accent-text: var(--tx-orange-700);
+  --tx-border: var(--tx-choc-100);
+  --tx-border-strong: var(--tx-choc-200);
+  --tx-field-bg: var(--tx-white);
+  --tx-icon-bg: var(--tx-choc-50);
+}
+
+/* Role tokens, dark context (hero, bike chapter, network, footer, console sidebar). */
+.tx-dark {
+  --tx-bg: var(--tx-choc-950);
+  --tx-bg-alt: var(--tx-choc-900);
+  --tx-surface: var(--tx-choc-900);
+  --tx-text: var(--tx-cream-100);
+  --tx-text-muted: var(--tx-choc-200);
+  --tx-accent: var(--tx-orange-500);
+  --tx-accent-hover: var(--tx-orange-400);
+  --tx-accent-text: var(--tx-orange-500);
+  --tx-border: rgb(217 194 181 / 0.16);
+  --tx-border-strong: rgb(217 194 181 / 0.32);
+  --tx-field-bg: var(--tx-choc-900);
+  --tx-icon-bg: var(--tx-choc-800);
+}
+
+/* =========================================================================
+   Legacy aliases (--ngf-*): kept so every existing page re-skins; removed in I.3.
+   Mapping: primary → chocolate, accent → orange, ink → chocolate 950–700,
+   slate (UI neutrals) → chocolate/cream tints of similar lightness, status colours unchanged.
+   ========================================================================= */
+:root {
+  --ngf-primary-50: var(--tx-choc-50);
+  --ngf-primary-100: var(--tx-choc-100);
+  --ngf-primary-200: var(--tx-choc-200);
+  --ngf-primary-300: var(--tx-choc-300);
+  --ngf-primary-400: var(--tx-choc-400);
+  --ngf-primary-500: var(--tx-choc-500);
+  --ngf-primary-600: var(--tx-choc-600);
+  --ngf-primary-700: var(--tx-choc-700);
+  --ngf-primary-800: var(--tx-choc-800);
+  --ngf-primary-900: var(--tx-choc-900);
+
+  --ngf-accent-50: var(--tx-orange-50);
+  --ngf-accent-100: var(--tx-orange-100);
+  --ngf-accent-200: var(--tx-orange-200);
+  --ngf-accent-300: var(--tx-orange-300);
+  --ngf-accent-400: var(--tx-orange-400);
+  --ngf-accent-500: var(--tx-orange-500);
+  --ngf-accent-600: var(--tx-orange-600);
+  --ngf-accent-700: var(--tx-orange-700);
+  --ngf-accent-800: var(--tx-orange-800);
+  --ngf-accent-900: var(--tx-orange-800);
+
+  --ngf-ink-950: var(--tx-choc-950);
+  --ngf-ink-900: var(--tx-choc-900);
+  --ngf-ink-800: var(--tx-choc-800);
+  --ngf-ink-700: var(--tx-choc-700);
+
+  --ngf-accent-rgb: 244, 136, 0;
+  --ngf-ink-rgb: 28, 18, 14;
+  --ngf-primary-rgb: 42, 27, 22;
+
+  --ngf-success-50: var(--tx-success-50);
+  --ngf-success-100: var(--tx-success-100);
+  --ngf-success-500: var(--tx-success-500);
+  --ngf-success-600: var(--tx-success-600);
+  --ngf-success-700: var(--tx-success-700);
+
+  --ngf-warning-50: var(--tx-warning-50);
+  --ngf-warning-100: var(--tx-warning-100);
+  --ngf-warning-200: var(--tx-warning-200);
+  --ngf-warning-500: var(--tx-warning-500);
+  --ngf-warning-600: var(--tx-warning-600);
+  --ngf-warning-700: var(--tx-warning-700);
+
+  --ngf-danger-50: var(--tx-danger-50);
+  --ngf-danger-100: var(--tx-danger-100);
+  --ngf-danger-500: var(--tx-danger-500);
+  --ngf-danger-600: var(--tx-danger-600);
+
+  --ngf-info-50: var(--tx-info-50);
+  --ngf-info-100: var(--tx-info-100);
+  --ngf-info-200: var(--tx-info-200);
+  --ngf-info-500: var(--tx-info-500);
+  --ngf-info-600: var(--tx-info-600);
+  --ngf-info-700: var(--tx-info-700);
+
+  --ngf-slate-900: var(--tx-choc-900);
+  --ngf-slate-800: var(--tx-choc-800);
+  --ngf-slate-700: var(--tx-choc-700);
+  --ngf-slate-600: var(--tx-choc-600);
+  --ngf-slate-500: var(--tx-choc-500);
+  --ngf-slate-400: var(--tx-choc-300);
+  --ngf-slate-300: var(--tx-choc-200);
+  --ngf-slate-200: var(--tx-choc-100);
+  --ngf-slate-100: var(--tx-cream-200);
+  --ngf-slate-50: var(--tx-cream-100);
+  --ngf-white: var(--tx-white);
+
+  --ngf-color-bg: var(--tx-surface);
+  --ngf-color-surface: var(--tx-bg);
+  --ngf-color-text: var(--tx-text);
+  --ngf-color-muted: var(--tx-text-muted);
+  --ngf-color-brand: var(--tx-choc-900);
+  --ngf-color-brand-contrast: var(--tx-cream-100);
+  --ngf-color-accent: var(--tx-accent);
+  --ngf-color-border: var(--tx-border);
+  --ngf-color-focus: var(--tx-focus);
+
+  --ngf-font-sans: var(--tx-font-body);
+  --ngf-font-display: var(--tx-font-display);
+  --ngf-font-mono: var(--tx-font-mono);
+
+  --ngf-container-max: var(--tx-container);
   --ngf-container-wide: 1400px;
-  --ngf-radius-sm: 6px;
-  --ngf-radius-md: 10px;
-  --ngf-radius-lg: 14px;
-  --ngf-radius-xl: 20px;
-  --ngf-radius-full: 9999px;
+  --ngf-radius-sm: var(--tx-radius-xs);
+  --ngf-radius-md: var(--tx-radius-input);
+  --ngf-radius-lg: var(--tx-radius-card);
+  --ngf-radius-xl: var(--tx-radius-lg);
+  --ngf-radius-full: var(--tx-radius-pill);
 
-  /* Shadows */
-  --ngf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --ngf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --ngf-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-  --ngf-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --ngf-shadow-card: 0 2px 8px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --ngf-shadow-hero: 0 20px 40px -15px rgba(var(--ngf-primary-rgb), 0.15);
+  --ngf-shadow-sm: var(--tx-shadow-sm);
+  --ngf-shadow-md: var(--tx-shadow-md);
+  --ngf-shadow-lg: 0 10px 15px -3px rgb(28 18 14 / 0.08), 0 4px 6px -4px rgb(28 18 14 / 0.04);
+  --ngf-shadow-xl: 0 20px 25px -5px rgb(28 18 14 / 0.1), 0 8px 10px -6px rgb(28 18 14 / 0.04);
+  --ngf-shadow-card: 0 2px 8px rgb(28 18 14 / 0.06), 0 1px 2px rgb(28 18 14 / 0.04);
+  --ngf-shadow-hero: 0 20px 40px -15px rgb(42 27 22 / 0.15);
 
-  /* Transitions */
-  --ngf-transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  --ngf-transition-slow: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --ngf-transition: all var(--tx-dur) var(--tx-ease-out);
+  --ngf-transition-slow: all var(--tx-dur-slow) var(--tx-ease-out);
 }

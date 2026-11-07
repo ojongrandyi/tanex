@@ -47,7 +47,7 @@
   align-items: center;
   gap: 0.45rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   padding: 0.6rem 1.15rem;
   border-radius: 8px;
@@ -192,7 +192,7 @@
 }
 
 .doc-nav-tab.active {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border-bottom-color: var(--ngf-accent-500);
 }
 
@@ -208,7 +208,7 @@
 
 .doc-nav-tab.active .tab-count-pill {
   background: var(--ngf-accent-100);
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
 }
 
 /* ==========================================================================
@@ -252,7 +252,7 @@
 
 .doc-search-input:focus {
   background: #ffffff;
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.1);
 }
 
@@ -292,7 +292,7 @@
 }
 
 .filter-select:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
 }
 
 /* ==========================================================================
@@ -403,7 +403,7 @@
 }
 
 .doc-number-cell strong {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-weight: 700;
 }
 
@@ -526,7 +526,7 @@
 .btn-view-doc-primary:hover {
   background: var(--ngf-accent-500);
   border-color: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
 }
 
 .dropdown-action-wrap {
@@ -587,7 +587,7 @@
 
 .dropdown-item:hover {
   background: #f1f5f9;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .dropdown-divider {
@@ -640,7 +640,7 @@
   align-items: center;
   gap: 0.35rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -730,7 +730,7 @@
 
 .preview-version-pill {
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   font-size: 0.7rem;
   font-weight: 800;
   padding: 0.2rem 0.5rem;
@@ -812,7 +812,7 @@
 
 .v-chip.current {
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   font-weight: 700;
 }
 
@@ -944,7 +944,7 @@
 .lbl-service-stamp span {
   font-size: 0.6rem;
   font-weight: 800;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   letter-spacing: 0.04em;
 }
 
@@ -1057,7 +1057,7 @@
   font-size: 0.65rem;
   font-weight: 900;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   padding: 0.15rem 0.45rem;
   border-radius: 3px;
   white-space: nowrap;
@@ -1145,7 +1145,7 @@
 }
 
 .lbl-footer-id {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-weight: 800;
 }
 
@@ -1202,7 +1202,7 @@
 }
 
 .rec-meta-id {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .rec-status-pill {
@@ -1258,7 +1258,7 @@
 .rec-card-lbl {
   font-size: 0.65rem;
   font-weight: 800;
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   letter-spacing: 0.04em;
   margin-bottom: 0.15rem;
 }
@@ -1389,7 +1389,7 @@
 .inv-masthead-title h1 {
   font-size: 1.8rem;
   font-weight: 900;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -1397,7 +1397,7 @@
 .inv-id-badge {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .inv-divider {
@@ -1561,7 +1561,7 @@
 }
 
 .bol-id-value {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .bol-parties-container {
@@ -1725,7 +1725,7 @@
 }
 
 .ins-id-value {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .ins-title-band {
@@ -2123,7 +2123,7 @@
 }
 
 .modal-shipment-select:focus {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.1);
 }
 
@@ -2138,7 +2138,7 @@
 }
 
 .insured-value-input-wrap:focus-within {
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.1);
 }
 
@@ -2235,7 +2235,7 @@
   align-items: center;
   gap: 0.4rem;
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
   border: none;
   padding: 0.55rem 1.15rem;
   border-radius: 6px;

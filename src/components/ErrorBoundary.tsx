@@ -36,12 +36,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             gap: '0.75rem',
             padding: '4rem 2rem',
             textAlign: 'center',
-            color: '#475569',
+            color: 'var(--tx-text-muted)',
             minHeight: '320px',
           }}
         >
           <AlertTriangle size={32} color="#dc2626" />
-          <h3 style={{ margin: 0, color: '#0f172a' }}>
+          <h3 style={{ margin: 0, color: 'var(--tx-text)' }}>
             {this.props.label ? `${this.props.label} failed to load` : 'Something went wrong'}
           </h3>
           <p style={{ margin: 0, maxWidth: 420, fontSize: '0.9rem' }}>
@@ -55,8 +55,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               padding: '0.5rem 1.25rem',
               borderRadius: '8px',
               border: 'none',
-              background: '#D3070B',
-              color: '#fff',
+              background: 'var(--tx-accent)',
+              color: 'var(--tx-on-accent)',
               fontWeight: 600,
               cursor: 'pointer',
             }}

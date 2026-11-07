@@ -154,7 +154,7 @@
 .ngf-spp-btn.primary {
   background: var(--ngf-accent-600);
   border-color: var(--ngf-accent-600);
-  color: #ffffff;
+  color: var(--tx-on-accent);
 }
 
 .ngf-spp-btn.primary:hover:not(:disabled) {
@@ -175,6 +175,7 @@
 .ngf-spp button:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 .ngf-spp-spin {

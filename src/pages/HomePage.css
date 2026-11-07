@@ -127,7 +127,7 @@
   gap: 0.625rem;
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--ngf-white);
+  color: var(--tx-on-accent);
   background: linear-gradient(135deg, var(--ngf-accent-500) 0%, var(--ngf-accent-500) 100%);
   border: none;
   border-radius: var(--ngf-radius-md);
@@ -292,7 +292,7 @@
 }
 
 .hero-showcase-bottom strong {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-family: var(--ngf-font-mono);
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -328,7 +328,7 @@
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   text-transform: uppercase;
   display: block;
   margin-bottom: 0.5rem;
@@ -391,7 +391,7 @@
   width: 54px;
   height: 54px;
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-100);
   border-radius: var(--ngf-radius-lg);
   display: flex;
@@ -418,7 +418,7 @@
   gap: 0.375rem;
   background: transparent;
   border: none;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   font-size: 0.8125rem;
   font-weight: 700;
   cursor: pointer;
@@ -572,7 +572,7 @@
   font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .node-body h3 {
@@ -642,7 +642,7 @@
 
 .btn-corp-ghost-dark:hover {
   background: var(--ngf-slate-200);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 /* ============================================================
@@ -683,7 +683,7 @@
   top: 1.5rem;
   left: 1.5rem;
   background: linear-gradient(135deg, var(--ngf-accent-500) 0%, var(--ngf-accent-500) 100%);
-  color: var(--ngf-white);
+  color: var(--tx-on-accent);
   padding: 1rem 1.25rem;
   border-radius: var(--ngf-radius-lg);
   display: flex;
@@ -938,6 +938,7 @@
   background: var(--ngf-accent-500);
   border-color: var(--ngf-accent-500);
   transform: translateX(4px);
+  color: var(--tx-on-accent);
 }
 
 /* ============================================================
@@ -973,7 +974,7 @@
 
 .ind-tab-btn:hover {
   border-color: var(--ngf-accent-400);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .ind-tab-btn.active {
@@ -1124,7 +1125,7 @@
 .hub-pill-btn.active {
   background: var(--ngf-accent-500);
   border-color: var(--ngf-accent-500);
-  color: var(--ngf-white);
+  color: var(--tx-on-accent);
 }
 
 .hubs-preview-grid {
@@ -1572,7 +1573,7 @@
   font-size: 5rem;
   line-height: 1;
   font-family: Georgia, serif;
-  color: var(--ngf-accent-400);
+  color: var(--tx-accent-text);
   position: absolute;
   top: 1rem;
   left: 1.5rem;
@@ -1735,7 +1736,7 @@
   align-items: center;
   gap: 0.5rem;
   background: linear-gradient(135deg, var(--ngf-accent-500) 0%, var(--ngf-accent-500) 100%);
-  color: var(--ngf-white);
+  color: var(--tx-on-accent);
   font-weight: 700;
   font-size: 0.875rem;
   padding: 0.875rem 1.5rem;

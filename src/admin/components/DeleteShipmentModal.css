@@ -138,7 +138,7 @@
 }
 
 .inline-arrow {
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   margin: 0 0.15rem;
 }
 

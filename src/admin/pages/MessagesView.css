@@ -200,7 +200,7 @@
 
 .message-gateway {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
 }
 
 .message-preview {
@@ -246,7 +246,7 @@
 }
 
 .message-detail-grid a {
-  color: var(--ngf-accent-600);
+  color: var(--tx-accent-text);
   font-weight: 600;
 }
 
@@ -283,7 +283,7 @@
 .message-action.primary {
   background: var(--ngf-accent-500);
   border-color: var(--ngf-accent-500);
-  color: var(--ngf-white);
+  color: var(--tx-on-accent);
 }
 
 .message-action:disabled {

@@ -7,6 +7,7 @@ import { GATEWAYS, TRADE_LANES, type Gateway, getGateway, getLanePartners, forma
 import 'leaflet/dist/leaflet.css';
 import { MapPin, Clock, Layers, ZoomIn, ZoomOut, Compass, Radio, Route, Mail } from 'lucide-react';
 import './FacilityNetworkMap.css';
+import { BRAND_COLORS } from '../config/brand';
 
 interface FacilityNetworkMapProps {
   onContactGateway?: (code: string) => void;
@@ -59,7 +60,7 @@ export const FacilityNetworkMap: React.FC<FacilityNetworkMapProps> = ({ onContac
 
         // Outer glow
         L.polyline(arc, {
-          color: '#D3070B',
+          color: BRAND_COLORS.orange,
           weight: 4,
           opacity: 0.2,
           dashArray: '8, 8'
@@ -67,7 +68,7 @@ export const FacilityNetworkMap: React.FC<FacilityNetworkMapProps> = ({ onContac
 
         // Inner crisp line
         L.polyline(arc, {
-          color: '#D3070B',
+          color: BRAND_COLORS.orange,
           weight: 2,
           opacity: 0.75,
           dashArray: '6, 6'

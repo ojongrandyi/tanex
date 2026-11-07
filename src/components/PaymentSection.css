@@ -297,7 +297,8 @@
 
 .ngf-pay-tab-btn:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
-  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px var(--tx-focus-offset);
+  outline-offset: -4px;
 }
 
 .ngf-pay-tab-icon {
@@ -309,12 +310,12 @@
   height: 38px;
   border-radius: 10px;
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .ngf-pay-tab.is-open .ngf-pay-tab-icon {
   background: var(--ngf-accent-500);
-  color: #ffffff;
+  color: var(--tx-on-accent);
 }
 
 .ngf-pay-tab-text {
@@ -345,7 +346,7 @@
 
 .ngf-pay-tab.is-open .ngf-pay-tab-chevron {
   transform: rotate(180deg);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
 }
 
 .ngf-pay-tab-panel {
@@ -442,7 +443,8 @@
 .ngf-proof-field input:focus-visible,
 .ngf-proof-field select:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
-  outline-offset: 1px;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
   border-color: transparent;
 }
 
@@ -537,6 +539,7 @@
 .ngf-proof-link:focus-visible {
   outline: 2px solid var(--ngf-color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 .ngf-proof-form-error {

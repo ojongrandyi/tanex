@@ -113,7 +113,7 @@
 .help-search-icon {
   position: absolute;
   left: 1.25rem;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   pointer-events: none;
 }
 
@@ -138,7 +138,7 @@
 .help-search-input:focus {
   outline: none;
   background: var(--ngf-white);
-  border-color: var(--ngf-accent-500);
+  border-color: var(--tx-accent-text);
   box-shadow: 0 0 0 4px rgba(var(--ngf-accent-rgb), 0.15);
 }
 
@@ -253,6 +253,7 @@
 .help-pillar-card:focus-visible {
   outline: 3px solid var(--ngf-accent-400);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 .help-pillar-card:hover {
@@ -273,7 +274,7 @@
 
 .pillar-icon.icon-accent {
   background: var(--ngf-accent-50);
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   border: 1px solid var(--ngf-accent-200);
 }
 
@@ -317,7 +318,7 @@
   gap: 0.375rem;
   font-size: 0.8125rem;
   font-weight: 800;
-  color: var(--ngf-accent-500);
+  color: var(--tx-accent-text);
   transition: var(--ngf-transition);
 }
 
