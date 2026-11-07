@@ -203,7 +203,7 @@
   <nav aria-label="Sections">
     <a href="#palette">1 Palette</a><a href="#type">2 Type</a><a href="#components">3 Components</a><a href="#home">4 Homepage</a><a href="#journey">5 Journey</a><a href="#bike">6 Bike sheet</a><a href="#approve">Approve</a>
   </nav>
-  <span class="st">For approval · C.1</span>
+  <span class="st">Approved 7 Nov 2026 · C.1</span>
 </div></div>
 
 <header class="mast tx-dark">
@@ -549,8 +549,8 @@
         U('bike-side', 70, 150, 150, 98) + U('truck-side', 330, 140, 210, 105) +
         dash('M110 160Q230 70 380 150') + U('parcel', 222, 80, 46, 37) +
         '<g>' + [['LIMBE', 100, 1], ['BUEA', 300, 1], ['DOUALA', 500, 0]].map(function (p) {
-          return '<circle cx="' + p[1] + '" cy="318" r="9" fill="' + (p[2] ? '#2A1B16' : '#F48800') + '"/>' + (p[2] ? '<path d="M' + (p[1] - 4) + ' 318l3 3 6-6" stroke="#FBF6EC" stroke-width="2" fill="none"/>' : '') + M(p[1] + 16, 322, p[0], '#2A1B16'); }).join('') +
-        '<path d="M109 318H291M309 318H491" stroke="#2A1B16" stroke-width="1.5"/>' + dash('M509 318H630', '#9C7360', 1.5) + M(560, 340, 'AND BEYOND', '#7B5545') + '</g>',
+          return '<circle cx="' + p[1] + '" cy="318" r="9" fill="' + (p[2] ? '#2A1B16' : '#F48800') + '"/>' + (p[2] ? '<path d="M' + (p[1] - 4) + ' 318l3 3 6-6" stroke="#FBF6EC" stroke-width="2" fill="none"/>' : '') + M(p[1], 342, p[0], '#2A1B16', 'middle'); }).join('') +
+        '<path d="M109 318H291M309 318H491" stroke="#2A1B16" stroke-width="1.5"/>' + dash('M509 318H630', '#9C7360', 1.5) + M(630, 342, 'AND BEYOND', '#7B5545', 'end') + '</g>',
       moves: ['The bike hands the parcel to a TanEx truck: the box lifts across in an arc.', 'The camera pulls back to a stylised road with pins Limbe · Buea · Douala.', 'The truck drives the route as you scroll; each pin checks off as it passes.'],
       text: '<q>Bigger loads, between cities.</q> Caption: <q>Too big for the bike? The truck takes it from here.</q>' },
     { n: 4, name: 'The world', sec: 'Global network · CONTENT §2.5', len: ['150 vh pinned', 'then releases to the map'], bg: '#1C120E', svg:
@@ -572,7 +572,7 @@
         [0,1].map(function (i) { return '<rect x="60" y="' + (64 + i * 66) + '" width="70" height="6" rx="3" fill="#2A1B16"/><rect x="60" y="' + (78 + i * 66) + '" width="260" height="32" rx="8" fill="#FFF" stroke="#D9C2B5"/>'; }).join('') +
         '<rect x="60" y="196" width="70" height="6" rx="3" fill="#2A1B16"/><rect x="60" y="210" width="260" height="64" rx="8" fill="#FFF" stroke="#D9C2B5"/><rect x="60" y="288" width="130" height="28" rx="14" fill="#2A1B16"/>' +
         U('bike-side', 360, 140, 260, 170) +
-        '<path d="M429 254a40 40 0 0 1 22 30" fill="none" stroke="#9C7360" stroke-width="1.5" stroke-dasharray="3 4"/>' + M(470, 340, 'PARKED · IDLE WHEEL, STOPS ON FOCUS', '#7B5545'),
+        '<path d="M429 254a40 40 0 0 1 22 30" fill="none" stroke="#9C7360" stroke-width="1.5" stroke-dasharray="3 4"/>' + M(620, 340, 'PARKED · IDLE WHEEL, STOPS ON FOCUS', '#7B5545', 'end'),
       moves: ['The Stage calms: the bike rides back in and parks in the lane beside the form, with a slow idle wheel.', 'Nothing moves while the visitor types: the render loop stops when a field gets focus.'],
       text: '<q>Get in touch with us</q> with the phone numbers, email, both offices, hours and the quick form.' },
     { n: 7, name: 'FAQ and blog', sec: 'CONTENT §2.8, §2.9', len: ['not pinned'], bg: '#FBF6EC', svg:

@@ -3,7 +3,7 @@
 > **Context:** the platform is already built and working. TanEx gets a **complete visual redesign** through the
 > design system (`src/styles/tokens.css` + components), not by rewriting features. See `docs/TANEX_PLAN.md`.
 > The design direction (palette, type, one homepage mockup) is approved by the owner before pages are built
-> (tracker C.1). Values marked *(proposed)* become final at that approval.
+> (tracker C.1). Approved by the owner on 2026-11-07 (`design/direction.html`); the values below are final.
 
 ## 1. Name usage
 
@@ -45,7 +45,7 @@ Source: owner brief (*dark chocolate, cream, a small amount of orange*) and the 
 wordmark black). Orange is an **accent**: buttons, the paper-plane mark, route lines, highlights, never large
 areas of text.
 
-### 4.1 Palette *(proposed)*
+### 4.1 Palette
 
 | Scale | 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
