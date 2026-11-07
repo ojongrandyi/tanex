@@ -24,6 +24,7 @@ import {
   Truck
 } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
+import { useAuth } from '../../auth/AuthContext';
 import { QuoteRequest, QuoteRequestStatus, QuoteRequestPricing } from '../../types/admin';
 import './QuoteRequestsView.css';
 import { MoneyInput } from '../../components/forms/UnitControls';
@@ -35,6 +36,9 @@ import { SERVICE_OPTIONS } from '../../data/serviceOptions';
 
 export const QuoteRequestsView: React.FC = () => {
   const { quoteRequests, publishQuote, updateQuoteStatus, convertQuoteToShipment, settings } = useAdminData();
+  // quotes.view reads; publishing and status changes need quotes.manage, converting also shipments.create.
+  const { can } = useAuth();
+  const canManageQuotes = can('quotes.manage');
   const money = useCurrency();
   const [units] = useUnitSystem();
 
@@ -386,28 +390,30 @@ export const QuoteRequestsView: React.FC = () => {
                 {/* Lifecycle State Actions */}
                 <div className="pricing-actions-footer">
                   {selectedQuote.status === 'NEW' || selectedQuote.status === 'UNDER_REVIEW' ? (
-                    <div className="action-buttons-stack">
-                      <button
-                        className="btn-publish-quote-primary"
-                        onClick={() => setShowPublishConfirmModal(true)}
-                      >
-                        <Send size={16} />
-                        <span>Publish Final Quote ({money.format(finalPrice)})</span>
-                      </button>
-                      {selectedQuote.status === 'NEW' && (
+                    canManageQuotes && (
+                      <div className="action-buttons-stack">
                         <button
-                          className="btn-review-status-secondary"
-                          onClick={() => {
-                            updateQuoteStatus(selectedQuote.id, 'UNDER_REVIEW');
-                            setSuccessToast(`Quote ${selectedQuote.id} marked as Under Review.`);
-                            setTimeout(() => setSuccessToast(null), 3000);
-                          }}
+                          className="btn-publish-quote-primary"
+                          onClick={() => setShowPublishConfirmModal(true)}
                         >
-                          <Clock size={14} />
-                          <span>Mark as Under Review</span>
+                          <Send size={16} />
+                          <span>Publish Final Quote ({money.format(finalPrice)})</span>
                         </button>
-                      )}
-                    </div>
+                        {selectedQuote.status === 'NEW' && (
+                          <button
+                            className="btn-review-status-secondary"
+                            onClick={() => {
+                              updateQuoteStatus(selectedQuote.id, 'UNDER_REVIEW');
+                              setSuccessToast(`Quote ${selectedQuote.id} marked as Under Review.`);
+                              setTimeout(() => setSuccessToast(null), 3000);
+                            }}
+                          >
+                            <Clock size={14} />
+                            <span>Mark as Under Review</span>
+                          </button>
+                        )}
+                      </div>
+                    )
                   ) : selectedQuote.status === 'QUOTE_PUBLISHED' || selectedQuote.status === 'RATE_PUBLISHED' ? (
                     <div className="published-state-box">
                       <div className="pub-status-alert">
@@ -418,30 +424,32 @@ export const QuoteRequestsView: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="decision-recorder-buttons">
-                        <button
-                          className="btn-record-accept"
-                          onClick={() => {
-                            updateQuoteStatus(selectedQuote.id, 'ACCEPTED');
-                            setSuccessToast(`Recorded customer acceptance for quote ${selectedQuote.id}!`);
-                            setTimeout(() => setSuccessToast(null), 3000);
-                          }}
-                        >
-                          <Check size={14} />
-                          <span>Record Customer Acceptance</span>
-                        </button>
-                        <button
-                          className="btn-record-decline"
-                          onClick={() => {
-                            updateQuoteStatus(selectedQuote.id, 'DECLINED');
-                            setSuccessToast(`Recorded quote ${selectedQuote.id} as declined.`);
-                            setTimeout(() => setSuccessToast(null), 3000);
-                          }}
-                        >
-                          <XCircle size={14} />
-                          <span>Record Declined</span>
-                        </button>
-                      </div>
+                      {canManageQuotes && (
+                        <div className="decision-recorder-buttons">
+                          <button
+                            className="btn-record-accept"
+                            onClick={() => {
+                              updateQuoteStatus(selectedQuote.id, 'ACCEPTED');
+                              setSuccessToast(`Recorded customer acceptance for quote ${selectedQuote.id}!`);
+                              setTimeout(() => setSuccessToast(null), 3000);
+                            }}
+                          >
+                            <Check size={14} />
+                            <span>Record Customer Acceptance</span>
+                          </button>
+                          <button
+                            className="btn-record-decline"
+                            onClick={() => {
+                              updateQuoteStatus(selectedQuote.id, 'DECLINED');
+                              setSuccessToast(`Recorded quote ${selectedQuote.id} as declined.`);
+                              setTimeout(() => setSuccessToast(null), 3000);
+                            }}
+                          >
+                            <XCircle size={14} />
+                            <span>Record Declined</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : selectedQuote.status === 'ACCEPTED' ? (
                     <div className="accepted-action-box">
@@ -453,14 +461,16 @@ export const QuoteRequestsView: React.FC = () => {
                         </div>
                       </div>
 
-                      <button
-                        className="btn-convert-to-shipment"
-                        onClick={() => handleConvertShipment(selectedQuote.id)}
-                        disabled={isConverting}
-                      >
-                        <Truck size={17} />
-                        <span>{isConverting ? 'Verifying Route & Converting…' : 'Create Shipment from Quote'}</span>
-                      </button>
+                      {canManageQuotes && can('shipments.create') && (
+                        <button
+                          className="btn-convert-to-shipment"
+                          onClick={() => handleConvertShipment(selectedQuote.id)}
+                          disabled={isConverting}
+                        >
+                          <Truck size={17} />
+                          <span>{isConverting ? 'Verifying Route & Converting…' : 'Create Shipment from Quote'}</span>
+                        </button>
+                      )}
                     </div>
                   ) : selectedQuote.status === 'CONVERTED' ? (
                     <div className="converted-state-box">
@@ -473,13 +483,15 @@ export const QuoteRequestsView: React.FC = () => {
                   ) : (
                     <div className="closed-state-box">
                       <span>Status: <strong>{selectedQuote.status}</strong></span>
-                      <button
-                        className="btn-reopen-quote"
-                        onClick={() => updateQuoteStatus(selectedQuote.id, 'UNDER_REVIEW')}
-                      >
-                        <RotateCcw size={13} />
-                        <span>Re-open Quote</span>
-                      </button>
+                      {canManageQuotes && (
+                        <button
+                          className="btn-reopen-quote"
+                          onClick={() => updateQuoteStatus(selectedQuote.id, 'UNDER_REVIEW')}
+                        >
+                          <RotateCcw size={13} />
+                          <span>Re-open Quote</span>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

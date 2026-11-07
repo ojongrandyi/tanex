@@ -15,6 +15,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
+import { useAuth } from '../../auth/AuthContext';
 import { resolveLocation } from '../../services/geocodingService';
 import { Shipment, ShipmentStatus } from '../../types/shipment';
 import { EditShipmentModal } from '../components/EditShipmentModal';
@@ -45,6 +46,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
   onQuickUpdateStatus
 }) => {
   const { shipments, createShipment, updateShipmentFull, deleteShipment } = useAdminData();
+  const { can } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
@@ -184,23 +186,27 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
         </div>
 
         <div className="header-actions-cluster">
-          <button
-            type="button"
-            className="recently-deleted-btn"
-            onClick={() => setShowTrashModal(true)}
-            title="View and restore deleted shipments"
-          >
-            <Trash2 size={15} />
-            <span>Recently Deleted</span>
-          </button>
-          <button
-            type="button"
-            className="create-shipment-cta-btn"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <Plus size={16} />
-            <span>Book Consignment</span>
-          </button>
+          {can('shipments.delete') && (
+            <button
+              type="button"
+              className="recently-deleted-btn"
+              onClick={() => setShowTrashModal(true)}
+              title="View and restore deleted shipments"
+            >
+              <Trash2 size={15} />
+              <span>Recently Deleted</span>
+            </button>
+          )}
+          {can('shipments.create') && (
+            <button
+              type="button"
+              className="create-shipment-cta-btn"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <Plus size={16} />
+              <span>Book Consignment</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -553,24 +559,28 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                       {/* 7. ACTIONS */}
                       <td className="action-cell" style={{ textAlign: 'right' }}>
                         <div className="action-button-cluster">
-                          <button
-                            type="button"
-                            className={`control-pill-btn ${isSimulating ? 'sim-active' : ''}`}
-                            title="Operations Control"
-                            onClick={() => onQuickUpdateStatus(s)}
-                          >
-                            <SlidersHorizontal size={12} className="control-dash" aria-hidden="true" />
-                            <span>{isSimulating ? 'Moving' : 'Control'}</span>
-                          </button>
+                          {can('tracking.update') && (
+                            <button
+                              type="button"
+                              className={`control-pill-btn ${isSimulating ? 'sim-active' : ''}`}
+                              title="Operations Control"
+                              onClick={() => onQuickUpdateStatus(s)}
+                            >
+                              <SlidersHorizontal size={12} className="control-dash" aria-hidden="true" />
+                              <span>{isSimulating ? 'Moving' : 'Control'}</span>
+                            </button>
+                          )}
 
-                          <button
-                            type="button"
-                            className="action-icon-btn edit"
-                            title="Edit Consignment"
-                            onClick={() => setEditModalShipment(s)}
-                          >
-                            <Edit3 size={13} />
-                          </button>
+                          {can('shipments.edit') && (
+                            <button
+                              type="button"
+                              className="action-icon-btn edit"
+                              title="Edit Consignment"
+                              onClick={() => setEditModalShipment(s)}
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                          )}
 
                           <button
                             type="button"
@@ -581,14 +591,16 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                             <Eye size={13} />
                           </button>
 
-                          <button
-                            type="button"
-                            className="action-icon-btn delete"
-                            title="Delete Consignment"
-                            onClick={() => setDeleteModalShipment(s)}
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                          {can('shipments.delete') && (
+                            <button
+                              type="button"
+                              className="action-icon-btn delete"
+                              title="Delete Consignment"
+                              onClick={() => setDeleteModalShipment(s)}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

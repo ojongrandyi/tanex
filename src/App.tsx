@@ -12,6 +12,8 @@ import './pages/pageStyles';
 import './admin/styles';
 import { TrackingLoadingScreen } from './components/TrackingLoadingScreen';
 import { AdminDataProvider, useAdminData } from './context/AdminDataContext';
+import { AuthProvider, useAuth } from './auth/AuthContext';
+import { PERMISSIONS, hasPermission } from './shared/permissions';
 import { Shipment } from './types/shipment';
 import { QuoteRequest } from './types/admin';
 import { api } from './services/api';
@@ -21,8 +23,19 @@ import './styles/global.css';
 
 const loadAdminApp = () => import('./admin/AdminApp');
 const loadAdminLogin = () => import('./admin/AdminLogin');
+const loadAuthScreens = () => import('./admin/AuthScreens');
 const AdminApp = lazy(() => loadAdminApp().then((m) => ({ default: m.AdminApp })));
 const AdminLogin = lazy(() => loadAdminLogin().then((m) => ({ default: m.AdminLogin })));
+const ForcedPasswordChange = lazy(() => loadAuthScreens().then((m) => ({ default: m.ForcedPasswordChange })));
+const CourierComingSoon = lazy(() => loadAuthScreens().then((m) => ({ default: m.CourierComingSoon })));
+const NoAccess = lazy(() => loadAuthScreens().then((m) => ({ default: m.NoAccess })));
+
+/** What a signed-in account opens at the console path (IAM_RBAC_SPEC §9). */
+function consoleKind(permissions: readonly string[]): 'console' | 'courier' | 'none' {
+  const staffKeys = PERMISSIONS.map((p) => p.key).filter((k) => k !== 'courier.app');
+  if (staffKeys.some((k) => hasPermission(permissions, k))) return 'console';
+  return hasPermission(permissions, 'courier.app') ? 'courier' : 'none';
+}
 
 const TrackPage = lazy(() => import('./pages/TrackPage').then((m) => ({ default: m.TrackPage })));
 const TrackResultPage = lazy(() => import('./pages/TrackResultPage').then((m) => ({ default: m.TrackResultPage })));
@@ -147,26 +160,19 @@ function MainAppContent() {
   // `n` bumps on every request so repeating the same footer link re-opens that tier.
   const [serviceTier, setServiceTier] = useState<{ id: string; n: number }>({ id: '', n: 0 });
   const [contactGateway, setContactGateway] = useState<string>('');
-  const [adminAuthChecked, setAdminAuthChecked] = useState(false);
-  const [isAdminAuthed, setIsAdminAuthed] = useState(false);
+  const auth = useAuth();
   const [isTrackSearching, setIsTrackSearching] = useState(false);
   const [trackSearchQuery, setTrackSearchQuery] = useState('');
   const { getShipment, quoteRequests, shipments } = useAdminData();
 
-  // Every admin API route now requires a session — check once before ever rendering the
-  // real admin console, so someone without a session sees the login form instead of a
-  // console full of failed 401 requests and empty/mock data.
+  // The session is read once by AuthProvider. On the console path, fetch the console code
+  // while that check runs, so the split adds no wait.
   useEffect(() => {
-    if (currentPage === 'admin' && !adminAuthChecked) {
-      // Fetch the console code while the session is checked, so the split adds no wait.
+    if (currentPage === 'admin') {
       loadAdminLogin().catch(() => {});
       loadAdminApp().catch(() => {});
-      api.checkSession().then(isAdmin => {
-        setIsAdminAuthed(isAdmin);
-        setAdminAuthChecked(true);
-      });
     }
-  }, [currentPage, adminAuthChecked]);
+  }, [currentPage]);
 
   // Keep tracked shipment in continuous live synchronization with simulation engine
   useEffect(() => {
@@ -418,13 +424,21 @@ function MainAppContent() {
   // session check above so no admin data ever loads into the page before login succeeds.
   if (currentPage === 'admin') {
     const adminPlaceholder = <div className="admin-login-shell" />;
-    if (!adminAuthChecked) {
+    if (!auth.ready) {
       return adminPlaceholder;
     }
+    const kind = auth.user ? consoleKind(auth.user.permissions) : null;
     return (
       <Suspense fallback={adminPlaceholder}>
-        {!isAdminAuthed ? (
+        {!auth.user ? (
           <AdminLogin onNavigatePublic={handleNavigate} />
+        ) : auth.user.mustChangePassword ? (
+          // A temporary password is replaced before anything else (IAM_RBAC_SPEC §5.5).
+          <ForcedPasswordChange />
+        ) : kind === 'courier' ? (
+          <CourierComingSoon />
+        ) : kind === 'none' ? (
+          <NoAccess />
         ) : (
           <AdminApp
             onNavigatePublic={handleNavigate}
@@ -533,9 +547,11 @@ function MainAppContent() {
 
 export function App() {
   return (
-    <AdminDataProvider>
-      <MainAppContent />
-    </AdminDataProvider>
+    <AuthProvider>
+      <AdminDataProvider>
+        <MainAppContent />
+      </AdminDataProvider>
+    </AuthProvider>
   );
 }
 

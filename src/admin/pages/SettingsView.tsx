@@ -17,12 +17,15 @@ import {
 } from 'lucide-react';
 import { ADMIN_URL, COMPANY_SHORT, EMAIL, HQ_ADDRESS, LEGAL_NAME } from '../../config/brand';
 import { useAdminData } from '../../context/AdminDataContext';
+import { usePermission } from '../../auth/AuthContext';
 import './SettingsView.css';
 import { CURRENCY_NAMES, DISPLAY_CURRENCIES, formatMoney, resolveCurrency, type DisplayCurrency } from '../../shared/currency';
 import { MeasureInput, useUnitLabels } from '../../components/forms/UnitControls';
 
 export const SettingsView: React.FC = () => {
   const { settings, updateSettings } = useAdminData();
+  // settings.view reads; Reset Defaults and Save need settings.manage.
+  const canManageSettings = usePermission('settings.manage');
 
   // Company Profile State — hydrated from persisted settings (falling back to the legacy
   // `headquarters` key for databases seeded before it was renamed to `headquartersAddress`)
@@ -187,24 +190,26 @@ export const SettingsView: React.FC = () => {
           <p>Manage company identity, public tracking privacy, pricing defaults, and document rules.</p>
         </div>
 
-        <div className="settings-header-actions">
-          <button
-            type="button"
-            className="btn-reset-settings"
-            onClick={handleResetDefaults}
-          >
-            <RotateCcw size={15} />
-            <span>Reset Defaults</span>
-          </button>
-          <button
-            type="button"
-            className="btn-save-settings-primary"
-            onClick={handleSaveAll}
-          >
-            <Save size={15} />
-            <span>Save All Settings</span>
-          </button>
-        </div>
+        {canManageSettings && (
+          <div className="settings-header-actions">
+            <button
+              type="button"
+              className="btn-reset-settings"
+              onClick={handleResetDefaults}
+            >
+              <RotateCcw size={15} />
+              <span>Reset Defaults</span>
+            </button>
+            <button
+              type="button"
+              className="btn-save-settings-primary"
+              onClick={handleSaveAll}
+            >
+              <Save size={15} />
+              <span>Save All Settings</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Settings Navigation Tabs */}

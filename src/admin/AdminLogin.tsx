@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Lock, User, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
+import { Lock, User, ShieldCheck, ArrowRight, AlertCircle, Mail, CheckCircle2 } from 'lucide-react';
 import { api } from '../services/api';
+import { useAuth } from '../auth/AuthContext';
+import { AUTH_TEXT } from '../auth/strings';
 import { ADMIN_CONSOLE_NAME, LOGO_ALT, LOGO_HEIGHT, LOGO_WHITE, LOGO_WIDTH } from '../config/brand';
 import './AdminLogin.css';
 
@@ -8,7 +10,39 @@ interface AdminLoginProps {
   onNavigatePublic: (page: string) => void;
 }
 
+/** Shared frame for every console screen shown before the console itself (logo + white card). */
+export const AuthCard: React.FC<{ icon?: React.ReactNode; title: string; intro: string; children: React.ReactNode }> = ({
+  icon,
+  title,
+  intro,
+  children
+}) => (
+  <div className="admin-login-shell">
+    <img src={LOGO_WHITE} alt={LOGO_ALT} className="admin-login-logo" width={LOGO_WIDTH} height={LOGO_HEIGHT} />
+    <div className="admin-login-card">
+      <div className="admin-login-badge" aria-hidden="true">
+        {icon ?? <ShieldCheck size={22} />}
+      </div>
+      <h1 className="admin-login-title">{title}</h1>
+      <p className="admin-login-sub">{intro}</p>
+      {children}
+    </div>
+  </div>
+);
+
+export const AuthError: React.FC<{ message: string | null }> = ({ message }) =>
+  message ? (
+    <div className="admin-login-error" role="alert">
+      <AlertCircle size={14} aria-hidden="true" />
+      <span>{message}</span>
+    </div>
+  ) : null;
+
+const T = AUTH_TEXT.login;
+
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
+  const { refresh, passwordReset } = useAuth();
+  const [mode, setMode] = useState<'sign-in' | 'forgot'>('sign-in');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -21,75 +55,130 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
     setError(null);
     try {
       await api.login(identifier, password);
-      // AdminDataContext only ever fetches shipments/quotes/documents/settings once, on the
-      // very first app mount — which, for someone landing straight on #/admin logged out,
-      // happened before this session existed and so came back empty/401. A full reload is
-      // the simplest way to guarantee that context re-fetches everything now that a valid
-      // session cookie actually exists, rather than trying to thread a manual refetch call
-      // through the provider just for this one-time transition.
-      window.location.reload();
+      // The console (and its data) loads for whoever the session now says is signed in.
+      const user = await refresh();
+      if (!user) {
+        setError(T.failed);
+        setSubmitting(false);
+      }
     } catch (err: any) {
-      // CONTENT §10.1 wording for wrong details; other failures (e.g. too many attempts) keep the server's message.
-      const message: string = err?.message || '';
-      setError(/incorrect sign-in/i.test(message) || !message ? 'Incorrect sign-in details. Please try again.' : message);
+      // CONTENT §10.1: one message for every wrong-details case (including a locked account).
+      const status = err?.status;
+      setError(status === 401 ? T.failed : status === 429 ? T.tooMany : err?.message || T.failed);
+      setSubmitting(false);
+    }
+  };
+
+  if (mode === 'forgot') {
+    return <ForgotPassword onBack={() => setMode('sign-in')} />;
+  }
+
+  return (
+    <AuthCard title={ADMIN_CONSOLE_NAME} intro={T.subtitle}>
+      <form onSubmit={handleSubmit} className="admin-login-form">
+        <div className="admin-login-field">
+          <User size={15} className="admin-login-field-icon" aria-hidden="true" />
+          <input
+            type="text"
+            value={identifier}
+            onChange={(e) => { setIdentifier(e.target.value); setError(null); }}
+            placeholder={T.identifier}
+            aria-label={T.identifier}
+            autoFocus
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+          />
+        </div>
+        <div className="admin-login-field">
+          <Lock size={15} className="admin-login-field-icon" aria-hidden="true" />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); setError(null); }}
+            placeholder={T.password}
+            aria-label={T.password}
+            autoComplete="current-password"
+          />
+        </div>
+
+        <AuthError message={error} />
+
+        <button type="submit" className="admin-login-submit" disabled={submitting || !identifier.trim() || !password}>
+          {submitting ? T.busy : T.submit}
+          {!submitting && <ArrowRight size={15} aria-hidden="true" />}
+        </button>
+      </form>
+
+      {/* Only when the server can email a reset link (IAM_RBAC_SPEC §9). */}
+      {passwordReset && (
+        <button type="button" className="tx-auth-link" onClick={() => { setError(null); setMode('forgot'); }}>
+          {T.forgot}
+        </button>
+      )}
+
+      <button type="button" className="admin-login-exit" onClick={() => onNavigatePublic('home')}>
+        {T.backToSite}
+      </button>
+    </AuthCard>
+  );
+};
+
+const F = AUTH_TEXT.forgot;
+
+const ForgotPassword: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await api.requestPasswordReset(email.trim());
+      setSent(true);
+    } catch (err: any) {
+      setError(err?.status === 429 ? T.tooMany : err?.message || null);
+    } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="admin-login-shell">
-      <img src={LOGO_WHITE} alt={LOGO_ALT} className="admin-login-logo" width={LOGO_WIDTH} height={LOGO_HEIGHT} />
-      <div className="admin-login-card">
-        <div className="admin-login-badge">
-          <ShieldCheck size={22} />
+    <AuthCard icon={<Mail size={22} />} title={F.title} intro={F.intro}>
+      {sent ? (
+        <div className="tx-auth-success" role="status">
+          <CheckCircle2 size={14} aria-hidden="true" />
+          <span>{F.done}</span>
         </div>
-        <h1 className="admin-login-title">{ADMIN_CONSOLE_NAME}</h1>
-        <p className="admin-login-sub">Sign in with your work email or phone number.</p>
-
+      ) : (
         <form onSubmit={handleSubmit} className="admin-login-form">
           <div className="admin-login-field">
-            <User size={15} className="admin-login-field-icon" />
+            <Mail size={15} className="admin-login-field-icon" aria-hidden="true" />
             <input
-              type="text"
-              value={identifier}
-              onChange={(e) => { setIdentifier(e.target.value); setError(null); }}
-              placeholder="Email or phone"
-              aria-label="Email or phone"
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(null); }}
+              placeholder={F.email}
+              aria-label={F.email}
               autoFocus
               autoComplete="username"
               autoCapitalize="none"
               spellCheck={false}
             />
           </div>
-          <div className="admin-login-field">
-            <Lock size={15} className="admin-login-field-icon" />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(null); }}
-              placeholder="Password"
-              aria-label="Password"
-              autoComplete="current-password"
-            />
-          </div>
-
-          {error && (
-            <div className="admin-login-error">
-              <AlertCircle size={14} />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <button type="submit" className="admin-login-submit" disabled={submitting || !identifier.trim() || !password}>
-            {submitting ? 'Signing in…' : 'Sign in'}
-            {!submitting && <ArrowRight size={15} />}
+          <AuthError message={error} />
+          <button type="submit" className="admin-login-submit" disabled={submitting || !email.trim()}>
+            {submitting ? F.busy : F.submit}
           </button>
         </form>
-
-        <button type="button" className="admin-login-exit" onClick={() => onNavigatePublic('home')}>
-          ← Back to public site
-        </button>
-      </div>
-    </div>
+      )}
+      <button type="button" className="tx-auth-link" onClick={onBack}>
+        {F.back}
+      </button>
+    </AuthCard>
   );
 };

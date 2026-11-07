@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Ban, CheckCircle2, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { api } from '../../services/api';
 import { useAdminData } from '../../context/AdminDataContext';
+import { usePermission } from '../../auth/AuthContext';
 import { PAYMENT_METHODS } from '../../shared/paymentMethods';
 import { ShipmentPayment, formatPaymentAmount } from '../../shared/paymentRequest';
 import { PaymentIcon } from '../../components/PaymentIcon';
@@ -27,6 +28,8 @@ interface ShipmentPaymentPanelProps {
  */
 export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trackingNumber }) => {
   const { documents } = useAdminData();
+  // payments.view shows the request; changing it needs payments.manage.
+  const canManage = usePermission('payments.manage');
   const [payment, setPayment] = useState<ShipmentPayment | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -161,6 +164,7 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
               </li>
             ))}
           </ul>
+          {canManage && (
           <div className="ngf-spp-actions">
             {(payment.status === 'AWAITING_PAYMENT' || payment.status === 'UNDER_REVIEW') && (
               <>
@@ -189,14 +193,17 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
               <span>Edit</span>
             </button>
           </div>
+          )}
         </div>
       ) : (
         <div className="ngf-spp-none">
           <p className="ngf-spp-empty">No payment request for this shipment.</p>
-          <button type="button" className="ngf-spp-btn primary" onClick={startEditing}>
-            <Plus size={14} aria-hidden="true" />
-            <span>Add payment request</span>
-          </button>
+          {canManage && (
+            <button type="button" className="ngf-spp-btn primary" onClick={startEditing}>
+              <Plus size={14} aria-hidden="true" />
+              <span>Add payment request</span>
+            </button>
+          )}
         </div>
       )}
     </section>

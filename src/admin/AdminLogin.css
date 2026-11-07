@@ -189,3 +189,53 @@
       image-set(url('/images/site/locations-hero-2400.webp') type('image/webp'), url('/images/site/locations-hero-2400.jpg') type('image/jpeg'));
   }
 }
+
+/* Secondary links and notes on the sign-in cards (B.4). */
+.tx-auth-link {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tx-auth-link:hover {
+  color: var(--ngf-ink-950);
+}
+
+.tx-auth-link:focus-visible,
+.admin-login-exit:focus-visible,
+.admin-login-submit:focus-visible {
+  outline: 2px solid var(--ngf-ink-950);
+  outline-offset: 2px;
+}
+
+.tx-auth-hint {
+  margin: -0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-align: left;
+}
+
+.tx-auth-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+  box-sizing: border-box;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  text-align: left;
+}

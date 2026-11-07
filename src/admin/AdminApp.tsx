@@ -9,6 +9,9 @@ import { DocumentCenterView } from './pages/DocumentCenterView';
 import { SettingsView } from './pages/SettingsView';
 import { MessagesView } from './pages/MessagesView';
 import { PaymentsView } from './pages/PaymentsView';
+import { AccountView } from './pages/AccountView';
+import { useAuth } from '../auth/AuthContext';
+import { canOpenView, firstAllowedView } from './views';
 import { api } from '../services/api';
 import type { ContactMessage } from '../types/admin';
 import { ShipmentControlModal } from './components/ShipmentControlModal';
@@ -49,7 +52,16 @@ interface AdminAppProps {
 
 export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicTracking }) => {
   const { shipments, updateShipmentStatus, updateShipmentDirect } = useAdminData();
-  const [currentView, setCurrentView] = useState<AdminViewType>('operations-center');
+  const { can } = useAuth();
+  // Land on the first view this user may open; a user with no work views gets My account.
+  const [currentView, setCurrentViewRaw] = useState<AdminViewType>(() => firstAllowedView(can) ?? 'account');
+  // Views link to each other (dashboard cards, toasts); a link to a view the user can't open does nothing.
+  const setCurrentView = useCallback((view: AdminViewType) => {
+    if (canOpenView(view, can)) setCurrentViewRaw(view);
+  }, [can]);
+  const canViewMessages = can('messages.view');
+  const canViewPayments = can('payments.view');
+  const canViewDashboard = can('dashboard.view');
   const [globalSearch, setGlobalSearch] = useState<string>('');
   const [newMessagesCount, setNewMessagesCount] = useState(0);
 
@@ -58,11 +70,12 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPubl
     setNewMessagesCount(messages.filter((m) => m.status === 'NEW').length);
   }, []);
   useEffect(() => {
+    if (!canViewMessages) return;
     const refresh = () => api.getContactMessages().then(handleMessagesChanged).catch(() => {});
     refresh();
     const timer = window.setInterval(refresh, 60_000);
     return () => window.clearInterval(timer);
-  }, [handleMessagesChanged]);
+  }, [handleMessagesChanged, canViewMessages]);
 
   // Badge for proofs of payment waiting for review (update G.1): read from the stats call every
   // 30 s while the tab is visible, and again as soon as the console is shown or focused.
@@ -72,9 +85,14 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPubl
   const [proofToast, setProofToast] = useState<{ trackingNumber: string | null; count: number } | null>(null);
   const seenProofsRef = useRef<Set<string> | null>(null);
   const refreshProofsCount = useCallback(() => {
-    api.getStats()
-      .then(async (stats) => {
-        const count = Number(stats?.submittedProofsCount) || 0;
+    if (!canViewPayments) return;
+    // The stats call is the light way to read the count; without dashboard.view (Finance) the
+    // waiting list is read instead.
+    const countWaiting = canViewDashboard
+      ? api.getStats().then((stats) => Number(stats?.submittedProofsCount) || 0)
+      : api.getPaymentProofs('SUBMITTED').then((list) => list.length);
+    countWaiting
+      .then(async (count) => {
         setNewProofsCount(count);
         const stored = readSeenProofs();
         // Without browser storage the first poll only records what is already there.
@@ -91,7 +109,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPubl
         }
       })
       .catch(() => {});
-  }, []);
+  }, [canViewPayments, canViewDashboard]);
   useEffect(() => {
     if (!proofToast) return;
     const timer = window.setTimeout(() => setProofToast(null), 10_000);
@@ -128,7 +146,9 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPubl
     ? shipments.find(s => s.trackingNumber === controlModalTrackingNumber) || null
     : null;
 
+  // The control modal changes status and adds events: tracking.update only.
   const handleQuickUpdateStatus = (shipment: Shipment) => {
+    if (!can('tracking.update')) return;
     setControlModalTrackingNumber(shipment.trackingNumber);
   };
 
@@ -292,6 +312,11 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPubl
         {/* SETTINGS */}
         {currentView === 'settings' && (
           <SettingsView />
+        )}
+
+        {/* MY ACCOUNT: every signed-in user */}
+        {currentView === 'account' && (
+          <AccountView />
         )}
       </ErrorBoundary>
 

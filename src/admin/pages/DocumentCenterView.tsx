@@ -26,6 +26,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { useAdminData } from '../../context/AdminDataContext';
+import { usePermission } from '../../auth/AuthContext';
 import { AdminDocument, DocumentType, DocumentStatus } from '../../types/admin';
 import { Barcode } from '../../components/Barcode';
 import { COMPANY_SHORT, LEGAL_NAME } from '../../config/brand';
@@ -89,6 +90,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
   onSelectView
 }) => {
   const { shipments, documents, generateDocument, regenerateDocument, updateDocumentStatus, updateDocumentPaymentStatus, deleteDocument, settings } = useAdminData();
+  // documents.view reads, previews, downloads and prints; every change needs documents.manage.
+  const canManage = usePermission('documents.manage');
 
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState('');
@@ -520,15 +523,17 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           <p>Generate, view, print, and manage shipment documents from one place.</p>
         </div>
 
-        <div className="doc-header-actions">
-          <button
-            className="btn-generate-doc-primary"
-            onClick={() => openGenerateModal()}
-          >
-            <Plus size={16} />
-            <span>Generate Document</span>
-          </button>
-        </div>
+        {canManage && (
+          <div className="doc-header-actions">
+            <button
+              className="btn-generate-doc-primary"
+              onClick={() => openGenerateModal()}
+            >
+              <Plus size={16} />
+              <span>Generate Document</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* =========================================================================
@@ -736,13 +741,15 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                       <FileText size={36} className="empty-icon" />
                       <h4>No documents yet</h4>
                       <p>Documents generated from your shipments will appear here.</p>
-                      <button
-                        className="btn-empty-generate"
-                        onClick={() => openGenerateModal()}
-                      >
-                        <Plus size={14} />
-                        <span>Create Document</span>
-                      </button>
+                      {canManage && (
+                        <button
+                          className="btn-empty-generate"
+                          onClick={() => openGenerateModal()}
+                        >
+                          <Plus size={14} />
+                          <span>Create Document</span>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -875,13 +882,15 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                     <Printer size={14} />
                                     <span>Print</span>
                                   </button>
-                                  <button
-                                    className="dropdown-item"
-                                    onClick={() => handleTriggerRegenerate(doc)}
-                                  >
-                                    <RotateCcw size={14} />
-                                    <span>Regenerate</span>
-                                  </button>
+                                  {canManage && (
+                                    <button
+                                      className="dropdown-item"
+                                      onClick={() => handleTriggerRegenerate(doc)}
+                                    >
+                                      <RotateCcw size={14} />
+                                      <span>Regenerate</span>
+                                    </button>
+                                  )}
                                   {onOpenShipmentDetail && (
                                     <button
                                       className="dropdown-item"
@@ -894,7 +903,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                       <span>View Shipment</span>
                                     </button>
                                   )}
-                                  {doc.charges && (doc.docType === 'RECEIPT' || doc.docType === 'INVOICE' || doc.docType === 'BOL') && (
+                                  {canManage && doc.charges && (doc.docType === 'RECEIPT' || doc.docType === 'INVOICE' || doc.docType === 'BOL') && (
                                     <button
                                       className="dropdown-item"
                                       onClick={() => handleTogglePaymentStatus(doc)}
@@ -903,6 +912,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                       <span>Mark as {doc.charges.paymentStatus === 'PAID' ? 'Pending' : 'Paid'}</span>
                                     </button>
                                   )}
+                                  {canManage && (<>
                                   <div className="dropdown-divider" />
                                   <button
                                     className={`dropdown-item ${doc.status === 'CANCELLED' ? 'text-emerald' : 'text-danger'}`}
@@ -927,6 +937,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                     <Trash2 size={14} />
                                     <span>Delete Document</span>
                                   </button>
+                                  </>)}
                                 </div>
                               </>,
                               document.body
@@ -985,14 +996,16 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                   <Printer size={15} />
                   <span>Print</span>
                 </button>
-                <button
-                  className="btn-preview-action"
-                  onClick={() => handleTriggerRegenerate(previewDoc)}
-                >
-                  <RotateCcw size={15} />
-                  <span>Regenerate</span>
-                </button>
-                {previewDoc.charges && (previewDoc.docType === 'RECEIPT' || previewDoc.docType === 'INVOICE' || previewDoc.docType === 'BOL') && (
+                {canManage && (
+                  <button
+                    className="btn-preview-action"
+                    onClick={() => handleTriggerRegenerate(previewDoc)}
+                  >
+                    <RotateCcw size={15} />
+                    <span>Regenerate</span>
+                  </button>
+                )}
+                {canManage && previewDoc.charges && (previewDoc.docType === 'RECEIPT' || previewDoc.docType === 'INVOICE' || previewDoc.docType === 'BOL') && (
                   <button
                     className="btn-preview-action"
                     onClick={() => handleTogglePaymentStatus(previewDoc)}
@@ -1001,13 +1014,15 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     <span>Mark as {previewDoc.charges.paymentStatus === 'PAID' ? 'Pending' : 'Paid'}</span>
                   </button>
                 )}
-                <button
-                  className="btn-preview-action btn-preview-delete"
-                  onClick={() => handleTriggerDelete(previewDoc)}
-                >
-                  <Trash2 size={15} />
-                  <span>Delete</span>
-                </button>
+                {canManage && (
+                  <button
+                    className="btn-preview-action btn-preview-delete"
+                    onClick={() => handleTriggerDelete(previewDoc)}
+                  >
+                    <Trash2 size={15} />
+                    <span>Delete</span>
+                  </button>
+                )}
                 <button
                   className="btn-preview-close"
                   onClick={() => setPreviewDoc(null)}

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { EditShipmentModal } from '../components/EditShipmentModal';
 import { useAdminData } from '../../context/AdminDataContext';
+import { useAuth } from '../../auth/AuthContext';
 import { AdminViewType } from '../AdminLayout';
 import { Shipment } from '../../types/shipment';
 import './OperationsCenter.css';
@@ -48,6 +49,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
   onProofsChanged
 }) => {
   const { shipments, quoteRequests, updateShipmentFull } = useAdminData();
+  const { can } = useAuth();
   const [tableFilter, setTableFilter] = useState<'ALL' | 'IN_TRANSIT' | 'DELIVERED' | 'HELD'>('ALL');
   // Edit pen on Recent Shipments (update I.5).
   const [editShipment, setEditShipment] = useState<Shipment | null>(null);
@@ -153,6 +155,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
       {/* ====================================================================
           2. ENTERPRISE KPI METRIC CARDS (MATCHING SHIPMENTS PAGE)
          ==================================================================== */}
+      {can('shipments.view') && (
       <div className="ops-kpi-row">
         {/* Card 1: Active Shipments */}
         <div
@@ -318,17 +321,21 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* New payment proofs waiting for review (update G.2) */}
-      <NewProofsPanel
-        newProofsCount={newProofsCount}
-        onProofsChanged={onProofsChanged}
-        onOpenPayments={() => onSelectView('payments')}
-      />
+      {can('payments.view') && (
+        <NewProofsPanel
+          newProofsCount={newProofsCount}
+          onProofsChanged={onProofsChanged}
+          onOpenPayments={() => onSelectView('payments')}
+        />
+      )}
 
       {/* ====================================================================
           3. MAIN RECENT SHIPMENTS TABLE (MATCHING MASTER LEDGER DESIGN)
          ==================================================================== */}
+      {can('shipments.view') && (
       <div className="ops-section-card">
         <div className="ops-table-header-block">
           <div className="table-title-group">
@@ -396,12 +403,14 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             <Package size={36} className="empty-panel-icon" />
             <h4>No Consignments in Ledger</h4>
             <p>Zero shipments registered in the local fleet database.</p>
-            <button
-              className="ops-btn-primary"
-              onClick={() => onSelectView('create-shipment')}
-            >
-              + Book New Shipment
-            </button>
+            {can('shipments.create') && (
+              <button
+                className="ops-btn-primary"
+                onClick={() => onSelectView('create-shipment')}
+              >
+                + Book New Shipment
+              </button>
+            )}
           </div>
         ) : filteredShipments.length === 0 ? (
           <div className="ops-empty-panel">
@@ -525,26 +534,30 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                       {/* 7. ACTIONS */}
                       <td style={{ textAlign: 'right' }}>
                         <div className="ops-action-cluster">
-                          <button
-                            type="button"
-                            className={`ops-control-btn ${isSimulating ? 'sim-active' : ''}`}
-                            onClick={() => onQuickUpdateStatus(shipment)}
-                            title="Operations Control"
-                          >
-                            <SlidersHorizontal size={12} className="control-dash" aria-hidden="true" />
-                            <span>{isSimulating ? 'Moving' : 'Control'}</span>
-                          </button>
+                          {can('tracking.update') && (
+                            <button
+                              type="button"
+                              className={`ops-control-btn ${isSimulating ? 'sim-active' : ''}`}
+                              onClick={() => onQuickUpdateStatus(shipment)}
+                              title="Operations Control"
+                            >
+                              <SlidersHorizontal size={12} className="control-dash" aria-hidden="true" />
+                              <span>{isSimulating ? 'Moving' : 'Control'}</span>
+                            </button>
+                          )}
 
                           {/* Edit pen (update I.5): the same editor as All Shipments — details, photos, payment request. */}
-                          <button
-                            type="button"
-                            className="ops-inspect-icon-btn ops-edit-icon-btn"
-                            onClick={() => setEditShipment(shipment)}
-                            title="Edit Consignment"
-                            aria-label={`Edit ${shipment.trackingNumber}`}
-                          >
-                            <Edit3 size={13} />
-                          </button>
+                          {can('shipments.edit') && (
+                            <button
+                              type="button"
+                              className="ops-inspect-icon-btn ops-edit-icon-btn"
+                              onClick={() => setEditShipment(shipment)}
+                              title="Edit Consignment"
+                              aria-label={`Edit ${shipment.trackingNumber}`}
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                          )}
 
                           <button
                             type="button"
@@ -564,6 +577,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
           </div>
         )}
       </div>
+      )}
 
       {editShipment && (
         <EditShipmentModal

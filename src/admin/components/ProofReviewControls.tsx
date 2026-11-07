@@ -1,6 +1,7 @@
 import React, { useId, useState } from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { api } from '../../services/api';
+import { usePermission } from '../../auth/AuthContext';
 import { PROOF_LIMITS, type AdminPaymentProof } from '../../shared/paymentProof';
 import './ProofReviewControls.css';
 
@@ -21,8 +22,10 @@ export const ProofReviewControls: React.FC<ProofReviewControlsProps> = ({ proof,
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Approve/reject need payments.manage; payments.view alone sees the proof only.
+  const canManage = usePermission('payments.manage');
 
-  if (proof.status !== 'SUBMITTED') return null;
+  if (proof.status !== 'SUBMITTED' || !canManage) return null;
 
   const approve = async () => {
     if (!window.confirm(`Approve this proof and mark the payment for ${proof.trackingNumber} as paid?`)) return;

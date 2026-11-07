@@ -4,6 +4,7 @@ import { Shipment } from '../../types/shipment';
 import { resolveLocation } from '../../services/geocodingService';
 import { ShipmentImagesPanel } from './ShipmentImagesPanel';
 import { ShipmentPaymentPanel } from './ShipmentPaymentPanel';
+import { usePermission } from '../../auth/AuthContext';
 import './EditShipmentModal.css';
 import { COMPANY_SHORT } from '../../config/brand';
 
@@ -19,6 +20,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
   onClose,
   onSave
 }) => {
+  const canViewPayments = usePermission('payments.view');
   // Sender form state. Missing values start empty: the old U.S. defaults (New York / NY /
   // 100 Broadway, Los Angeles / CA / 500 Grand Ave) were saved into worldwide shipments.
   const initialSenderName = typeof shipment.sender === 'object' ? (shipment.sender?.name || '') : String(shipment.sender || '');
@@ -874,7 +876,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
           <ShipmentImagesPanel trackingNumber={shipment.trackingNumber} legacyPhotos={shipment.photos} />
 
           {/* Payment request with this shipment's own accounts (update D.2); saved on its own. */}
-          <ShipmentPaymentPanel trackingNumber={shipment.trackingNumber} />
+          {canViewPayments && <ShipmentPaymentPanel trackingNumber={shipment.trackingNumber} />}
 
           {/* Footer Actions */}
           {saveError && <p className="edit-save-error" role="alert">{saveError}</p>}

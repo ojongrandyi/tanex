@@ -105,8 +105,9 @@ roles belong to the Super Admin (except the locked Super Admin role).
 |---|---|---|
 | `POST /api/auth/login` | public (rate-limited) | `{ identifier, password }` |
 | `POST /api/auth/logout` | session | |
-| `GET /api/auth/session` | public | `{ user: { id, displayName, email, phone, locale, roles, permissions, mustChangePassword } | null }` |
+| `GET /api/auth/session` | public | `{ user: { id, displayName, email, phone, locale, roles, permissions, mustChangePassword } | null, passwordReset }` (`passwordReset`: the sign-in screen may offer "Forgot password?"; false until B.6) |
 | `POST /api/auth/change-password` | session | `{ currentPassword, newPassword }`; clears `must_change_password` |
+| `PATCH /api/auth/me` | session | `{ displayName?, locale? }`: own name (1–80 chars) and language (`en`/`fr`) only; audited `user.update_self` (added B.4) |
 | `POST /api/auth/forgot` | public (rate-limited) | emails a reset link when SMTP is set; always answers the same |
 | `POST /api/auth/reset` | public (token) | token is random 32 bytes, stored hashed, 30 min, single use |
 | `GET/POST /api/users`, `PATCH /api/users/:id` | `users.view` / `users.manage` | create, edit, roles, disable/enable |

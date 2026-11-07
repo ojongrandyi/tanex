@@ -21,6 +21,18 @@ export const LOCKOUT_MS = 15 * 60 * 1000;
 // answer never tells a guesser which part was wrong or that an account exists.
 const SIGN_IN_FAILED = 'Incorrect sign-in details.';
 
+export const DISPLAY_NAME_MAX = 80;
+const LOCALES: readonly string[] = ['en', 'fr'];
+
+/**
+ * Whether the sign-in screen may offer "Forgot password?". The reset email needs the mailer and
+ * the forgot/reset routes (tracker B.6); until those exist this stays false, so the link is never
+ * shown without a working reset behind it. B.6 replaces it with "SMTP is configured".
+ */
+export function passwordResetAvailable(): boolean {
+  return false;
+}
+
 interface LoginRow {
   id: string;
   display_name: string;
@@ -154,7 +166,40 @@ export function createAuthRouter(): Router {
   // GET /api/auth/session: public; the signed-in user or null.
   router.get('/session', (req: Request, res: Response) => {
     const auth = getRequestAuth(req);
-    res.json({ success: true, user: auth ? sessionUser(auth) : null });
+    res.json({ success: true, user: auth ? sessionUser(auth) : null, passwordReset: passwordResetAvailable() });
+  });
+
+  // PATCH /api/auth/me  { displayName?, locale? }: the signed-in user's own name and language.
+  router.patch('/me', (req: Request, res: Response) => {
+    const auth = getRequestAuth(req);
+    if (!auth) return res.status(401).json({ success: false, error: 'Authentication required' });
+
+    const { displayName, locale } = req.body || {};
+    const changes: { display_name?: string; locale?: string } = {};
+    if (displayName !== undefined) {
+      const name = typeof displayName === 'string' ? displayName.trim().replace(/\s+/g, ' ') : '';
+      if (!name || name.length > DISPLAY_NAME_MAX) {
+        return res.status(400).json({ success: false, code: 'INVALID_NAME', error: `Enter a name of 1 to ${DISPLAY_NAME_MAX} characters.` });
+      }
+      if (name !== auth.user.displayName) changes.display_name = name;
+    }
+    if (locale !== undefined) {
+      if (typeof locale !== 'string' || !LOCALES.includes(locale)) {
+        return res.status(400).json({ success: false, code: 'INVALID_LOCALE', error: 'Language must be en or fr.' });
+      }
+      if (locale !== auth.user.locale) changes.locale = locale;
+    }
+
+    const fields = Object.keys(changes) as (keyof typeof changes)[];
+    if (fields.length > 0) {
+      const sets = fields.map((f) => `${f} = ?`).join(', ');
+      db.prepare(`UPDATE users SET ${sets}, updated_at_ts = ? WHERE id = ?`)
+        .run(...fields.map((f) => changes[f] as string), Date.now(), auth.user.id);
+      audit(req, 'user.update_self', 'user', auth.user.id, `Own account updated: ${fields.join(', ')}`);
+      resetRequestAuth(req);
+    }
+    const fresh = loadAuth(db, auth.user.id);
+    res.json({ success: true, user: fresh ? sessionUser(fresh) : null });
   });
 
   // POST /api/auth/change-password  { currentPassword, newPassword }

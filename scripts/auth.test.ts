@@ -318,6 +318,35 @@ test('change-password: checks the current password and policy, clears must-chang
   for (const r of rows) assert.ok(!JSON.stringify(r).includes('a brand new secret'), 'no password in the audit log');
 });
 
+// ---- My account ----
+
+test('PATCH /me: own name and language only; validated; audited; session shows the change', async () => {
+  const app = await startApp();
+  const id = createUser({ email: 'me@example.test', roles: ['role_test_editor'] });
+  const { cookie } = await login(app, 'me@example.test');
+  const patch = (body: object, c: string | null = cookie) => fetch(`${app.base}/api/auth/me`, {
+    method: 'PATCH', headers: { ...(c ? { Cookie: c } : {}), 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+  });
+
+  assert.equal((await patch({ locale: 'fr' }, null)).status, 401);
+  assert.equal((await patch({ displayName: '   ' })).status, 400);
+  assert.equal((await patch({ displayName: 'x'.repeat(81) })).status, 400);
+  assert.equal((await patch({ locale: 'de' })).status, 400);
+
+  const ok = await patch({ displayName: '  Ada   Mbah ', locale: 'fr', email: 'other@example.test', permissions: ['*'] });
+  assert.equal(ok.status, 200);
+  const body = await ok.json() as any;
+  assert.equal(body.user.displayName, 'Ada Mbah');
+  assert.equal(body.user.locale, 'fr');
+  assert.equal(body.user.email, 'me@example.test', 'email is not editable here');
+  assert.deepEqual(body.user.permissions, ['shipments.edit'], 'permissions are not editable here');
+
+  const session = await (await get(app, '/api/auth/session', cookie!)).json() as any;
+  assert.equal(session.user.displayName, 'Ada Mbah');
+  assert.equal(typeof session.passwordReset, 'boolean');
+  assert.equal(count(`SELECT COUNT(*) AS c FROM audit_log WHERE entity_id = ? AND action = 'user.update_self'`, id), 1);
+});
+
 // ---- Audit ----
 
 test('stripSecrets drops passwords, hashes and tokens at any depth', () => {

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Inbox, Mail, Phone, MapPin, Package, RefreshCw, CheckCircle2, Eye, RotateCcw, AlertTriangle, Reply } from 'lucide-react';
 import { api } from '../../services/api';
+import { usePermission } from '../../auth/AuthContext';
 import type { ContactMessage, ContactMessageStatus } from '../../types/admin';
 import './MessagesView.css';
 
@@ -29,6 +30,8 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
   const [filter, setFilter] = useState<Filter>('ALL');
   const [openId, setOpenId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  // messages.view reads; marking read/resolved/unread needs messages.manage.
+  const canManage = usePermission('messages.manage');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -66,7 +69,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
   const toggleOpen = (msg: ContactMessage) => {
     const opening = openId !== msg.id;
     setOpenId(opening ? msg.id : null);
-    if (opening && msg.status === 'NEW') setStatus(msg.id, 'READ');
+    if (opening && msg.status === 'NEW' && canManage) setStatus(msg.id, 'READ');
   };
 
   const visible = useMemo(() => {
@@ -168,7 +171,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
                         <Phone size={14} /><span>Call back</span>
                       </a>
                     )}
-                    {m.status !== 'RESOLVED' ? (
+                    {canManage && (m.status !== 'RESOLVED' ? (
                       <button type="button" className="message-action" disabled={busyId === m.id} onClick={() => setStatus(m.id, 'RESOLVED')}>
                         <CheckCircle2 size={14} /><span>Mark resolved</span>
                       </button>
@@ -176,8 +179,8 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
                       <button type="button" className="message-action" disabled={busyId === m.id} onClick={() => setStatus(m.id, 'READ')}>
                         <RotateCcw size={14} /><span>Reopen</span>
                       </button>
-                    )}
-                    {m.status !== 'NEW' && (
+                    ))}
+                    {canManage && m.status !== 'NEW' && (
                       <button type="button" className="message-action" disabled={busyId === m.id} onClick={() => setStatus(m.id, 'NEW')}>
                         <Eye size={14} /><span>Mark unread</span>
                       </button>

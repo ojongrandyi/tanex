@@ -37,6 +37,7 @@ import { useCurrency } from '../../utils/useCurrency';
 import { calculateRouteGeometry, inferTransportMode, type TransportMode } from '../../services/routingEngine';
 import { generateShipmentPlan } from '../../services/planningEngine';
 import { useAdminData } from '../../context/AdminDataContext';
+import { useAuth } from '../../auth/AuthContext';
 import { AdminViewType } from '../AdminLayout';
 import { Shipment, ShipmentStatus, TrackingEvent } from '../../types/shipment';
 import { ADMIN_ROLE_LABEL, COMPANY, COMPANY_SHORT, LEGAL_NAME, REFERENCE_PREFIX, TRACKING_PREFIX } from '../../config/brand';
@@ -74,6 +75,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   onOpenShipmentDetail
 }) => {
   const { createShipment, generateDocument } = useAdminData();
+  const { can } = useAuth();
 
   // Current Step: 1 to 7
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -1324,7 +1326,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           )}
 
           {/* Optional step: package images, now that the server has assigned the tracking ID. */}
-          {generatedTrackingNumber && (
+          {generatedTrackingNumber && can('shipments.edit') && (
             <div className="success-images-step">
               <ShipmentImagesPanel trackingNumber={generatedTrackingNumber} />
             </div>
@@ -3565,7 +3567,9 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 </div>
               </div>
 
-              {/* Customer payment request (update D.2): unlike the pricing above, this IS public. */}
+              {/* Customer payment request (update D.2): unlike the pricing above, this IS public.
+                  Saving it needs payments.manage, so it is offered only with that permission. */}
+              {can('payments.manage') && (
               <div className="create-payment-block">
                 <label className="create-payment-toggle">
                   <input
@@ -3601,6 +3605,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   />
                 )}
               </div>
+              )}
             </div>
           )}
 

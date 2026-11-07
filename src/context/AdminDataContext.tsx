@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '../auth/AuthContext';
 import { Shipment, ShipmentStatus, TrackingEvent } from '../types/shipment';
 import { QuoteRequest, QuoteRequestStatus, QuoteRequestPricing, AdminNotification, AdminSettings, AdminDocument, DocumentStatus, DocumentVersion } from '../types/admin';
 import { api } from '../services/api';
@@ -114,18 +115,26 @@ const normalizeShipment = (s: any): Shipment => {
   };
 };
 
-  // Live initial load from persistent SQLite Backend
+  // Only the lists the signed-in user may view are requested (IAM_RBAC_SPEC §9), so a
+  // visitor or a user without that permission never triggers a 401/403. The load runs again
+  // when someone signs in (the user id changes). Settings are public (the server returns
+  // more fields to staff).
+  const { ready: authReady, user: authUser, can } = useAuth();
+  const canViewShipments = can('shipments.view');
+  const canViewQuotes = can('quotes.view');
+  const canViewDocuments = can('documents.view');
+  const authUserId = authUser?.id ?? null;
+
   useEffect(() => {
+    if (!authReady) return;
     let isMounted = true;
+    const skip = () => Promise.reject(new Error('not permitted'));
     const loadBackendData = async () => {
       try {
-        // Shipments, quotes and documents are admin-only; asking for them without a session
-        // only produced 401s in every public visitor's console. Settings are public.
-        const isAdmin = await api.checkSession();
         const [liveShipments, liveQuotes, liveDocs, liveSettings] = await Promise.allSettled([
-          isAdmin ? api.getShipments() : Promise.reject(new Error('no admin session')),
-          isAdmin ? api.getQuotes() : Promise.reject(new Error('no admin session')),
-          isAdmin ? api.getDocuments() : Promise.reject(new Error('no admin session')),
+          canViewShipments ? api.getShipments() : skip(),
+          canViewQuotes ? api.getQuotes() : skip(),
+          canViewDocuments ? api.getDocuments() : skip(),
           api.getSettings()
         ]);
 
@@ -158,7 +167,7 @@ const normalizeShipment = (s: any): Shipment => {
 
     loadBackendData();
     return () => { isMounted = false; };
-  }, []);
+  }, [authReady, authUserId, canViewShipments, canViewQuotes, canViewDocuments]);
 
   // The initial load above only ever runs once, on mount — with nothing else refreshing it,
   // this context's `shipments` silently drifted further behind the server's real, continuously
@@ -181,12 +190,9 @@ const normalizeShipment = (s: any): Shipment => {
     // this effect fresh with a valid session. Other failures (a network blip, a 5xx) keep
     // retrying as before; only a confirmed "not authenticated" response silences it.
     // Without a session there is nothing to refresh, so the interval isn't started at all.
+    // Started only for a user who may view shipments.
+    if (!canViewShipments) return;
     let stopped = false;
-    let interval: ReturnType<typeof setInterval> | undefined;
-    api.checkSession().then(isAdmin => {
-      if (!isAdmin || stopped) return;
-      interval = setInterval(refresh, REFRESH_MS);
-    });
     const refresh = async () => {
       if (stopped) return;
       try {
@@ -205,8 +211,9 @@ const normalizeShipment = (s: any): Shipment => {
         // Any other error: silent, a failed background refresh shouldn't disrupt the session.
       }
     };
+    const interval: ReturnType<typeof setInterval> = setInterval(refresh, REFRESH_MS);
     return () => { stopped = true; clearInterval(interval); };
-  }, []);
+  }, [canViewShipments, authUserId]);
 
   // Subscribe to Live Simulation Engine
   useEffect(() => {

@@ -23,6 +23,24 @@ export interface PaymentProofBody {
   image: string;
 }
 
+/** GET /api/auth/session `user` (docs/IAM_RBAC_SPEC.md §6). permissions may hold '*'. */
+export interface SessionUser {
+  id: string;
+  displayName: string;
+  email: string | null;
+  phone: string | null;
+  locale: string;
+  roles: { id: string; name: string }[];
+  permissions: string[];
+  mustChangePassword: boolean;
+}
+
+export interface SessionInfo {
+  user: SessionUser | null;
+  /** True when the server can email a reset link ("Forgot password?" is shown only then). */
+  passwordReset: boolean;
+}
+
 const API_BASE = '/api';
 
 // ---------------------------------------------------------------------------------------------
@@ -84,6 +102,8 @@ async function handleResponse<T>(res: Response): Promise<T> {
     // refresh, which used to retry every 12s forever even for a logged-out visitor.
     const err: any = new Error(json.error || `HTTP error ${res.status}`);
     err.status = res.status;
+    // Machine-readable reason where the route gives one (e.g. WRONG_PASSWORD, TOO_SHORT).
+    if (typeof json.code === 'string') err.code = json.code;
     // Per-field messages from form endpoints (e.g. payment methods), keyed by field name.
     if (json.fieldErrors) err.fieldErrors = json.fieldErrors;
     throw err;
@@ -92,9 +112,15 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export const api = {
-  // Admin Auth
-  // identifier: email or phone (normalised by the server). Full AuthContext arrives in B.4.
+  // Staff auth (docs/IAM_RBAC_SPEC.md §6). The console reads these through src/auth/AuthContext.
+  // identifier: email or phone (normalised by the server). Errors carry the HTTP status
+  // (401 wrong details, 429 too many attempts, 0 unreachable).
   async login(identifier: string, password: string): Promise<{ success: boolean }> {
+    const fail = (status: number, message: string) => {
+      const err: any = new Error(message);
+      err.status = status;
+      return err;
+    };
     let res: Response;
     try {
       res = await fetchApi(`${API_BASE}/auth/login`, {
@@ -105,7 +131,7 @@ export const api = {
         body: JSON.stringify({ identifier, password })
       });
     } catch {
-      throw new Error("Can't reach the server. Check your connection and try again.");
+      throw fail(0, "Can't reach the server. Check your connection and try again.");
     }
     let json: any;
     try {
@@ -113,13 +139,13 @@ export const api = {
     } catch {
       // The hosting CDN has been seen answering with an empty or HTML body. The body is
       // unreliable but the session cookie isn't, so ask the server whether login took.
-      if (res.ok && await api.checkSession()) return { success: true };
-      if (res.status === 401) throw new Error('Incorrect sign-in details.');
-      if (res.status === 429) throw new Error('Too many login attempts. Try again in a few minutes.');
-      throw new Error('Sign-in is temporarily unavailable. Please try again in a moment.');
+      if (res.ok && (await api.getSession()).user) return { success: true };
+      if (res.status === 401) throw fail(401, 'Incorrect sign-in details.');
+      if (res.status === 429) throw fail(429, 'Too many login attempts. Try again in a few minutes.');
+      throw fail(res.status, 'Sign-in is temporarily unavailable. Please try again in a moment.');
     }
     if (!res.ok || json.success === false) {
-      throw new Error(json.error || `HTTP error ${res.status}`);
+      throw fail(res.status, json.error || `HTTP error ${res.status}`);
     }
     return json;
   },
@@ -128,15 +154,47 @@ export const api = {
     await fetchApi(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
   },
 
-  async checkSession(): Promise<boolean> {
-    try {
-      const res = await fetchApi(`${API_BASE}/auth/session`, { credentials: 'include', cache: 'no-store' });
-      const json = await res.json();
-      // Signed in as any active user. Per-permission gating of the console comes in B.4.
-      return Boolean(json?.user);
-    } catch {
-      return false;
-    }
+  /**
+   * The signed-in staff user (null when signed out) and whether "Forgot password?" may be
+   * offered. Throws only when the server can't be reached, so callers can tell "signed out"
+   * apart from "offline".
+   */
+  async getSession(): Promise<SessionInfo> {
+    const res = await fetchApi(`${API_BASE}/auth/session`, { credentials: 'include', cache: 'no-store' });
+    const json = await handleResponse<any>(res);
+    return { user: json?.user ?? null, passwordReset: json?.passwordReset === true };
+  },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const res = await fetchApi(`${API_BASE}/auth/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    await handleResponse<unknown>(res);
+  },
+
+  /** The signed-in user's own name and language (PATCH /api/auth/me). */
+  async updateMyAccount(changes: { displayName?: string; locale?: 'en' | 'fr' }): Promise<SessionUser | null> {
+    const res = await fetchApi(`${API_BASE}/auth/me`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(changes)
+    });
+    const json = await handleResponse<any>(res);
+    return json?.user ?? null;
+  },
+
+  /** Asks for a reset link (B.6). The server answers the same whether or not the email has an account. */
+  async requestPasswordReset(email: string): Promise<void> {
+    const res = await fetchApi(`${API_BASE}/auth/forgot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    await handleResponse<unknown>(res);
   },
 
   // Public Tracking
