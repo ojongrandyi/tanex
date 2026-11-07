@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import type { PaymentStatus, PublicPayment } from '../shared/paymentRequest';
-import { formatPaymentAmount } from '../shared/paymentRequest';
+import { formatPaymentAmount, paymentStatusLabel } from '../shared/paymentRequest';
+import { useLocale } from '../i18n/I18nProvider';
 import { AlertCircle, CheckCircle2, ChevronDown, Clock, Upload, Wallet } from 'lucide-react';
 import { PaymentMethodCard } from './PaymentMethodCard';
 import { PaymentProofForm } from './PaymentProofForm';
@@ -11,12 +12,12 @@ interface PaymentSectionProps {
   payment: PublicPayment;
 }
 
-// Status badge text (CONTENT.md §6.8) and tone.
-const STATUS_BADGES: Record<PaymentStatus, { label: string; tone: string }> = {
-  AWAITING_PAYMENT: { label: 'Awaiting payment', tone: 'awaiting' },
-  UNDER_REVIEW: { label: 'Proof under review', tone: 'review' },
-  PAID: { label: 'Paid', tone: 'paid' },
-  CANCELLED: { label: 'Cancelled', tone: 'cancelled' },
+// Status badge tone; the text is the shared status name in the page language (CONTENT §6.8).
+const STATUS_BADGES: Record<PaymentStatus, { tone: string }> = {
+  AWAITING_PAYMENT: { tone: 'awaiting' },
+  UNDER_REVIEW: { tone: 'review' },
+  PAID: { tone: 'paid' },
+  CANCELLED: { tone: 'cancelled' },
 };
 
 /** Due dates are stored as YYYY-MM-DD; read them as calendar dates so no time zone shifts the day. */
@@ -96,7 +97,9 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
   // next track refresh brings the server's own status.
   const [sentAt, setSentAt] = useState<string | null>(null);
   const status: PaymentStatus = sentAt && payment.status === 'AWAITING_PAYMENT' ? 'UNDER_REVIEW' : payment.status;
-  const badge = STATUS_BADGES[status] ?? STATUS_BADGES.AWAITING_PAYMENT;
+  const badgeStatus: PaymentStatus = STATUS_BADGES[status] ? status : 'AWAITING_PAYMENT';
+  const locale = useLocale();
+  const badge = { tone: STATUS_BADGES[badgeStatus].tone, label: paymentStatusLabel(badgeStatus, locale) };
   const narrow = useIsNarrow();
   const [openId, setOpenId] = useState<string | null>(payment.methods[0]?.id ?? null);
   const [toast, setToast] = useState('');

@@ -1,0 +1,42 @@
+/* French suggestion banner (LanguageSuggestion.tsx): a slim cream bar above the header. */
+.tx-langsuggest {
+  background: var(--tx-cream-200);
+  color: var(--tx-choc-900);
+  border-bottom: 1px solid var(--tx-border);
+  font-size: var(--tx-fs-small);
+}
+.tx-langsuggest__inner {
+  max-width: var(--tx-container);
+  margin: 0 auto;
+  padding: 0.25rem var(--tx-gutter-mobile);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+}
+.tx-langsuggest__text { margin: 0; }
+.tx-langsuggest__action {
+  color: var(--tx-choc-900);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.tx-langsuggest__close {
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--tx-choc-900);
+  cursor: pointer;
+}
+.tx-langsuggest__close svg { width: 18px; height: 18px; }
+.tx-langsuggest__close:hover { background: var(--tx-cream-300); }
+.tx-langsuggest a:focus-visible,
+.tx-langsuggest button:focus-visible { outline: none; box-shadow: var(--tx-focus-ring); }

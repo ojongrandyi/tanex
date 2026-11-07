@@ -11,7 +11,7 @@ export const publicWriteLimiter = rateLimit({
   limit: 40,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { success: false, error: 'Too many requests. Please try again in a few minutes.' }
+  message: { success: false, code: 'RATE_LIMITED', error: 'Too many requests. Please try again in a few minutes.' }
 });
 
 // Proof-of-payment uploads from the track page (docs/update.md F.2). Each one carries an image
@@ -33,5 +33,5 @@ export const publicLookupLimiter = rateLimit({
   limit: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { success: false, error: 'Too many requests. Please try again in a few minutes.' }
+  message: { success: false, code: 'RATE_LIMITED', error: 'Too many requests. Please try again in a few minutes.' }
 });

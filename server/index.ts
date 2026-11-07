@@ -14,6 +14,7 @@ import { seoRouter } from './seo.js';
 import { publicPages, sendIndex } from './publicPages.js';
 import { createIndexRenderer } from './render/pageMeta.js';
 import { registerApiRoutes } from './apiRoutes.js';
+import { generalErrorCode } from '../src/shared/apiErrors.js';
 import { ADMIN_PATH, COMPANY } from '../src/config/brand.js';
 import { isAllowedOrigin } from './cors.js';
 import { requirePermission, requireJsonOrMultipart } from './middleware/auth.js';
@@ -251,6 +252,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const status = isMalformedBody ? 400 : (typeof err?.status === 'number' ? err.status : 500);
   res.status(status).json({
     success: false,
+    code: isMalformedBody ? 'MALFORMED_BODY' : generalErrorCode(status),
     error: isMalformedBody ? 'Malformed request body.' : 'Internal server error.'
   });
 });

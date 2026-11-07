@@ -4,6 +4,7 @@ import type { PublicPayment } from '../shared/paymentRequest';
 import { validateProofSubmission } from '../shared/paymentProof';
 import { compressImage } from '../services/imageCompress';
 import { api } from '../services/api';
+import { useApiErrorText } from '../i18n/I18nProvider';
 
 interface PaymentProofFormProps {
   trackingNumber: string;
@@ -34,6 +35,8 @@ const FIELD_ORDER: Field[] = ['methodId', 'payerName', 'amountSent', 'reference'
  * stripped of EXIF data in the browser before upload, with a preview.
  */
 export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumber, payment, onSent, embedded = false }) => {
+  // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
+  const apiErrorText = useApiErrorText();
   const id = useId();
   const fileInput = useRef<HTMLInputElement>(null);
   const [methodId, setMethodId] = useState(payment.methods.length === 1 ? payment.methods[0].id : '');
@@ -105,7 +108,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
         focusFirstError(err.fieldErrors);
       } else if (err?.status === 409 || err?.status === 429) {
         // The server's own text: no longer awaiting, too many open proofs, or too many attempts.
-        setFormError(err.message);
+        setFormError(apiErrorText(err));
       } else {
         setFormError(MSG.network);
       }

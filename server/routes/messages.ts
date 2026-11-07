@@ -54,14 +54,14 @@ messagesRouter.post('/', publicWriteLimiter,
     const gatewayCode = getGateway(text(body.gatewayCode, 3).toUpperCase())?.code || null;
 
     if (!name || !message) {
-      return res.status(400).json({ success: false, error: 'Name and message are required.' });
+      return res.status(400).json({ success: false, code: 'MISSING_FIELDS', error: 'Name and message are required.' });
     }
     // Contact form messages come with an email; Home callback requests only with a phone number.
     if (!email && (phone ?? '').replace(/\D/g, '').length < 6) {
-      return res.status(400).json({ success: false, error: 'Please enter an email address or a phone number with its country code.' });
+      return res.status(400).json({ success: false, code: 'CONTACT_REQUIRED', error: 'Please enter an email address or a phone number with its country code.' });
     }
     if (email && !EMAIL_PATTERN.test(email)) {
-      return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
+      return res.status(400).json({ success: false, code: 'INVALID_EMAIL', error: 'Please enter a valid email address.' });
     }
 
     const exists = db.prepare('SELECT 1 FROM contact_messages WHERE id = ?');

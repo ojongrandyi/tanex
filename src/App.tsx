@@ -1,6 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { LanguageSuggestion } from './components/LanguageSuggestion';
+import { I18nProvider } from './i18n/I18nProvider';
 import { HomePage } from './pages/HomePage';
 // Every other public page is its own chunk, fetched when it opens, so the landing page only
 // downloads its own code. Their stylesheets stay in the main bundle, in the original order.
@@ -174,7 +176,8 @@ function MainAppContent() {
       meta = known ? pageMetaText(known.id, lang) : home;
     }
     setPageMeta(meta);
-    // French paths render English until the i18n layer (D.3), so they stay out of the index.
+    // French paths stay out of the index until their page bodies are translated (phase E sets
+    // FRENCH_PAGES_INDEXABLE); since D.3 only the header, footer and 404 page are French.
     setRobotsNoIndex(currentPage === 'admin' || currentPage === 'not-found' || isAdminPath() || (lang === 'fr' && !FRENCH_PAGES_INDEXABLE));
   }, [currentPage, liveShipment, currentQuote, route?.lang]);
 
@@ -406,6 +409,7 @@ function MainAppContent() {
 
   return (
     <div className="ngf-app-shell">
+      <LanguageSuggestion />
       <Header
         activePage={currentPage}
         onNavigate={handleNavigate}
@@ -498,7 +502,9 @@ export function App() {
   return (
     <AuthProvider>
       <AdminDataProvider>
-        <MainAppContent />
+        <I18nProvider>
+          <MainAppContent />
+        </I18nProvider>
       </AdminDataProvider>
     </AuthProvider>
   );

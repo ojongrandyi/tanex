@@ -95,16 +95,24 @@ export const PHONE_2 = '+237691194663';
 export const WHATSAPP = '';
 
 export const HQ_ADDRESS = 'Check Point, opposite Molyko Omnisport Stadium, Buea, Cameroon';
+// French form of the addresses (CONTENT_FR placeholders {{HQ_ADDRESS}}, {{DOUALA_OFFICE}}).
+export const HQ_ADDRESS_FR = 'Check Point, en face du stade omnisports de Molyko, Buea, Cameroun';
 
 export interface Office {
   city: string;
   label: string;
   address: string;
+  addressFr: string;
 }
 
 export const OFFICES: readonly Office[] = [
-  { city: 'Buea', label: 'Head office', address: HQ_ADDRESS },
-  { city: 'Douala', label: 'Douala office', address: 'Kotto, La Canadienne, Douala, Cameroon' },
+  { city: 'Buea', label: 'Head office', address: HQ_ADDRESS, addressFr: HQ_ADDRESS_FR },
+  {
+    city: 'Douala',
+    label: 'Douala office',
+    address: 'Kotto, La Canadienne, Douala, Cameroon',
+    addressFr: 'Kotto, La Canadienne, Douala, Cameroun',
+  },
 ];
 
 // Office time zone (CLAUDE.md §7): console dates and audit date filters use it.
@@ -118,7 +126,8 @@ export const OPENING_HOURS: { opens: string; closes: string; days: readonly stri
   days: [],
 };
 
-// "09:00" -> "9:00 AM". English only; the i18n layer (task D.3) moves this to Intl.
+// "09:00" -> "9:00 AM". English; pages in a chosen language use formatOpeningHoursIn
+// (src/i18n/format.ts), which also writes the French "9 h 00 – 16 h 00".
 function formatClock(hhmm: string): string {
   const [h, m] = hhmm.split(':').map(Number);
   return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;

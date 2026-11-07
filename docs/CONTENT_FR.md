@@ -5,7 +5,7 @@
 > **Relecture par un locuteur natif côté propriétaire avant le lancement** (tracker #108).
 > Typographie : espace insécable avant `: ; ! ?` et à l'intérieur des « guillemets » (géré par le helper i18n).
 
-**Statut :** §1, §2, §6.9, §7.5, §10.3 et §14 sont rédigés ci-dessous. Les autres sections sont traduites
+**Statut :** §1 (dont §1.4), §2, §6.3, §6.8 (statuts), §6.9, §6.11, §7.5, §10.3 et §14 sont rédigés ci-dessous. Les autres sections sont traduites
 dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utilisées dans le code.
 
 | Placeholder | Valeur |
@@ -68,6 +68,33 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 **Bureaux :** `Buea (siège)` : `{{HQ_ADDRESS}}` · `Douala` : `{{DOUALA_OFFICE}}` · `Appelez le {{PHONE}} · {{PHONE_2}}` · `Ouvert de {{HOURS}}`
 
 **Ligne du bas :** `© {année} Tanex SARL. Tous droits réservés.`
+
+### 1.4 Langue, messages communs et erreurs (ajouté le 2026-11-08 avec D.3, **à confirmer**, relecture native #108)
+- **Sélecteur :** `EN | FR` · `English` · `Français` · libellé `Langue` · navigation `Navigation principale` · logo `Accueil {{COMPANY}}`.
+- **Bandeau de suggestion** (page d'accueil anglaise, navigateur en français ; toujours en français) :
+  `Ce site existe aussi en français.` · lien `Voir le site en français` · bouton `Fermer`.
+- **Messages d'erreur** (même codes que CONTENT §1.4) :
+  `BAD_REQUEST` Certaines informations sont incorrectes. Vérifiez-les et réessayez. ·
+  `AUTH_REQUIRED` Veuillez vous connecter pour continuer. ·
+  `FORBIDDEN` Vous n'avez pas l'autorisation de faire cela. ·
+  `NOT_FOUND` Nous n'avons pas trouvé ce que vous cherchez. ·
+  `CONFLICT` Cet élément a été modifié entre-temps. Actualisez la page et réessayez. ·
+  `PAYLOAD_TOO_LARGE` Le fichier est trop volumineux. ·
+  `UNSUPPORTED_MEDIA_TYPE` / `MALFORMED_BODY` Cette demande n'a pas pu être lue. Actualisez la page et réessayez. ·
+  `RATE_LIMITED` Trop de tentatives. Veuillez patienter un moment, puis réessayer. ·
+  `SERVER_ERROR` Un problème est survenu de notre côté. Veuillez réessayer. ·
+  `NETWORK` Impossible de joindre notre serveur. Vérifiez votre connexion et réessayez. ·
+  `INVALID_TRACKING_ID` Les numéros de suivi commencent par TX et comptent 8 caractères, par ex. TX7K2M9P. ·
+  `SHIPMENT_NOT_FOUND` Nous n'avons trouvé aucun envoi avec ce numéro. Vérifiez les caractères et réessayez. ·
+  `QUOTE_NOT_FOUND` Nous n'avons trouvé aucun devis avec cette référence. ·
+  `NO_PAYMENT_REQUEST` Cet envoi n'a aucune demande de paiement. ·
+  `NOT_ACCEPTING` Ce paiement n'attend plus de preuve. Actualisez la page pour voir son statut actuel. ·
+  `TOO_MANY_OPEN` Des preuves de ce paiement sont déjà en attente de vérification. Notre équipe les examinera en premier. ·
+  `VALIDATION_FAILED` Certaines informations doivent être corrigées. ·
+  `MISSING_FIELDS` Le nom et le message sont obligatoires. ·
+  `CONTACT_REQUIRED` Veuillez saisir une adresse e-mail ou un numéro de téléphone avec son indicatif pays. ·
+  `INVALID_EMAIL` Veuillez saisir une adresse e-mail valide.
+- **Heures :** format `9 h 00 – 16 h 00`.
 
 ---
 
@@ -145,6 +172,19 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 - **Arrivée (pied de page) :** `Livré. De votre porte au monde entier, et jusqu'à une autre porte.`
 
 ---
+
+## 6.3 Suivi : noms des statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)
+`Réservé` · `Récupéré` · `À la plateforme de départ` · `Parti` · `En transit` · `Arrivé à la plateforme de destination` ·
+`Dédouanement` · `En cours de livraison` · `Livré` · `En attente` · `Retardé` · `Retour à l'expéditeur` · `Annulé`
+
+## 6.8 Paiement : statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)
+`En attente de paiement` · `Preuve en cours de vérification` · `Payé` · `Annulé`
+
+## 6.11 Événements écrits par le système (ajouté le 2026-11-08 avec D.3, **à confirmer**)
+`Envoi enregistré et code-barres attribué` · `Envoi enregistré à partir d'un devis` · `Envoi retour enregistré` ·
+`Retour à l'expéditeur : {motif}` · `Parti de la plateforme, en transit` · `Paiement confirmé` · `Scan de contrôle vérifié` ·
+un changement de statut sans titre affiche le nom du statut (§6.3). La description de l'événement reste en anglais
+(texte enregistré) jusqu'à une tâche ultérieure.
 
 ## 6.9 Suivi : livraisons locales et entre villes
 - **Étapes :** `Demandée` · `Livreur assigné` · `Récupéré` · `En route` · `Livré` · échec : `Tentative de livraison infructueuse`

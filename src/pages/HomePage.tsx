@@ -39,6 +39,7 @@ import { useCompanyContact } from '../utils/useCompanyContact';
 import { COMPANY, COMPANY_SHORT, LOGO_MARK, TRACKING_ID_EXAMPLE } from '../config/brand';
 import { api } from '../services/api';
 import './HomePage.css';
+import { useApiErrorText } from '../i18n/I18nProvider';
 
 interface HomePageProps {
   onTrack: (trackingNumber: string) => void;
@@ -193,6 +194,8 @@ const FAQS = [
 ];
 
 export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
+  // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
+  const apiErrorText = useApiErrorText();
   // Empty phone values hide their element (no placeholders).
   const { phone: supportPhone, email: dispatchEmail } = useCompanyContact();
 
@@ -240,7 +243,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
       setCbPhone('');
       setCbTime('');
     } catch (err) {
-      setCbError(err instanceof Error && err.message ? err.message : 'We couldn’t send your request. Please try again.');
+      setCbError(apiErrorText(err, 'We couldn’t send your request. Please try again.'));
     } finally {
       setCbSubmitting(false);
     }

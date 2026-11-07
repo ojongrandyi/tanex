@@ -21,6 +21,7 @@ import { api } from '../services/api';
 import { GATEWAYS, getGateway } from '../data/gateways';
 import { HELP_ARTICLES, CONTACT_QUICK_ANSWER_IDS } from '../data/helpArticles';
 import './ContactPage.css';
+import { useApiErrorText } from '../i18n/I18nProvider';
 
 // CONTENT §8.3 form topics (stored as the message subject in the admin inbox).
 const TOPICS = ['Quote', 'Active shipment', 'Billing', 'Partnership', 'Other'] as const;
@@ -36,6 +37,8 @@ interface ContactPageProps {
 }
 
 export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, initialGateway = '' }) => {
+  // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
+  const apiErrorText = useApiErrorText();
   const { settings } = useAdminData();
   // Empty phone/WhatsApp/address/regulatory values hide their element (no placeholders).
   const { phone: supportPhone, phoneHref, whatsapp, email: dispatchEmail, address: headquartersAddress, regulatoryLine } = useCompanyContact();
@@ -83,7 +86,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, initialGat
       setTicket({ id: saved.id, email: email.trim() });
       window.scrollTo({ top: 300, behavior: 'smooth' });
     } catch (err: any) {
-      setFormError(`We couldn't send your message: ${err?.message || 'please try again'}. You can also email us at ${dispatchEmail}.`);
+      setFormError(`We couldn't send your message: ${apiErrorText(err, 'please try again')}. You can also email us at ${dispatchEmail}.`);
     } finally {
       setSubmitting(false);
     }

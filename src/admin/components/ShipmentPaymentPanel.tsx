@@ -4,18 +4,19 @@ import { api } from '../../services/api';
 import { useAdminData } from '../../context/AdminDataContext';
 import { usePermission } from '../../auth/AuthContext';
 import { PAYMENT_METHODS } from '../../shared/paymentMethods';
-import { ShipmentPayment, formatPaymentAmount } from '../../shared/paymentRequest';
+import { PAYMENT_STATUS_LABELS, ShipmentPayment, formatPaymentAmount } from '../../shared/paymentRequest';
 import { PaymentIcon } from '../../components/PaymentIcon';
 import {
   PaymentDraft, PaymentRequestEditor, draftFromPayment, draftToRequest, emptyPaymentDraft, paymentDraftErrors,
 } from './PaymentRequestEditor';
 import './ShipmentPaymentPanel.css';
 
+// Shared status names (CONTENT §6.8); the console is English until phase I.
 const STATUS_LABELS: Record<ShipmentPayment['status'], string> = {
-  AWAITING_PAYMENT: 'Awaiting payment',
-  UNDER_REVIEW: 'Proof under review',
-  PAID: 'Paid',
-  CANCELLED: 'Cancelled',
+  AWAITING_PAYMENT: PAYMENT_STATUS_LABELS.AWAITING_PAYMENT.en,
+  UNDER_REVIEW: PAYMENT_STATUS_LABELS.UNDER_REVIEW.en,
+  PAID: PAYMENT_STATUS_LABELS.PAID.en,
+  CANCELLED: PAYMENT_STATUS_LABELS.CANCELLED.en,
 };
 
 interface ShipmentPaymentPanelProps {

@@ -1,3 +1,4 @@
+import { eventTitleColumns } from '../../src/shared/eventTitles.js';
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { requirePermission } from '../middleware/auth.js';
@@ -117,7 +118,7 @@ quotesRouter.get('/:id', publicLookupLimiter, (req: Request, res: Response) => {
   try {
     const row = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(req.params.id as string);
     if (!row) {
-      return res.status(404).json({ success: false, error: 'Quote request not found' });
+      return res.status(404).json({ success: false, code: 'QUOTE_NOT_FOUND', error: 'Quote request not found' });
     }
     // Staff see the full record; a visitor who only has the reference sees the contact details
     // masked (references are short enough to guess, tracker #127).
@@ -419,24 +420,25 @@ quotesRouter.post('/:id/convert', requirePermission('quotes.manage'), requirePer
     // 3. Create initial event
     const originLabel = `${origin.city}, ${origin.state}`;
     const createdTime = eventTime(originLabel, { lat: origin.lat, lng: origin.lng });
+    const registered = eventTitleColumns('event.registered_from_quote');
     db.prepare(`
       INSERT INTO tracking_events (
         id, shipment_tracking, status, title, location, facility,
         timestamp, description, operator_notes, delay_flag, completed, current_flag, sort_order,
-        occurred_at_ts, time_zone
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        occurred_at_ts, time_zone, title_key, title_vars_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       `e-${Date.now()}`,
       trackingNumber,
       'RECEIVED',
-      'Consignment Registered from Rate Quote',
+      registered.title,
       originLabel,
       'Origin Gateway',
       createdTime.timestamp,
       `Consignment generated from approved quote ${q.id}. Linear Code 128 barcode assigned.`,
       `Converted by ${actorName(req)}. Tariff: ${q.pricing?.finalPrice || '350.00'}`,
       0, 1, 1, 1,
-      createdTime.occurredAtTs, createdTime.timeZone
+      createdTime.occurredAtTs, createdTime.timeZone, registered.titleKey, registered.titleVarsJson
     );
 
     // 4. Mark the quote CONVERTED (the actual terminal status for this action — it previously

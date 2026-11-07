@@ -79,7 +79,7 @@ export function createAuthRouter(): Router {
     limit: 20,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, error: 'Too many login attempts. Try again in a few minutes.' }
+    message: { success: false, code: 'RATE_LIMITED', error: 'Too many login attempts. Try again in a few minutes.' }
   });
 
   // Reset links: per IP, 10 requests and 10 new-password attempts per hour. The per-account
@@ -89,14 +89,14 @@ export function createAuthRouter(): Router {
     limit: 10,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, error: 'Too many attempts. Please wait a while and try again.' }
+    message: { success: false, code: 'RATE_LIMITED', error: 'Too many attempts. Please wait a while and try again.' }
   });
   const resetLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
     limit: 10,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, error: 'Too many attempts. Please wait a while and try again.' }
+    message: { success: false, code: 'RATE_LIMITED', error: 'Too many attempts. Please wait a while and try again.' }
   });
 
   // POST /api/auth/login  { identifier, password }

@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { ChevronDown, Clock, Mail, MapPin, Menu, Phone, X } from 'lucide-react';
 import {
   COMPANY,
@@ -6,21 +6,30 @@ import {
   LOGO_WORDMARK_WEB,
   LOGO_WORDMARK_WEB_HEIGHT,
   LOGO_WORDMARK_WEB_WIDTH,
-  formatOpeningHours,
 } from '../config/brand';
 import { useCompanyContact } from '../utils/useCompanyContact';
 import { useEscapeKey } from '../utils/useEscapeKey';
-import { SITE_TEXT, type SiteLink } from './siteText';
-import { hrefFor } from '../router/navigation';
+import { hrefFor, navigate } from '../router/navigation';
+import { alternatePath } from '../router/routes';
+import { isPlainClick } from '../router/Link';
+import { useLocale, useT, type TFunction } from '../i18n/I18nProvider';
+import { formatOpeningHoursIn } from '../i18n/format';
+import { loadLocale, storeLocale } from '../i18n/runtime';
+import { LOCALES, type Locale } from '../i18n/types';
 import { buttonClass } from './ui';
 import './Header.css';
 
 // Public site header (CONTENT §1.2, design/direction.html): dark utility bar on desktop, then a
 // sticky cream bar with a backdrop blur: logo, main navigation with the Services menu, the
-// language switch (EN active; FR arrives with D.3) and Get a Quote. Below 1100 px the navigation
-// moves into a drawer (dialog with focus trap; Escape, backdrop and every link close it).
+// EN | FR language switch and Get a Quote. Below 1100 px the navigation moves into a drawer
+// (dialog with focus trap; Escape, backdrop and every link close it). Text: src/i18n common.
 
-const T = SITE_TEXT.header;
+/** A link to an App.tsx page, with an optional param (service tier ID, legal section ID). */
+export interface SiteLink {
+  label: string;
+  page: string;
+  param?: string;
+}
 
 // Moves keyboard focus past the header to the page content. A button, not an in-page "#main"
 // link: the address bar should keep the page path, not gain a fragment.
@@ -44,16 +53,31 @@ interface NavItem {
   allLabel?: string;
 }
 
+/** CONTENT §1.2 Services menu (also the footer's Services column). */
+export function servicesLinks(t: TFunction): SiteLink[] {
+  return [
+    { label: t('services.air'), page: 'services', param: 'air' },
+    { label: t('services.maritime'), page: 'services', param: 'maritime' },
+    { label: t('services.rail'), page: 'services', param: 'rail' },
+    { label: t('services.road'), page: 'services', param: 'road' },
+    { label: t('services.warehousing'), page: 'services', param: 'warehousing' },
+    { label: t('services.localDelivery'), page: 'services', param: 'local-delivery' },
+  ];
+}
+
 // Blog (F.3) joins the list when the public blog exists. A menu with a single entry is shown as a
 // plain link (Ship, until the bike-delivery booking page arrives with G.6).
-const NAV: NavItem[] = [
-  { key: 'track', label: T.track, page: 'track', pages: ['track', 'track-result'] },
-  { key: 'services', label: T.services, page: 'services', pages: ['services'], menu: T.servicesMenu, allLabel: T.allServices },
-  { key: 'ship', label: T.ship, page: 'ship', pages: ['ship'], menu: T.shipMenu },
-  { key: 'network', label: T.network, page: 'locations', pages: ['locations'] },
-  { key: 'about', label: T.about, page: 'about', pages: ['about'] },
-  { key: 'contact', label: T.contact, page: 'contact', pages: ['contact'] },
-];
+function navItems(t: TFunction): NavItem[] {
+  return [
+    { key: 'track', label: t('header.track'), page: 'track', pages: ['track', 'track-result'] },
+    { key: 'services', label: t('header.services'), page: 'services', pages: ['services'], menu: servicesLinks(t), allLabel: t('header.allServices') },
+    // 'Book a bike delivery' joins with the local-delivery booking page (G.6).
+    { key: 'ship', label: t('header.ship'), page: 'ship', pages: ['ship'], menu: [{ label: t('ship.bookShipment'), page: 'ship' }] },
+    { key: 'network', label: t('header.network'), page: 'locations', pages: ['locations'] },
+    { key: 'about', label: t('header.about'), page: 'about', pages: ['about'] },
+    { key: 'contact', label: t('header.contact'), page: 'contact', pages: ['contact'] },
+  ];
+}
 
 const hasMenu = (item: NavItem) => (item.menu?.length ?? 0) > 1;
 
@@ -62,38 +86,64 @@ interface HeaderProps {
   onNavigate?: (page: string, param?: string) => void;
 }
 
-/** EN | FR. French is shown but not selectable until the i18n foundation (D.3). */
-const LanguageSwitch: React.FC<{ idSuffix: string }> = ({ idSuffix }) => {
-  const hintId = `tx-lang-hint-${idSuffix}`;
+/**
+ * EN | FR (I18N_SPEC §2–3). The other language is a real link to the same page in that language
+ * (tracking ID, tier or policy tab kept); choosing it is remembered in tx_locale.
+ */
+export const LanguageSwitch: React.FC<{ onSwitched?: () => void }> = ({ onSwitched }) => {
+  const t = useT();
+  const locale = useLocale();
+  const names: Record<Locale, string> = { en: t('language.enName'), fr: t('language.frName') };
+  const codes: Record<Locale, string> = { en: t('language.en'), fr: t('language.fr') };
+  const hrefIn = (target: Locale) =>
+    typeof window === 'undefined' ? '/' : alternatePath(window.location.pathname, target) + window.location.search;
+
+  const choose = (target: Locale) => async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    storeLocale(target);
+    if (!isPlainClick(e)) return;
+    e.preventDefault();
+    const href = hrefIn(target);
+    try {
+      await loadLocale(target);
+    } catch {
+      // Dictionary couldn't load: a full page load still shows the right language from the server.
+      window.location.assign(href);
+      return;
+    }
+    onSwitched?.();
+    navigate(href);
+  };
+
   return (
-    <div className="tx-lang" role="group" aria-label={T.language}>
-      <span className="tx-lang__opt is-current" aria-current="true" lang="en" title={T.englishName}>
-        {T.english}
-      </span>
-      <span className="tx-lang__sep" aria-hidden="true">|</span>
-      <button
-        type="button"
-        className="tx-lang__opt"
-        lang="fr"
-        aria-disabled="true"
-        aria-describedby={hintId}
-        title={T.frenchSoon}
-        onClick={(e) => e.preventDefault()}
-      >
-        {T.french}
-      </button>
-      <span id={hintId} className="tx-visually-hidden">{T.frenchSoon}</span>
+    <div className="tx-lang" role="group" aria-label={t('language.label')}>
+      {LOCALES.map((code, i) => (
+        <React.Fragment key={code}>
+          {i > 0 && <span className="tx-lang__sep" aria-hidden="true">|</span>}
+          {code === locale ? (
+            <span className="tx-lang__opt is-current" aria-current="true" lang={code} title={names[code]}>
+              {codes[code]}
+            </span>
+          ) : (
+            <a className="tx-lang__opt" href={hrefIn(code)} hrefLang={code} lang={code} title={names[code]} aria-label={names[code]} onClick={choose(code)}>
+              {codes[code]}
+            </a>
+          )}
+        </React.Fragment>
+      ))}
     </div>
   );
 };
 
 export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate = () => {} }) => {
+  const t = useT();
+  const locale = useLocale();
+  const NAV = useMemo(() => navItems(t), [t]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerSection, setDrawerSection] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const { phone, phoneHref, email } = useCompanyContact();
-  const hours = formatOpeningHours();
+  const hours = formatOpeningHoursIn(locale);
   const uid = useId().replace(/:/g, '');
 
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -205,13 +255,13 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
   return (
     <header className={`tx-header${scrolled ? ' is-scrolled' : ''}`}>
       <button type="button" className="ngf-skip-link" onClick={skipToContent}>
-        {SITE_TEXT.skipLink}
+        {t('skipLink')}
       </button>
 
       {/* Utility bar (desktop): phone · email · hours · cities */}
       <div className="tx-utility tx-dark">
         <div className="tx-header__container tx-utility__inner">
-          <ul className="tx-utility__list" aria-label={T.utilityLabel}>
+          <ul className="tx-utility__list" aria-label={t('header.utilityLabel')}>
             {phone && (
               <li>
                 <a href={phoneHref} className="tx-utility__item">
@@ -230,11 +280,11 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
             )}
             <li className="tx-utility__item">
               <Clock aria-hidden="true" />
-              <span>{T.open(hours)}</span>
+              <span>{t('header.open', { hours })}</span>
             </li>
             <li className="tx-utility__item">
               <MapPin aria-hidden="true" />
-              <span>{T.cities}</span>
+              <span>{t('header.cities')}</span>
             </li>
           </ul>
         </div>
@@ -243,7 +293,7 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
       {/* Main bar */}
       <div className="tx-header__bar">
         <div className="tx-header__container tx-header__inner">
-          <a href={hrefFor('home')} className="tx-header__logo" onClick={go('home')} aria-label={SITE_TEXT.homeLabel(COMPANY)}>
+          <a href={hrefFor('home')} className="tx-header__logo" onClick={go('home')} aria-label={t('homeLabel', { company: COMPANY })}>
             <img
               src={LOGO_WORDMARK_WEB}
               width={LOGO_WORDMARK_WEB_WIDTH}
@@ -253,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
             />
           </a>
 
-          <nav className="tx-nav" aria-label={T.navLabel} ref={navRef}>
+          <nav className="tx-nav" aria-label={t('header.navLabel')} ref={navRef}>
             <ul className="tx-nav__list">
               {NAV.map((item) => {
                 const current = isCurrent(item);
@@ -301,7 +351,7 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
                       <ChevronDown className="tx-nav__chevron" aria-hidden="true" />
                     </button>
                     <div className="tx-nav__panel" id={menuId} hidden={!open}>
-                      <ul className="tx-nav__menu" aria-label={T.submenu(item.label)} onKeyDown={onMenuListKeyDown}>
+                      <ul className="tx-nav__menu" aria-label={t('header.submenu', { name: item.label })} onKeyDown={onMenuListKeyDown}>
                         {item.menu!.map((link) => (
                           <li key={link.label}>
                             <a href={hrefFor(link.page, link.param)} className="tx-nav__menu-link" onClick={go(link.page, link.param)}>
@@ -331,16 +381,16 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
 
           <div className="tx-header__actions">
             <div className="tx-header__lang">
-              <LanguageSwitch idSuffix={`bar-${uid}`} />
+              <LanguageSwitch />
             </div>
             <a href={hrefFor('quote')} className={buttonClass('primary', 'sm', false, 'tx-header__quote')} onClick={go('quote')}>
-              {T.quote}
+              {t('header.quote')}
             </a>
             <button
               ref={toggleRef}
               type="button"
               className="tx-header__toggle"
-              aria-label={T.openMenu}
+              aria-label={t('header.openMenu')}
               aria-expanded={drawerOpen}
               aria-controls={`tx-drawer-${uid}`}
               onClick={() => setDrawerOpen(true)}
@@ -360,23 +410,23 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
             className="tx-drawer"
             role="dialog"
             aria-modal="true"
-            aria-label={T.menu}
+            aria-label={t('header.menu')}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="tx-drawer__head">
-              <a href={hrefFor('home')} className="tx-header__logo" onClick={go('home')} aria-label={SITE_TEXT.homeLabel(COMPANY)}>
+              <a href={hrefFor('home')} className="tx-header__logo" onClick={go('home')} aria-label={t('homeLabel', { company: COMPANY })}>
                 <img src={LOGO_WORDMARK_WEB} width={LOGO_WORDMARK_WEB_WIDTH} height={LOGO_WORDMARK_WEB_HEIGHT} alt={LOGO_ALT} className="tx-header__logo-img" />
               </a>
-              <button type="button" className="tx-header__toggle" aria-label={T.closeMenu} onClick={() => setDrawerOpen(false)}>
+              <button type="button" className="tx-header__toggle" aria-label={t('header.closeMenu')} onClick={() => setDrawerOpen(false)}>
                 <X aria-hidden="true" />
               </button>
             </div>
 
-            <nav className="tx-drawer__nav" aria-label={T.navLabel}>
+            <nav className="tx-drawer__nav" aria-label={t('header.navLabel')}>
               <ul className="tx-drawer__list">
                 <li>
                   <a href={hrefFor('home')} className="tx-drawer__link" aria-current={activePage === 'home' ? 'page' : undefined} onClick={go('home')}>
-                    {T.home}
+                    {t('header.home')}
                   </a>
                 </li>
                 {NAV.map((item) => {
@@ -427,16 +477,16 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
             </nav>
 
             <a href={hrefFor('quote')} className={buttonClass('primary', 'lg', true)} onClick={go('quote')}>
-              {T.quote}
+              {t('header.quote')}
             </a>
 
             <div className="tx-drawer__lang">
-              <LanguageSwitch idSuffix={`drawer-${uid}`} />
+              <LanguageSwitch onSwitched={() => setDrawerOpen(false)} />
             </div>
 
             {(email || phone) && (
               <div className="tx-drawer__help">
-                <p className="tx-drawer__help-title">{T.needHelp}</p>
+                <p className="tx-drawer__help-title">{t('header.needHelp')}</p>
                 {email && (
                   <a href={`mailto:${email}`} className="tx-drawer__help-link">
                     <Mail aria-hidden="true" />

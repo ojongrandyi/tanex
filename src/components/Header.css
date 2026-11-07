@@ -145,7 +145,8 @@ a.tx-utility__item:hover { color: var(--tx-cream-100); }
   letter-spacing: 0.04em;
 }
 .tx-lang__opt.is-current { color: var(--tx-text); }
-.tx-lang__opt[aria-disabled='true'] { cursor: not-allowed; }
+a.tx-lang__opt { text-decoration: none; }
+a.tx-lang__opt:hover { color: var(--tx-text); text-decoration: underline; text-underline-offset: 3px; }
 .tx-lang__sep { color: var(--tx-choc-300); }
 
 .tx-header__toggle {

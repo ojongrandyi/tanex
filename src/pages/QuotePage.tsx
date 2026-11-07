@@ -24,6 +24,7 @@ import { formatWeight } from '../shared/units';
 import { TRANSPORT_MODE_LABELS, type TransportMode } from '../shared/transportMode';
 import { useCurrency } from '../utils/useCurrency';
 import './QuotePage.css';
+import { useApiErrorText } from '../i18n/I18nProvider';
 
 // Address as sent to the API: the short region shown after the city ("TX" / "NG"), plus the
 // full region, postcode and country as entered.
@@ -50,6 +51,8 @@ interface QuotePageProps {
 }
 
 export const QuotePage: React.FC<QuotePageProps> = ({ onNavigate, initialService }) => {
+  // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
+  const apiErrorText = useApiErrorText();
   const { createQuoteRequest } = useAdminData();
 
   // Your details
@@ -144,7 +147,7 @@ export const QuotePage: React.FC<QuotePageProps> = ({ onNavigate, initialService
       window.scrollTo({ top: 200, behavior: 'smooth' });
     } catch (err: any) {
       // Nothing was saved: say so rather than showing a reference that doesn't exist.
-      setFormError(`We couldn't send your quote request: ${err?.message || 'the server did not respond'}. Nothing was saved; please try again.`);
+      setFormError(`We couldn't send your quote request: ${apiErrorText(err, 'the server did not respond')}. Nothing was saved; please try again.`);
     } finally {
       setIsSubmitting(false);
     }

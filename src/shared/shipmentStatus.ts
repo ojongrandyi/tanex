@@ -1,30 +1,43 @@
-// Shipment status names shown to customers and staff (CONTENT §6.3). Shared by the browser and
-// the server so the public track page, the admin console and server-written status text agree.
+// Shipment status names shown to customers and staff (CONTENT §6.3 / CONTENT_FR §6.3). Shared by
+// the browser and the server so the public track page, the admin console and server-written status
+// text agree. The API stores and returns codes; each client shows the name in its language
+// (I18N_SPEC §5). `label` is the English name, which the server writes into status_text.
 
 export type StatusTone = 'booked' | 'transit' | 'out' | 'delivered' | 'hold' | 'delayed' | 'returning';
 
+export type StatusLang = 'en' | 'fr';
+
 interface StatusDef {
   value: string;
+  /** English name (same as labels.en). */
   label: string;
+  labels: Record<StatusLang, string>;
   tone: StatusTone;
+}
+
+function def(value: string, en: string, fr: string, tone: StatusTone): StatusDef {
+  return { value, label: en, labels: { en, fr }, tone };
 }
 
 // The statuses an admin can set, in journey order. `value` is the stored code (DB column
 // `status`); codes are not renamed, only their names.
 export const SHIPMENT_STATUS_OPTIONS: readonly StatusDef[] = [
-  { value: 'BOOKED', label: 'Booked', tone: 'booked' },
-  { value: 'RECEIVED', label: 'Collected', tone: 'transit' },
-  { value: 'PROCESSING', label: 'At origin gateway', tone: 'transit' },
-  { value: 'DEPARTED_FACILITY', label: 'Departed', tone: 'transit' },
-  { value: 'IN_TRANSIT', label: 'In transit', tone: 'transit' },
-  { value: 'DESTINATION_PROCESSING', label: 'Arrived at destination gateway', tone: 'transit' },
-  { value: 'CUSTOMS_CLEARANCE', label: 'Customs clearance', tone: 'transit' },
-  { value: 'OUT_FOR_DELIVERY', label: 'Out for delivery', tone: 'out' },
-  { value: 'DELIVERED', label: 'Delivered', tone: 'delivered' },
-  { value: 'ON_HOLD', label: 'On hold', tone: 'hold' },
-  { value: 'DELAYED', label: 'Delayed', tone: 'delayed' },
-  { value: 'RETURNED', label: 'Returning to sender', tone: 'returning' },
+  def('BOOKED', 'Booked', 'Réservé', 'booked'),
+  def('RECEIVED', 'Collected', 'Récupéré', 'transit'),
+  def('PROCESSING', 'At origin gateway', 'À la plateforme de départ', 'transit'),
+  def('DEPARTED_FACILITY', 'Departed', 'Parti', 'transit'),
+  def('IN_TRANSIT', 'In transit', 'En transit', 'transit'),
+  def('DESTINATION_PROCESSING', 'Arrived at destination gateway', 'Arrivé à la plateforme de destination', 'transit'),
+  def('CUSTOMS_CLEARANCE', 'Customs clearance', 'Dédouanement', 'transit'),
+  def('OUT_FOR_DELIVERY', 'Out for delivery', 'En cours de livraison', 'out'),
+  def('DELIVERED', 'Delivered', 'Livré', 'delivered'),
+  def('ON_HOLD', 'On hold', 'En attente', 'hold'),
+  def('DELAYED', 'Delayed', 'Retardé', 'delayed'),
+  def('RETURNED', 'Returning to sender', "Retour à l'expéditeur", 'returning'),
 ];
+
+/** Name of the CANCELLED code, which is not in the list staff pick from. */
+export const CANCELLED_LABEL: Record<StatusLang, string> = { en: 'Cancelled', fr: 'Annulé' };
 
 // Older codes still found in stored rows, shown under the nearest current name.
 const LEGACY_STATUS: Record<string, string> = {
@@ -50,19 +63,19 @@ function lookup(status: unknown): StatusDef | undefined {
 }
 
 /** Display name when the code is a shipment status (current or legacy), otherwise undefined. */
-export function knownStatusLabel(status: unknown): string | undefined {
-  return lookup(status)?.label;
+export function knownStatusLabel(status: unknown, lang: StatusLang = 'en'): string | undefined {
+  return lookup(status)?.labels[lang];
 }
 
 /** Display name for any stored status code, e.g. DESTINATION_PROCESSING -> "Arrived at destination gateway". */
-export function shipmentStatusLabel(status: unknown): string {
-  const def = lookup(status);
-  if (def) return def.label;
+export function shipmentStatusLabel(status: unknown, lang: StatusLang = 'en'): string {
+  const found = lookup(status);
+  if (found) return found.labels[lang];
   const code = String(status ?? '').trim();
-  if (code.toUpperCase() === 'CANCELLED') return 'Cancelled';
+  if (code.toUpperCase() === 'CANCELLED') return CANCELLED_LABEL[lang];
   // Unknown code: readable rather than blank ("SOME_CODE" -> "Some code").
   const words = code.replace(/_/g, ' ').toLowerCase();
-  return words ? words[0].toUpperCase() + words.slice(1) : 'In transit';
+  return words ? words[0].toUpperCase() + words.slice(1) : BY_VALUE.get('IN_TRANSIT')!.labels[lang];
 }
 
 /** Colour family for badges. */

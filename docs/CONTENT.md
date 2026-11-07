@@ -98,6 +98,35 @@ unless the owner confirms them. Items marked **[confirm]** are best-knowledge dr
 Built with C.3: *Company* shows **Blog** from F.3 and *Support* shows **Book a bike delivery** from G.6 (hidden until those
 pages exist). Hidden headings for screen readers (**owner to confirm**): `Offices`, `Social media`.
 
+### 1.4 Language, common messages and API errors (added 2026-11-08 with D.3, **owner to confirm**)
+- **Language switch:** `EN | FR`; option names `English` · `Français`; group label `Language`; main navigation label `Main`; logo label `{{COMPANY}} home`.
+- **French suggestion banner** (English home page, French browser; always shown in French, see CONTENT_FR §1.4). Its English twin, kept for parity: `This site is also available in English.` · `View the site in English` · `Close`.
+- **Error messages** (shown for the API's error `code`; English pages keep the server's own, more specific English text):
+
+| Code | Message |
+|---|---|
+| `BAD_REQUEST` | Some details aren't right. Check them and try again. |
+| `AUTH_REQUIRED` | Please sign in to continue. |
+| `FORBIDDEN` | You don't have permission to do this. |
+| `NOT_FOUND` | We couldn't find what you were looking for. |
+| `CONFLICT` | This was changed in the meantime. Refresh the page and try again. |
+| `PAYLOAD_TOO_LARGE` | The file is too large. |
+| `UNSUPPORTED_MEDIA_TYPE` · `MALFORMED_BODY` | This request couldn't be read. Refresh the page and try again. |
+| `RATE_LIMITED` | Too many attempts. Please wait a while and try again. (§6.8) |
+| `SERVER_ERROR` | Something went wrong on our side. Please try again. |
+| `NETWORK` | We couldn't reach our server. Check your connection and try again. |
+| `INVALID_TRACKING_ID` | Tracking IDs start with TX and are 8 characters long, e.g. TX7K2M9P. (§6.1) |
+| `SHIPMENT_NOT_FOUND` | We couldn't find a shipment with this ID. Check the characters and try again. |
+| `QUOTE_NOT_FOUND` | We couldn't find a quote with this reference. |
+| `NO_PAYMENT_REQUEST` | This shipment has no payment request. |
+| `NOT_ACCEPTING` · `TOO_MANY_OPEN` | as in §6.8 |
+| `VALIDATION_FAILED` | Some details need fixing. |
+| `MISSING_FIELDS` | Name and message are required. |
+| `CONTACT_REQUIRED` | Please enter an email address or a phone number with its country code. |
+| `INVALID_EMAIL` | Please enter a valid email address. |
+
+- No cookie or consent banner exists: the public site sets no cookies (Legal → Cookie Policy). If one is added, its text goes here first.
+
 ---
 
 ## 2. Home page (owner's outline, 2026-11-06)
@@ -404,6 +433,14 @@ Shown only when the shipment has a payment request. Hidden completely when the r
 | `Orange Money` | `Account name` · `Orange Money number` · `Merchant code` (optional) | admin instructions |
 | `Cash on delivery` | (none) | `Pay the rider in cash when your parcel arrives. Ask for your receipt reference.` |
 - **Reference hint for MoMo/OM proofs:** `Enter the transaction ID from your confirmation SMS.`
+
+### 6.11 Timeline events written by the system (added 2026-11-08 with D.3, **owner to confirm**)
+Titles the server writes itself (`src/shared/eventTitles.ts`); stored with a key so the French track page shows the
+French title. These are the existing English titles, unchanged; events staff type keep their own text.
+`Consignment Registered & Barcode Issued` (booking) · `Consignment Registered from Rate Quote` (quote converted) ·
+`Return Shipment Registered` · `Returning to sender: {reason}` · `Departed Facility — Transit Underway` (automatic) ·
+`Payment confirmed` (§6.8) · `Checkpoint Scan Verified` (event added without a title) · a status change without a title
+shows the status name (§6.3).
 
 ---
 

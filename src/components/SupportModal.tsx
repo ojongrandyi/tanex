@@ -4,6 +4,7 @@ import './SupportModal.css';
 import { TRACKING_ID_EXAMPLE } from '../config/brand';
 import { api } from '../services/api';
 import { useEscapeKey } from '../utils/useEscapeKey';
+import { useApiErrorText } from '../i18n/I18nProvider';
 
 // CONTENT §6.4
 export const SUPPORT_ISSUE_TYPES = ['Delay', 'Address change', 'Damage', 'Customs question', 'Other'] as const;
@@ -22,6 +23,8 @@ export const SupportModal: React.FC<SupportModalProps> = ({
   initialTrackingNumber = '',
   defaultIssueType = 'Other',
 }) => {
+  // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
+  const apiErrorText = useApiErrorText();
   const [trackingNumber, setTrackingNumber] = useState(initialTrackingNumber);
   const [issueType, setIssueType] = useState<SupportIssueType>(defaultIssueType);
   const [fullName, setFullName] = useState('');
@@ -64,7 +67,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({
       setTicket({ id: saved.id, trackingNumber: id, email: email.trim() });
       setMessage('');
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : 'We couldn’t send your request. Please try again.');
+      setError(apiErrorText(err, 'We couldn’t send your request. Please try again.'));
     } finally {
       setSubmitting(false);
     }

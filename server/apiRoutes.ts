@@ -19,6 +19,7 @@ import { rolesRouter, permissionsRouter } from './routes/roles.js';
 import { auditRouter } from './routes/auditLog.js';
 import { mailRouter } from './routes/mail.js';
 import { requirePermission } from './middleware/auth.js';
+import { addErrorCodes } from './middleware/errorCodes.js';
 
 /**
  * Mounts the API. Every console route checks its own permission with requirePermission
@@ -26,6 +27,8 @@ import { requirePermission } from './middleware/auth.js';
  * Ends with a JSON 404 for unknown /api paths.
  */
 export function registerApiRoutes(app: Express): void {
+  // Error answers without a specific `code` get the general one for their status (I18N_SPEC §5).
+  app.use('/api', addErrorCodes);
   app.use('/api/auth', authRouter);
   // Staff accounts, roles, permission catalogue and audit log (IAM_RBAC_SPEC §6); gated per route.
   app.use('/api/users', usersRouter);
@@ -60,6 +63,6 @@ export function registerApiRoutes(app: Express): void {
 
   // 404 for anything under /api that didn't match a route above.
   app.use('/api', (req: Request, res: Response) => {
-    res.status(404).json({ success: false, error: 'Not found.' });
+    res.status(404).json({ success: false, code: 'NOT_FOUND', error: 'Not found.' });
   });
 }

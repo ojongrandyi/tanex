@@ -42,6 +42,8 @@ import { MultiPieceList } from '../components/MultiPieceList';
 import { PackageGallery, type GalleryImage } from '../components/PackageGallery';
 import { legacyPhotoUrls } from '../shared/legacyPhotos';
 import { shipmentStatusLabel, shipmentStatusTone } from '../shared/shipmentStatus';
+import { eventTitleText } from '../shared/eventTitles';
+import { useLocale } from '../i18n/I18nProvider';
 import { SupportModal } from '../components/SupportModal';
 import { calculateRouteGeometry, inferTransportMode } from '../services/routingEngine';
 import { timeZoneForPlace } from '../shared/timeZones';
@@ -76,6 +78,9 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
 
   // Continuous real-time synchronized state
   const [liveShipment, setLiveShipment] = useState<Shipment>(shipment);
+  // Status names and server-written event titles follow the page language (I18N_SPEC §5); the
+  // rest of this page is translated with task E.5.
+  const locale = useLocale();
 
   useEffect(() => {
     setLiveShipment(prev => applyForwardOnlyShipmentUpdate(prev, shipment));
@@ -152,7 +157,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   const hasRevisedSchedule = isHold || isDelayed || Boolean(shipment.delayNotice?.hasDelay);
   // Single canonical status name (CONTENT §6.3, shared with the admin), reused everywhere the
   // page shows the shipment's current status.
-  const statusDisplayLabel = shipmentStatusLabel(status);
+  const statusDisplayLabel = shipmentStatusLabel(status, locale);
   // Vehicle views only for real vehicle shipments (by type or stored vehicle details).
   const isVehicle = liveShipment?.shipmentType === 'Vehicle' || !!liveShipment?.vehicleDetails;
   const isPet = liveShipment?.shipmentType === 'Pets' || !!liveShipment?.petDetails;
@@ -377,6 +382,8 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
           displayDate: dStr,
           displayTime: tStr,
           title: shipmentStatusLabel('DELIVERED'),
+          titleKey: 'event.status',
+          titleVars: { status: 'DELIVERED' },
           facility: '',
           city: destCity,
           state: destState,
@@ -833,7 +840,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
 
                       <div className="t-content-col">
                         <div className="t-event-head-row">
-                          <h4 className={`t-event-title ${isCurrent ? 'text-blue' : ''}`}>{evt.title}</h4>
+                          <h4 className={`t-event-title ${isCurrent ? 'text-blue' : ''}`}>{eventTitleText(evt, locale)}</h4>
                           <span className={`t-tag ${evt.statusType}`}>
                             {evt.statusType === 'confirmed' ? 'Confirmed' : evt.statusType === 'current' ? 'Current' : 'Estimated'}
                           </span>
@@ -873,7 +880,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                   {eventsList.map((evt, idx) => (
                     <div key={evt.id || idx} className="extended-scan-item">
                       <div className="scan-time font-mono">{evt.displayDate} · {evt.displayTime}</div>
-                      <div className="scan-title">{evt.title} — {[evt.city, evt.state].filter(Boolean).join(', ')}</div>
+                      <div className="scan-title">{eventTitleText(evt, locale)} —{[evt.city, evt.state].filter(Boolean).join(', ')}</div>
                       <div className="scan-facility text-xs text-slate-500">{evt.facility}</div>
                     </div>
                   ))}

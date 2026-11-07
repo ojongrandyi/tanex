@@ -1,6 +1,6 @@
 // Client-side navigation with the History API (I18N_SPEC §2). No router library (CLAUDE.md §3).
 import { useSyncExternalStore } from 'react';
-import { Lang, RouteMatch, legacyHashToPath, matchPath, pagePath } from './routes';
+import { Lang, RouteMatch, langOfPath, legacyHashToPath, matchPath, pagePath } from './routes';
 
 const listeners = new Set<() => void>();
 
@@ -81,9 +81,10 @@ export function currentRoute(): RouteMatch | null {
   return matchPath(window.location.pathname);
 }
 
-/** Language of the current address; English outside the /fr/ tree. */
+/** Language of the current address; English outside the /fr/ tree (also on unknown paths). */
 export function currentLang(): Lang {
-  return currentRoute()?.lang ?? 'en';
+  if (typeof window === 'undefined') return 'en';
+  return currentRoute()?.lang ?? langOfPath(window.location.pathname);
 }
 
 /** Path for an App.tsx page name in the current address's language. */

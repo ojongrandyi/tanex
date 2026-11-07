@@ -150,3 +150,19 @@ function safeDecode(value: string): string {
     return value;
   }
 }
+
+/** Language of any path, known or not: the /fr/ tree is French (so is its 404 page). */
+export function langOfPath(pathname: string): Lang {
+  return pathname === '/fr' || pathname.startsWith('/fr/') ? 'fr' : 'en';
+}
+
+/**
+ * The same page in the other language, for the language switch (I18N_SPEC §2). Keeps the
+ * sub-path segment (tracking ID, quote ID, service tier, policy tab). An unknown path maps to
+ * the other language's home page.
+ */
+export function alternatePath(pathname: string, target: Lang): string {
+  const match = matchPath(pathname);
+  if (!match) return buildPath('home', undefined, target);
+  return buildPath(match.id, match.param, target);
+}

@@ -14,6 +14,18 @@ export const DEFAULT_PAYMENT_CURRENCY: PaymentCurrency = 'USD';
 export const PAYMENT_STATUSES = ['AWAITING_PAYMENT', 'UNDER_REVIEW', 'PAID', 'CANCELLED'] as const;
 export type PaymentStatus = typeof PAYMENT_STATUSES[number];
 
+/** Payment status names (CONTENT §6.8 / CONTENT_FR §6.8). The API returns the code. */
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, { en: string; fr: string }> = {
+  AWAITING_PAYMENT: { en: 'Awaiting payment', fr: 'En attente de paiement' },
+  UNDER_REVIEW: { en: 'Proof under review', fr: 'Preuve en cours de vérification' },
+  PAID: { en: 'Paid', fr: 'Payé' },
+  CANCELLED: { en: 'Cancelled', fr: 'Annulé' },
+};
+
+export function paymentStatusLabel(status: PaymentStatus, lang: 'en' | 'fr' = 'en'): string {
+  return PAYMENT_STATUS_LABELS[status]?.[lang] ?? status;
+}
+
 export const PAYMENT_LIMITS = {
   maxAmount: 1_000_000_000,
   reasonMin: 3,

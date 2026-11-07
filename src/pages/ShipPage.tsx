@@ -36,6 +36,7 @@ import { formatDimensions, formatWeight } from '../shared/units';
 import { TRANSPORT_MODE_LABELS, type TransportMode } from '../shared/transportMode';
 import { useCurrency } from '../utils/useCurrency';
 import { isPlainClick } from '../router/Link';
+import { useApiErrorText } from '../i18n/I18nProvider';
 
 interface ShipPageProps {
   onTrack: (trackingNumber: string) => void;
@@ -125,6 +126,8 @@ const NEXT_STEPS = [
 ];
 
 export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
+  // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
+  const apiErrorText = useApiErrorText();
   const { createShipment, generateDocument } = useAdminData();
   const units = useUnitLabels();
   const money = useCurrency();
@@ -366,7 +369,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
       });
       newTrackingId = created.trackingNumber;
     } catch (err: any) {
-      setFormError(`We couldn't register your shipment: ${err?.message || 'the server did not respond'}. Nothing was saved; please try again.`);
+      setFormError(`We couldn't register your shipment: ${apiErrorText(err, 'the server did not respond')}. Nothing was saved; please try again.`);
       setIsSubmitting(false);
       return;
     }

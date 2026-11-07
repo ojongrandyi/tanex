@@ -1,3 +1,4 @@
+import { eventTitleColumns } from '../../src/shared/eventTitles.js';
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -148,16 +149,17 @@ function addPaymentConfirmedEvent(tracking: string, chargeReason: string, record
   const time = eventTime(location, { lat: ship.current_location_lat ?? undefined, lng: ship.current_location_lng ?? undefined });
   db.prepare('UPDATE tracking_events SET current_flag = 0 WHERE shipment_tracking = ?').run(tracking);
   const count = (db.prepare('SELECT COUNT(*) AS n FROM tracking_events WHERE shipment_tracking = ?').get(tracking) as { n: number }).n;
+  const paid = eventTitleColumns('event.payment_confirmed');
   db.prepare(`
     INSERT INTO tracking_events (
       id, shipment_tracking, status, title, location, facility,
       timestamp, description, operator_notes, delay_flag, completed, current_flag, sort_order,
-      recorded_by, occurred_at_ts, time_zone
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, 1, ?, ?, ?, ?)
+      recorded_by, occurred_at_ts, time_zone, title_key, title_vars_json
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, 1, ?, ?, ?, ?, ?, ?)
   `).run(
-    `e-pay-${crypto.randomUUID()}`, tracking, ship.status, 'Payment confirmed', location, OPERATIONS_CENTRE,
+    `e-pay-${crypto.randomUUID()}`, tracking, ship.status, paid.title, location, OPERATIONS_CENTRE,
     time.timestamp, `Payment received for: ${chargeReason}.`, 'Recorded when a proof of payment was approved.',
-    count + 1, recordedBy, time.occurredAtTs, time.timeZone,
+    count + 1, recordedBy, time.occurredAtTs, time.timeZone, paid.titleKey, paid.titleVarsJson,
   );
 }
 

@@ -1,3 +1,4 @@
+import { eventTitleColumns } from '../../src/shared/eventTitles.js';
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { syncTimeBasedProgress, shipmentTransportMode } from '../progress.js';
@@ -337,9 +338,10 @@ shipmentsRouter.post('/', publicWriteLimiter,
       INSERT INTO tracking_events (
         id, shipment_tracking, status, title, location, facility,
         timestamp, description, operator_notes, delay_flag, completed, current_flag, sort_order,
-        occurred_at_ts, time_zone
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        occurred_at_ts, time_zone, title_key, title_vars_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
+    const registered = eventTitleColumns('event.registered');
 
     const originLabel = [s.origin?.city || 'New York', s.origin?.state].filter(Boolean).join(', ');
     const createdTime = eventTime(originLabel, { lat: s.origin?.lat, lng: s.origin?.lng });
@@ -347,14 +349,14 @@ shipmentsRouter.post('/', publicWriteLimiter,
       `e-${Date.now()}`,
       trackingNumber,
       s.status || 'RECEIVED',
-      'Consignment Registered & Barcode Issued',
+      registered.title,
       originLabel,
       s.currentLocation?.facility || 'Intake Gateway',
       createdTime.timestamp,
       `Shipment received into the ${COMPANY_SHORT} network. Linear Code 128 barcode assigned.`,
       'Initial entry scan.',
       0, 1, 1, 1,
-      createdTime.occurredAtTs, createdTime.timeZone
+      createdTime.occurredAtTs, createdTime.timeZone, registered.titleKey, registered.titleVarsJson
     );
 
     const createdRow = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(trackingNumber);
@@ -466,17 +468,22 @@ shipmentsRouter.patch('/:trackingNumber/status', requirePermission('tracking.upd
       // before, so callers that never had a richer title (like Tracking Events, which always
       // skips this block) are unaffected.
       const statusTime = eventTime(location || '', hasCoords ? { lat, lng } : {});
+      // Keyed only when the title is the plain status name the server chose; a title or status
+      // text written by staff is stored as written.
+      const statusTitle = !eventTitle && statusText === shipmentStatusLabel(newStatus)
+        ? eventTitleColumns('event.status', { status: newStatus })
+        : { title: eventTitle || statusText, titleKey: null, titleVarsJson: null };
       db.prepare(`
         INSERT INTO tracking_events (
           id, shipment_tracking, status, title, location, facility,
           timestamp, description, operator_notes, delay_flag, completed, current_flag, sort_order,
-          recorded_by, occurred_at_ts, time_zone
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          recorded_by, occurred_at_ts, time_zone, title_key, title_vars_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         `e-${Date.now()}`,
         tracking,
         newStatus,
-        eventTitle || statusText,
+        statusTitle.title,
         location || 'Regional Transit Gateway',
         facility || `${COMPANY_SHORT} Facility`,
         statusTime.timestamp,
@@ -485,7 +492,7 @@ shipmentsRouter.patch('/:trackingNumber/status', requirePermission('tracking.upd
         newStatus === 'EXCEPTION' ? 1 : 0,
         1, 1, eventCount + 1,
         actorName(req),
-        statusTime.occurredAtTs, statusTime.timeZone
+        statusTime.occurredAtTs, statusTime.timeZone, statusTitle.titleKey, statusTitle.titleVarsJson
       );
     }
 
@@ -587,15 +594,18 @@ shipmentsRouter.post('/:trackingNumber/return', requirePermission('tracking.upda
       INSERT INTO tracking_events (
         id, shipment_tracking, status, title, location, facility,
         timestamp, description, operator_notes, delay_flag, completed, current_flag, sort_order, recorded_by,
-        occurred_at_ts, time_zone
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        occurred_at_ts, time_zone, title_key, title_vars_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
+    const returnRegistered = eventTitleColumns('event.return_registered');
+    const returning = eventTitleColumns('event.returning', { reason: String(reason) });
 
     insertEvent.run(
-      `e-${now}-r`, returnId, 'RECEIVED', 'Return Shipment Registered', currentLabel,
+      `e-${now}-r`, returnId, 'RECEIVED', returnRegistered.title, currentLabel,
       row.current_facility || `${COMPANY_SHORT} Facility`, timestamp,
       `Return of ${tracking} to the sender at ${row.origin_city}, ${row.origin_state} (${reason}).`,
-      null, 0, 1, 1, 1, operator, returnTime.occurredAtTs, returnTime.timeZone
+      null, 0, 1, 1, 1, operator, returnTime.occurredAtTs, returnTime.timeZone,
+      returnRegistered.titleKey, returnRegistered.titleVarsJson
     );
 
     const returnLeg = {
@@ -618,10 +628,11 @@ shipmentsRouter.post('/:trackingNumber/return', requirePermission('tracking.upda
     db.prepare('UPDATE tracking_events SET current_flag = 0 WHERE shipment_tracking = ?').run(tracking);
     const eventCount = (db.prepare('SELECT COUNT(*) as count FROM tracking_events WHERE shipment_tracking = ?').get(tracking) as any).count;
     insertEvent.run(
-      `e-${now}`, tracking, 'RETURNED', `${shipmentStatusLabel('RETURNED')}: ${reason}`, currentLabel,
+      `e-${now}`, tracking, 'RETURNED', returning.title, currentLabel,
       row.current_facility || `${COMPANY_SHORT} Facility`, timestamp,
       `Original journey concluded (${reason}). Returning to the sender at ${row.origin_city}, ${row.origin_state} under tracking ID ${returnId}.`,
-      null, 1, 1, 1, eventCount + 1, operator, returnTime.occurredAtTs, returnTime.timeZone
+      null, 1, 1, 1, eventCount + 1, operator, returnTime.occurredAtTs, returnTime.timeZone,
+      returning.titleKey, returning.titleVarsJson
     );
 
     db.exec('COMMIT');
@@ -658,18 +669,22 @@ shipmentsRouter.post('/:trackingNumber/events', requirePermission('tracking.upda
     // the event location's own zone. Browser-formatted displayDate/displayTime strings are no
     // longer stored, as they carried the admin's own clock rather than the location's.
     const time = eventTime(eventLocation, { occurredAt: e.occurredAt, timeZone: e.timeZone ?? e.timezone });
+    // A title typed by staff is stored as written; the default one is keyed.
+    const checkpoint = e.title
+      ? { title: e.title, titleKey: null, titleVarsJson: null }
+      : eventTitleColumns('event.checkpoint');
 
     db.prepare(`
       INSERT INTO tracking_events (
         id, shipment_tracking, status, title, location, facility,
         timestamp, description, operator_notes, delay_flag, completed, current_flag, sort_order,
-        recorded_by, occurred_at_ts, time_zone
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        recorded_by, occurred_at_ts, time_zone, title_key, title_vars_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       e.id || `e-${Date.now()}`,
       tracking,
       e.status || e.eventStatus || 'IN_TRANSIT',
-      e.title || 'Checkpoint Scan Verified',
+      checkpoint.title,
       eventLocation,
       e.facility || 'Gateway Hub',
       time.timestamp,
@@ -678,7 +693,7 @@ shipmentsRouter.post('/:trackingNumber/events', requirePermission('tracking.upda
       e.delayFlag ? 1 : 0,
       1, 1, eventCount + 1,
       actorName(req),
-      time.occurredAtTs, time.timeZone
+      time.occurredAtTs, time.timeZone, checkpoint.titleKey, checkpoint.titleVarsJson
     );
 
     // Also update shipment status if provided

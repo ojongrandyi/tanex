@@ -10,6 +10,7 @@ import { latestPublicProof } from './paymentProofs.js';
 import { publicPaymentView } from '../../src/shared/paymentRequest.js';
 import { maskEmail, maskName, maskPhone } from '../../src/shared/masking.js';
 import { serverError } from '../errors.js';
+import { isEventTitleKey, parseEventTitleVars } from '../../src/shared/eventTitles.js';
 
 export const trackRouter = Router();
 
@@ -34,13 +35,13 @@ trackRouter.get('/:trackingNumber', (req: Request, res: Response) => {
     // its parent), and reject anything that can't be a tracking ID before touching the DB.
     const parsed = parseTrackingInput(req.params.trackingNumber as string);
     if (!parsed) {
-      return res.status(400).json({ success: false, error: `Tracking IDs are 8 characters, starting with ${TRACKING_PREFIX} (for example ${TRACKING_ID_EXAMPLE}).` });
+      return res.status(400).json({ success: false, code: 'INVALID_TRACKING_ID', error: `Tracking IDs are 8 characters, starting with ${TRACKING_PREFIX} (for example ${TRACKING_ID_EXAMPLE}).` });
     }
     const tracking = parsed.trackingId;
     const row = db.prepare('SELECT * FROM shipments WHERE tracking_number = ? AND deleted_at_ts IS NULL').get(tracking) as any;
 
     if (!row) {
-      return res.status(404).json({ success: false, error: `No active shipment found with identifier "${tracking}".` });
+      return res.status(404).json({ success: false, code: 'SHIPMENT_NOT_FOUND', error: `No active shipment found with identifier "${tracking}".` });
     }
 
     // Advance progress based on real elapsed time before responding, so it moves forward
@@ -69,6 +70,14 @@ trackRouter.get('/:trackingNumber', (req: Request, res: Response) => {
       id: e.id,
       status: e.status,
       title: settings.piiMaskingEnabled ? maskSignerName(e.title) : e.title,
+      // Server-written titles: key + variables, so the page can show them in French (I18N_SPEC §5).
+      ...(isEventTitleKey(e.title_key)
+        ? {
+          titleKey: e.title_key,
+          titleVars: Object.fromEntries(Object.entries(parseEventTitleVars(e.title_vars_json))
+            .map(([k, v]) => [k, settings.piiMaskingEnabled ? (maskSignerName(v) ?? v) : v])),
+        }
+        : {}),
       location: e.location,
       ...splitLocation(e.location),
       // Local time where the event happened + UTC offset; older rows keep their stored text.

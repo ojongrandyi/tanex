@@ -366,6 +366,11 @@ export function initDatabase() {
   try { db.exec(`ALTER TABLE shipments ADD COLUMN transport_mode TEXT;`); } catch (e) {}
   try { db.exec(`ALTER TABLE tracking_events ADD COLUMN occurred_at_ts INTEGER;`); } catch (e) {}
   try { db.exec(`ALTER TABLE tracking_events ADD COLUMN time_zone TEXT;`); } catch (e) {}
+  // Server-written event titles carry a key and their variables (I18N_SPEC §5,
+  // src/shared/eventTitles.ts) so the public track page can show them in French. NULL for
+  // titles typed by staff and for rows stored before task D.3, which show their stored text.
+  try { db.exec(`ALTER TABLE tracking_events ADD COLUMN title_key TEXT;`); } catch (e) {}
+  try { db.exec(`ALTER TABLE tracking_events ADD COLUMN title_vars_json TEXT;`); } catch (e) {}
   // Mode the customer asked for on a quote (tracker 2.8); carried onto the shipment on convert.
   try { db.exec(`ALTER TABLE quote_requests ADD COLUMN transport_mode TEXT;`); } catch (e) {}
   // Staff user id that booked the shipment in the console (IAM_RBAC_SPEC §7); NULL for public bookings.

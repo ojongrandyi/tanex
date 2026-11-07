@@ -31,12 +31,12 @@ trackProofRouter.post('/:trackingNumber/payment-proof', paymentProofLimiter,
   let savedFile: string | null = null;
   try {
     const parsed = parseTrackingInput(req.params.trackingNumber as string);
-    if (!parsed) return res.status(400).json({ success: false, error: `Tracking IDs are 8 characters, starting with ${TRACKING_PREFIX} (for example ${TRACKING_ID_EXAMPLE}).` });
+    if (!parsed) return res.status(400).json({ success: false, code: 'INVALID_TRACKING_ID', error: `Tracking IDs are 8 characters, starting with ${TRACKING_PREFIX} (for example ${TRACKING_ID_EXAMPLE}).` });
     const tracking = parsed.trackingId;
 
     const shipment = db.prepare('SELECT 1 FROM shipments WHERE tracking_number = ? AND deleted_at_ts IS NULL').get(tracking);
     const payment = shipment ? getShipmentPayment(tracking) : null;
-    if (!payment) return res.status(404).json({ success: false, error: 'This shipment has no payment request.' });
+    if (!payment) return res.status(404).json({ success: false, code: 'NO_PAYMENT_REQUEST', error: 'This shipment has no payment request.' });
     if (payment.status !== 'AWAITING_PAYMENT') {
       return res.status(409).json({ success: false, code: 'NOT_ACCEPTING', error: NOT_ACCEPTING });
     }
@@ -50,13 +50,13 @@ trackProofRouter.post('/:trackingNumber/payment-proof', paymentProofLimiter,
     const fieldErrors: Record<string, string> = checked.ok ? {} : { ...checked.errors };
     if (!body.image) fieldErrors.image = 'Add a screenshot of the payment.';
     if (!checked.ok || fieldErrors.image) {
-      return res.status(400).json({ success: false, error: 'Some details need fixing.', fieldErrors });
+      return res.status(400).json({ success: false, code: 'VALIDATION_FAILED', error: 'Some details need fixing.', fieldErrors });
     }
 
     const upload = saveImageUpload('proofs', body.image);
     if (!upload.ok) {
       const message = upload.error === 'The image is too large.' ? upload.error : NOT_AN_IMAGE;
-      return res.status(400).json({ success: false, error: 'Some details need fixing.', fieldErrors: { image: message } });
+      return res.status(400).json({ success: false, code: 'VALIDATION_FAILED', error: 'Some details need fixing.', fieldErrors: { image: message } });
     }
     savedFile = upload.fileName;
 

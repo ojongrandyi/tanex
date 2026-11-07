@@ -40,6 +40,9 @@ export interface TrackingEvent {
   displayDate: string; // e.g. "Sep 28, 2026"
   displayTime: string; // local time where it happened + offset, e.g. "3:04 PM UTC+1"
   title: string;
+  /** Server-written titles: key and variables (src/shared/eventTitles.ts), shown in the page language. */
+  titleKey?: string;
+  titleVars?: Record<string, string>;
   status?: ShipmentStatus | string;
   milestoneState?: MilestoneState;
   location?: string;

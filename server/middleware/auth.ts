@@ -12,7 +12,7 @@ export { SESSION_COOKIE } from '../auth/sessionStore.js';
 /** 401 unless an active user is signed in. */
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!getRequestAuth(req)) {
-    return res.status(401).json({ success: false, error: 'Authentication required' });
+    return res.status(401).json({ success: false, code: 'AUTH_REQUIRED', error: 'Authentication required' });
   }
   next();
 }
@@ -23,7 +23,7 @@ export function requirePermission(...keys: PermissionKey[]): RequestHandler {
   return (req: Request, res: Response, next: NextFunction) => {
     const auth = getRequestAuth(req);
     if (!auth) {
-      return res.status(401).json({ success: false, error: 'Authentication required' });
+      return res.status(401).json({ success: false, code: 'AUTH_REQUIRED', error: 'Authentication required' });
     }
     // A temporary password must be replaced first (IAM_RBAC_SPEC §5.5); /api/auth/* stays open
     // so the user can change it, see their session and sign out.
@@ -31,7 +31,7 @@ export function requirePermission(...keys: PermissionKey[]): RequestHandler {
       return res.status(403).json({ success: false, code: 'PASSWORD_CHANGE_REQUIRED', error: 'Change your temporary password first.' });
     }
     if (!keys.some((k) => hasPermission(auth.permissions, k))) {
-      return res.status(403).json({ success: false, error: 'You do not have permission to do this.' });
+      return res.status(403).json({ success: false, code: 'FORBIDDEN', error: 'You do not have permission to do this.' });
     }
     next();
   };
@@ -53,5 +53,5 @@ export function requireJsonOrMultipart(req: Request, res: Response, next: NextFu
   } else if (type === 'application/json' || type === 'multipart/form-data') {
     return next();
   }
-  res.status(415).json({ success: false, error: 'Unsupported content type.' });
+  res.status(415).json({ success: false, code: 'UNSUPPORTED_MEDIA_TYPE', error: 'Unsupported content type.' });
 }
