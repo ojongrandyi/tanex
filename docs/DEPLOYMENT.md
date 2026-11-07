@@ -117,6 +117,7 @@ images), `pod/` (proof-of-delivery photos and signatures, private) and `couriers
 - [ ] Home over HTTPS with the TanEx logo, name, favicon; `/fr/` in French; no console errors.
 - [ ] `www.` and `http://` redirect to `https://tanexsarl.com/`.
 - [ ] `/api/health` → `ok`, `"service": "TanEx API"`.
+- [ ] `SESSION_SECRET` set in hPanel (64 hex chars, §4). Until it is, the server uses the random secret it generated in `tanex-data/.session-secret` (start log says so); setting it signs everyone out once.
 - [ ] `/private-user/` login with the Super Admin; forced password change; `ADMIN_PASSWORD_HASH` removed afterwards.
 - [ ] Create users for each role; each sees only their areas; a Courier lands in the courier app.
 - [ ] `/#/admin` shows Home; `/admin` shows 404; robots.txt and sitemap don't mention `private-user`.
