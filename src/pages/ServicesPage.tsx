@@ -18,7 +18,7 @@ import './ServicesPage.css';
 
 interface ServicesPageProps {
   onNavigate: (page: string) => void;
-  // Tier to open on arrival (#/services/<tier-id>, e.g. from the footer).
+  // Tier to open on arrival (/services/<tier-id>, e.g. from the footer).
   initialServiceId?: string;
   // Changes on every navigation request, so the same tier link works twice in a row.
   serviceRequest?: number;

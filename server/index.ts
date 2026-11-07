@@ -11,6 +11,7 @@ import { bootstrapSuperAdmin } from './auth/bootstrap.js';
 import { startOutboxWorker } from './mail/outbox.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { seoRouter } from './seo.js';
+import { publicPages } from './publicPages.js';
 import { registerApiRoutes } from './apiRoutes.js';
 import { ADMIN_PATH, COMPANY } from '../src/config/brand.js';
 import { isAllowedOrigin } from './cors.js';
@@ -170,10 +171,10 @@ if (ADMIN_PROXY_TARGET) {
 }
 
 // Serve the built React frontend (dist/, produced by `vite build`) so this one process is
-// the whole deployed app — API above, static site here. The app uses HashRouter (#/admin,
-// #/track/...), so the browser only ever requests the bare "/" from the server no matter which
-// in-app page is open (everything after "#" stays client-side) — express.static's default
-// index.html-for-"/" behavior is enough, no separate SPA catch-all route is needed.
+// the whole deployed app — API above, static site here. Pages are real paths (/services,
+// /track/TX7K2M9P, /fr/suivi; src/router/routes.ts): publicPages() below answers each known
+// path with index.html and every other path gets the 404 handler, so a deep link or a reload
+// works on any page and a mistyped address is still a real 404.
 //
 // Cache rules, so Hostinger's CDN and browsers can keep the files (with Express's default
 // max-age=0 every visitor pulled the full bundle from this process): Vite's /assets/ files have
@@ -210,6 +211,9 @@ app.use(express.static(distDir, {
     else res.setHeader('Cache-Control', 'public, max-age=3600');
   },
 }));
+
+// Public pages by path, after the static files so a real file always wins.
+app.use(publicPages(path.join(distDir, 'index.html')));
 
 // Anything not matched above is a 404. Browsers get the app with status 404, which shows the
 // "Page not found" page (NotFoundPage, chosen from the path in App.tsx); other requests

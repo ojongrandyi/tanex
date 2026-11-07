@@ -17,6 +17,7 @@ import {
 } from '../config/brand';
 import { useCompanyContact } from '../utils/useCompanyContact';
 import { SITE_TEXT } from './siteText';
+import { hrefFor } from '../router/navigation';
 import { SpeedLines } from './ui';
 import './Footer.css';
 
@@ -36,7 +37,7 @@ const SOCIAL_LINKS: { key: SocialNetwork; label: string; Icon: typeof Facebook }
 
 const TRUST_ICONS = [Globe2, MapPinned, Camera, Languages];
 
-const hrefFor = (page: string, param?: string) => (page === 'home' ? '#/' : `#/${page}${param ? `/${param}` : ''}`);
+// Real paths in the current language (src/router); plain clicks route in-app through onNavigate.
 
 interface FooterProps {
   onNavigate?: (page: string, param?: string) => void;

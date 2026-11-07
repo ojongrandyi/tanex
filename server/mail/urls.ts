@@ -1,6 +1,7 @@
 // Links written into emails. They always start from a configured base URL, never from the
 // request's Host header, so a forged Host can't point a reset link at another site.
 import { ADMIN_PATH, SITE_URL } from '../../src/config/brand.js';
+import { pagePath } from '../../src/router/routes.js';
 
 /** APP_URL when set (staging, local testing), else the live site. No trailing slash. */
 export function appUrl(): string {
@@ -16,9 +17,9 @@ export function passwordResetUrl(token: string): string {
   return `${appUrl()}${ADMIN_PATH}#reset=${encodeURIComponent(token)}`;
 }
 
-/** Public page of one quote request (hash route, App.tsx `#/quote/:id`). */
+/** Public page of one quote request (`/quote/:id`, src/router/routes.ts). */
 export function quoteUrl(id: string): string {
-  return `${appUrl()}/#/quote/${encodeURIComponent(id)}`;
+  return `${appUrl()}${pagePath('quote-result', id)}`;
 }
 
 /** The staff console (links in staff alerts). */

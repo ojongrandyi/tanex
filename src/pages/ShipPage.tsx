@@ -35,6 +35,7 @@ import { getCountry, postcodeLabel, regionLabel, shortRegion } from '../data/cou
 import { formatDimensions, formatWeight } from '../shared/units';
 import { TRANSPORT_MODE_LABELS, type TransportMode } from '../shared/transportMode';
 import { useCurrency } from '../utils/useCurrency';
+import { isPlainClick } from '../router/Link';
 
 interface ShipPageProps {
   onTrack: (trackingNumber: string) => void;
@@ -424,7 +425,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
         <div className="ngf-ship-hero-bg" />
         <div className="ngf-container-wide ship-hero-container">
           <nav className="ngf-ship-breadcrumbs" aria-label="Breadcrumb">
-            <a href="#/" onClick={(e) => { e.preventDefault(); onNavigate('home'); }} className="crumb-link">Home</a>
+            <a href="/" onClick={(e) => { if (!isPlainClick(e)) return; e.preventDefault(); onNavigate('home'); }} className="crumb-link">Home</a>
             <span className="crumb-sep">/</span>
             <span className="crumb-current" aria-current="page">Book a shipment</span>
           </nav>

@@ -18,7 +18,9 @@ import { Shipment } from './types/shipment';
 import { QuoteRequest } from './types/admin';
 import { api } from './services/api';
 import { simulationEngine } from './services/simulationEngine';
-import { ADMIN_CONSOLE_NAME, COMPANY, COMPANY_SHORT, isAdminPathname } from './config/brand';
+import { ADMIN_CONSOLE_NAME, ADMIN_PATH, COMPANY, COMPANY_SHORT, isAdminPathname } from './config/brand';
+import { matchPath, pagePath } from './router/routes';
+import { hrefFor, isLocalAdminHash, navigate, subscribe, useRoute } from './router/navigation';
 import './styles/global.css';
 
 const loadAdminApp = () => import('./admin/AdminApp');
@@ -50,24 +52,14 @@ const LegalPage = lazy(() => import('./pages/LegalPage').then((m) => ({ default:
 const LocationsPage = lazy(() => import('./pages/LocationsPage').then((m) => ({ default: m.LocationsPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
-const KNOWN_PAGES = ['home', 'track', 'services', 'quote', 'ship', 'about', 'help', 'contact', 'legal', 'locations', 'admin'];
-
 // Admin lives at ADMIN_PATH (/private-user/, src/config/brand.ts) on the same host, app and API
 // as the public site. Deliberately not /admin, one of the most commonly probed paths. An exact
 // path match (trailing slash and case ignored), so look-alikes such as /private-users never open
 // the console. Works on any host, so localhost:3000/private-user/ opens it too; localhost is also
-// exempted separately so local dev can keep using the plain #/admin hash.
+// exempted separately so local dev can keep using the plain #/admin hash (isLocalAdminHash).
 function isAdminPath(): boolean {
   if (typeof window === 'undefined') return false;
   return isAdminPathname(window.location.pathname);
-}
-
-// Pages are hash routes on "/", so any other path (except the admin path) is an address the
-// site doesn't have. The server answers those with status 404 and this app shows NotFoundPage.
-function isUnknownPath(): boolean {
-  if (typeof window === 'undefined') return false;
-  const p = window.location.pathname;
-  return p !== '/' && p !== '/index.html' && !isAdminPathname(p);
 }
 
 // Search engines must never index the console. Added at runtime (not in index.html) because the
@@ -120,34 +112,20 @@ function setPageMeta({ title, description }: PageMeta) {
   tag.content = description;
 }
 
-function isLocalDevHost(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-}
-
-// Reads the current URL hash synchronously, before the first paint, so the initial render
-// already shows the right page. Without this, `currentPage` always started as 'home' and only
-// got corrected once the hash-parsing effect ran a moment later — barely noticeable on an
-// ordinary page load, but very visible right after logging into the admin console, since that
-// flow does a full page reload: the public home page (header, hero, footer) would flash on
-// screen for a beat before the admin dashboard took over. Only handles the simple, synchronous
-// cases (a known page name, or /admin) — /track/:id and /quote/:id still need an async lookup
-// to know what to show, so those fall back through to 'track' as a neutral holding page; the
-// existing hash-parsing effect (below) still runs afterward and resolves them for real.
+// Reads the current address synchronously, before the first paint, so the initial render
+// already shows the right page (without this the public home page flashed before the admin
+// console after the login reload). Pages are real paths from the route table
+// (src/router/routes.ts); any other path except the admin path is a 404 (the server answers it
+// with status 404 too). /track/:id and /quote/:id need an async lookup to know what to show, so
+// they start on 'track' as a neutral holding page and the location effect below resolves them.
+// Legacy `/#/…` links were already rewritten to paths by startRouter() (main.tsx).
 function getInitialPage(): string {
   if (typeof window === 'undefined') return 'home';
-  if (isAdminPath()) return 'admin';
-  if (isUnknownPath()) return 'not-found';
-  const target = window.location.hash.replace('#', '');
-  if (target.startsWith('/admin') || target === 'admin') {
-    return isLocalDevHost() ? 'admin' : 'home';
-  }
-  if (target.startsWith('/track/') || target.startsWith('/quote/')) return 'track';
-  if (target.startsWith('/')) {
-    const page = target.replace('/', '').split('/')[0];
-    if (KNOWN_PAGES.includes(page)) return page;
-  }
-  return 'home';
+  if (isAdminPath() || isLocalAdminHash()) return 'admin';
+  const route = matchPath(window.location.pathname);
+  if (!route) return 'not-found';
+  if (route.param && (route.id === 'track' || route.id === 'quote')) return 'track';
+  return route.id;
 }
 
 function MainAppContent() {
@@ -164,6 +142,8 @@ function MainAppContent() {
   const [isTrackSearching, setIsTrackSearching] = useState(false);
   const [trackSearchQuery, setTrackSearchQuery] = useState('');
   const { getShipment, quoteRequests, shipments } = useAdminData();
+  // Re-renders on every navigation (also back/forward).
+  const route = useRoute();
 
   // The session is read once by AuthProvider. On the console path, fetch the console code
   // while that check runs, so the split adds no wait.
@@ -207,25 +187,31 @@ function MainAppContent() {
       'not-found': { title: `Page Not Found | ${COMPANY}`, description: DEFAULT_DESCRIPTION },
     };
     setPageMeta(meta[currentPage] || PAGE_META.home);
-    setRobotsNoIndex(currentPage === 'admin' || currentPage === 'not-found' || isAdminPath());
-  }, [currentPage, liveShipment, currentQuote]);
+    // French paths render English until the i18n layer (D.3), so they stay out of the index.
+    setRobotsNoIndex(currentPage === 'admin' || currentPage === 'not-found' || isAdminPath() || route?.lang === 'fr');
+  }, [currentPage, liveShipment, currentQuote, route?.lang]);
 
-  // Initialize from hash if available
+  // Page from the address: first load, every navigate(), back/forward (src/router/navigation.ts).
   useEffect(() => {
-    const handleHash = async () => {
-      if (isAdminPath()) {
+    const handleLocation = async () => {
+      if (isAdminPath() || isLocalAdminHash()) {
+        // isLocalAdminHash: the localhost-only #/admin shortcut. The console lives at ADMIN_PATH.
         setCurrentPage('admin');
         return;
       }
-      if (isUnknownPath()) {
+      const route = matchPath(window.location.pathname);
+      if (!route) {
         setCurrentPage('not-found');
         return;
       }
-      const target = window.location.hash.replace('#', '');
+      // /services/ → /services, /fr → /fr/, /index.html → / (the server answers those with a 301).
+      if (window.location.pathname !== route.canonical) {
+        window.history.replaceState(null, '', route.canonical + window.location.search + window.location.hash);
+      }
 
-      if (target.startsWith('/track/')) {
-        const trk = target.replace('/track/', '');
-        if (trk.toUpperCase().startsWith('QR-') || trk.toUpperCase().startsWith('QR')) {
+      if (route.id === 'track' && route.param) {
+        const trk = route.param;
+        if (trk.toUpperCase().startsWith('QR')) {
           handleTrackShipment(trk);
           return;
         }
@@ -249,44 +235,28 @@ function MainAppContent() {
           setNotFoundQuery(trk);
           setCurrentPage('track');
         }
-      } else if (target.startsWith('/quote/')) {
-        const quoteId = target.replace('/quote/', '');
-        handleTrackShipment(quoteId);
-      } else if (target.startsWith('/admin') || target === 'admin') {
-        // Never resolves on the public site: the admin lives at ADMIN_PATH (/private-user/).
-        // Exempted on localhost so local dev can keep using the plain #/admin hash.
-        if (isLocalDevHost()) {
-          setCurrentPage('admin');
+      } else if (route.id === 'quote' && route.param) {
+        handleTrackShipment(route.param);
+      } else {
+        // Deep links from the footer: /services/<tier-id>, /legal/<section>
+        if (route.id === 'services') {
+          const sub = route.param || '';
+          setServiceTier(prev => (prev.id === sub ? prev : { id: sub, n: prev.n + 1 }));
         }
-      } else if (target.startsWith('/')) {
-        const [page, sub] = target.replace('/', '').split('/');
-        if (KNOWN_PAGES.includes(page)) {
-          // Deep links from the footer: #/services/<tier-id>, #/legal/<section>
-          if (page === 'services') {
-            setServiceTier(prev => (prev.id === (sub || '') ? prev : { id: sub || '', n: prev.n + 1 }));
-          }
-          if (page === 'legal' && sub) setLegalSection(sub);
-          setCurrentPage(page);
-        } else if (page === 'track-result') {
-          // If navigated directly to track-result without an active shipment, redirect to track search
-          if (!currentShipment) {
-            setCurrentPage('track');
-          }
-        }
+        if (route.id === 'legal' && route.param) setLegalSection(route.param);
+        setCurrentPage(route.id);
       }
     };
 
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    handleLocation();
+    return subscribe(handleLocation);
   }, [getShipment, quoteRequests, shipments, currentShipment]);
 
   const handleNavigate = (page: string, param?: string) => {
-    // The admin path only ever shows the console, and an unknown path only the 404 page; public
-    // pages live at the root of the same origin (relative URLs, so this also works on localhost).
-    if ((isAdminPath() || isUnknownPath()) && page !== 'admin') {
-      const path = page === 'home' ? '' : (param ? `/${page}/${param}` : `/${page}`);
-      window.location.assign(path ? `/#${path}` : '/');
+    // Leaving the console path is a full page load, so no console data stays in memory on the
+    // public site (relative URLs, so this also works on localhost).
+    if (isAdminPath() && page !== 'admin') {
+      window.location.assign(pagePath(page, param));
       return;
     }
     if (page === 'quote' && param) {
@@ -307,17 +277,9 @@ function MainAppContent() {
     if (!(page === 'services' && param)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    if (page === 'track-result' && param) {
-      window.location.hash = `/track/${param}`;
-    } else if (page === 'quote-result' && param) {
-      window.location.hash = `/quote/${param}`;
-    } else if ((page === 'services' || page === 'legal') && param) {
-      window.location.hash = `/${page}/${param}`;
-    } else if (page === 'home') {
-      window.location.hash = '';
-    } else {
-      window.location.hash = `/${page}`;
-    }
+    // Only track/quote results, service tiers and legal tabs carry the parameter in the URL
+    // (pagePath); a quote's preselected service and a contact gateway stay page state.
+    navigate(page === 'admin' ? ADMIN_PATH : hrefFor(page, param));
   };
 
   const handleTrackShipment = async (inputQuery: string) => {
@@ -356,7 +318,7 @@ function MainAppContent() {
         await finishSearch(() => {
           setCurrentQuote(match);
           setCurrentPage('quote-result');
-          window.location.hash = `/quote/${match.id}`;
+          navigate(hrefFor('quote-result', match.id));
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
         return;
@@ -372,7 +334,7 @@ function MainAppContent() {
           await finishSearch(() => {
             setCurrentQuote(apiMatch);
             setCurrentPage('quote-result');
-            window.location.hash = `/quote/${apiMatch.id}`;
+            navigate(hrefFor('quote-result', apiMatch.id));
             window.scrollTo({ top: 0, behavior: 'smooth' });
           });
           return;
@@ -389,7 +351,7 @@ function MainAppContent() {
         setCurrentShipment(foundShipment);
         setNotFoundQuery(null);
         setCurrentPage('track-result');
-        window.location.hash = `/track/${foundShipment.trackingNumber}`;
+        navigate(hrefFor('track-result', foundShipment.trackingNumber));
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
       return;
@@ -403,7 +365,7 @@ function MainAppContent() {
           setCurrentShipment(apiShipment);
           setNotFoundQuery(null);
           setCurrentPage('track-result');
-          window.location.hash = `/track/${apiShipment.trackingNumber}`;
+          navigate(hrefFor('track-result', apiShipment.trackingNumber));
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
         return;
@@ -416,7 +378,7 @@ function MainAppContent() {
     await finishSearch(() => {
       setNotFoundQuery(query);
       setCurrentPage('track');
-      window.location.hash = `/track`;
+      navigate(hrefFor('track'));
     });
   };
 
@@ -444,7 +406,7 @@ function MainAppContent() {
             onNavigatePublic={handleNavigate}
             onViewPublicTracking={(trk) => {
               if (isAdminPath()) {
-                window.location.assign(`/#/track/${encodeURIComponent(trk)}`);
+                window.location.assign(pagePath('track-result', trk));
               } else {
                 handleTrackShipment(trk);
               }

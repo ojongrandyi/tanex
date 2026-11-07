@@ -3,6 +3,7 @@
 // CONTENT §13 are shown as written until the owner confirms them.
 
 import { COMPANY_SHORT, DOMAIN, LEGAL_NAME } from '../config/brand';
+import { pagePath } from '../router/routes';
 
 export type LegalDocId = 'privacy' | 'terms' | 'shipping-terms' | 'cookies' | 'accessibility';
 
@@ -288,4 +289,4 @@ export function legalDocs({ email, address }: LegalContact): LegalDoc[] {
 }
 
 /** Footer line on generated documents (CONTENT §11) links here. */
-export const LEGAL_URL = `${DOMAIN}/#/legal`;
+export const LEGAL_URL = `${DOMAIN}${pagePath('legal', 'shipping-terms')}`;

@@ -15,8 +15,8 @@ function isAdminRequest(req: Request): boolean {
   return p === ADMIN_PREFIX || p.startsWith(`${ADMIN_PREFIX}/`);
 }
 
-// The site uses hash routing (#/services, #/track/…). Search engines drop everything after "#",
-// so the home URL is the only page they can index on its own; hash URLs don't belong in a sitemap.
+// Pages are real paths since D.1 (src/router/routes.ts). The sitemap still lists only the home
+// page: task D.2 builds it from the route table with hreflang alternates and canonicals.
 const SITEMAP_PATHS = ['/'];
 
 export const seoRouter = Router();

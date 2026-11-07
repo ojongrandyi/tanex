@@ -57,7 +57,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ initialSection = 'privacy'
                     className={`legal-nav-btn ${d.id === doc.id ? 'active' : ''}`}
                     onClick={() => {
                       setActiveDoc(d.id);
-                      // Keep the URL (#/legal/<id>) in step, so each policy has its own link.
+                      // Keep the URL (/legal/<id>) in step, so each policy has its own link.
                       onNavigate?.('legal', d.id);
                     }}
                   >

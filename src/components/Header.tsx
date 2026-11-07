@@ -11,6 +11,7 @@ import {
 import { useCompanyContact } from '../utils/useCompanyContact';
 import { useEscapeKey } from '../utils/useEscapeKey';
 import { SITE_TEXT, type SiteLink } from './siteText';
+import { hrefFor } from '../router/navigation';
 import { buttonClass } from './ui';
 import './Header.css';
 
@@ -22,7 +23,7 @@ import './Header.css';
 const T = SITE_TEXT.header;
 
 // Moves keyboard focus past the header to the page content. A button, not an in-page "#main"
-// link: the site uses hash routing, so changing the hash would change the page.
+// link: the address bar should keep the page path, not gain a fragment.
 function skipToContent() {
   const main = document.querySelector<HTMLElement>('main');
   if (!main) return;
@@ -30,7 +31,7 @@ function skipToContent() {
   main.focus();
 }
 
-const hrefFor = (page: string, param?: string) => (page === 'home' ? '#/' : `#/${page}${param ? `/${param}` : ''}`);
+// Real paths in the current language (src/router); plain clicks route in-app through onNavigate.
 
 interface NavItem {
   key: string;
@@ -242,7 +243,7 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
       {/* Main bar */}
       <div className="tx-header__bar">
         <div className="tx-header__container tx-header__inner">
-          <a href="#/" className="tx-header__logo" onClick={go('home')} aria-label={SITE_TEXT.homeLabel(COMPANY)}>
+          <a href={hrefFor('home')} className="tx-header__logo" onClick={go('home')} aria-label={SITE_TEXT.homeLabel(COMPANY)}>
             <img
               src={LOGO_WORDMARK_WEB}
               width={LOGO_WORDMARK_WEB_WIDTH}
@@ -363,7 +364,7 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
             onClick={(e) => e.stopPropagation()}
           >
             <div className="tx-drawer__head">
-              <a href="#/" className="tx-header__logo" onClick={go('home')} aria-label={SITE_TEXT.homeLabel(COMPANY)}>
+              <a href={hrefFor('home')} className="tx-header__logo" onClick={go('home')} aria-label={SITE_TEXT.homeLabel(COMPANY)}>
                 <img src={LOGO_WORDMARK_WEB} width={LOGO_WORDMARK_WEB_WIDTH} height={LOGO_WORDMARK_WEB_HEIGHT} alt={LOGO_ALT} className="tx-header__logo-img" />
               </a>
               <button type="button" className="tx-header__toggle" aria-label={T.closeMenu} onClick={() => setDrawerOpen(false)}>
@@ -374,7 +375,7 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
             <nav className="tx-drawer__nav" aria-label={T.navLabel}>
               <ul className="tx-drawer__list">
                 <li>
-                  <a href="#/" className="tx-drawer__link" aria-current={activePage === 'home' ? 'page' : undefined} onClick={go('home')}>
+                  <a href={hrefFor('home')} className="tx-drawer__link" aria-current={activePage === 'home' ? 'page' : undefined} onClick={go('home')}>
                     {T.home}
                   </a>
                 </li>

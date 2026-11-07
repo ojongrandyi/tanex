@@ -115,9 +115,9 @@ test('mailer is off when SMTP_HOST is unset: nothing queued, reset hidden', asyn
 });
 
 test('templates: EN and FR from CONTENT §14, escaped HTML, plain-text twin, signature', () => {
-  const en = renderTemplate('quote.received', 'en', { name: '<b>Ann</b>', ref: 'QR-2026-12345', url: 'https://tanexsarl.com/#/quote/QR-2026-12345' });
+  const en = renderTemplate('quote.received', 'en', { name: '<b>Ann</b>', ref: 'QR-2026-12345', url: 'https://tanexsarl.com/quote/QR-2026-12345' });
   assert.equal(en.subject, "We've received your quote request QR-2026-12345");
-  assert.match(en.text, /Thank you, <b>Ann<\/b>\. Our team will review your request and send you a price\. View it any time: https:\/\/tanexsarl\.com\/#\/quote\/QR-2026-12345/);
+  assert.match(en.text, /Thank you, <b>Ann<\/b>\. Our team will review your request and send you a price\. View it any time: https:\/\/tanexsarl\.com\/quote\/QR-2026-12345/);
   assert.match(en.text, /— TanEx/);
   assert.ok(en.html.includes('&lt;b&gt;Ann&lt;/b&gt;'), 'visitor text is escaped in HTML');
   assert.ok(!en.html.includes('<b>Ann</b>'));
@@ -221,7 +221,7 @@ test('quote and contact forms queue the customer email; the server assigns the q
   assert.equal(qMail.locale, 'fr');
   assert.equal(qMail.related_id, q.id);
   assert.ok(qMail.subject.endsWith(q.id));
-  assert.ok(qMail.text.includes(`https://staging.example.test/#/quote/${q.id}`));
+  assert.ok(qMail.text.includes(`https://staging.example.test/quote/${q.id}`));
   assert.ok(qMail.text.includes('Merci, Ann Bcc: x@evil.test.'), 'line breaks in a name are flattened');
 
   // No email typed (the server's placeholder address) → nothing queued.
