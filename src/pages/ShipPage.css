@@ -1482,8 +1482,8 @@
 
 /* "Print labels": only the tracking ID block and the piece labels are printed */
 @media print {
-  body:has(.ship-print-labels) .ngf-header-wrapper,
-  body:has(.ship-print-labels) .ngf-pro-footer-wrapper,
+  body:has(.ship-print-labels) .tx-header,
+  body:has(.ship-print-labels) .tx-footer,
   .ngf-page-ship .ngf-ship-hero,
   .ngf-page-ship .ngf-ship-process-section,
   .ngf-booking-confirmed-card > :not(.ship-print-labels) {

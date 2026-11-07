@@ -69,6 +69,11 @@ unless the owner confirms them. Items marked **[confirm]** are best-knowledge dr
 - Primary button: **Get a Quote** · Language switch: `EN | FR`
 - Utility bar (desktop): `{{PHONE}}` · `{{EMAIL}}` · `Open {{HOURS}}` · `Buea · Douala`
 - Mobile drawer footer: `Need help? {{EMAIL}}`
+- Interface strings added with C.3 (**owner to confirm**): drawer `Home` (first entry) · last item of the Services
+  menu `All services` · `Menu` / `Open menu` / `Close menu` · `Skip to main content` · utility bar label `Contact details`
+  · language switch label `Language`, French option hint `French version coming soon` (until the French site is live).
+- Shown later: **Blog** (with the public blog, F.3); **Ship** becomes a menu when **Book a bike delivery** exists (G.6).
+  Until the Services page has a section per service (E.2), the Services menu items open the Services page.
 
 ### 1.3 Footer
 **Brand block:** TanEx logo (light) + `From Your Door to the World`
@@ -89,6 +94,9 @@ unless the owner confirms them. Items marked **[confirm]** are best-knowledge dr
 **Offices block:** `Buea (head office)`: `{{HQ_ADDRESS}}` · `Douala`: `{{DOUALA_OFFICE}}` · `Call {{PHONE}} · {{PHONE_2}}` · `Open {{HOURS}}`
 
 **Bottom line:** `© {year} Tanex SARL. All rights reserved.` · social icons only with real URLs.
+
+Built with C.3: *Company* shows **Blog** from F.3 and *Support* shows **Book a bike delivery** from G.6 (hidden until those
+pages exist). Hidden headings for screen readers (**owner to confirm**): `Offices`, `Social media`.
 
 ---
 

@@ -1,97 +1,59 @@
 import React from 'react';
+import { Camera, Facebook, Globe2, Instagram, Languages, Linkedin, MapPinned, Twitter, Youtube } from 'lucide-react';
 import {
-  ShieldCheck,
-  Clock,
-  Layers,
-  Globe,
-  Linkedin,
-  Facebook,
-  Twitter,
-  Instagram,
-  Youtube,
-  ChevronRight
-} from 'lucide-react';
-import { COMPANY_SHORT, LEGAL_NAME, LOGO_ALT, LOGO_WORDMARK_WEB_HEIGHT, LOGO_WORDMARK_WEB_WIDTH, LOGO_WORDMARK_WHITE_WEB, SOCIAL, SocialNetwork, TAGLINE } from '../config/brand';
+  LEGAL_NAME,
+  LOGO_ALT,
+  LOGO_WORDMARK_WEB_HEIGHT,
+  LOGO_WORDMARK_WEB_WIDTH,
+  LOGO_WORDMARK_WHITE_WEB,
+  OFFICES,
+  PHONE,
+  PHONE_2,
+  SOCIAL,
+  SocialNetwork,
+  TAGLINE,
+  formatOpeningHours,
+  formatPhone,
+} from '../config/brand';
 import { useCompanyContact } from '../utils/useCompanyContact';
+import { SITE_TEXT } from './siteText';
+import { SpeedLines } from './ui';
 import './Footer.css';
 
-// Only networks with a real URL in brand.ts are rendered.
+// Public site footer (CONTENT §1.3, design/direction.html): trust strip, then the dark footer
+// with the brand block, four link columns, the offices block and the bottom line. Every link
+// points at a real page; social icons only for networks with a real URL in brand.ts.
+
+const T = SITE_TEXT.footer;
+
 const SOCIAL_LINKS: { key: SocialNetwork; label: string; Icon: typeof Facebook }[] = [
   { key: 'facebook', label: 'Facebook', Icon: Facebook },
-  { key: 'x', label: 'Twitter / X', Icon: Twitter },
+  { key: 'x', label: 'X', Icon: Twitter },
   { key: 'instagram', label: 'Instagram', Icon: Instagram },
   { key: 'linkedin', label: 'LinkedIn', Icon: Linkedin },
   { key: 'youtube', label: 'YouTube', Icon: Youtube },
 ];
 
-// Every link points at a real page (and, where there is one, the exact section on it):
-// page = App.tsx KNOWN_PAGES entry, param = service tier ID or legal section ID.
-interface FooterLinkDef {
-  label: string;
-  page: string;
-  param?: string;
-}
+const TRUST_ICONS = [Globe2, MapPinned, Camera, Languages];
 
-const FOOTER_COLUMNS: { title: string; links: FooterLinkDef[] }[] = [
-  {
-    title: 'Services',
-    links: [
-      { label: 'Priority Express', page: 'services', param: 'priority-courier' },
-      { label: 'Freight & Linehaul', page: 'services', param: 'scheduled-freight' },
-      { label: 'Vehicle Shipping', page: 'services', param: 'vehicle-shipping' },
-      { label: 'Secure Vault', page: 'services', param: 'secure-vault' },
-    ],
-  },
-  {
-    // Careers hidden until the page exists
-    title: 'Company',
-    links: [
-      { label: `About ${COMPANY_SHORT}`, page: 'about' },
-      { label: 'Our Services', page: 'services' },
-      { label: 'Global Network', page: 'locations' },
-      { label: 'Contact', page: 'contact' },
-    ],
-  },
-  {
-    title: 'Support',
-    links: [
-      { label: 'Track a Shipment', page: 'track' },
-      { label: 'Book a Shipment', page: 'ship' },
-      { label: 'Get a Quote', page: 'quote' },
-      { label: 'Help Centre', page: 'help' },
-    ],
-  },
-  {
-    // LegalPage sections (CONTENT §1.3 / §13).
-    title: 'Legal',
-    links: [
-      { label: 'Privacy Policy', page: 'legal', param: 'privacy' },
-      { label: 'Terms of Service', page: 'legal', param: 'terms' },
-      { label: 'Shipping Terms', page: 'legal', param: 'shipping-terms' },
-      { label: 'Cookie Policy', page: 'legal', param: 'cookies' },
-    ],
-  },
-];
-
-// Keep every column at exactly four links so the rows line up across the footer.
-// Accessibility lives in the bottom bar instead of a fifth Legal row.
-
-const hrefFor = (page: string, param?: string) =>
-  page === 'home' ? '#/' : `#/${page}${param ? `/${param}` : ''}`;
+const hrefFor = (page: string, param?: string) => (page === 'home' ? '#/' : `#/${page}${param ? `/${param}` : ''}`);
 
 interface FooterProps {
   onNavigate?: (page: string, param?: string) => void;
   showTrustStrip?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({
-  onNavigate = () => {},
-  showTrustStrip = true,
-}) => {
-  const { address } = useCompanyContact();
+export const Footer: React.FC<FooterProps> = ({ onNavigate = () => {}, showTrustStrip = true }) => {
+  // Admin Settings can override the head-office address and the support phone (useCompanyContact).
+  const { phone, phoneHref, address } = useCompanyContact();
+  // The admin Settings phone (if set) leads; the second brand number follows when it differs.
+  const phones = [phone, formatPhone(PHONE), formatPhone(PHONE_2)]
+    .filter((p, i, all) => p && all.indexOf(p) === i);
+  const telFor = (display: string) => (display === phone && phoneHref ? phoneHref : `tel:${display.replace(/[^0-9+]/g, '')}`);
+  const social = SOCIAL_LINKS.filter((s) => SOCIAL[s.key]);
 
-  // Plain clicks route in-app; Ctrl/Cmd/Shift/middle-click keep the browser's
-  // open-in-new-tab behaviour, since each link carries its real URL.
+  // Plain clicks route in-app; Ctrl/Cmd/Shift/middle-click keep the browser's open-in-new-tab
+  // behaviour, since each link carries its real URL.
   const go = (page: string, param?: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
@@ -99,111 +61,63 @@ export const Footer: React.FC<FooterProps> = ({
   };
 
   return (
-    <footer className="ngf-pro-footer-wrapper">
-      {/* 1. TRUST FEATURE STRIP */}
+    <footer className="tx-footer">
       {showTrustStrip && (
-        <div className="ngf-footer-trust-strip">
-          <div className="ngf-container-wide ngf-trust-grid">
-            <div className="ngf-trust-card">
-              <div className="ngf-trust-icon">
-                <Globe size={24} />
-              </div>
-              <div className="ngf-trust-info">
-                <h3>Worldwide Coverage</h3>
-                <p>Air, ocean and road, connected.</p>
-              </div>
-            </div>
-
-            <div className="ngf-trust-card">
-              <div className="ngf-trust-icon">
-                <Clock size={24} />
-              </div>
-              <div className="ngf-trust-info">
-                <h3>Live Milestones</h3>
-                <p>Every hand-off scanned and time-stamped.</p>
-              </div>
-            </div>
-
-            <div className="ngf-trust-card">
-              <div className="ngf-trust-icon">
-                <Layers size={24} />
-              </div>
-              <div className="ngf-trust-info">
-                <h3>Piece-Level Labels</h3>
-                <p>Every carton individually barcoded.</p>
-              </div>
-            </div>
-
-            <div className="ngf-trust-card">
-              <div className="ngf-trust-icon">
-                <ShieldCheck size={24} />
-              </div>
-              <div className="ngf-trust-info">
-                <h4>Signed Delivery</h4>
-                <p>Digital proof of delivery on every shipment.</p>
-              </div>
-            </div>
-          </div>
+        <div className="tx-footer__trust">
+          <ul className="tx-footer__container tx-footer__trust-grid">
+            {T.trust.map((item, i) => {
+              const Icon = TRUST_ICONS[i];
+              return (
+                <li key={item.title} className="tx-footer__trust-item">
+                  <span className="tx-footer__trust-icon" aria-hidden="true"><Icon /></span>
+                  <p>
+                    <strong>{item.title}</strong> {item.body}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
 
-      {/* 2. MAIN EXECUTIVE FOOTER */}
-      <div className="ngf-pro-footer-main">
-        {/* Subtle Map Watermark Background */}
-        <div className="footer-world-map-bg" />
-        
-        {/* Glowing Accent Corner Swoosh */}
-        <div className="footer-accent-swoosh" />
-
-        <div className="ngf-container-wide footer-content-relative">
-          <div className="ngf-pro-footer-grid">
-            {/* Column 1: Brand & Tagline */}
-            <div className="ngf-pro-brand-col">
-              <a className="ngf-pro-footer-logo" href={hrefFor('home')} onClick={go('home')}>
+      <div className="tx-footer__main tx-dark">
+        <div className="tx-footer__container">
+          <div className="tx-footer__grid">
+            <div className="tx-footer__brand">
+              <a className="tx-footer__logo" href={hrefFor('home')} onClick={go('home')}>
                 <img
                   src={LOGO_WORDMARK_WHITE_WEB}
                   width={LOGO_WORDMARK_WEB_WIDTH}
                   height={LOGO_WORDMARK_WEB_HEIGHT}
                   loading="lazy"
                   alt={LOGO_ALT}
-                  className="ngf-pro-footer-logo-img"
                 />
               </a>
-
-              <p className="ngf-pro-brand-desc">
-                Express, freight and secure cargo across borders, with one tracking ID and one accountable team from pickup to proof of delivery.
+              <p className="tx-footer__tagline">
+                <SpeedLines />
+                <span>{TAGLINE}</span>
               </p>
-
-              {SOCIAL_LINKS.some(s => SOCIAL[s.key]) && (
-                <div className="ngf-pro-socials">
-                  {SOCIAL_LINKS.filter(s => SOCIAL[s.key]).map(({ key, label, Icon }) => (
-                    <a key={key} href={SOCIAL[key]} className="pro-social-btn" aria-label={label} target="_blank" rel="noopener noreferrer">
-                      <Icon size={15} />
-                    </a>
+              <p className="tx-footer__desc">{T.description}</p>
+              {social.length > 0 && (
+                <ul className="tx-footer__social" aria-label={T.social}>
+                  {social.map(({ key, label, Icon }) => (
+                    <li key={key}>
+                      <a href={SOCIAL[key]} aria-label={label} target="_blank" rel="noopener noreferrer">
+                        <Icon aria-hidden="true" />
+                      </a>
+                    </li>
                   ))}
-                </div>
+                </ul>
               )}
-
-              <div className="ngf-pro-faster-tagline font-mono">
-                <span>{TAGLINE.toUpperCase()}</span>
-                <div className="tagline-bar" />
-              </div>
             </div>
 
-            {/* Columns 2–5: Services · Company · Support · Legal */}
-            {FOOTER_COLUMNS.map(({ title, links }) => (
-              <nav key={title} className="ngf-pro-links-col" aria-label={title}>
-                <h4 className="ngf-pro-col-title">
-                  {title}
-                  <span className="title-accent-dash" />
-                </h4>
-                <ul className="ngf-pro-links-list">
+            {T.columns.map(({ title, links }) => (
+              <nav key={title} className="tx-footer__col" aria-label={title}>
+                <h2 className="tx-footer__col-title">{title}</h2>
+                <ul>
                   {links.map(({ label, page, param }) => (
                     <li key={label}>
-                      <a href={hrefFor(page, param)} onClick={go(page, param)}>
-                        <ChevronRight size={14} className="link-chevron" aria-hidden="true" />
-                        <span>{label}</span>
-                      </a>
+                      <a href={hrefFor(page, param)} onClick={go(page, param)}>{label}</a>
                     </li>
                   ))}
                 </ul>
@@ -211,19 +125,32 @@ export const Footer: React.FC<FooterProps> = ({
             ))}
           </div>
 
-          {/* 3. BOTTOM BAR */}
-          <div className="ngf-pro-footer-bottom">
-            <div className="pro-copy-text">
-              © {new Date().getFullYear()} {LEGAL_NAME}. All rights reserved.
-              {address && <> · {address}</>}
+          <div className="tx-footer__offices">
+            <h2 className="tx-visually-hidden">{T.officesTitle}</h2>
+            {OFFICES.map((office, i) => (
+              <address key={office.city} className="tx-footer__office">
+                <strong>{i === 0 ? T.headOffice : office.city}</strong>
+                <span>{i === 0 && address ? address : office.address}</span>
+              </address>
+            ))}
+            <div className="tx-footer__office">
+              {phones.length > 0 && (
+                <span>
+                  {T.call('')}
+                  {phones.map((p, i) => (
+                    <React.Fragment key={p}>
+                      {i > 0 && ' · '}
+                      <a href={telFor(p)}>{p}</a>
+                    </React.Fragment>
+                  ))}
+                </span>
+              )}
+              <span>{T.open(formatOpeningHours())}</span>
             </div>
-            <a
-              className="pro-bottom-link"
-              href={hrefFor('legal', 'accessibility')}
-              onClick={go('legal', 'accessibility')}
-            >
-              Accessibility
-            </a>
+          </div>
+
+          <div className="tx-footer__bottom">
+            <p>{T.copyright(new Date().getFullYear(), LEGAL_NAME)}</p>
           </div>
         </div>
       </div>

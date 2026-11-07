@@ -37,6 +37,12 @@ body {
 :lang(fr) :is(p, li, dd, td) { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
 .tx-nowrap { white-space: nowrap; }
 
+/* Legacy colour utilities used across pages and the console (formerly in Header.css). .text-accent
+   is for light surfaces; dark sections override it to Orange 500 where they use it. */
+.text-accent { color: var(--tx-accent-text); }
+.text-emerald { color: #10b981; }
+.tx-dark .text-accent { color: var(--tx-orange-500); }
+
 #root {
   display: flex;
   flex-direction: column;

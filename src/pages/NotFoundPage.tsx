@@ -1,5 +1,6 @@
 import React from 'react';
 import { Home, PackageSearch } from 'lucide-react';
+import { Button } from '../components/ui';
 import './NotFoundPage.css';
 
 interface NotFoundPageProps {
@@ -16,12 +17,12 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onNavigate }) => (
         The page you're looking for doesn't exist or may have moved. Check the address, or use one of the links below.
       </p>
       <div className="ngf-notfound-actions">
-        <button type="button" className="ngf-btn-primary" onClick={() => onNavigate('home')}>
-          <Home size={18} aria-hidden="true" /> Back to Home
-        </button>
-        <button type="button" className="ngf-btn-secondary" onClick={() => onNavigate('track')}>
-          <PackageSearch size={18} aria-hidden="true" /> Track a Shipment
-        </button>
+        <Button variant="primary" icon={<Home size={18} />} onClick={() => onNavigate('home')}>
+          Back to Home
+        </Button>
+        <Button variant="ghost" icon={<PackageSearch size={18} />} onClick={() => onNavigate('track')}>
+          Track a Shipment
+        </Button>
       </div>
       <p className="ngf-notfound-help">
         Need help?{' '}

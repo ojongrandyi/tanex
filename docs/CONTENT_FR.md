@@ -49,6 +49,10 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 - Navigation : **Suivi** · **Services** (Aérien · Maritime · Ferroviaire · Routier · Entreposage · Livraison locale) · **Expédier** (Réserver un envoi · Réserver une livraison à moto) · **Réseau** · **À propos** · **Blog** · **Contact**
 - Bouton principal : **Demander un devis** · Langue : `EN | FR`
 - Bandeau mobile : `Besoin d'aide ? {{EMAIL}}`
+- Libellés d'interface ajoutés avec C.3 (**à confirmer**, relecture native #108) : `Accueil` · `Tous les services` ·
+  `Menu` / `Ouvrir le menu` / `Fermer le menu` · `Aller au contenu principal` · `Coordonnées` · `Langue` · titres
+  masqués du pied de page : `Bureaux`, `Réseaux sociaux`. (L'indication anglaise « French version coming soon » disparaît
+  quand le site français est actif, D.3.)
 
 ### 1.3 Pied de page
 `Livraison à moto en ville, camions entre les villes, et fret aérien, maritime, ferroviaire et routier vers le monde entier, avec un seul numéro de suivi de la première à la dernière porte.`
