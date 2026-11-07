@@ -18,11 +18,14 @@ import {
   LogOut,
   Inbox,
   Wallet,
-  UserCircle
+  UserCircle,
+  Users,
+  ShieldCheck,
+  History
 } from 'lucide-react';
 import { useAdminData } from '../context/AdminDataContext';
 import { useAuth } from '../auth/AuthContext';
-import { AUTH_TEXT } from '../auth/strings';
+import { AUTH_TEXT, IAM_TEXT } from '../auth/strings';
 import { LOGO_ALT, LOGO_WORDMARK_HEIGHT, LOGO_WORDMARK_WHITE, LOGO_WORDMARK_WIDTH, TAGLINE } from '../config/brand';
 import { canOpenView, firstAllowedView, type AdminViewType } from './views';
 import './AdminLayout.css';
@@ -93,6 +96,21 @@ const VIEW_METADATA: Record<AdminViewType, { title: string; category: string; de
     title: 'Settings',
     category: 'Compliance & Governance',
     description: 'Carrier configuration and system preferences.'
+  },
+  'users': {
+    title: IAM_TEXT.users.title,
+    category: 'Administration',
+    description: 'Staff accounts, their roles and sign-in.'
+  },
+  'roles': {
+    title: IAM_TEXT.roles.title,
+    category: 'Administration',
+    description: 'Roles and the permissions they grant.'
+  },
+  'audit': {
+    title: IAM_TEXT.audit.title,
+    category: 'Administration',
+    description: 'Who changed what, and when.'
   },
   'account': {
     title: AUTH_TEXT.account.title,
@@ -319,6 +337,41 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   <Settings size={18} />
                 </div>
                 <span className="nav-title">Settings</span>
+              </button>
+            )}
+
+            {/* Users, Roles, Audit log (IAM_RBAC_SPEC §9) */}
+            {allowed('users') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'users' ? 'active' : ''}`}
+                onClick={() => { onSelectView('users'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <Users size={18} />
+                </div>
+                <span className="nav-title">{IAM_TEXT.users.title}</span>
+              </button>
+            )}
+            {allowed('roles') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'roles' ? 'active' : ''}`}
+                onClick={() => { onSelectView('roles'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <ShieldCheck size={18} />
+                </div>
+                <span className="nav-title">{IAM_TEXT.roles.title}</span>
+              </button>
+            )}
+            {allowed('audit') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'audit' ? 'active' : ''}`}
+                onClick={() => { onSelectView('audit'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <History size={18} />
+                </div>
+                <span className="nav-title">{IAM_TEXT.audit.title}</span>
               </button>
             )}
 

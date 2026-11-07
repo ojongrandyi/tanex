@@ -108,12 +108,14 @@ quotesRouter.get('/:id', (req: Request, res: Response) => {
 });
 
 // POST /api/quotes (Create quote request from public form) — rate-limited, no session to
-// gate this behind.
-quotesRouter.post('/', publicWriteLimiter, (req: Request, res: Response) => {
+// gate this behind. A staff member sending it from a signed-in browser is audited.
+quotesRouter.post('/', publicWriteLimiter,
+  audited('quote.create', 'quote', null, 'Quote request submitted while signed in', { signedInOnly: true }), (req: Request, res: Response) => {
   try {
     const q = req.body;
     const randomSuffix = Math.floor(10000 + Math.random() * 90000);
     const id = q.id || `QR-2026-${randomSuffix}`;
+    res.locals.auditEntityId = id;
     const createdAt = `${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
 
     const customerName = q.customerName || q.requesterName || 'Prospective Customer';

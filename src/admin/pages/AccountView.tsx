@@ -1,5 +1,6 @@
 // My account (docs/IAM_RBAC_SPEC.md §9): the signed-in user's name, language and password,
-// and sign out. Avatar and active sessions come with the Users screens (tracker B.5).
+// and sign out. Avatar and an active-sessions list are not built yet (the sessions API,
+// GET /api/users/:id/sessions, exists since B.5).
 import React, { useState } from 'react';
 import { CheckCircle2, AlertCircle, LogOut, UserCircle, KeyRound } from 'lucide-react';
 import { api } from '../../services/api';

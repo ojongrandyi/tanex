@@ -110,12 +110,12 @@ roles belong to the Super Admin (except the locked Super Admin role).
 | `PATCH /api/auth/me` | session | `{ displayName?, locale? }`: own name (1–80 chars) and language (`en`/`fr`) only; audited `user.update_self` (added B.4) |
 | `POST /api/auth/forgot` | public (rate-limited) | emails a reset link when SMTP is set; always answers the same |
 | `POST /api/auth/reset` | public (token) | token is random 32 bytes, stored hashed, 30 min, single use |
-| `GET/POST /api/users`, `PATCH /api/users/:id` | `users.view` / `users.manage` | create, edit, roles, disable/enable |
+| `GET/POST /api/users`, `GET/PATCH /api/users/:id` | `users.view` / `users.manage` | create (returns the temporary password once), edit, roles, disable/enable. An account can only be changed by someone holding all of its permissions; no self-disable (added B.5) |
 | `POST /api/users/:id/reset-password` | `users.manage` | returns a one-time temporary password (shown once; can be sent by WhatsApp link) |
 | `GET /api/users/:id/sessions`, `DELETE /api/users/:id/sessions` | `users.manage` | sign out everywhere |
-| `GET/POST /api/roles`, `PATCH/DELETE /api/roles/:id` | `roles.manage` | permissions edited as a checklist |
+| `GET/POST /api/roles`, `PATCH/DELETE /api/roles/:id` | `roles.manage` (GET also `users.manage`) | permissions edited as a checklist; seeded roles can be edited but not deleted; a role in use can't be deleted (B.5) |
 | `GET /api/permissions` | `roles.manage` | catalogue with groups/descriptions |
-| `GET /api/audit` | `audit.view` | filters: actor, action, entity, date range; paginated |
+| `GET /api/audit`, `GET /api/audit/filters` | `audit.view` | filters: `actor`, `action`, `entityType`, `entityId`, `from`/`to` (epoch ms, `to` exclusive); `page`, `pageSize` (50, max 100); `/filters` lists the actions, record types and people present |
 
 ## 7. Mapping existing routes (B.3)
 

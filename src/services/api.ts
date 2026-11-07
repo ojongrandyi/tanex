@@ -35,6 +35,86 @@ export interface SessionUser {
   mustChangePassword: boolean;
 }
 
+/** A staff account as the Users screen sees it (GET /api/users). */
+export interface StaffUser {
+  id: string;
+  displayName: string;
+  email: string | null;
+  phone: string | null;
+  status: 'ACTIVE' | 'DISABLED';
+  locale: 'en' | 'fr';
+  mustChangePassword: boolean;
+  locked: boolean;
+  lastLoginAt: number | null;
+  createdAt: number;
+  updatedAt: number;
+  roles: { id: string; name: string }[];
+}
+
+/** Body for POST/PATCH /api/users. Empty email/phone clears it. */
+export interface StaffUserInput {
+  displayName?: string;
+  email?: string;
+  phone?: string;
+  locale?: 'en' | 'fr';
+  roleIds?: string[];
+  status?: 'ACTIVE' | 'DISABLED';
+}
+
+export interface StaffRole {
+  id: string;
+  name: string;
+  description: string;
+  isSystem: boolean;
+  /** The Super Admin role: read-only. */
+  isLocked: boolean;
+  /** Catalogue keys, or ['*'] for Super Admin. */
+  permissions: string[];
+  userCount: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface AuditEntry {
+  id: string;
+  at: number;
+  actorUserId: string | null;
+  actorName: string | null;
+  action: string;
+  entityType: string | null;
+  entityId: string | null;
+  summary: string | null;
+  before: unknown;
+  after: unknown;
+  ip: string | null;
+}
+
+export interface AuditQuery {
+  actor?: string;
+  action?: string;
+  entityType?: string;
+  entityId?: string;
+  /** Epoch ms, inclusive. */
+  from?: number;
+  /** Epoch ms, exclusive. */
+  to?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface AuditPage {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: AuditEntry[];
+}
+
+export interface AuditFilters {
+  actions: string[];
+  entityTypes: string[];
+  actors: { id: string; name: string }[];
+}
+
 export interface SessionInfo {
   user: SessionUser | null;
   /** True when the server can email a reset link ("Forgot password?" is shown only then). */
@@ -195,6 +275,98 @@ export const api = {
       body: JSON.stringify({ email })
     });
     await handleResponse<unknown>(res);
+  },
+
+  // Staff accounts, roles and audit log (IAM_RBAC_SPEC §6). Errors carry `code` (e.g.
+  // CANNOT_GRANT, LAST_SUPER_ADMIN) for the console to word.
+  async listUsers(): Promise<StaffUser[]> {
+    const res = await fetchApi(`${API_BASE}/users`, { credentials: 'include', cache: 'no-store' });
+    return handleResponse<StaffUser[]>(res);
+  },
+
+  /** Creates an account; the temporary password comes back once and is never stored here. */
+  async createUser(input: StaffUserInput): Promise<{ user: StaffUser; tempPassword: string }> {
+    const res = await fetchApi(`${API_BASE}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      cache: 'no-store',
+      body: JSON.stringify(input)
+    });
+    return handleResponse<{ user: StaffUser; tempPassword: string }>(res);
+  },
+
+  async updateUser(id: string, changes: StaffUserInput): Promise<StaffUser> {
+    const res = await fetchApi(`${API_BASE}/users/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(changes)
+    });
+    return handleResponse<StaffUser>(res);
+  },
+
+  async resetUserPassword(id: string): Promise<{ user: StaffUser; tempPassword: string }> {
+    const res = await fetchApi(`${API_BASE}/users/${encodeURIComponent(id)}/reset-password`, {
+      method: 'POST',
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    return handleResponse<{ user: StaffUser; tempPassword: string }>(res);
+  },
+
+  /** Signs the user out on every device; returns how many sessions ended. */
+  async signOutUserEverywhere(id: string): Promise<number> {
+    const res = await fetchApi(`${API_BASE}/users/${encodeURIComponent(id)}/sessions`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await handleResponse<{ signedOut: number }>(res);
+    return Number(data?.signedOut) || 0;
+  },
+
+  async listRoles(): Promise<StaffRole[]> {
+    const res = await fetchApi(`${API_BASE}/roles`, { credentials: 'include', cache: 'no-store' });
+    return handleResponse<StaffRole[]>(res);
+  },
+
+  async createRole(input: { name: string; description: string; permissions: string[] }): Promise<StaffRole> {
+    const res = await fetchApi(`${API_BASE}/roles`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(input)
+    });
+    return handleResponse<StaffRole>(res);
+  },
+
+  async updateRole(id: string, changes: { name?: string; description?: string; permissions?: string[] }): Promise<StaffRole> {
+    const res = await fetchApi(`${API_BASE}/roles/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(changes)
+    });
+    return handleResponse<StaffRole>(res);
+  },
+
+  async deleteRole(id: string): Promise<void> {
+    const res = await fetchApi(`${API_BASE}/roles/${encodeURIComponent(id)}`, { method: 'DELETE', credentials: 'include' });
+    await handleResponse<unknown>(res);
+  },
+
+  async getAuditLog(query: AuditQuery): Promise<AuditPage> {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(query)) {
+      if (v !== undefined && v !== null && v !== '') params.set(k, String(v));
+    }
+    const res = await fetchApi(`${API_BASE}/audit?${params.toString()}`, { credentials: 'include', cache: 'no-store' });
+    return handleResponse<AuditPage>(res);
+  },
+
+  async getAuditFilters(): Promise<AuditFilters> {
+    const res = await fetchApi(`${API_BASE}/audit/filters`, { credentials: 'include', cache: 'no-store' });
+    return handleResponse<AuditFilters>(res);
   },
 
   // Public Tracking

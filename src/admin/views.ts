@@ -12,6 +12,9 @@ export type AdminViewType =
   | 'payments'
   | 'document-center'
   | 'settings'
+  | 'users'
+  | 'roles'
+  | 'audit'
   | 'account';
 
 /** null = every signed-in user (My account). */
@@ -25,6 +28,9 @@ export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | null> = {
   'payments': 'payments.view',
   'document-center': 'documents.view',
   'settings': 'settings.view',
+  'users': 'users.view',
+  'roles': 'roles.manage',
+  'audit': 'audit.view',
   'account': null
 };
 
@@ -38,7 +44,10 @@ export const VIEW_ORDER: readonly AdminViewType[] = [
   'messages',
   'payments',
   'document-center',
-  'settings'
+  'settings',
+  'users',
+  'roles',
+  'audit'
 ];
 
 export function canOpenView(view: AdminViewType, can: (key: PermissionKey) => boolean): boolean {

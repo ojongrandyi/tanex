@@ -14,6 +14,9 @@ import { paymentsRouter } from './routes/paymentProofs.js';
 import { statsRouter } from './routes/stats.js';
 import { messagesRouter } from './routes/messages.js';
 import { mediaRouter } from './routes/media.js';
+import { usersRouter } from './routes/users.js';
+import { rolesRouter, permissionsRouter } from './routes/roles.js';
+import { auditRouter } from './routes/auditLog.js';
 import { requirePermission } from './middleware/auth.js';
 
 /**
@@ -23,6 +26,11 @@ import { requirePermission } from './middleware/auth.js';
  */
 export function registerApiRoutes(app: Express): void {
   app.use('/api/auth', authRouter);
+  // Staff accounts, roles, permission catalogue and audit log (IAM_RBAC_SPEC §6); gated per route.
+  app.use('/api/users', usersRouter);
+  app.use('/api/roles', rolesRouter);
+  app.use('/api/permissions', permissionsRouter);
+  app.use('/api/audit', auditRouter);
   // Package images (/api/shipments/:id/images) and the payment request per shipment
   // (/api/shipments/:id/payment), each route gated individually.
   app.use('/api/shipments', shipmentImagesRouter);

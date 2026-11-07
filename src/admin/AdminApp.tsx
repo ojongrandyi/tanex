@@ -10,6 +10,9 @@ import { SettingsView } from './pages/SettingsView';
 import { MessagesView } from './pages/MessagesView';
 import { PaymentsView } from './pages/PaymentsView';
 import { AccountView } from './pages/AccountView';
+import { UsersView } from './pages/UsersView';
+import { RolesView } from './pages/RolesView';
+import { AuditLogView } from './pages/AuditLogView';
 import { useAuth } from '../auth/AuthContext';
 import { canOpenView, firstAllowedView } from './views';
 import { api } from '../services/api';
@@ -312,6 +315,17 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPubl
         {/* SETTINGS */}
         {currentView === 'settings' && (
           <SettingsView />
+        )}
+
+        {/* USERS, ROLES, AUDIT LOG (IAM_RBAC_SPEC §9) */}
+        {currentView === 'users' && (
+          <UsersView searchQuery={globalSearch} />
+        )}
+        {currentView === 'roles' && (
+          <RolesView />
+        )}
+        {currentView === 'audit' && (
+          <AuditLogView />
         )}
 
         {/* MY ACCOUNT: every signed-in user */}

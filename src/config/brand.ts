@@ -96,6 +96,9 @@ export const OFFICES: readonly Office[] = [
   { city: 'Douala', label: 'Douala office', address: 'Kotto, La Canadienne, Douala, Cameroon' },
 ];
 
+// Office time zone (CLAUDE.md §7): console dates and audit date filters use it.
+export const OFFICE_TIME_ZONE = 'Africa/Douala';
+
 // Opening hours, 24-hour local time (Africa/Douala). The days of the week are TBD: while `days`
 // is empty, UI shows the hours only.
 export const OPENING_HOURS: { opens: string; closes: string; days: readonly string[] } = {

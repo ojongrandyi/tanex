@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { TRACKING_ID_EXAMPLE, TRACKING_PREFIX } from '../../src/config/brand.js';
 import { paymentProofLimiter } from '../middleware/rateLimit.js';
+import { audited } from '../audit.js';
 import { deleteUpload, saveImageUpload } from '../uploads.js';
 import { getShipmentPayment } from './shipmentPayments.js';
 import { parseTrackingInput } from '../../src/shared/trackingId.js';
@@ -18,7 +19,12 @@ const NOT_ACCEPTING = 'This payment is no longer waiting for a proof. Refresh th
 const TOO_MANY_OPEN = 'We already have proofs waiting for review for this payment. Our team will check them first.';
 const NOT_AN_IMAGE = 'This file isn\'t an image. Upload a JPG, PNG, WebP or HEIC.';
 
-trackProofRouter.post('/:trackingNumber/payment-proof', paymentProofLimiter, (req: Request, res: Response) => {
+// Customers send proofs without signing in; one sent from a signed-in staff browser is audited.
+trackProofRouter.post('/:trackingNumber/payment-proof', paymentProofLimiter,
+  audited('payment_proof.create', 'payment_proof', null,
+    (req) => `Proof of payment submitted while signed in for ${String(req.params.trackingNumber ?? '').toUpperCase()}`,
+    { signedInOnly: true }),
+  (req: Request, res: Response) => {
   let savedFile: string | null = null;
   try {
     const parsed = parseTrackingInput(req.params.trackingNumber as string);
@@ -78,6 +84,7 @@ trackProofRouter.post('/:trackingNumber/payment-proof', paymentProofLimiter, (re
       throw err;
     }
 
+    res.locals.auditEntityId = upload.id;
     res.status(201).json({ success: true, data: { status: 'SUBMITTED', submittedAt: now } });
   } catch (err: any) {
     if (savedFile) {

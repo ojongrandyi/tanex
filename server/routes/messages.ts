@@ -34,8 +34,10 @@ function formatMessage(row: any) {
 }
 
 // POST /api/messages — the public Contact form and the Home callback request. Rate-limited, no session.
-// An empty email is stored as '' (the column is NOT NULL).
-messagesRouter.post('/', publicWriteLimiter, (req: Request, res: Response) => {
+// An empty email is stored as '' (the column is NOT NULL). A staff member sending it from a
+// signed-in browser is recorded in the audit log.
+messagesRouter.post('/', publicWriteLimiter,
+  audited('message.create', 'message', null, 'Contact message submitted while signed in', { signedInOnly: true }), (req: Request, res: Response) => {
   try {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     const name = text(body.name, 120);
@@ -68,6 +70,7 @@ messagesRouter.post('/', publicWriteLimiter, (req: Request, res: Response) => {
       ) VALUES (?, ?, 'NEW', ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, Date.now(), name, email, phone, subject, priority, trackingNumber, gatewayCode, message);
 
+    res.locals.auditEntityId = id;
     const created = db.prepare('SELECT * FROM contact_messages WHERE id = ?').get(id);
     res.status(201).json({ success: true, data: formatMessage(created) });
   } catch (err: any) {

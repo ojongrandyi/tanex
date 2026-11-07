@@ -77,3 +77,124 @@ export function passwordErrorText(err: unknown): string {
     default: return e?.message || AUTH_TEXT.password.wrongCurrent;
   }
 }
+
+// Users, Roles and Audit log screens (CONTENT §10.1; B.5 additions marked owner to confirm).
+// English only until D.3, like AUTH_TEXT above.
+export const IAM_TEXT = {
+  users: {
+    title: 'Users',
+    add: 'Add user',
+    edit: 'Edit user',
+    columns: { name: 'Name', contact: 'Email / phone', roles: 'Roles', status: 'Status', lastSignIn: 'Last sign-in', actions: 'Actions' },
+    status: { ACTIVE: 'Active', DISABLED: 'Disabled' },
+    locked: 'Locked',
+    firstSignInPending: 'Password change pending',
+    never: 'Never',
+    noRoles: 'No role',
+    you: 'You',
+    actions: {
+      edit: 'Edit',
+      resetPassword: 'Reset password',
+      disable: 'Disable',
+      enable: 'Enable',
+      signOutEverywhere: 'Sign out everywhere'
+    },
+    fields: {
+      name: 'Name',
+      email: 'Email',
+      phone: 'Phone',
+      language: 'Language',
+      roles: 'Roles'
+    },
+    contactHint: 'Enter an email address, a phone number or both. Phone numbers without a country code are read as Cameroonian.',
+    roleNotGrantable: "You can't give this role: it has permissions you don't hold.",
+    create: 'Create user',
+    save: 'Save',
+    saving: 'Saving…',
+    cancel: 'Cancel',
+    close: 'Close',
+    empty: 'No accounts yet.',
+    loading: 'Loading…',
+    search: 'Search by name, email or phone',
+    confirmDisable: (name: string) => `Disable ${name}? They are signed out at once and can't sign in until enabled again.`,
+    confirmReset: (name: string) => `Give ${name} a new temporary password? Their current password stops working and they are signed out.`,
+    confirmSignOut: (name: string) => `Sign ${name} out on every device?`,
+    signedOut: (n: number) => `Signed out of ${n} session${n === 1 ? '' : 's'}.`,
+    saved: 'Saved.'
+  },
+  temp: {
+    title: 'Temporary password',
+    intro: "Shown once. Share it securely; they'll choose their own at first sign-in.",
+    signInWith: 'Signs in with',
+    copy: 'Copy',
+    copied: 'Copied',
+    whatsapp: 'Send on WhatsApp',
+    whatsappHint: 'Opens WhatsApp with the message ready. You still tap Send.',
+    whatsappNoPhone: 'Add a valid phone number to this account to send it on WhatsApp.',
+    done: 'Done'
+  },
+  roles: {
+    title: 'Roles',
+    add: 'New role',
+    name: 'Name',
+    description: 'Description',
+    permissions: 'Permissions',
+    usersWithRole: (n: number) => `Users with this role: ${n}`,
+    system: 'System role',
+    locked: "The Super Admin role can't be changed.",
+    allPermissions: 'Every permission, including users, roles and settings.',
+    notGrantable: "You can't change this permission because you don't hold it.",
+    save: 'Save',
+    saving: 'Saving…',
+    create: 'Create role',
+    cancel: 'Cancel',
+    delete: 'Delete role',
+    confirmDelete: (name: string) => `Delete the role ${name}?`,
+    saved: 'Saved.',
+    selectPrompt: 'Choose a role to see its permissions.',
+    loading: 'Loading…'
+  },
+  audit: {
+    title: 'Audit log',
+    filters: { person: 'Person', action: 'Action', record: 'Record', recordId: 'Record ID', date: 'Date', from: 'From', to: 'To' },
+    all: { person: 'Everyone', action: 'All actions', record: 'All records' },
+    clear: 'Clear filters',
+    columns: { when: 'When', person: 'Person', action: 'Action', record: 'Record', summary: 'Summary' },
+    before: 'Before',
+    after: 'After',
+    ip: 'IP address',
+    noDetail: 'No field changes recorded for this entry.',
+    notSignedIn: 'Not signed in',
+    empty: 'No entries match these filters.',
+    entries: (n: number) => `${n} entr${n === 1 ? 'y' : 'ies'}`,
+    page: (p: number, n: number) => `Page ${p} of ${n}`,
+    previous: 'Previous',
+    next: 'Next',
+    loading: 'Loading…',
+    showDetail: 'Show details',
+    hideDetail: 'Hide details'
+  },
+  errors: {
+    CANNOT_GRANT: "You can't give permissions you don't hold.",
+    CANNOT_MANAGE_USER: "You can't change an account that has permissions you don't hold.",
+    LAST_SUPER_ADMIN: 'This is the last active Super Admin. Give the role to someone else first.',
+    SELF_DISABLE: "You can't disable your own account.",
+    SELF_RESET: 'Use My account to change your own password.',
+    EMAIL_TAKEN: 'Another account already uses this email address.',
+    PHONE_TAKEN: 'Another account already uses this phone number.',
+    IDENTIFIER_REQUIRED: 'Enter an email address or a phone number.',
+    INVALID_EMAIL: 'Enter a valid email address.',
+    INVALID_PHONE: 'Enter a valid phone number.',
+    INVALID_NAME: 'Enter a name.',
+    NAME_TAKEN: 'A role with this name already exists.',
+    ROLE_LOCKED: "The Super Admin role can't be changed.",
+    ROLE_SYSTEM: "System roles can't be deleted. You can rename them or change their permissions.",
+    ROLE_IN_USE: 'Some accounts have this role. Remove it from them first.'
+  } as Record<string, string>
+} as const;
+
+/** The §10.1 wording for an error from the users/roles API, else the server's own message. */
+export function iamErrorText(err: unknown): string {
+  const e = err as { message?: string; code?: string } | null;
+  return (e?.code && IAM_TEXT.errors[e.code]) || e?.message || 'Something went wrong. Please try again.';
+}
