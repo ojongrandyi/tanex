@@ -16,6 +16,7 @@ import { ADMIN_PATH, COMPANY } from '../src/config/brand.js';
 import { isAllowedOrigin } from './cors.js';
 import { requirePermission, requireJsonOrMultipart } from './middleware/auth.js';
 import { SqliteSessionStore, createSessionMiddleware } from './auth/sessionStore.js';
+import { resolveSessionSecret } from './auth/sessionSecret.js';
 
 dotenv.config(); // reload trigger for tsx watch after .env changes
 
@@ -108,15 +109,12 @@ if (ADMIN_PROXY_TARGET) {
   // (see Settings > Barcode & Documents) doesn't silently fail with a 413.
   app.use(express.json({ limit: '5mb' }));
 
-  if (!process.env.SESSION_SECRET) {
-    console.error('[server] SESSION_SECRET is not set in .env — admin sessions will not persist reliably across restarts.');
-  }
-
   // Sessions live in the SQLite `sessions` table (IAM_RBAC_SPEC §5.7), so a restart or
   // redeploy no longer signs everyone out. Cookie settings are in createSessionMiddleware.
   app.use(createSessionMiddleware(
     new SqliteSessionStore(db),
-    process.env.SESSION_SECRET || 'dev-only-insecure-fallback-secret'
+    // SESSION_SECRET, or a random secret generated once and kept next to the database.
+    resolveSessionSecret(dataDir)
   ));
 
   // State-changing /api requests must be JSON or multipart (IAM_RBAC_SPEC §5.8).
@@ -163,7 +161,7 @@ if (ADMIN_PROXY_TARGET) {
         databaseFileModifiedAt: dbStat ? dbStat.mtime.toISOString() : null
       });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      serverError(res, err);
     }
   });
 
@@ -259,3 +257,5 @@ app.listen(PORT, () => {
   }
   console.log(`====================================================`);
 });
+
+import { serverError } from './errors.js';

@@ -182,4 +182,6 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 | `quote.ready` | Objet `Votre devis TanEx {ref} est prêt` · `Votre prix est prêt à être consulté et accepté : {url}` |
 | `contact.received` | Objet `Nous avons bien reçu votre message ({ref})` · `Merci, {name}. Nous vous répondrons dès que possible.` |
 | `payment.confirmed` | Objet `Paiement reçu pour {id}` · `Merci. Nous avons confirmé votre paiement pour {reason}.` |
+| `contact.staff_alert` (ajouté après B.6, à confirmer) | Objet `Nouveau message de {name} ({ref})` · `{name} a envoyé un message depuis le site (sujet : {subject}). Lisez-le et répondez dans la console : {url}` |
+| `payment.proof_received` (ajouté après B.6, à confirmer) | Objet `Preuve de paiement reçue pour {id}` · `Un client a envoyé une preuve de paiement pour {id}. Vérifiez-la dans la console, rubrique Paiements : {url}` |
 | `mail.test` (ajouté avec B.6, à confirmer) | Objet `E-mail de test TanEx` · `Ceci est un e-mail de test envoyé depuis la console TanEx. Si vous pouvez le lire, l'envoi d'e-mails fonctionne.` |

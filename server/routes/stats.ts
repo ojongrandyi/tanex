@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { requestHasPermission } from '../auth/permissions.js';
+import { serverError } from '../errors.js';
 
 export const statsRouter = Router();
 
@@ -47,6 +48,6 @@ statsRouter.get('/', (req: Request, res: Response) => {
 
     res.json({ success: true, data: visible });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });

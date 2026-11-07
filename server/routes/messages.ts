@@ -5,8 +5,10 @@ import { audited, param } from '../audit.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
 import { generateReference } from '../../src/shared/references.js';
 import { getGateway } from '../../src/data/gateways.js';
-import { isDeliverableAddress, queueEmail } from '../mail/outbox.js';
+import { isDeliverableAddress, queueEmail, queueStaffAlert } from '../mail/outbox.js';
+import { consoleUrl } from '../mail/urls.js';
 import { cleanVar } from '../mail/layout.js';
+import { serverError } from '../errors.js';
 
 export const messagesRouter = Router();
 
@@ -83,11 +85,14 @@ messagesRouter.post('/', publicWriteLimiter,
       });
     }
 
+    // Staff alert (NOTIFICATIONS_SPEC §4): names the sender and topic, links to the console.
+    queueStaffAlert('contact.staff_alert', { name: cleanVar(name), ref: id, subject: cleanVar(subject), url: consoleUrl() }, { type: 'message', id });
+
     res.locals.auditEntityId = id;
     const created = db.prepare('SELECT * FROM contact_messages WHERE id = ?').get(id);
     res.status(201).json({ success: true, data: formatMessage(created) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -97,7 +102,7 @@ messagesRouter.get('/', requirePermission('messages.view'), (req: Request, res: 
     const rows = db.prepare('SELECT * FROM contact_messages ORDER BY created_at_ts DESC').all();
     res.json({ success: true, count: rows.length, data: rows.map(formatMessage) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -117,6 +122,6 @@ messagesRouter.patch('/:id/status', requirePermission('messages.manage'),
     const updated = db.prepare('SELECT * FROM contact_messages WHERE id = ?').get(id);
     res.json({ success: true, data: formatMessage(updated) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });

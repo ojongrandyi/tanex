@@ -5,7 +5,7 @@
 import crypto from 'crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import { db } from '../db.js';
-import { mailEnabled, maskEmail, sendMessage } from './mailer.js';
+import { mailConfig, mailEnabled, maskEmail, sendMessage } from './mailer.js';
 import { renderTemplate, TEMPLATES, type TemplateKey, type TemplateVars } from './templates/index.js';
 import type { MailLocale } from './layout.js';
 
@@ -15,6 +15,8 @@ export const RETRY_DELAYS_MS = [1, 5, 15, 60].map((m) => m * 60 * 1000);
 export const WORKER_INTERVAL_MS = 30 * 1000;
 /** Customer emails (public forms) to one address per hour; stops the forms being used to spam someone. */
 export const CUSTOMER_EMAILS_PER_HOUR = 3;
+/** Staff alerts of one kind per hour; a spam wave on a public form can't flood the staff inbox. */
+export const STAFF_ALERTS_PER_HOUR = 20;
 
 const EMAIL_PATTERN = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[^\s@<>()",;:]+$/;
 
@@ -77,6 +79,16 @@ export function queueEmail<K extends TemplateKey>(opts: QueueOptions<K>, conn: D
       `).get(to, now - 60 * 60 * 1000, ...customerKeys) as { c: number };
       if (c >= CUSTOMER_EMAILS_PER_HOUR) {
         console.warn(`[mail] ${opts.template} to ${maskEmail(to)} not queued: hourly limit reached`);
+        return null;
+      }
+    }
+
+    if ((entry as { staffAlert?: boolean }).staffAlert) {
+      const { c } = conn.prepare(`
+        SELECT COUNT(*) AS c FROM email_outbox WHERE template_key = ? AND created_at_ts > ?
+      `).get(opts.template, now - 60 * 60 * 1000) as { c: number };
+      if (c >= STAFF_ALERTS_PER_HOUR) {
+        console.warn(`[mail] ${opts.template} not queued: hourly limit for staff alerts reached`);
         return null;
       }
     }
@@ -300,4 +312,18 @@ export function retryFailed(id: string, conn: DatabaseSync = db, now: number = D
   conn.prepare(`UPDATE email_outbox SET status = 'QUEUED', attempts = 0, next_attempt_at_ts = ? WHERE id = ?`).run(now, id);
   kickWorker();
   return true;
+}
+
+/**
+ * Alert to the staff mailbox (MAIL_STAFF_ALERTS_TO, NOTIFICATIONS_SPEC §4), in English. Does
+ * nothing when the variable is unset or not a single address.
+ */
+export function queueStaffAlert<K extends 'contact.staff_alert' | 'payment.proof_received'>(
+  template: K,
+  vars: TemplateVars[K],
+  related?: { type: string; id: string }
+): string | null {
+  const to = (mailConfig()?.staffAlertsTo || '').trim();
+  if (!to) return null;
+  return queueEmail({ to, template, locale: 'en', vars, related });
 }

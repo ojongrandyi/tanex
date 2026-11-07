@@ -1,10 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { requirePermission } from '../middleware/auth.js';
-import { actorName } from '../auth/permissions.js';
+import { actorName, requestHasPermission } from '../auth/permissions.js';
+import crypto from 'crypto';
 import { audited, param } from '../audit.js';
 import { publicWriteLimiter } from '../middleware/rateLimit.js';
 import { LEGAL_NAME } from '../../src/config/brand.js';
+import { serverError } from '../errors.js';
 
 export const documentsRouter = Router();
 
@@ -97,7 +99,7 @@ documentsRouter.get('/', requirePermission('documents.view'), (req: Request, res
     const docs = rows.map(formatDoc);
     res.json({ success: true, count: docs.length, data: docs });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -110,20 +112,62 @@ documentsRouter.get('/:id', requirePermission('documents.view'), (req: Request, 
     }
     res.json({ success: true, data: formatDoc(row) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
 // POST /api/documents/generate (Generate new document)
 // Deliberately NOT gated: ShipPage.tsx's public booking flow auto-generates a BOL right
 // after a customer books a shipment, via this same endpoint. Rate-limited instead.
+const DOCUMENT_ID = /^(BOL|LBL|REC|INV|INS)-\d{4}-\d{5}$/;
+// A visitor's booking may only add its bill of lading, shortly after the booking.
+const PUBLIC_DOCUMENT_WINDOW_MS = 30 * 60 * 1000;
+
+function newDocumentId(prefix: string): string {
+  const year = new Date().getFullYear();
+  const exists = db.prepare('SELECT 1 FROM documents WHERE id = ?');
+  let id = '';
+  for (let i = 0; i < 10; i++) {
+    id = `${prefix}-${year}-${crypto.randomInt(10000, 100000)}`;
+    if (!exists.get(id)) break;
+  }
+  return id;
+}
+
+/**
+ * Why a visitor (no documents.manage / shipments.create) may not create this document, or null.
+ * Allowed: one bill of lading for a shipment booked from the public site (no staff creator) in
+ * the last 30 minutes. Anything else would let anyone attach documents to other shipments.
+ */
+function publicDocumentRefusal(d: any): { status: number; code: string; error: string } | null {
+  const tracking = typeof d.shipmentTracking === 'string' ? d.shipmentTracking.trim().toUpperCase() : '';
+  const docType = d.docType || 'BOL';
+  const notAllowed = { status: 403, code: 'NOT_ALLOWED', error: 'You do not have permission to do this.' };
+  if (docType !== 'BOL' || !tracking) return notAllowed;
+  const ship = db.prepare('SELECT created_at_ts, created_by FROM shipments WHERE tracking_number = ? AND deleted_at_ts IS NULL')
+    .get(tracking) as { created_at_ts: number | null; created_by: string | null } | undefined;
+  if (!ship || ship.created_by || !ship.created_at_ts || Date.now() - ship.created_at_ts > PUBLIC_DOCUMENT_WINDOW_MS) return notAllowed;
+  if (db.prepare("SELECT 1 FROM documents WHERE shipment_tracking = ? AND doc_type = 'BOL'").get(tracking)) {
+    return { status: 409, code: 'ALREADY_EXISTS', error: 'This shipment already has a bill of lading.' };
+  }
+  d.shipmentTracking = tracking;
+  return null;
+}
+
 documentsRouter.post('/generate', publicWriteLimiter,
   audited('document.create', 'document', null, (req) => `Document generated: ${req.body?.docType || 'BILL_OF_LADING'}`, { signedInOnly: true }), (req: Request, res: Response) => {
   try {
-    const d = req.body;
+    const d = req.body && typeof req.body === 'object' ? req.body : {};
+    const staff = requestHasPermission(req, 'documents.manage', 'shipments.create');
+    if (!staff) {
+      const refusal = publicDocumentRefusal(d);
+      if (refusal) return res.status(refusal.status).json({ success: false, code: refusal.code, error: refusal.error });
+    }
     const prefix = d.docType === 'SHIPPING_LABEL' ? 'LBL' : d.docType === 'RECEIPT' ? 'REC' : d.docType === 'INVOICE' ? 'INV' : d.docType === 'INSURANCE' ? 'INS' : 'BOL';
-    const randNum = Math.floor(10000 + Math.random() * 90000);
-    const id = d.id || `${prefix}-2026-${randNum}`;
+    // The console keeps the id it generated (its own format); anything else gets a server id.
+    const id = staff && typeof d.id === 'string' && DOCUMENT_ID.test(d.id) && !db.prepare('SELECT 1 FROM documents WHERE id = ?').get(d.id)
+      ? d.id
+      : newDocumentId(prefix);
     res.locals.auditEntityId = id;
     const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -202,7 +246,7 @@ documentsRouter.post('/generate', publicWriteLimiter,
     const created = db.prepare('SELECT * FROM documents WHERE id = ?').get(id);
     res.status(201).json({ success: true, data: formatDoc(created) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -287,7 +331,7 @@ documentsRouter.post('/:id/regenerate', requirePermission('documents.manage'),
     const updated = db.prepare('SELECT * FROM documents WHERE id = ?').get(id);
     res.json({ success: true, data: formatDoc(updated) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -302,7 +346,7 @@ documentsRouter.patch('/:id/status', requirePermission('documents.manage'),
     const updated = db.prepare('SELECT * FROM documents WHERE id = ?').get(id);
     res.json({ success: true, data: formatDoc(updated) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -343,7 +387,7 @@ documentsRouter.patch('/:id/payment-status', requirePermission('documents.manage
     const updated = db.prepare('SELECT * FROM documents WHERE id = ?').get(id);
     res.json({ success: true, data: formatDoc(updated) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -355,6 +399,6 @@ documentsRouter.delete('/:id', requirePermission('documents.manage'),
     db.prepare('DELETE FROM documents WHERE id = ?').run(id);
     res.json({ success: true, message: `Document ${id} deleted` });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });

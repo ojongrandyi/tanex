@@ -6,6 +6,7 @@ import { audited, param } from '../audit.js';
 import { PaymentStatus, ShipmentPayment, validatePaymentRequest } from '../../src/shared/paymentRequest.js';
 import { setDocumentPaymentStatus } from './documents.js';
 import { deleteProofsForShipment } from './paymentProofs.js';
+import { serverError } from '../errors.js';
 
 // A shipment's payment request (docs/update.md D.1, D-9). Mounted on /api/shipments next to
 // shipmentsRouter, which also takes the public booking POST, so every route is gated
@@ -64,7 +65,7 @@ shipmentPaymentsRouter.get('/:trackingNumber/payment', requirePermission('paymen
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
     res.json({ success: true, data: getShipmentPayment(tracking) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -106,7 +107,7 @@ shipmentPaymentsRouter.put('/:trackingNumber/payment', requirePermission('paymen
     }
     res.status(existing ? 200 : 201).json({ success: true, data: getShipmentPayment(tracking) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -147,7 +148,7 @@ shipmentPaymentsRouter.post('/:trackingNumber/payment/status', requirePermission
     }
     res.json({ success: true, data: getShipmentPayment(tracking) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -160,6 +161,6 @@ shipmentPaymentsRouter.delete('/:trackingNumber/payment', requirePermission('pay
     if (!deleteShipmentPayment(tracking)) return res.status(404).json({ success: false, error: 'This shipment has no payment request.' });
     res.json({ success: true, data: null });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });

@@ -7,6 +7,9 @@ import { deleteUpload, saveImageUpload } from '../uploads.js';
 import { getShipmentPayment } from './shipmentPayments.js';
 import { parseTrackingInput } from '../../src/shared/trackingId.js';
 import { PROOF_LIMITS, validateProofSubmission } from '../../src/shared/paymentProof.js';
+import { serverError } from '../errors.js';
+import { queueStaffAlert } from '../mail/outbox.js';
+import { consoleUrl } from '../mail/urls.js';
 
 // POST /api/track/:trackingNumber/payment-proof (public, rate-limited; docs/update.md F.2).
 // Anyone with the tracking ID can send a proof, but only while the request is awaiting payment,
@@ -84,12 +87,14 @@ trackProofRouter.post('/:trackingNumber/payment-proof', paymentProofLimiter,
       throw err;
     }
 
+    queueStaffAlert('payment.proof_received', { id: tracking, url: consoleUrl() }, { type: 'payment_proof', id: upload.id });
+
     res.locals.auditEntityId = upload.id;
     res.status(201).json({ success: true, data: { status: 'SUBMITTED', submittedAt: now } });
   } catch (err: any) {
     if (savedFile) {
       try { deleteUpload('proofs', savedFile); } catch { /* the error below matters more */ }
     }
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });

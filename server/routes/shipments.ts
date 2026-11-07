@@ -14,6 +14,7 @@ import { parseTransportMode } from '../../src/shared/transportMode.js';
 import { shipmentStatusLabel } from '../../src/shared/shipmentStatus.js';
 import { deleteAllShipmentImages } from './shipmentImages.js';
 import { deleteShipmentPayment } from './shipmentPayments.js';
+import { serverError } from '../errors.js';
 
 export const shipmentsRouter = Router();
 
@@ -163,7 +164,7 @@ shipmentsRouter.get('/', requirePermission('shipments.view'), (req: Request, res
     const shipments = rows.map(formatShipment);
     res.json({ success: true, count: shipments.length, data: shipments });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -182,7 +183,7 @@ shipmentsRouter.get('/:trackingNumber', requirePermission('shipments.view'), (re
 
     res.json({ success: true, data: formatShipment(row) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -359,7 +360,7 @@ shipmentsRouter.post('/', publicWriteLimiter,
     const createdRow = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(trackingNumber);
     res.status(201).json({ success: true, data: formatShipment(createdRow) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -491,7 +492,7 @@ shipmentsRouter.patch('/:trackingNumber/status', requirePermission('tracking.upd
     const updatedRow = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(tracking);
     res.json({ success: true, data: formatShipment(updatedRow) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -631,7 +632,7 @@ shipmentsRouter.post('/:trackingNumber/return', requirePermission('tracking.upda
     res.status(201).json({ success: true, data: { original, returnShipment } });
   } catch (err: any) {
     if (inTransaction) db.exec('ROLLBACK');
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -695,7 +696,7 @@ shipmentsRouter.post('/:trackingNumber/events', requirePermission('tracking.upda
     const updatedRow = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(tracking);
     res.status(201).json({ success: true, data: formatShipment(updatedRow) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -778,7 +779,7 @@ shipmentsRouter.patch('/:trackingNumber/events/:eventId', requirePermission('tra
     const updatedRow = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(tracking);
     res.json({ success: true, data: formatShipment(updatedRow) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -883,7 +884,7 @@ shipmentsRouter.put('/:trackingNumber', requirePermission('shipments.edit'),
     const updatedRow = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(tracking);
     res.json({ success: true, data: formatShipment(updatedRow) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -905,7 +906,7 @@ shipmentsRouter.delete('/:trackingNumber', requirePermission('shipments.delete')
     db.prepare('UPDATE shipments SET deleted_at_ts = ? WHERE tracking_number = ?').run(Date.now(), tracking);
     res.json({ success: true, message: `Shipment ${tracking} moved to trash — restorable from Recently Deleted.` });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -922,7 +923,7 @@ shipmentsRouter.post('/:trackingNumber/restore', requirePermission('shipments.de
     const restoredRow = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(tracking);
     res.json({ success: true, data: formatShipment(restoredRow) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -948,6 +949,6 @@ shipmentsRouter.delete('/:trackingNumber/permanent', requirePermission('shipment
     deleteShipmentPayment(tracking);
     res.json({ success: true, message: `Shipment ${tracking} permanently deleted.` });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });

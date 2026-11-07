@@ -11,7 +11,9 @@ import { eventTime } from '../eventTime.js';
 import { isDeliverableAddress, queueEmail } from '../mail/outbox.js';
 import { cleanVar } from '../mail/layout.js';
 import { quoteUrl } from '../mail/urls.js';
+import { maskEmail, maskName, maskPhone } from '../../src/shared/masking.js';
 import crypto from 'crypto';
+import { serverError } from '../errors.js';
 
 // Quote references QR-YYYY-##### (CLAUDE.md §2), random, unique in the table.
 function newQuoteId(): string {
@@ -103,7 +105,7 @@ quotesRouter.get('/', requirePermission('quotes.view'), (req: Request, res: Resp
     const quotes = rows.map(r => formatQuote(r));
     res.json({ success: true, count: quotes.length, data: quotes });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -117,9 +119,17 @@ quotesRouter.get('/:id', publicLookupLimiter, (req: Request, res: Response) => {
     if (!row) {
       return res.status(404).json({ success: false, error: 'Quote request not found' });
     }
-    res.json({ success: true, data: formatQuote(row, false) });
+    // Staff see the full record; a visitor who only has the reference sees the contact details
+    // masked (references are short enough to guess, tracker #127).
+    const quote: any = formatQuote(row, false);
+    if (!requestHasPermission(req, 'quotes.view')) {
+      quote.requesterName = quote.customerName = maskName(quote.customerName);
+      quote.requesterEmail = quote.customerEmail = maskEmail(quote.customerEmail);
+      quote.requesterPhone = quote.customerPhone = maskPhone(quote.customerPhone);
+    }
+    res.json({ success: true, data: quote });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -196,7 +206,7 @@ quotesRouter.post('/', publicWriteLimiter,
     const created = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(id);
     res.status(201).json({ success: true, data: formatQuote(created) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -227,7 +237,7 @@ const publishHandler = (req: Request, res: Response) => {
     const updated = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(id);
     res.json({ success: true, data: formatQuote(updated) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 };
 const publishAudit = audited('quote.publish', 'quote', param('id'), 'Rate published');
@@ -289,7 +299,7 @@ quotesRouter.patch('/:id/status',
     const updated = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(id);
     res.json({ success: true, data: formatQuote(updated) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -441,6 +451,6 @@ quotesRouter.post('/:id/convert', requirePermission('quotes.manage'), requirePer
     const createdShipment = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(trackingNumber);
     res.status(201).json({ success: true, trackingNumber, data: createdShipment });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });

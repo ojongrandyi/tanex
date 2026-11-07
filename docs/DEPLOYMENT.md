@@ -71,6 +71,8 @@ MAIL_FROM="TanEx <info@tanexsarl.com>"
 MAIL_STAFF_ALERTS_TO=info@tanexsarl.com
 # Optional: MAIL_REPLY_TO; APP_URL (base of links in emails, default https://tanexsarl.com;
 # set it only for a staging copy). Links never use the request Host header.
+# Optional: CORS_ORIGINS (extra origins allowed to call the API; normally unset).
+# Without SESSION_SECRET a random secret is generated once into DB_PATH's folder (.session-secret).
 ```
 Without `SMTP_HOST` email is off: nothing is queued and "Forgot password?" is hidden (the server log says so
 at start). With it, emails wait in the `email_outbox` table and are sent every 30 s, retried after 1, 5, 15 and

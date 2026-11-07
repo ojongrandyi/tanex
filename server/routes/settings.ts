@@ -3,6 +3,7 @@ import { db } from '../db.js';
 import { requirePermission } from '../middleware/auth.js';
 import { getRequestAuth, isCourierOnly, requestHasPermission } from '../auth/permissions.js';
 import { audit } from '../audit.js';
+import { serverError } from '../errors.js';
 
 export const settingsRouter = Router();
 
@@ -62,7 +63,7 @@ settingsRouter.get('/', (req: Request, res: Response) => {
     else data = pickFields(settings, PUBLIC_SETTINGS_FIELDS);
     res.json({ success: true, data });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -82,6 +83,6 @@ settingsRouter.put('/', requirePermission('settings.manage'), (req: Request, res
       undefined, changed.length ? { fields: changed } : undefined);
     res.json({ success: true, data: merged });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });

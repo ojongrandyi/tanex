@@ -20,3 +20,8 @@ export function passwordResetUrl(token: string): string {
 export function quoteUrl(id: string): string {
   return `${appUrl()}/#/quote/${encodeURIComponent(id)}`;
 }
+
+/** The staff console (links in staff alerts). */
+export function consoleUrl(): string {
+  return `${appUrl()}${ADMIN_PATH}`;
+}

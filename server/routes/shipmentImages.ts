@@ -3,6 +3,7 @@ import { db } from '../db.js';
 import { requirePermission } from '../middleware/auth.js';
 import { audited, param } from '../audit.js';
 import { IMAGE_CONTENT_TYPES, deleteUpload, resolveUploadPath, saveImageUpload } from '../uploads.js';
+import { serverError } from '../errors.js';
 
 // Package images (docs/update.md B.2). Mounted on /api/shipments next to shipmentsRouter, which
 // also takes public requests (booking POST), so every route here is gated individually rather
@@ -90,7 +91,7 @@ shipmentImagesRouter.get('/:trackingNumber/images', requirePermission('shipments
     if (!activeShipmentExists(tracking)) return res.status(404).json({ success: false, error: `Shipment ${tracking} not found` });
     res.json({ success: true, data: listImages(tracking) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -123,7 +124,7 @@ shipmentImagesRouter.post('/:trackingNumber/images', requirePermission('shipment
     );
     res.status(201).json({ success: true, data: listImages(tracking) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -150,7 +151,7 @@ shipmentImagesRouter.put('/:trackingNumber/images/order', requirePermission('shi
     }
     res.json({ success: true, data: listImages(tracking) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -174,7 +175,7 @@ shipmentImagesRouter.patch('/:trackingNumber/images/:imageId', requirePermission
     db.prepare('UPDATE shipment_images SET caption = ?, is_public = ? WHERE id = ?').run(caption, isPublic, row.id);
     res.json({ success: true, data: listImages(tracking) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -190,7 +191,7 @@ shipmentImagesRouter.delete('/:trackingNumber/images/:imageId', requirePermissio
     deleteUpload('images', row.file_name);
     res.json({ success: true, data: listImages(tracking) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 

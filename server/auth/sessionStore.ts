@@ -156,7 +156,7 @@ export class SqliteSessionStore extends session.Store {
 
 /**
  * The session middleware: SQLite store, cookie `tx.sid`, httpOnly, sameSite=lax, secure in
- * production, trusts the proxy's X-Forwarded-Proto (with app.set('trust proxy', 1)), 12 h
+ * production and on any HTTPS request, trusts the proxy's X-Forwarded-Proto (with app.set('trust proxy', 1)), 12 h
  * rolling by default. The login route sets a longer maxAge for courier-only users.
  */
 export function createSessionMiddleware(store: SqliteSessionStore, secret: string): RequestHandler {
@@ -173,8 +173,10 @@ export function createSessionMiddleware(store: SqliteSessionStore, secret: strin
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      // Over plain http in local development a secure cookie would never be sent back.
-      secure: process.env.NODE_ENV === 'production',
+      // Always secure in production. Elsewhere 'auto': secure whenever the request arrived over
+      // HTTPS (directly or via the proxy's X-Forwarded-Proto), so a deployment that forgot
+      // NODE_ENV still gets a secure cookie, while plain-http local development keeps working.
+      secure: process.env.NODE_ENV === 'production' ? true : 'auto',
       maxAge: STAFF_SESSION_MS
     }
   });

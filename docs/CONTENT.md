@@ -735,6 +735,8 @@ Plain text, short, signed `— TanEx`. `{link}` = the public tracking URL in the
 | `quote.ready` (email) | Subject `Your TanEx quote {ref} is ready` · body `Your price is ready to view and accept: {url}` |
 | `contact.received` (email) | Subject `We've received your message ({ref})` · body `Thank you, {name}. We'll get back to you as soon as possible.` |
 | `payment.confirmed` (email) | Subject `Payment received for {id}` · body `Thank you. We've confirmed your payment for {reason}.` |
+| `contact.staff_alert` (email to `MAIL_STAFF_ALERTS_TO`, *added after B.6, owner to confirm*) | Subject `New message from {name} ({ref})` · body `{name} sent a message through the website (topic: {subject}). Read and answer it in the console: {url}` (the visitor's message itself is not copied into the email) |
+| `payment.proof_received` (email to `MAIL_STAFF_ALERTS_TO`, *added after B.6, owner to confirm*) | Subject `Proof of payment received for {id}` · body `A customer uploaded a proof of payment for {id}. Check it in the console under Payments: {url}` |
 | `mail.test` (email, *added with B.6, owner to confirm*) | Subject `TanEx test email` · body `This is a test email from the TanEx Operations Console. If you can read it, email sending works.` |
 
 ---

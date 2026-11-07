@@ -12,6 +12,7 @@ import { audited, param } from '../audit.js';
 import { OPERATIONS_CENTRE } from '../../src/config/brand.js';
 import { PROOF_LIMITS, PROOF_STATUSES } from '../../src/shared/paymentProof.js';
 import type { AdminPaymentProof, ProofStatus, PublicProofStatus } from '../../src/shared/paymentProof.js';
+import { serverError } from '../errors.js';
 
 // Proofs of payment (docs/update.md Phase F). The screenshots are private: they are only served
 // through admin-authenticated routes, never from /media.
@@ -110,7 +111,7 @@ paymentsRouter.get('/proofs', requirePermission('payments.view'), (req: Request,
       : db.prepare(`${PROOF_SELECT} ORDER BY pp.created_at DESC LIMIT 500`).all()) as ProofListRow[];
     res.json({ success: true, data: rows.map(formatProof) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -126,7 +127,7 @@ paymentsRouter.get('/proofs/:id/file', requirePermission('payments.view'), (req:
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.sendFile(filePath);
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -201,7 +202,7 @@ paymentsRouter.post('/proofs/:id/approve', requirePermission('payments.manage'),
     }
     res.json({ success: true, data: getProof(proof.id) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -239,6 +240,6 @@ paymentsRouter.post('/proofs/:id/reject', requirePermission('payments.manage'),
     }
     res.json({ success: true, data: getProof(proof.id) });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    serverError(res, err);
   }
 });
