@@ -275,6 +275,11 @@ En-têtes : `Service` · `Idéal pour` · `Rapidité` · `Suivi`
 - **Rôles :** `Siège` · `Bureau` · `Livraison à moto` · modes `Aérien` · `Maritime` · `Routier`
 - **Note :** `Votre destination n'apparaît pas ? Nous expédions bien au-delà de ces carrefours. Parlez-nous de votre itinéraire.`
 
+### 8.6 Libellés ajoutés avec E.4 (**à confirmer**)
+- **Aide :** `Rechercher dans le centre d'aide` · `Accès rapides` · `Sujets` · `Livraison locale` · `Paiements` · `{n} réponses`
+- **Contact :** `Téléphone` · `WhatsApp` · `E-mail` · `Nos bureaux` · `Horaires d'ouverture` · `Itinéraire` (`Itinéraire : {bureau} (ouvre Google Maps)`) · `(facultatif)` · `Par exemple TX7K2M9P` · `Aucune porte d'entrée` · `Indiquez votre nom, votre e-mail, le sujet et votre message.` · `Saisissez une adresse e-mail valide.` · `Nous n'avons pas pu envoyer votre message. Réessayez, ou écrivez-nous à {email}.` · `Plus de réponses dans le Centre d'aide`
+- **Mentions légales :** `Pages juridiques` · `Dernière mise à jour : {date}`
+
 ## 9. Liste du réseau
 
 Noms affichés en français : Buea (siège) · Douala (bureau) · Limbe · Douala (porte d'entrée aéroport et port) ·
@@ -289,6 +294,105 @@ Johannesburg · New York · Houston. Pays : noms français via `Intl.DisplayName
 |---|---|
 | about-md | `{{MD_NAME}}, directeur général de TanEx, au bureau TanEx de Buea` (sans le nom : `Le directeur général de TanEx au bureau TanEx de Buea`) |
 | scènes moto / camion | (décoratif) |
+
+## 8. Centre d'aide et Contact (ajouté avec E.4, **relecture native en attente**)
+
+### 8.1 Aide : en-tête et accès rapides
+- **H1 :** `Comment pouvons-nous vous aider ?` · Recherche : `Cherchez une réponse, ex. douane, délai de livraison, documents`
+- Accès rapides : **Suivre un envoi** · **Réserver un enlèvement** · **Demander un devis** · **Bureau des opérations TanEx**
+- Aucun résultat : **Aucune réponse trouvée.** `Essayez d'autres mots, ou contactez-nous et nous vous répondrons directement.`
+- Bandeau : **Encore besoin d'aide pour un envoi ?** → `Contacter l'assistance`
+
+### 8.2 Aide : base de connaissances (`Réponses aux questions fréquentes`)
+**Suivi**
+- *Où trouver mon numéro de suivi ?* Sur votre confirmation de réservation, en haut de votre lettre de transport et sur chaque étiquette de colis. Il compte 8 caractères et commence par TX (ex. TX7K2M9P).
+- *Pourquoi mon suivi n'a-t-il pas été mis à jour ?* Les mises à jour apparaissent à chaque scan. Sur les longs trajets en avion ou en bateau, plusieurs heures peuvent séparer deux scans. La position estimée continue d'avancer entre-temps.
+- *Comment fonctionnent les envois de plusieurs colis ?* Tous les colis partagent un seul numéro de suivi. Chaque colis a sa propre étiquette, terminée par -01, -02, etc.
+
+**Réservation et enlèvement**
+- *Quelle est l'heure limite pour un enlèvement le jour même ?* Elle dépend de votre ville et du service. Votre coordinateur la confirme à la réservation. [à confirmer]
+- *Comment emballer mon envoi ?* Utilisez un carton extérieur solide, calez chaque objet et scellez toutes les jointures. Pour les objets de valeur, demandez notre emballage Secure Vault.
+- *Puis-je changer l'adresse de livraison ?* Oui, tant que l'envoi n'a pas atteint la porte d'entrée de destination. Contactez-nous avec votre numéro de suivi.
+
+**Douane et international**
+- *Qui paie les droits et taxes ?* C'est convenu à la réservation : soit l'expéditeur (droits payés), soit le destinataire (droits non payés).
+- *De quels documents ai-je besoin ?* En général une facture commerciale et, pour certaines marchandises, des permis ou certificats. Nous vous dirons exactement ce qu'il faut pour votre itinéraire.
+- *Que ne puis-je pas expédier ?* Les articles interdits et réglementés varient selon les pays. Consultez nos Conditions d'expédition ou demandez-nous avant de réserver.
+
+**Documents et livraison**
+- *Où est ma preuve de livraison ?* Sur votre page de suivi dès la livraison, téléchargeable en PDF.
+- *Que faire si mon envoi est endommagé ?* Prévenez-nous dans les 7 jours suivant la livraison, avec des photos [à confirmer]. Nous ouvrons une réclamation et vous tenons informé.
+
+### 8.3 Page Contact
+- **H1 :** `Parlez à TanEx`
+- **Texte :** `Une question, un devis ou un envoi qui demande de l'attention : un vrai coordinateur vous répondra.`
+- **Bureaux :** **Buea, siège** · `Check Point, en face du stade omnisports de Molyko` · **Douala** · `Kotto, La Canadienne` · **Horaires d'ouverture** `{{HOURS}}` · lien `Itinéraire`
+- **Formulaire :** `Envoyez-nous un message`. Champs : Nom · E-mail · Téléphone (facultatif) · Sujet (Devis · Envoi en cours · Facturation · Partenariat · Autre) · Numéro de suivi (facultatif) · Message
+- **Succès :** **Message reçu.** `Votre référence est TX-TKT-######. Nous répondrons à {email} dès que possible.`
+- **Carte d'aide :** **Bureau des opérations TanEx.** `Pour un envoi en cours, indiquez votre numéro de suivi pour une aide plus rapide.`
+- **FAQ :** `Réponses rapides`
+
+### 8.4 Libellés d'interface
+- **Aide :** `Tous les sujets ({n})` · `Effacer la recherche` · `Appeler le {{PHONE}}`
+- **Contact :** `Choisissez un sujet` · `Porte d'entrée` · `Envoyer le message` · `Envoyer un autre message` · `Suivre un envoi`
+
+### 8.5 Aide : livraison locale et paiements
+**Livraison locale**
+- *Quelles zones vos livreurs couvrent-ils ?* Buea, Limbe et Douala. À la réservation, choisissez votre ville et les quartiers d'enlèvement et de livraison pour voir le prix.
+- *Comment le prix est-il calculé ?* Selon la ville, les quartiers d'enlèvement et de livraison et la taille du colis. L'enlèvement express coûte un supplément. Si vos quartiers ne sont pas encore listés, nous confirmons le prix avant l'enlèvement.
+- *Le livreur peut-il encaisser de l'argent auprès du destinataire ?* Oui. Choisissez le paiement à la livraison à la réservation et indiquez le montant. Nous vous le reversons comme convenu.
+- *Et si le destinataire n'est pas disponible ?* Le livreur essaie de le joindre. Si la livraison ne peut pas se faire, votre page de suivi en indique la raison et notre équipe vous contacte pour convenir d'un nouveau créneau.
+- *Pourquoi ne vois-je pas le livreur sur la carte ?* La position apparaît dès que votre colis est récupéré et se met à jour toutes les quelques secondes pendant le trajet.
+
+**Paiements**
+- *Quels moyens de paiement acceptez-vous ?* Les espèces au livreur, MTN Mobile Money et Orange Money sur les comptes de l'entreprise TanEx, et pour les envois internationaux les moyens indiqués sur votre demande de paiement.
+- *Comment prouver un paiement Mobile Money ?* Envoyez une capture d'écran du SMS de confirmation sur votre page de suivi, avec l'ID de transaction.
+
+## 13. Mentions légales (ajouté avec E.4, **relecture par un juriste et un locuteur natif requise**)
+
+H1 : `Mentions légales`. Onglets : **Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Politique de cookies · Accessibilité**. Chaque onglet affiche `Dernière mise à jour : {date}` (8 novembre 2026). Le droit applicable est celui de la République du Cameroun (à confirmer par le juriste, #112). Le texte est rendu depuis `src/data/legalDocs.ts` (version française dans le même fichier).
+
+**Politique de confidentialité**
+1. *Qui nous sommes.* Tanex SARL (« TanEx », « nous ») exploite ce site et transporte les envois qui y sont réservés. Notre siège est situé {{HQ_ADDRESS}}. Pour toute question sur vos données personnelles, écrivez à {{EMAIL}}.
+2. *Ce que nous collectons.* Les coordonnées de l'expéditeur et du destinataire que vous nous donnez lors d'une réservation ou d'une demande de devis : noms, entreprise, numéros de téléphone, e-mail et adresses de livraison. · Les données d'envoi : contenu, poids, dimensions, valeur déclarée, ainsi que les scans et événements enregistrés pendant le transport. · Les messages que vous nous envoyez via les formulaires de contact, de rappel et d'assistance. · Des données techniques de base : quand votre navigateur charge nos pages, cartes et polices, les serveurs concernés reçoivent votre adresse IP. Nous n'utilisons aucun outil d'analyse ni de publicité.
+3. *Pourquoi nous les utilisons.* Pour enlever, transporter et livrer vos envois. · Pour préparer les documents de douane et d'expédition. · Pour répondre à vos questions, traiter les réclamations et vous tenir informé. · Pour respecter nos obligations légales, fiscales et douanières.
+4. *Suivi public.* Toute personne disposant d'un numéro de suivi peut suivre un envoi. La page de suivi publique n'affiche que la ville et le pays à chaque extrémité du trajet, et masque les noms, numéros de téléphone et adresses e-mail.
+5. *Avec qui nous les partageons.* Nous ne partageons que ce dont chaque intervenant a besoin pour acheminer votre envoi : transporteurs, agents et manutentionnaires sur le trajet, ainsi que les douanes et autres autorités. Nous ne vendons pas de données personnelles.
+6. *Transferts internationaux.* Comme nous transportons des marchandises à travers les frontières, les informations d'envoi voyagent avec elles vers les pays du trajet. Nous ne partageons que ce qu'exigent le transport et la douane.
+7. *Durée de conservation.* Nous conservons les données personnelles uniquement le temps nécessaire aux finalités ci-dessus, y compris les durées imposées par les règles fiscales, douanières et de transport.
+8. *Vos droits.* Selon votre lieu de résidence (par exemple en vertu de la loi camerounaise n° 2024/017 du 23 décembre 2024 relative à la protection des données à caractère personnel [à confirmer par le juriste], ou du RGPD de l'UE ou du Royaume-Uni), vous pouvez demander à consulter les données personnelles que nous détenons sur vous, les corriger, les supprimer ou vous opposer à leur utilisation. Vous pouvez aussi déposer une plainte auprès de votre autorité de protection des données.
+9. *Demandes relatives à la vie privée.* Écrivez à {{EMAIL}} en indiquant votre demande et, si elle concerne un envoi, son numéro de suivi. Nous pouvons vous demander de confirmer votre identité avant d'y donner suite.
+
+**Conditions d'utilisation**
+1. *Acceptation des conditions.* En utilisant ce site, vous acceptez les présentes conditions. Lorsque vous réservez un envoi, nos Conditions d'expédition s'appliquent également.
+2. *Utilisation du site et du suivi.* Vous pouvez utiliser ce site pour demander des devis, réserver des envois et les suivre. Merci de ne pas en faire un usage abusif : pas de collecte automatisée des données de suivi, ni de tentative d'accès aux envois d'autres personnes ou à nos systèmes internes. · Les mises à jour du suivi dépendent des scans effectués sur le trajet et peuvent être retardées. Elles sont fournies à titre indicatif et ne garantissent pas les délais de livraison.
+3. *Devis et réservations.* Un devis est valable jusqu'à la date indiquée et couvre l'envoi que vous avez décrit. Si l'envoi s'avère différent (par exemple plus lourd, plus volumineux ou avec un autre contenu), le prix peut changer. Une réservation est confirmée lorsque vous recevez un numéro de suivi.
+4. *Paiement et facturation.* Nous facturons chaque envoi, ou selon ce qui a été convenu par écrit avec vous. Le paiement est dû comme indiqué sur la facture. Les droits, taxes et frais fixés par les autorités s'ajoutent, sauf mention contraire sur votre devis.
+5. *Limitation de responsabilité.* Dans les limites permises par la loi, nous ne sommes pas responsables des pertes indirectes ou consécutives liées à votre utilisation de ce site. Notre responsabilité pour les envois est définie dans les Conditions d'expédition.
+6. *Modification des conditions.* Nous pouvons mettre à jour ces conditions. La date en haut de cette page indique la version en vigueur.
+7. *Droit applicable.* Les présentes conditions sont régies par le droit de la République du Cameroun [à confirmer par le juriste]. Elles ne vous privent d'aucun droit que vous accorde le droit de la consommation du pays où vous résidez.
+
+**Conditions d'expédition**
+1. *Réservation et acceptation.* Nous acceptons un envoi lorsque nous l'enlevons, ou que vous nous le remettez, et qu'il dispose d'un numéro de suivi. Nous pouvons inspecter, refuser ou retenir tout envoi non conforme aux présentes conditions ou à la loi.
+2. *Articles interdits et réglementés.* Vous ne devez rien envoyer d'illégal dans le pays d'origine, de transit ou de destination. Des articles tels que les marchandises dangereuses, l'argent liquide, les armes, les animaux vivants et les denrées périssables sont interdits ou nécessitent notre accord avant la réservation. Les règles varient selon les pays : demandez-nous avant de réserver.
+3. *Emballage.* Il vous appartient d'emballer votre envoi pour qu'il résiste à une manutention normale : carton extérieur solide, chaque objet calé, toutes les jointures scellées. Pour les objets de valeur, demandez notre emballage Secure Vault.
+4. *Poids facturable.* Nous facturons le plus élevé du poids réel et du poids volumétrique. Poids volumétrique en kg = longueur × largeur × hauteur en cm ÷ 5000.
+5. *Suppléments.* Des suppléments carburant, zone éloignée et douane peuvent s'appliquer. Tout supplément connu figure sur votre devis.
+6. *Droits et taxes.* La prise en charge des droits et taxes est convenue à la réservation : soit l'expéditeur (droits payés), soit le destinataire (droits non payés).
+7. *Livraison et preuve de livraison.* Nous livrons à l'adresse indiquée lors de la réservation. L'heure de livraison et le nom de la personne qui a signé sont enregistrés avec votre numéro de suivi comme preuve de livraison.
+8. *Responsabilité et valeur déclarée.* Notre responsabilité en cas de perte ou de dommage est limitée. Sauf si vous déclarez une valeur et souscrivez une couverture étendue lors de la réservation, l'indemnisation est limitée à la responsabilité standard de votre service et de votre itinéraire, confirmée à la réservation. Nous ne sommes pas responsables des retards ni des pertes indirectes.
+9. *Réclamations.* Prévenez-nous dans les 7 jours suivant la livraison. Indiquez votre numéro de suivi, une description du problème, des photos des marchandises et de l'emballage, et une preuve de valeur (par exemple la facture commerciale). Nous ouvrons une réclamation et vous tenons informé.
+10. *Retour à l'expéditeur.* Si un envoi ne peut être ni livré ni dédouané, nous contactons l'expéditeur. Il peut être retourné aux frais de l'expéditeur ; un retour reçoit son propre numéro de suivi.
+
+**Politique de cookies**
+1. *Les cookies que nous utilisons.* Nous utilisons un seul cookie essentiel, tx.sid. Il garde le personnel TanEx connecté à notre console d'opérations pendant 12 heures au maximum. Il n'est pas déposé pour les visiteurs du site public. · Nous n'utilisons ni cookies d'analyse ni cookies publicitaires. Si nous ajoutons un outil d'analyse, nous mettrons cette page à jour et demanderons votre consentement lorsque la loi l'exige.
+2. *Choix enregistrés dans votre navigateur.* tx_locale (langue choisie) · ngf_recent_tracking · ngf_units · ngf_live_shipment_stream : texte complet dans `src/data/legalDocs.ts`.
+3. *Autres services utilisés par nos pages.* Nos pages chargent des fonds de carte depuis Esri (ArcGIS) et utilisent OpenStreetMap Nominatim et OSRM pour rechercher des adresses et des itinéraires. Les polices et les photos sont servies depuis notre propre site. Ces services reçoivent votre adresse IP lorsque votre navigateur les contacte.
+
+**Accessibilité**
+1. *Notre engagement.* Nous voulons que chacun puisse suivre un envoi, réserver et nous contacter. Nous visons le niveau AA des Règles pour l'accessibilité des contenus Web (WCAG) 2.2 sur l'ensemble de ce site.
+2. *Ce que nous faisons.* Les formulaires, boutons et menus fonctionnent au clavier et les champs ont des libellés. · Les images ont des alternatives textuelles, et le texte est dimensionné et coloré pour rester lisible. · Les cartes animées respectent le réglage de réduction des animations de votre appareil. · Les pages de suivi donnent l'itinéraire et chaque scan sous forme de texte, pas seulement sur la carte.
+3. *Signaler un obstacle.* Si quelque chose sur ce site est difficile à utiliser, écrivez à {{EMAIL}}. Indiquez la page et ce qui s'est passé : nous vous aiderons à obtenir ce dont vous avez besoin autrement pendant que nous corrigeons le problème.
 
 ## 6.3 Suivi : noms des statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)
 `Réservé` · `Récupéré` · `À la plateforme de départ` · `Parti` · `En transit` · `Arrivé à la plateforme de destination` ·

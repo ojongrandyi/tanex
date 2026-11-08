@@ -1,395 +1,230 @@
 import React, { useState } from 'react';
-import {
-  Phone,
-  Mail,
-  MapPin,
-  Send,
-  CheckCircle2,
-  HelpCircle,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  AlertTriangle,
-  ArrowRight,
-  RotateCcw,
-  MessageCircle
-} from 'lucide-react';
-import { useAdminData } from '../context/AdminDataContext';
+import { ArrowRight, Check, Clock, ExternalLink, Headphones, Mail, MapPin, MessageCircle, Phone, Plus } from 'lucide-react';
+import { Button, Input, Select, Textarea } from '../components/ui';
+import { Link } from '../router/Link';
+import { useApiErrorText, useAreaT, useLocale } from '../i18n/I18nProvider';
+import { formatOpeningHoursIn } from '../i18n/format';
 import { useCompanyContact } from '../utils/useCompanyContact';
-import { COMPANY_SHORT, LEGAL_NAME, TRACKING_ID_EXAMPLE } from '../config/brand';
+import { OFFICES, PHONE, PHONE_2, TRACKING_ID_EXAMPLE, formatPhone } from '../config/brand';
 import { api } from '../services/api';
-import { GATEWAYS, getGateway } from '../data/gateways';
+import { GATEWAYS, gatewayName, getGateway } from '../data/gateways';
 import { HELP_ARTICLES, CONTACT_QUICK_ANSWER_IDS } from '../data/helpArticles';
 import './ContactPage.css';
-import { useApiErrorText } from '../i18n/I18nProvider';
 
-// CONTENT §8.3 form topics (stored as the message subject in the admin inbox).
-const TOPICS = ['Quote', 'Active shipment', 'Billing', 'Partnership', 'Other'] as const;
+// Contact page (CONTENT §8.3, §8.4, §8.6). Channels hide when their value is empty (WhatsApp until
+// #100). Offices link to Google Maps searches of the written address: the exact pins are not
+// confirmed yet (#120), so no pin is placed on a map.
+
+interface ContactPageProps {
+  onNavigate: (page: string, param?: string) => void;
+  /** Gateway code pre-filled by "Contact us about this lane" (Network page, homepage map). */
+  initialGateway?: string;
+}
+
+// Stored as the message subject in the console inbox (staff-facing, English until phase I).
+const TOPICS = [
+  { key: 'quote', value: 'Quote' },
+  { key: 'shipment', value: 'Active shipment' },
+  { key: 'billing', value: 'Billing' },
+  { key: 'partnership', value: 'Partnership' },
+  { key: 'other', value: 'Other' },
+] as const;
 
 const QUICK_ANSWERS = CONTACT_QUICK_ANSWER_IDS
   .map((id) => HELP_ARTICLES.find((a) => a.id === id))
   .filter((a): a is NonNullable<typeof a> => Boolean(a));
 
-interface ContactPageProps {
-  onNavigate?: (page: string) => void;
-  /** Gateway code pre-filled by "Contact this gateway" on the Locations page. */
-  initialGateway?: string;
-}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const directionsUrl = (address: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
 export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, initialGateway = '' }) => {
-  // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
+  const t = useAreaT('contact');
+  const th = useAreaT('help');
+  const locale = useLocale();
   const apiErrorText = useApiErrorText();
-  const { settings } = useAdminData();
-  // Empty phone/WhatsApp/address/regulatory values hide their element (no placeholders).
-  const { phone: supportPhone, phoneHref, whatsapp, email: dispatchEmail, address: headquartersAddress, regulatoryLine } = useCompanyContact();
-  const companyName = settings.companyName || LEGAL_NAME;
-  const whatsappHref = whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, '')}` : '';
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [topic, setTopic] = useState('');
-  const [tracking, setTracking] = useState('');
-  const [gatewayCode, setGatewayCode] = useState(getGateway(initialGateway) ? initialGateway : '');
-  const [message, setMessage] = useState('');
-  // The server's reference (TX-TKT-######) and the email it was sent with.
+  const { whatsapp, email: companyEmail, regulatoryLine } = useCompanyContact();
+  const hours = formatOpeningHoursIn(locale);
+
+  const [form, setForm] = useState({
+    name: '', email: '', phone: '', topic: '', tracking: '',
+    gateway: getGateway(initialGateway)?.kind === 'gateway' ? initialGateway : '',
+    message: '',
+  });
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
   const [ticket, setTicket] = useState<{ id: string; email: string } | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
 
-  // Accordion open states
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitting) return;
-    setFormError(null);
-
-    if (!name.trim() || !email.trim() || !topic || !message.trim()) {
-      setFormError('Please complete all required fields (Name, Email, Topic and Message) before sending.');
+    if (sending) return;
+    const topic = TOPICS.find((x) => x.key === form.topic);
+    if (!form.name.trim() || !form.email.trim() || !topic || !form.message.trim()) {
+      setError(t('form.errorRequired'));
       return;
     }
-
-    // The server stores the message and issues the TX-TKT reference.
-    setSubmitting(true);
+    if (!EMAIL_RE.test(form.email.trim())) {
+      setError(t('form.errorEmail'));
+      return;
+    }
+    setError('');
+    setSending(true);
     try {
       const saved = await api.submitContactMessage({
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim() || undefined,
-        subject: topic,
-        // No priority picker on the form (§8.3); active shipments are flagged for the inbox.
-        priority: topic === 'Active shipment' ? 'urgent' : 'routine',
-        trackingNumber: tracking.trim() || undefined,
-        gatewayCode: gatewayCode || undefined,
-        message: message.trim()
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
+        subject: topic.value,
+        // Active shipments are flagged for the inbox (no priority picker on the form, §8.3).
+        priority: topic.key === 'shipment' ? 'urgent' : 'routine',
+        trackingNumber: form.tracking.trim().toUpperCase() || undefined,
+        gatewayCode: form.gateway || undefined,
+        message: form.message.trim(),
       });
-      setTicket({ id: saved.id, email: email.trim() });
-      window.scrollTo({ top: 300, behavior: 'smooth' });
-    } catch (err: any) {
-      setFormError(`We couldn't send your message: ${apiErrorText(err, 'please try again')}. You can also email us at ${dispatchEmail}.`);
+      setTicket({ id: saved.id, email: form.email.trim() });
+    } catch (err) {
+      setError(apiErrorText(err, t('form.errorSend', { email: companyEmail })));
     } finally {
-      setSubmitting(false);
+      setSending(false);
     }
   };
 
-  const handleReset = () => {
-    setName('');
-    setEmail('');
-    setPhone('');
-    setTopic('');
-    setTracking('');
-    setGatewayCode('');
-    setMessage('');
+  const reset = () => {
+    setForm({ name: '', email: '', phone: '', topic: '', tracking: '', gateway: '', message: '' });
     setTicket(null);
-    setFormError(null);
+    setError('');
   };
 
-  const toggleFaq = (index: number) => {
-    setOpenFaq(openFaq === index ? null : index);
-  };
+  const offices = OFFICES.map((o) => ({
+    key: o.city,
+    label: o.city === 'Buea' ? t('offices.buea') : t('offices.douala'),
+    address: locale === 'fr' ? o.addressFr : o.address,
+    query: o.address,
+  }));
 
   return (
-    <div className="ngf-page-contact">
-      {/* =========================================================================
-          1. HERO (CONTENT §8.3)
-          ========================================================================= */}
-      <section className="ngf-contact-hero">
-        <div className="contact-hero-bg-overlay" />
-        <div className="ngf-container-wide contact-hero-inner">
-          {/* Regulatory line from admin Settings, only when set (tracker Blocked #20). */}
-          {regulatoryLine && (
-            <div className="contact-hero-pill animate-fade-in">
-              <span>{regulatoryLine}</span>
-            </div>
-          )}
-
-          <h1 className="contact-hero-title animate-fade-in">Talk to {COMPANY_SHORT}</h1>
-
-          <p className="contact-hero-lead animate-fade-in">
-            Questions, quotes or a shipment that needs attention: a real coordinator will get back to you.
-          </p>
+    <div className="tx-contact">
+      <section className="tx-contact__hero tx-dark" aria-labelledby="contact-title">
+        <div className="tx-contact__wrap">
+          <h1 className="tx-h1" id="contact-title">{t('hero.title')}</h1>
+          <p className="tx-lead">{t('hero.sub')}</p>
+          {regulatoryLine && <p className="tx-contact__reg">{regulatoryLine}</p>}
         </div>
       </section>
 
-      {/* =========================================================================
-          2. FORM & CHANNELS
-          ========================================================================= */}
-      <div className="ngf-container-wide ngf-contact-body">
-        <div className="contact-grid">
-          {/* Left Column: Form & Confirmation */}
-          <div className="contact-form-card">
+      <section className="tx-contact__main" aria-label={t('form.title')}>
+        <div className="tx-contact__wrap tx-contact__grid">
+          {/* Form */}
+          <div className="tx-contact__form-col">
             {ticket ? (
-              <div className="contact-success-wrap animate-fade-in" role="status">
-                <div className="success-icon-badge">
-                  <CheckCircle2 size={48} className="text-emerald" />
-                </div>
-                <h2>Message received.</h2>
-
-                <div className="ticket-summary-box">
-                  <p>
-                    Your reference is <strong className="font-mono">{ticket.id}</strong>. We'll reply to <strong>{ticket.email}</strong> as soon as possible.
-                  </p>
-                </div>
-
-                <div className="success-action-row">
-                  <button
-                    type="button"
-                    className="btn-corp-primary"
-                    onClick={handleReset}
-                  >
-                    <RotateCcw size={16} />
-                    <span>Send another message</span>
-                  </button>
-
-                  {onNavigate && (
-                    <button
-                      type="button"
-                      className="btn-corp-ghost"
-                      onClick={() => onNavigate('track')}
-                    >
-                      <span>Track a Shipment</span>
-                      <ArrowRight size={16} />
-                    </button>
-                  )}
+              <div className="tx-contact__card tx-contact__done" role="status">
+                <p className="tx-contact__done-title"><Check aria-hidden="true" />{t('success.title')}</p>
+                <p>{t('success.body', { ref: ticket.id, email: ticket.email })}</p>
+                <div className="tx-contact__done-actions">
+                  <Button variant="secondary" onClick={reset}>{t('success.again')}</Button>
+                  <Link page="track" onNavigate={onNavigate} className="tx-btn tx-btn--ghost">{t('success.track')}</Link>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="contact-form">
-                <div className="form-header-row">
-                  <h2>Send us a message</h2>
+              <form className="tx-contact__card tx-contact__form" onSubmit={submit} noValidate aria-labelledby="contact-form-title">
+                <h2 className="tx-h3" id="contact-form-title">{t('form.title')}</h2>
+                <div className="tx-contact__row">
+                  <Input label={t('form.name')} value={form.name} onChange={set('name')} autoComplete="name" required maxLength={120} />
+                  <Input label={t('form.email')} type="email" value={form.email} onChange={set('email')} autoComplete="email" required maxLength={160} />
                 </div>
-
-                {formError && (
-                  <div className="contact-form-error animate-fade-in" role="alert">
-                    <AlertTriangle size={18} className="flex-shrink-0" />
-                    <span>{formError}</span>
-                  </div>
-                )}
-
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label htmlFor="contact-name">Name *</label>
-                    <input
-                      id="contact-name"
-                      type="text"
-                      required
-                      autoComplete="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="ngf-input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="contact-email">Email *</label>
-                    <input
-                      id="contact-email"
-                      type="email"
-                      required
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@company.com"
-                      className="ngf-input"
-                    />
-                  </div>
+                <div className="tx-contact__row">
+                  <Input label={t('form.phone')} optionalText={t('form.optional')} type="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" maxLength={40} />
+                  <Select label={t('form.topic')} value={form.topic} onChange={set('topic')} required>
+                    <option value="" disabled>{t('form.topicPlaceholder')}</option>
+                    {TOPICS.map((x) => <option key={x.key} value={x.key}>{t(`form.topics.${x.key}`)}</option>)}
+                  </Select>
                 </div>
-
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label htmlFor="contact-phone">Phone <span className="ngf-field-optional">(optional)</span></label>
-                    <input
-                      id="contact-phone"
-                      type="tel"
-                      autoComplete="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="With country code, e.g. +44"
-                      className="ngf-input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="contact-topic">Topic *</label>
-                    <select
-                      id="contact-topic"
-                      required
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      className="ngf-input"
-                    >
-                      <option value="" disabled>Choose a topic</option>
-                      {TOPICS.map((t) => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="tx-contact__row">
+                  <Input label={t('form.tracking')} optionalText={t('form.optional')} hint={t('form.trackingHint', { example: TRACKING_ID_EXAMPLE })}
+                    value={form.tracking} onChange={set('tracking')} autoComplete="off" spellCheck={false} maxLength={14} inputClassName="tx-contact__mono" />
+                  <Select label={t('form.gateway')} optionalText={t('form.optional')} value={form.gateway} onChange={set('gateway')}>
+                    <option value="">{t('form.gatewayNone')}</option>
+                    {GATEWAYS.map((g) => <option key={g.code} value={g.code}>{g.code} · {gatewayName(g, locale)}</option>)}
+                  </Select>
                 </div>
-
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label htmlFor="contact-tracking">Tracking ID <span className="ngf-field-optional">(optional)</span></label>
-                    <input
-                      id="contact-tracking"
-                      type="text"
-                      value={tracking}
-                      onChange={(e) => setTracking(e.target.value)}
-                      placeholder={`e.g. ${TRACKING_ID_EXAMPLE}`}
-                      className="ngf-input font-mono"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="contact-gateway">Gateway <span className="ngf-field-optional">(optional)</span></label>
-                    <select
-                      id="contact-gateway"
-                      value={gatewayCode}
-                      onChange={(e) => setGatewayCode(e.target.value)}
-                      className="ngf-input"
-                    >
-                      <option value="">No specific gateway</option>
-                      {GATEWAYS.map((gw) => (
-                        <option key={gw.code} value={gw.code}>{gw.city}, {gw.country} ({gw.code})</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="contact-message">Message *</label>
-                  <textarea
-                    id="contact-message"
-                    required
-                    rows={5}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="ngf-input"
-                  />
-                </div>
-
-                <button type="submit" className="btn-corp-primary form-submit-btn" disabled={submitting} aria-busy={submitting}>
-                  <Send size={16} />
-                  <span>{submitting ? 'Sending…' : 'Send message'}</span>
-                </button>
+                <Textarea label={t('form.message')} value={form.message} onChange={set('message')} rows={6} required maxLength={4000} />
+                {error && <p className="tx-error" role="alert">{error}</p>}
+                <Button type="submit" variant="secondary" size="lg" disabled={sending}>{sending ? t('form.sending') : t('form.submit')}</Button>
               </form>
             )}
           </div>
 
-          {/* Right Column: Channels & 24/7 card */}
-          <div className="contact-info-col">
-            <div className="contact-info-card">
-              <div className="contact-channel-item">
-                <div className="channel-icon icon-emerald"><Mail size={22} /></div>
-                <div>
-                  <small>Email</small>
-                  <strong><a href={`mailto:${dispatchEmail}`}>{dispatchEmail}</a></strong>
-                </div>
-              </div>
-
-              {supportPhone && (
-                <div className="contact-channel-item">
-                  <div className="channel-icon icon-accent"><Phone size={22} /></div>
-                  <div>
-                    <small>Phone</small>
-                    <strong><a href={phoneHref}>{supportPhone}</a></strong>
-                  </div>
-                </div>
+          {/* Channels, offices, desk */}
+          <aside className="tx-contact__side">
+            <ul className="tx-contact__card tx-contact__channels" aria-label={t('channels.label')}>
+              {[PHONE, PHONE_2].filter(Boolean).map((p) => (
+                <li key={p}>
+                  <span className="tx-contact__ic" aria-hidden="true"><Phone /></span>
+                  <div><small>{t('channels.phone')}</small><a href={`tel:${p}`}>{formatPhone(p)}</a></div>
+                </li>
+              ))}
+              {whatsapp && (
+                <li>
+                  <span className="tx-contact__ic" aria-hidden="true"><MessageCircle /></span>
+                  <div><small>{t('channels.whatsapp')}</small><a href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">{formatPhone(whatsapp)}</a></div>
+                </li>
               )}
-
-              {whatsappHref && (
-                <div className="contact-channel-item">
-                  <div className="channel-icon icon-emerald"><MessageCircle size={22} /></div>
-                  <div>
-                    <small>WhatsApp</small>
-                    <strong><a href={whatsappHref} target="_blank" rel="noopener noreferrer">{whatsapp}</a></strong>
-                  </div>
-                </div>
+              {companyEmail && (
+                <li>
+                  <span className="tx-contact__ic" aria-hidden="true"><Mail /></span>
+                  <div><small>{t('channels.email')}</small><a href={`mailto:${companyEmail}`}>{companyEmail}</a></div>
+                </li>
               )}
+            </ul>
 
-              {headquartersAddress && (
-                <div className="contact-channel-item">
-                  <div className="channel-icon icon-sky"><MapPin size={22} /></div>
-                  <div>
-                    <small>Head office</small>
-                    <strong>{companyName}</strong>
-                    <p>{headquartersAddress}</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="emergency-box">
-                <div className="em-head">
-                  <Clock size={18} className="text-amber" />
-                  <strong>24/7 Operations Desk.</strong>
-                </div>
-                <p>For active shipments, include your tracking ID for the fastest help.</p>
-              </div>
+            <div className="tx-contact__card">
+              <h2 className="tx-contact__side-title">{t('offices.title')}</h2>
+              <ul className="tx-contact__offices">
+                {offices.map((o) => (
+                  <li key={o.key}>
+                    <span className="tx-contact__ic" aria-hidden="true"><MapPin /></span>
+                    <div>
+                      <strong>{o.label}</strong>
+                      <p>{o.address}</p>
+                      <a href={directionsUrl(o.query)} target="_blank" rel="noopener noreferrer" className="tx-link"
+                        aria-label={t('offices.directionsFor', { office: o.label })}>
+                        {t('offices.directions')}<ExternalLink aria-hidden="true" />
+                      </a>
+                    </div>
+                  </li>
+                ))}
+                <li>
+                  <span className="tx-contact__ic" aria-hidden="true"><Clock /></span>
+                  <div><strong>{t('offices.hoursTitle')}</strong><p>{hours}</p></div>
+                </li>
+              </ul>
             </div>
-          </div>
+
+            <div className="tx-contact__card tx-contact__desk tx-dark">
+              <Headphones aria-hidden="true" />
+              <p><strong>{t('desk.title')}</strong> {t('desk.body')}</p>
+            </div>
+          </aside>
         </div>
+      </section>
 
-        {/* =========================================================================
-            3. QUICK ANSWERS (CONTENT §8.3, items from §8.2)
-            ========================================================================= */}
-        <section className="ngf-contact-faq-section">
-          <div className="section-center-header">
-            <h2>Quick answers</h2>
-            <div className="section-header-line" />
-          </div>
-
-          <div className="contact-faq-accordion">
-            {QUICK_ANSWERS.map((faq, index) => (
-              <div
-                key={faq.id}
-                className={`contact-faq-item ${openFaq === index ? 'active' : ''}`}
-              >
-                <button
-                  type="button"
-                  className="faq-question-btn"
-                  aria-expanded={openFaq === index}
-                  onClick={() => toggleFaq(index)}
-                >
-                  <div className="q-left">
-                    <HelpCircle size={18} className="text-accent flex-shrink-0" />
-                    <span>{faq.question}</span>
-                  </div>
-                  {openFaq === index ? (
-                    <ChevronUp size={18} className="text-accent flex-shrink-0" />
-                  ) : (
-                    <ChevronDown size={18} className="text-slate-400 flex-shrink-0" />
-                  )}
-                </button>
-
-                {openFaq === index && (
-                  <div className="faq-answer-body animate-fade-in">
-                    <p>{faq.answer}</p>
-                  </div>
-                )}
-              </div>
+      {/* Quick answers (CONTENT §8.3, §8.4) */}
+      <section className="tx-contact__faq" aria-labelledby="contact-faq">
+        <div className="tx-contact__wrap">
+          <h2 className="tx-h2" id="contact-faq">{t('faq.title')}</h2>
+          <div className="tx-contact__faq-list">
+            {QUICK_ANSWERS.map((a) => (
+              <details key={a.id} className="tx-contact__faq-item">
+                <summary>{th(`articles.${a.key}.q`)}<Plus aria-hidden="true" /></summary>
+                <p>{th(`articles.${a.key}.a`)}</p>
+              </details>
             ))}
           </div>
-        </section>
-      </div>
+          <Link page="help" onNavigate={onNavigate} className="tx-link">{t('faq.more')}<ArrowRight aria-hidden="true" /></Link>
+        </div>
+      </section>
     </div>
   );
 };

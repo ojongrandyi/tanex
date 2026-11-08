@@ -1,93 +1,48 @@
-// Help Centre knowledge base (docs/CONTENT.md §8.2). Used by the Help page and by the
-// "Quick answers" block on the Contact page (§8.3).
+// Help Centre knowledge base structure (docs/CONTENT.md §8.2, §8.5). The questions and answers
+// live in the i18n area "help" (src/i18n/{en,fr}/help.ts) under `articles.<key>`; this file only
+// orders them and groups them. Used by the Help page and by "Quick answers" on the Contact page.
 
-import { TRACKING_ID_EXAMPLE, TRACKING_PREFIX } from '../config/brand';
+export type HelpCategory = 'tracking' | 'booking' | 'customs' | 'documents' | 'local' | 'payments';
 
-export type HelpCategory = 'tracking' | 'booking' | 'customs' | 'documents';
+export const HELP_CATEGORIES: readonly HelpCategory[] = ['tracking', 'booking', 'customs', 'documents', 'local', 'payments'];
+
+/** Dictionary key of each article (src/i18n/en/help.ts → articles). */
+export type HelpArticleKey =
+  | 'findId' | 'notUpdated' | 'multiPiece'
+  | 'cutOff' | 'packing' | 'changeAddress'
+  | 'duties' | 'customsDocuments' | 'prohibited'
+  | 'pod' | 'damaged'
+  | 'localAreas' | 'localPrice' | 'localCod' | 'localUnavailable' | 'localMap'
+  | 'payMethods' | 'payMomoProof';
 
 export interface HelpArticle {
+  /** Stable anchor id (kept from before the TanEx copy, so old links still open the answer). */
   id: string;
+  key: HelpArticleKey;
   category: HelpCategory;
-  question: string;
-  answer: string;
 }
 
-export const HELP_CATEGORIES: { id: HelpCategory; label: string }[] = [
-  { id: 'tracking', label: 'Tracking' },
-  { id: 'booking', label: 'Booking & collection' },
-  { id: 'customs', label: 'Customs & international' },
-  { id: 'documents', label: 'Documents & delivery' },
+export const HELP_ARTICLES: readonly HelpArticle[] = [
+  { id: 'find-id', key: 'findId', category: 'tracking' },
+  { id: 'not-updated', key: 'notUpdated', category: 'tracking' },
+  { id: 'multi-piece', key: 'multiPiece', category: 'tracking' },
+  { id: 'cut-off', key: 'cutOff', category: 'booking' },
+  { id: 'packing', key: 'packing', category: 'booking' },
+  { id: 'change-address', key: 'changeAddress', category: 'booking' },
+  { id: 'duties', key: 'duties', category: 'customs' },
+  { id: 'customs-documents', key: 'customsDocuments', category: 'customs' },
+  { id: 'prohibited', key: 'prohibited', category: 'customs' },
+  { id: 'pod', key: 'pod', category: 'documents' },
+  { id: 'damaged', key: 'damaged', category: 'documents' },
+  // CONTENT §8.5 (added for TanEx)
+  { id: 'local-areas', key: 'localAreas', category: 'local' },
+  { id: 'local-price', key: 'localPrice', category: 'local' },
+  { id: 'local-cod', key: 'localCod', category: 'local' },
+  { id: 'local-unavailable', key: 'localUnavailable', category: 'local' },
+  { id: 'local-map', key: 'localMap', category: 'local' },
+  { id: 'pay-methods', key: 'payMethods', category: 'payments' },
+  { id: 'pay-momo-proof', key: 'payMomoProof', category: 'payments' },
 ];
 
-// Answers marked [confirm] in CONTENT §8.2 are shown as written, pending the owner (tracker Blocked).
-export const HELP_ARTICLES: HelpArticle[] = [
-  {
-    id: 'find-id',
-    category: 'tracking',
-    question: 'Where do I find my tracking ID?',
-    answer: `On your booking confirmation, at the top of your waybill and on every piece label. It's 8 characters and starts with ${TRACKING_PREFIX} (e.g. ${TRACKING_ID_EXAMPLE}).`,
-  },
-  {
-    id: 'not-updated',
-    category: 'tracking',
-    question: "Why hasn't my tracking updated?",
-    answer: 'Updates appear at each scan. On long air or ocean legs there can be several hours between scans. The estimated position keeps moving in the meantime.',
-  },
-  {
-    id: 'multi-piece',
-    category: 'tracking',
-    question: 'How do multi-piece shipments work?',
-    answer: 'All pieces share one tracking ID. Each piece has its own label ending in -01, -02 and so on.',
-  },
-  {
-    id: 'cut-off',
-    category: 'booking',
-    question: "What's the cut-off for same-day collection?",
-    answer: 'It depends on your city and service. Your coordinator confirms it at booking.',
-  },
-  {
-    id: 'packing',
-    category: 'booking',
-    question: 'How should I pack my shipment?',
-    answer: 'Use a strong outer box, cushion every item and seal all seams. For high-value items, ask for our Secure Vault packaging.',
-  },
-  {
-    id: 'change-address',
-    category: 'booking',
-    question: 'Can I change the delivery address?',
-    answer: 'Yes, before the shipment reaches the destination gateway. Contact us with your tracking ID.',
-  },
-  {
-    id: 'duties',
-    category: 'customs',
-    question: 'Who pays duties and taxes?',
-    answer: "That's agreed at booking: either the sender (duties paid) or the recipient (duties unpaid).",
-  },
-  {
-    id: 'customs-documents',
-    category: 'customs',
-    question: 'What documents do I need?',
-    answer: "Usually a commercial invoice and, for some goods, permits or certificates. We'll tell you exactly what your lane needs.",
-  },
-  {
-    id: 'prohibited',
-    category: 'customs',
-    question: "What can't I ship?",
-    answer: 'Prohibited and restricted items vary by country. See our Shipping Terms, or ask us before you book.',
-  },
-  {
-    id: 'pod',
-    category: 'documents',
-    question: "Where's my proof of delivery?",
-    answer: 'On your tracking page as soon as the shipment is delivered, available to download as a PDF.',
-  },
-  {
-    id: 'damaged',
-    category: 'documents',
-    question: 'What if my shipment is damaged?',
-    answer: "Tell us within 7 days of delivery, with photos. We'll open a claim and keep you updated.",
-  },
-];
-
-// Contact page "Quick answers" (§8.3: 3–4 items from §8.2).
+/** CONTENT §8.4: the quick answers shown on the Contact page. */
 export const CONTACT_QUICK_ANSWER_IDS = ['find-id', 'change-address', 'duties', 'damaged'];

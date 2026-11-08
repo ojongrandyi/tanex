@@ -6,6 +6,9 @@ import home, { type HomeMessages } from './en/home';
 import type { ServicesMessages } from './en/services';
 import type { AboutMessages } from './en/about';
 import type { NetworkMessages } from './en/network';
+import type { HelpMessages } from './en/help';
+import type { ContactMessages } from './en/contact';
+import type { LegalMessages } from './en/legal';
 
 export const en = { common };
 
@@ -19,6 +22,9 @@ export interface AreaMessages {
   services: ServicesMessages;
   about: AboutMessages;
   network: NetworkMessages;
+  help: HelpMessages;
+  contact: ContactMessages;
+  legal: LegalMessages;
 }
 export type AreaName = keyof AreaMessages;
 
@@ -29,4 +35,7 @@ export const AREA_LOADERS_EN: { [A in AreaName]: () => Promise<AreaMessages[A]> 
   services: () => import('./en/services').then((m) => m.default),
   about: () => import('./en/about').then((m) => m.default),
   network: () => import('./en/network').then((m) => m.default),
+  help: () => import('./en/help').then((m) => m.default),
+  contact: () => import('./en/contact').then((m) => m.default),
+  legal: () => import('./en/legal').then((m) => m.default),
 };

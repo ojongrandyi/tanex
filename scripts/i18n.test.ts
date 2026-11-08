@@ -20,6 +20,14 @@ import enAbout from '../src/i18n/en/about.ts';
 import frAbout from '../src/i18n/fr/about.ts';
 import enNetwork from '../src/i18n/en/network.ts';
 import frNetwork from '../src/i18n/fr/network.ts';
+import enHelp from '../src/i18n/en/help.ts';
+import frHelp from '../src/i18n/fr/help.ts';
+import enContact from '../src/i18n/en/contact.ts';
+import frContact from '../src/i18n/fr/contact.ts';
+import enLegal from '../src/i18n/en/legal.ts';
+import frLegal from '../src/i18n/fr/legal.ts';
+import { legalDocs } from '../src/data/legalDocs.ts';
+import { HELP_ARTICLES } from '../src/data/helpArticles.ts';
 import { translate } from '../src/i18n/runtime.ts';
 import { formatClock, formatDistanceKm, formatMoney, formatOpeningHoursIn, frenchSpacing } from '../src/i18n/format.ts';
 import { alternatePath, langOfPath } from '../src/router/routes.ts';
@@ -75,6 +83,9 @@ const SAME_IN_BOTH: Record<string, string> = {
   'about:offices.douala': 'place name',
   'network:gateways.regions.Europe': 'same word in French',
   'network:gateways.modesLabel': 'same word in French',
+  'contact:channels.whatsapp': 'brand name',
+  'contact:offices.douala': 'place name',
+  'contact:form.message': 'same word in French',
 };
 
 const PAIRS: [string, Tree, Tree][] = [
@@ -84,6 +95,9 @@ const PAIRS: [string, Tree, Tree][] = [
   ['services', enServices as unknown as Tree, frServices as unknown as Tree],
   ['about', enAbout as unknown as Tree, frAbout as unknown as Tree],
   ['network', enNetwork as unknown as Tree, frNetwork as unknown as Tree],
+  ['help', enHelp as unknown as Tree, frHelp as unknown as Tree],
+  ['contact', enContact as unknown as Tree, frContact as unknown as Tree],
+  ['legal', enLegal as unknown as Tree, frLegal as unknown as Tree],
 ];
 
 test('fr dictionaries have exactly the English keys', () => {
@@ -263,4 +277,29 @@ test('API errors carry stable codes', async () => {
   await expect('GET', '/api/no-such-route', 404, 'NOT_FOUND');
   await expect('POST', '/api/messages', 400, 'MISSING_FIELDS', {});
   await expect('GET', '/api/__conflict', 409, 'CONFLICT');
+});
+
+test('legal pages: the same policies and sections in English and French, no placeholders', () => {
+  const contact = { email: 'info@example.test', address: 'Somewhere' };
+  const en = legalDocs(contact, 'en');
+  const fr = legalDocs(contact, 'fr');
+  assert.deepEqual(fr.map((d) => d.id), en.map((d) => d.id));
+  en.forEach((doc, i) => {
+    assert.equal(fr[i].sections.length, doc.sections.length, doc.id);
+    doc.sections.forEach((s, j) => assert.equal(fr[i].sections[j].body.length, s.body.length, `${doc.id} §${j + 1}`));
+  });
+  const all = JSON.stringify([en, fr]);
+  assert.ok(!/\{\{|TODO|Nigeria/.test(all), 'no template placeholders or previous-deployment law references');
+  assert.match(all, /2024\/017/);
+  // The cookie policy names the real cookie and the public storage keys.
+  for (const key of ['tx.sid', 'tx_locale', 'ngf_recent_tracking', 'ngf_units', 'ngf_live_shipment_stream']) assert.ok(all.includes(key), key);
+});
+
+test('help: every article has a question and an answer in both languages', () => {
+  for (const a of HELP_ARTICLES) {
+    for (const dict of [enHelp, frHelp]) {
+      const entry = (dict.articles as Record<string, { q: string; a: string }>)[a.key];
+      assert.ok(entry?.q && entry?.a, a.key);
+    }
+  }
 });

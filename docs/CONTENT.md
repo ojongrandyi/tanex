@@ -563,6 +563,10 @@ Reused where possible: service names and summaries (§3.1), add-ons (§3.4), sta
 - *Which payment methods do you accept?* Cash to the rider, MTN Mobile Money and Orange Money to the TanEx company accounts, and for international shipments the options shown on your payment request.
 - *How do I prove a Mobile Money payment?* Upload a screenshot of the confirmation SMS on your tracking page, with the transaction ID.
 
+### 8.6 Interface strings added with E.4 (**owner to confirm**)
+- **Help:** search label (screen readers) `Search the help centre` · quick links name `Quick links` · topic filter name `Topics` · topics `Local delivery` · `Payments` (§8.5) · result count (screen readers) `{n} answers`. The search also matches the topic names.
+- **Contact:** channel labels `Phone` · `WhatsApp` · `Email` · list name `Ways to reach us` · offices card `Our offices` · `Opening hours` · `Get directions` (opens Google Maps searching the written address; screen readers: `Get directions: {office} (opens Google Maps)`; no map pin until #120) · `(optional)` · tracking hint `For example TX7K2M9P` · gateway `No gateway` · errors `Please fill in your name, email, topic and message.` · `Please enter a valid email address.` · `We couldn't send your message. Please try again, or email us at {email}.` · quick answers link `More answers in the Help Centre`.
+
 ---
 
 ## 9. Network list (owner to confirm or edit, tracker #105)
@@ -691,7 +695,8 @@ Tabs: **Privacy Policy · Terms of Service · Shipping Terms · Cookie Policy ·
 - **Accessibility:** commitment to WCAG 2.2 AA · reduced-motion support · how to report a barrier ({{EMAIL}}).
 
 ### 13.1 Draft text (added 2026-09-29 with 3.11, **lawyer review required**)
-The text below is rendered from `src/data/legalDocs.ts`; change both together. Page H1: `Legal`. Each tab shows `Last updated: 29 September 2026`. The Head-office sentence is left out while {{HQ_ADDRESS}} is empty. {{JURISDICTION}} is not shown: the governing-law clause names "the country in which TanEx is registered" until it is confirmed (TODO in the code). Differences from the outline above: no analytics are installed, so Privacy and Cookies say so; Cookies also lists the browser-storage keys and the third-party services the pages load.
+The text below is rendered from `src/data/legalDocs.ts` (English and French, CONTENT_FR §13); change them together. Page H1: `Legal`. Each tab shows `Last updated: 8 November 2026` (updated with E.4). The Head-office sentence is left out while {{HQ_ADDRESS}} is empty. Governing law names the Republic of Cameroon (lawyer to confirm, #112). Differences from the outline above: no analytics are installed, so Privacy and Cookies say so; Cookies lists the real cookie and browser-storage keys of the public pages (audited in E.4) and the third-party services the pages load. Live chat is off (#109), so the Smartsupp sentence was removed; add it back if chat is switched on.
+- *E.4 interface (owner to confirm):* menu name (screen readers) `Legal pages` · French H1 `Mentions légales`.
 
 **Privacy Policy**
 1. *Who we are.*
@@ -699,8 +704,8 @@ The text below is rendered from `src/data/legalDocs.ts`; change both together. P
 2. *What we collect.*
    - Sender and recipient details you give us when you book or ask for a quote: names, company, phone numbers, email and delivery addresses.
    - Shipment data: contents, weights, sizes, declared value, and the scans and events recorded as the shipment moves.
-   - Messages you send us through the contact, callback and support forms.
-   - Basic technical data: when your browser loads our pages, maps and fonts, the servers involved receive your IP address. We do not use analytics or advertising tools.
+   - Messages you send us through the contact and support forms.
+   - Basic technical data: when your browser loads our pages and maps, the servers involved receive your IP address. We do not use analytics or advertising tools.
 3. *Why we use it.*
    - To collect, carry and deliver your shipments.
    - To prepare customs and shipping documents.
@@ -764,12 +769,13 @@ The text below is rendered from `src/data/legalDocs.ts`; change both together. P
    We do not use analytics or advertising cookies. If we add analytics, we will update this page and ask for your consent where the law requires it.
 2. *Choices saved in your browser.*
    Some pages remember a few choices in your browser's local storage. This data stays on your device and is not sent to us:
+   - tx_locale: the language you chose for this website (English or French).
    - ngf_recent_tracking: tracking IDs you looked up recently, so you can open them again.
    - ngf_units: whether you prefer metric or imperial units.
    - ngf_live_shipment_stream: the latest update for a shipment you are viewing, so other open tabs stay in step.
    You can clear these at any time in your browser settings.
 3. *Other services our pages use.*
-   Our pages load map tiles from Esri (ArcGIS) and use OpenStreetMap Nominatim and OSRM to look up addresses and routes. The live chat window on our public pages is provided by Smartsupp, which also receives the messages you type in it. Fonts and photos are served from our own site. These services receive your IP address when your browser contacts them.
+   Our pages load map tiles from Esri (ArcGIS) and use OpenStreetMap Nominatim and OSRM to look up addresses and routes. Fonts and photos are served from our own site. These services receive your IP address when your browser contacts them.
 
 **Accessibility**
 1. *Our commitment.*
