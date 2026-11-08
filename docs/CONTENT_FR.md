@@ -180,6 +180,76 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 
 ---
 
+## 3. Page Services (ajouté avec E.2, **relecture native en attente**, #108)
+
+- **Sur-titre :** `NOS SERVICES` · **H1 :** `Tous les moyens de transport, sous un même toit.`
+- **Texte :** `Choisissez le mode adapté à votre marchandise et à vos délais. Nous nous occupons de l'itinéraire, des documents et de chaque transfert.`
+- **Sur-titres de section :** `SERVICES` · `COMPARER` · `COMMENT ÇA MARCHE` · `OPTIONS`
+- **Libellés :** `Points forts` · `Idéal pour` · boutons `Demander un devis` · `Suivre un envoi`
+
+### 3.1 Services (tous **[à confirmer]**)
+
+**Fret aérien**
+- *Résumé :* Expédition aérienne internationale de documents, colis et marchandises urgentes.
+- *Points forts :* Enlèvement à votre porte · Documents d'exportation préparés avec vous · Accompagnement au dédouanement · Suivi de l'enlèvement à la livraison
+- *Idéal pour :* documents, échantillons, pièces détachées, commandes en ligne, colis personnels à l'étranger
+
+**Fret maritime**
+- *Résumé :* Transport maritime en conteneurs complets (FCL) ou groupés (LCL) pour les charges plus volumineuses et plus lourdes.
+- *Points forts :* FCL et LCL · Manutention portuaire et documents · Import et export · Livraison à la porte après dédouanement
+- *Idéal pour :* stocks d'entreprise, machines, véhicules, déménagements
+
+**Fret ferroviaire**
+- *Résumé :* Transport intérieur des marchandises lourdes et en vrac sur les lignes desservies par le rail, complété par la route à chaque extrémité.
+- *Points forts :* Économique pour les charges lourdes · Réservé et suivi par notre équipe · Enlèvement et livraison par la route pour compléter le trajet
+- *Idéal pour :* marchandises en vrac, matériaux de construction, produits agricoles
+
+**Fret routier**
+- *Résumé :* Transport par camion et fourgonnette entre les villes du Cameroun et vers les pays voisins.
+- *Points forts :* Chargements complets et partiels · Enlèvement et livraison porte à porte · Suivi de ville en ville
+- *Idéal pour :* meubles, stocks de magasin, palettes, livraisons entre Limbe, Buea, Douala et au-delà
+
+**Entreposage**
+- *Résumé :* Stockage sécurisé de vos marchandises, avec réception, contrôle des stocks, emballage et expédition.
+- *Points forts :* Stockage de courte et longue durée · Marchandises contrôlées et enregistrées à l'entrée · Préparation, emballage et expédition sur demande · Combinable avec tous nos services de transport
+- *Idéal pour :* commerçants, vendeurs en ligne, importateurs en attente de livraison
+
+**Livraison locale (moto)**
+- *Résumé :* Livraison dans la même ville par les livreurs TanEx à Buea, Limbe et Douala, avec suivi en direct.
+- *Points forts :* Récupéré à votre porte · Position du livreur en direct · Preuve de livraison en photo · Espèces ou Mobile Money
+- *Idéal pour :* documents, repas, téléphones et petits colis, livraisons de boutiques en ligne
+
+### 3.2 Comparer (tableau)
+| Service | Idéal pour | Rapidité | Suivi |
+|---|---|---|---|
+| Livraison locale | Petits objets dans une même ville | Le plus rapide, même ville | Position du livreur en direct |
+| Fret routier | Gros chargements entre les villes | Trajets programmés | Mises à jour de ville en ville |
+| Fret aérien | Envois internationaux urgents | Le plus rapide à l'international | Chaque étape |
+| Fret maritime | Charges internationales volumineuses ou lourdes | Départs programmés | Chaque étape |
+| Fret ferroviaire | Marchandises lourdes et en vrac à l'intérieur du pays | Départs programmés | Chaque étape |
+| Entreposage | Stocker avant la livraison | n/a | Registre des stocks |
+
+En-têtes : `Service` · `Idéal pour` · `Rapidité` · `Suivi`
+
+### 3.3 Comment ça marche (4 étapes)
+1. **Réservez.** En ligne, sur WhatsApp ou à notre bureau. Vous recevez immédiatement votre numéro de suivi à 8 caractères.
+2. **Enlèvement.** Nous récupérons à votre porte, vérifions et étiquetons chaque colis.
+3. **Transport.** À moto, en camion, par avion, bateau ou train. Chaque transfert est enregistré.
+4. **Livraison.** Livré à la porte, avec une photo et le nom du destinataire comme preuve.
+
+### 3.4 Options **[à confirmer]**
+1. **Express (en ville).** Enlèvement prioritaire pour les livraisons urgentes dans la même ville.
+2. **Paiement à la livraison.** Le livreur encaisse le prix de votre marchandise auprès du destinataire et nous vous le reversons.
+3. **Code de livraison.** Le destinataire donne un code à 4 chiffres au livreur avant la remise.
+4. **Emballage.** Nous emballons et protégeons vos objets avant l'expédition.
+
+### 3.6 Appel à l'action (aussi sur À propos)
+- **H2 :** `Prêt à envoyer quelque chose ?` · **Texte :** `Obtenez un prix clair, ou réservez une livraison à moto en quelques minutes.` · **Boutons :** `Demander un devis` · `Réserver une livraison à moto`
+
+### 3.7 Libellés ajoutés avec E.2 (**à confirmer**)
+- **Titres de section :** `Six façons de transporter` · `Quel service vous convient ?` · `De la réservation jusqu'à la porte` · `Des options quand vous en avez besoin`
+- `Services sur cette page` · `Nos services comparés` · `Rapidité` « n/a » s'écrit `Sans objet`
+
 ## 6.3 Suivi : noms des statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)
 `Réservé` · `Récupéré` · `À la plateforme de départ` · `Parti` · `En transit` · `Arrivé à la plateforme de destination` ·
 `Dédouanement` · `En cours de livraison` · `Livré` · `En attente` · `Retardé` · `Retour à l'expéditeur` · `Annulé`

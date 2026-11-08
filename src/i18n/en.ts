@@ -3,6 +3,7 @@
 import common from './en/common';
 import type { NotFoundMessages } from './en/notFound';
 import home, { type HomeMessages } from './en/home';
+import type { ServicesMessages } from './en/services';
 
 export const en = { common };
 
@@ -13,6 +14,7 @@ export type Messages = typeof en;
 export interface AreaMessages {
   notFound: NotFoundMessages;
   home: HomeMessages;
+  services: ServicesMessages;
 }
 export type AreaName = keyof AreaMessages;
 
@@ -20,4 +22,5 @@ export const AREA_LOADERS_EN: { [A in AreaName]: () => Promise<AreaMessages[A]> 
   notFound: () => import('./en/notFound').then((m) => m.default),
   // Bundled with HomePage (which primes it via runtime.primeArea): Home is the main first paint.
   home: () => Promise.resolve(home),
+  services: () => import('./en/services').then((m) => m.default),
 };

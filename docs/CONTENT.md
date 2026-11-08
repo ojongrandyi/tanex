@@ -286,6 +286,11 @@ Uses §3.3.
 ### 3.6 CTA (also on About)
 - **H2:** `Ready to send something?` · **Body:** `Get a clear price, or book a bike delivery in a few minutes.` · **Buttons:** `Get a Quote` · `Book a bike delivery`
 
+### 3.7 Interface strings added with E.2 (**owner to confirm**)
+- **Section headings** under the eyebrows: `Six ways to move it` (SERVICES) · `Which service fits?` (COMPARE) · `From booking to the door` (HOW IT WORKS) · `Extras when you need them` (ADD-ONS)
+- In-page menu name (screen readers) `Services on this page` · table caption (screen readers) `Our services compared` · table headers as in §3.2
+- Each service has a stable address: `/services/air`, `/services/maritime`, `/services/rail`, `/services/road`, `/services/warehousing`, `/services/local-delivery` (French: `/fr/services/…`). Until the bike booking page exists (G.6), the Local delivery panel offers `Get a Quote`.
+
 ---
 
 ## 4. About page

@@ -14,6 +14,8 @@ import enNotFound from '../src/i18n/en/notFound.ts';
 import frNotFound from '../src/i18n/fr/notFound.ts';
 import enHome from '../src/i18n/en/home.ts';
 import frHome from '../src/i18n/fr/home.ts';
+import enServices from '../src/i18n/en/services.ts';
+import frServices from '../src/i18n/fr/services.ts';
 import { translate } from '../src/i18n/runtime.ts';
 import { formatClock, formatDistanceKm, formatMoney, formatOpeningHoursIn, frenchSpacing } from '../src/i18n/format.ts';
 import { alternatePath, langOfPath } from '../src/router/routes.ts';
@@ -61,12 +63,17 @@ const SAME_IN_BOTH: Record<string, string> = {
   'home:contact.form.message': 'same word in French',
   'home:rail.chapters.services': 'same word in French',
   'home:rail.chapters.contact': 'same word in French',
+  'services:eyebrows.services': 'same word in French',
+  'services:compare.service': 'same word in French',
+  'services:items.rail.h4': 'intentionally empty: rail has three highlights',
+  'services:items.road.h4': 'intentionally empty: road has three highlights',
 };
 
 const PAIRS: [string, Tree, Tree][] = [
   ['common', enCommon as unknown as Tree, frCommon as unknown as Tree],
   ['notFound', enNotFound as unknown as Tree, frNotFound as unknown as Tree],
   ['home', enHome as unknown as Tree, frHome as unknown as Tree],
+  ['services', enServices as unknown as Tree, frServices as unknown as Tree],
 ];
 
 test('fr dictionaries have exactly the English keys', () => {

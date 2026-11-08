@@ -7,6 +7,7 @@ import { Barcode } from '../components/Barcode';
 import { HomeNetworkMap } from '../components/HomeNetworkMap';
 import { Button, Input, Textarea } from '../components/ui';
 import { Link } from '../router/Link';
+import { BIKE_BOOKING } from '../router/bookingLinks';
 import { api } from '../services/api';
 import {
   EMAIL, LOGO_MARK, LOGO_MARK_SIZE, OFFICES, PHONE, PHONE_2, TRACKING_ID_EXAMPLE, WHATSAPP, formatPhone,
@@ -38,9 +39,6 @@ interface HomePageProps {
 // Owner flyer: Buea bike delivery "from 500 FCFA" (CLAUDE.md §2). Real prices live in the tariffs (G.2).
 const BUEA_FROM_PRICE = 500;
 
-// Where "Book a bike delivery" leads until the booking page exists (G.6): the local-delivery
-// section of the Services page. One place to change when /local-delivery goes live.
-const BIKE_BOOKING = { page: 'services', param: 'local-delivery' } as const;
 
 // Blog section (CONTENT §2.9): the latest 3 posts in the page language. The public blog arrives
 // with F.3; until then there are none and the section stays hidden. No sample posts.
