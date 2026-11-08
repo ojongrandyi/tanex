@@ -10,4 +10,5 @@ export const loadFrMessages = (): Promise<Translation<Messages>> =>
 
 export const AREA_LOADERS_FR: { [A in AreaName]: () => Promise<Translation<AreaMessages[A]>> } = {
   notFound: () => import('./fr/notFound').then((m) => m.default),
+  home: () => import('./fr/home').then((m) => m.default),
 };

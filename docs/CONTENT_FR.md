@@ -171,6 +171,13 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 - **Étiquette :** `Chaque étape, une seule étiquette : TX7K2M9P.`
 - **Arrivée (pied de page) :** `Livré. De votre porte au monde entier, et jusqu'à une autre porte.`
 
+### 2.11 Libellés d'interface ajoutés avec E.1 (**à confirmer**, relecture native #108)
+- **Formulaire de contact :** `Envoyez-nous un message` · `Envoi…` · `Indiquez votre nom, un numéro de téléphone ou un e-mail, et votre message.` · `Saisissez une adresse e-mail ou un numéro de téléphone avec l'indicatif du pays.` · `Nous n'avons pas pu envoyer votre message. Veuillez réessayer.` · `Envoyer un autre message` · `Appeler` · `WhatsApp` · `E-mail` · `Ouvert` · `Comment nous joindre` · `Venez nous voir à Buea` · `Venez nous voir à Douala`
+- **Moto :** `Étapes de la livraison`
+- **Carte du réseau :** `Carte du réseau TanEx : Buea, Douala et les carrefours commerciaux que nous desservons` · `Choisir un lieu` · `Aérien` · `Maritime` · `Routier` · `Heure locale` · `Nous contacter pour cette route`
+- **Étiquette d'exemple :** `Exemple d'étiquette de colis TanEx` · `Origine` · `Destination` · `Poids` · `Service` · `Numéro de suivi : {id}`
+- **Titres scindés pour l'accent (C.1) :** `À travers la ville,` / `sous vos yeux.` · `Les gros chargements,` / `entre les villes.` · `De Buea aux grands carrefours du` / `commerce mondial` · `Une étiquette.` / `Chaque étape.` · `Contactez-nous` (entièrement en italique)
+
 ---
 
 ## 6.3 Suivi : noms des statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)

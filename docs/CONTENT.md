@@ -209,6 +209,14 @@ Order: 2.1 Hero · 2.2 Services · 2.3 Bike delivery · 2.4 Truck delivery · 2.
 - **Label chapter caption:** `Every step, one label: TX7K2M9P.`
 - **Footer arrival:** `Delivered. From your door to the world, and back to a door.`
 
+### 2.11 Interface strings added with E.1 (**owner to confirm**)
+- **Get in touch form:** heading `Send us a message` · busy `Sending…` · errors `Please fill in your name, a phone number or email, and your message.` · `Please enter an email address or a phone number with its country code.` · `We couldn't send your message. Please try again.` · after success `Send another message` · channel labels `Call` · `WhatsApp` · `Email` · `Open` · list name (screen readers) `Ways to reach us`
+- **Bike chapter:** steps list name (screen readers) `Delivery steps`
+- **Network map:** region name `Map of the TanEx network: Buea, Douala and the trade hubs we connect to` · place picker `Choose a place` · selected place card: modes `Air` · `Sea` · `Road` · `Local time` · `Contact us about this lane` (§5)
+- **Smart label demo:** name (screen readers) `Example of a TanEx parcel label` · field names `Origin` · `Destination` · `Weight` · `Service`
+- Until the bike booking page exists (G.6), every `Book a bike delivery` button opens the Local delivery section of the Services page.
+- The motion control (`Pause motion` / `Play motion`, §2.10) appears with the motion in phase H; before that the page has no motion to pause.
+
 ---
 
 ## 3. Services page

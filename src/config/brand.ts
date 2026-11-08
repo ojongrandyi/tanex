@@ -92,7 +92,7 @@ export const REFERENCE_PREFIX = 'TX';
 export const PHONE = '+237651059345';
 export const PHONE_2 = '+237691194663';
 // TBD: which number is on WhatsApp (tracker #100). Stays '' until the owner confirms.
-export const WHATSAPP = '';
+export const WHATSAPP: string = '';
 
 export const HQ_ADDRESS = 'Check Point, opposite Molyko Omnisport Stadium, Buea, Cameroon';
 // French form of the addresses (CONTENT_FR placeholders {{HQ_ADDRESS}}, {{DOUALA_OFFICE}}).

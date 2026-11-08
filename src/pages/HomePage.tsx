@@ -1,983 +1,535 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Package,
-  Truck,
-  Calculator,
-  MapPin,
-  Clock,
-  Globe,
-  Warehouse,
-  ShieldCheck,
-  Headphones,
-  CheckCircle2,
-  ArrowRight,
-  Phone,
-  Mail,
-  Sparkles,
-  Activity,
-  Zap,
-  Lock,
-  FileText,
-  FileCheck,
-  Search,
-  Shield,
-  Users,
-  Car,
-  ChevronDown,
-  ChevronUp,
-  Plane,
-  Ship,
-  ScanBarcode
+  ArrowRight, Bike, Camera, Check, Clock, Mail, MapPin, MessageCircle, Navigation, Phone, Plane, Plus, Search,
+  Ship, TrainFront, Truck, Users, Wallet, Warehouse,
 } from 'lucide-react';
 import { Barcode } from '../components/Barcode';
 import { HomeNetworkMap } from '../components/HomeNetworkMap';
-import { ResponsiveImage } from '../components/ResponsiveImage';
-import { SiteImageName } from '../data/siteImages';
-import { GATEWAYS, getGateway, getLanePartners, formatGatewayTime } from '../data/gateways';
-import { useNow } from '../utils/useNow';
-import { useCompanyContact } from '../utils/useCompanyContact';
-import { COMPANY, COMPANY_SHORT, LOGO_MARK, TRACKING_ID_EXAMPLE } from '../config/brand';
+import { Button, Input, Textarea } from '../components/ui';
+import { Link } from '../router/Link';
 import { api } from '../services/api';
+import {
+  EMAIL, LOGO_MARK, LOGO_MARK_SIZE, OFFICES, PHONE, PHONE_2, TRACKING_ID_EXAMPLE, WHATSAPP, formatPhone,
+} from '../config/brand';
+import { HUB_CODE, NETWORK_POINTS, gatewayName, getGateway, formatGatewayTime, type Gateway } from '../data/gateways';
+import { useApiErrorText, useAreaT, useLocale } from '../i18n/I18nProvider';
+import { primeArea } from '../i18n/runtime';
+import { formatMoney, formatOpeningHoursIn } from '../i18n/format';
+import homeEn from '../i18n/en/home';
+import { useNow } from '../utils/useNow';
+import { ArrivalDoor, BikeHero, HeroGlobe, JourneySprite, Mountain, ParcelLabel, ParkedBike, ServicesRoad, TruckRoute, WorldGlobe } from './home/JourneyArt';
+import { RouteRail, type RailChapter } from './home/RouteRail';
 import './HomePage.css';
-import { useApiErrorText } from '../i18n/I18nProvider';
+
+// Homepage (CONTENT §2.1–§2.10, the owner's order), laid out for the Journey (MOTION_3D_SPEC
+// §5–§8) as approved in C.1 (design/home.html). Every section is a chapter with a stable id and
+// data-chapter index; on desktop each chapter has a "lane" beside the text that alternates sides,
+// where the 3D bike rides in phase H. Until then each lane holds a fixed-size SVG poster. Text
+// blocks keep their own solid backgrounds, so contrast never depends on what's in the lane.
+
+// English home text ships with the page: no dictionary round-trip before first paint.
+primeArea('home', 'en', homeEn);
 
 interface HomePageProps {
   onTrack: (trackingNumber: string) => void;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, param?: string) => void;
 }
 
-type IndustryTab = 'auto' | 'medical' | 'ecommerce' | 'tech';
+// Owner flyer: Buea bike delivery "from 500 FCFA" (CLAUDE.md §2). Real prices live in the tariffs (G.2).
+const BUEA_FROM_PRICE = 500;
 
-// Copy: docs/CONTENT.md §2. Alt text: CONTENT.md §12.
-const SERVICES: { title: string; body: string; cta: string; image: SiteImageName; alt: string }[] = [
-  {
-    title: 'Priority Express Courier',
-    body: 'Time-critical documents and parcels, door to door, with the fastest available routing and customs pre-clearance where possible.',
-    cta: 'Explore Express',
-    image: 'service-priority-express',
-    alt: 'View from an aircraft cargo door down the loader to the airport apron'
-  },
-  {
-    title: 'Scheduled Freight & Linehaul',
-    body: 'Air, ocean (FCL and LCL) and road freight on fixed departures, for regular volumes that need predictable transit times.',
-    cta: 'Explore Freight',
-    image: 'service-freight-linehaul',
-    alt: 'Aerial night view of a container ship being loaded by gantry cranes'
-  },
-  {
-    title: 'Vehicle Shipping & Transport',
-    body: 'Cars, motorcycles and fleet vehicles moved by container, RoRo or enclosed carrier, with documentation handled end to end.',
-    cta: 'Explore Vehicle Shipping',
-    image: 'service-vehicle-transport',
-    alt: 'Roll-on/roll-off vehicle carrier ship berthed at a harbour quay'
-  },
-  {
-    title: 'Secure Vault & High-Value',
-    body: 'Sealed, tamper-evident transport for valuables, sensitive documents, pharmaceuticals and high-value electronics, with restricted hand-offs.',
-    cta: 'Explore Secure Vault',
-    image: 'service-secure-vault',
-    alt: 'Close-up of the combination lock on a metal security case'
-  }
-];
+// Where "Book a bike delivery" leads until the booking page exists (G.6): the local-delivery
+// section of the Services page. One place to change when /local-delivery goes live.
+const BIKE_BOOKING = { page: 'services', param: 'local-delivery' } as const;
 
-const INDUSTRIES: { id: IndustryTab; icon: React.ReactNode; title: string; body: string; bullets: string[]; image: SiteImageName; alt: string }[] = [
-  {
-    id: 'auto',
-    icon: <Car size={16} />,
-    title: 'Automotive & Vehicles',
-    body: 'Spare parts, components and complete vehicles, moved to keep production lines and dealerships running.',
-    bullets: ['Line-side parts express', 'Vehicle export & import documentation', 'Enclosed and container shipping'],
-    image: 'industry-automotive',
-    alt: 'Aerial view of rows of new cars waiting for shipment'
-  },
-  {
-    id: 'medical',
-    icon: <ShieldCheck size={16} />,
-    title: 'Healthcare & Life Sciences',
-    body: 'Samples, medical devices and pharmaceuticals handled with care, controlled hand-offs and full traceability.',
-    bullets: ['Temperature-sensitive handling (on request)', 'Sealed chain of custody', 'Priority customs lodgement'],
-    image: 'industry-healthcare',
-    alt: 'Gloved hands holding a sealed vaccine shipment box'
-  },
-  {
-    id: 'ecommerce',
-    icon: <Package size={16} />,
-    title: 'E-Commerce & Retail',
-    body: 'Cross-border parcels, stock replenishment and returns for growing online brands.',
-    bullets: ['Multi-piece shipments under one ID', 'Scheduled consolidations', 'Simple returns with linked tracking'],
-    image: 'industry-ecommerce',
-    alt: 'Parcels stacked inside a delivery van'
-  },
-  {
-    id: 'tech',
-    icon: <Zap size={16} />,
-    title: 'Technology & Electronics',
-    body: 'High-value hardware and components moved securely, on time and fully insured on request.',
-    bullets: ['Secure vault option', 'Anti-static, protected packing guidance', 'Signature-only release'],
-    image: 'industry-technology',
-    alt: 'Server rack with network cables and status lights'
-  }
-];
+// Blog section (CONTENT §2.9): the latest 3 posts in the page language. The public blog arrives
+// with F.3; until then there are none and the section stays hidden. No sample posts.
+interface HomePost { slug: string; title: string; excerpt: string }
+const LATEST_POSTS: HomePost[] = [];
 
-const STEPS: { title: string; body: string; icon: React.ReactNode }[] = [
-  {
-    title: 'Book & Label',
-    body: `Book online or with a coordinator. You get your 8-character ${COMPANY_SHORT} tracking ID and a barcode label for every piece straight away.`,
-    icon: <FileText size={22} className="text-accent" />
-  },
-  {
-    title: 'Collect & Verify',
-    body: 'We collect from your door, weigh and scan every piece at the origin gateway, and prepare the export and customs documents.',
-    icon: <Warehouse size={22} className="text-accent" />
-  },
-  {
-    title: 'Move Across Borders',
-    body: 'Your cargo travels on the fastest suitable lane: air, ocean or road. Customs clearance and each transfer are logged live.',
-    icon: <Globe size={22} className="text-accent" />
-  },
-  {
-    title: 'Deliver & Sign',
-    body: 'Final-mile delivery to the door, with a signed digital proof of delivery sent to you the moment it lands.',
-    icon: <ShieldCheck size={22} className="text-accent" />
-  }
-];
+// Chapters of the Journey, in page order (MOTION_3D_SPEC §6). Ids are stable anchors.
+const CHAPTER_IDS = ['door', 'services', 'in-town', 'city-to-city', 'world', 'label', 'contact', 'delivered'] as const;
+const RAIL_KEYS = ['door', 'services', 'town', 'city', 'world', 'label', 'contact', 'delivered'] as const;
 
-const TRUST_TILES: { title: string; body: string; icon: React.ReactNode }[] = [
-  { title: 'Integrity Guarantee', body: 'What you hand us is exactly what arrives: counted, sealed and signed for.', icon: <ShieldCheck size={22} className="text-accent" /> },
-  { title: 'Committed Schedules', body: 'Agreed windows, proactive updates and no silent delays.', icon: <Clock size={22} className="text-accent" /> },
-  { title: 'Vetted Handlers', body: 'Every driver, agent and handler in our chain is vetted and accountable.', icon: <Users size={22} className="text-accent" /> },
-  { title: 'Privacy by Design', body: 'Public tracking masks names and addresses. Your data stays yours.', icon: <Lock size={22} className="text-accent" /> },
-  { title: 'Compliance First', body: 'Export, import and dangerous-goods rules are respected on every lane.', icon: <Shield size={22} className="text-accent" /> },
-  { title: 'Digital Documents', body: 'Waybills, invoices and proof of delivery, available online at any time.', icon: <FileText size={22} className="text-accent" /> },
-  { title: 'Piece-Level Barcodes', body: 'Every carton carries its own scannable label, linked to one tracking ID.', icon: <ScanBarcode size={22} className="text-accent" /> },
-  { title: '24/7 Support', body: 'A real coordinator, whatever the hour and wherever you are.', icon: <Headphones size={22} className="text-accent" /> }
-];
+const SERVICE_CARDS = [
+  { key: 'air', icon: Plane, param: 'air' },
+  { key: 'maritime', icon: Ship, param: 'maritime' },
+  { key: 'rail', icon: TrainFront, param: 'rail' },
+  { key: 'road', icon: Truck, param: 'road' },
+  { key: 'warehousing', icon: Warehouse, param: 'warehousing' },
+  { key: 'local', icon: Bike, param: 'local-delivery' },
+] as const;
 
-// CONTENT.md §2.10 Option A: stands in for testimonials until real, permitted ones exist.
-const COMMITMENTS: { quote: string; body: string }[] = [
-  { quote: 'You’ll always know where it is.', body: 'Live milestones on every shipment, with no exceptions.' },
-  { quote: 'You’ll always reach a person.', body: 'A coordinator who knows your shipment, any time zone.' },
-  { quote: 'You’ll hear from us first.', body: 'If something changes, we tell you before you have to ask.' }
-];
+const FAQ_KEYS = ['account', 'town', 'live', 'pay', 'international', 'language'] as const;
 
-// CONTENT.md §2.11: replaces the client-logo strip. Real partner logos only with written permission.
-const MODES: { label: string; icon: React.ReactNode }[] = [
-  { label: 'Air Freight', icon: <Plane size={20} className="text-accent" /> },
-  { label: 'Ocean Freight', icon: <Ship size={20} className="text-accent" /> },
-  { label: 'Road Freight', icon: <Truck size={20} className="text-accent" /> },
-  { label: 'Express Courier', icon: <Package size={20} className="text-accent" /> },
-  { label: 'Customs Brokerage', icon: <FileCheck size={20} className="text-accent" /> },
-  { label: 'Secure Transport', icon: <Lock size={20} className="text-accent" /> }
-];
+/** A headline with its one emphasised phrase (C.1). Either part may be empty in a language. */
+const Headline: React.FC<{ start: string; em: string }> = ({ start, em }) => (
+  <>
+    {start}
+    {start && em ? ' ' : ''}
+    {em && <em className="tx-em">{em}</em>}
+  </>
+);
 
-const FAQS = [
-  {
-    q: 'Do I need an account to track a shipment?',
-    a: `No. Enter your 8-character tracking ID (for example ${TRACKING_ID_EXAMPLE}) on the Track page and you’ll see its status and milestones straight away. Personal details are masked for privacy.`
-  },
-  {
-    q: 'How does live tracking work?',
-    a: 'Every piece is scanned at each hand-off: collection, gateway, departure, arrival, customs and delivery. Between scans, we show your shipment’s estimated position on its route.'
-  },
-  {
-    q: 'Can I track a multi-piece shipment under one ID?',
-    a: `Yes. All pieces share one tracking ID, and each piece has its own label (for example ${TRACKING_ID_EXAMPLE}-01, -02), so you can see every carton individually.`
-  },
-  {
-    q: 'Do you handle customs clearance?',
-    a: 'Yes. We prepare the export and import documentation with you and manage clearance on your behalf. Duties and taxes are billed as agreed at booking.'
-  },
-  {
-    q: 'Are my documents available online?',
-    a: 'Yes. Your waybill, invoice and signed proof of delivery can be viewed and downloaded from your tracking page.'
-  }
-];
+/** Light reveals (no motion library): sections below the fold fade up once as they enter. */
+function useReveal(root: React.RefObject<HTMLElement>) {
+  useEffect(() => {
+    const el = root.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const targets = Array.from(el.querySelectorAll<HTMLElement>('[data-reveal]'));
+    // Only hide what is still below the fold, so nothing already on screen blinks.
+    const fold = window.innerHeight;
+    const pending = targets.filter((t) => t.getBoundingClientRect().top > fold);
+    pending.forEach((t) => t.classList.add('tx-reveal'));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-in');
+        io.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -10% 0px' });
+    pending.forEach((t) => io.observe(t));
+    return () => io.disconnect();
+  }, [root]);
+}
 
 export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
-  // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
+  const t = useAreaT('home');
+  const locale = useLocale();
   const apiErrorText = useApiErrorText();
-  // Empty phone values hide their element (no placeholders).
-  const { phone: supportPhone, email: dispatchEmail } = useCompanyContact();
+  const rootRef = useRef<HTMLDivElement>(null);
+  useReveal(rootRef);
 
-  // Industry Solutions Interactive Tab State
-  const [industryTab, setIndustryTab] = useState<IndustryTab>('auto');
-  const activeIndustry = INDUSTRIES.find((ind) => ind.id === industryTab) ?? INDUSTRIES[0];
-
-  // Callback Form State
-  const [cbName, setCbName] = useState('');
-  const [cbPhone, setCbPhone] = useState('');
-  const [cbTime, setCbTime] = useState('');
-  const [cbReference, setCbReference] = useState<string | null>(null);
-  const [cbSubmitting, setCbSubmitting] = useState(false);
-  const [cbError, setCbError] = useState<string | null>(null);
-
-  // FAQ Accordion State
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  // Global network map: selected gateway
-  const [activeGatewayCode, setActiveGatewayCode] = useState(GATEWAYS[0].code);
-  const activeGateway = getGateway(activeGatewayCode) ?? GATEWAYS[0];
-  const now = useNow();
-  const activeGatewayTime = formatGatewayTime(activeGateway.timeZone, now);
-  const activeGatewayLanes = getLanePartners(activeGateway.code).map((code) => getGateway(code)?.city ?? code);
-
-  // Stored as a message in the admin inbox; the server issues the TX-TKT reference.
-  const handleCallbackSubmit = async (e: React.FormEvent) => {
+  // ---- Hero track field ----
+  const [trackId, setTrackId] = useState('');
+  const submitTrack = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cbName.trim() || !cbPhone.trim() || cbSubmitting) return;
-    setCbSubmitting(true);
-    setCbError(null);
+    const id = trackId.trim();
+    if (id) onTrack(id);
+    else onNavigate('track');
+  };
+
+  // ---- Network map selection ----
+  const [activeCode, setActiveCode] = useState(HUB_CODE);
+  const active = getGateway(activeCode) ?? getGateway(HUB_CODE)!;
+  const now = useNow();
+  const activeTime = formatGatewayTime(active.timeZone, now);
+  const countryName = useMemo(() => {
+    try {
+      const names = new Intl.DisplayNames([locale === 'fr' ? 'fr' : 'en'], { type: 'region' });
+      return (iso: string, fallback: string) => names.of(iso) ?? fallback;
+    } catch {
+      return (_iso: string, fallback: string) => fallback;
+    }
+  }, [locale]);
+  const pointTitle = useCallback((g: Gateway) => `${gatewayName(g, locale)}, ${countryName(g.iso, g.country)}`, [locale, countryName]);
+  const modeLabel = (m: Gateway['modes'][number]) => t(m === 'Air' ? 'network.modes.air' : m === 'Ocean' ? 'network.modes.ocean' : 'network.modes.road');
+
+  // ---- Get in touch (reuses the contact API; the server issues the TX-TKT reference) ----
+  const [form, setForm] = useState({ name: '', contact: '', message: '' });
+  const [sending, setSending] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [reference, setReference] = useState<string | null>(null);
+  const submitMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (sending) return;
+    const name = form.name.trim();
+    const contact = form.contact.trim();
+    const message = form.message.trim();
+    if (!name || !contact || !message) {
+      setFormError(t('contact.form.errorRequired'));
+      return;
+    }
+    const isEmail = contact.includes('@');
+    if (!isEmail && contact.replace(/\D/g, '').length < 6) {
+      setFormError(t('contact.form.errorContact'));
+      return;
+    }
+    setSending(true);
+    setFormError('');
     try {
       const saved = await api.submitContactMessage({
-        name: cbName.trim(),
-        email: '',
-        phone: cbPhone.trim(),
-        subject: 'Callback request',
-        priority: 'urgent',
-        message: cbTime.trim()
-          ? `Callback requested from the Home page. Preferred time: ${cbTime.trim()}`
-          : 'Callback requested from the Home page. No preferred time given.'
+        name,
+        email: isEmail ? contact : '',
+        phone: isEmail ? '' : contact,
+        // Staff-facing (the console is English until phase I).
+        subject: 'Home page message',
+        priority: 'routine',
+        message,
       });
-      setCbReference(saved.id);
-      setCbName('');
-      setCbPhone('');
-      setCbTime('');
+      setReference(saved.id);
+      setForm({ name: '', contact: '', message: '' });
     } catch (err) {
-      setCbError(apiErrorText(err, 'We couldn’t send your request. Please try again.'));
+      setFormError(apiErrorText(err, t('contact.form.errorSend')));
     } finally {
-      setCbSubmitting(false);
+      setSending(false);
     }
   };
 
+  const hours = formatOpeningHoursIn(locale);
+  const addressOf = (city: string) => {
+    const office = OFFICES.find((o) => o.city === city);
+    return office ? (locale === 'fr' ? office.addressFr : office.address) : '';
+  };
+
+  const railChapters: RailChapter[] = CHAPTER_IDS.map((id, i) => ({ id, label: t(`rail.chapters.${RAIL_KEYS[i]}`) }));
+
   return (
-    <div className="ngf-homepage-container">
-      {/* =========================================================================
-          1. HERO (CONTENT.md §2.1)
-          ========================================================================= */}
-      <section className="corp-hero-section">
-        <ResponsiveImage
-          name="hero-home"
-          mobileName="hero-home-mobile"
-          alt="Container cranes silhouetted against the setting sun at a seaport"
-          eager
-          sizes="100vw"
-          className="corp-hero-media"
-          imgClassName="corp-hero-img"
-        />
-        <div className="corp-hero-overlay" />
-        <div className="ngf-container-wide corp-hero-inner">
-          <div className="corp-hero-content animate-fade-in">
-            <div className="corp-hero-badge">
-              <span className="badge-pulse-dot" />
-              <span>WORLDWIDE LOGISTICS NETWORK</span>
-            </div>
+    <div className="tx-home" ref={rootRef}>
+      <JourneySprite />
+      <RouteRail chapters={railChapters} label={t('rail.label')} />
 
-            <h1 className="corp-hero-title">
-              From your door <br />
-              <span className="ngf-highlight">to the world.</span>
+      {/* 0 · Hero: your door (CONTENT §2.1) */}
+      <section className="tx-ch tx-ch--hero tx-dark" id="door" data-chapter="0" aria-labelledby="home-title" tabIndex={-1}>
+        <div className="tx-ch__wrap tx-ch__grid">
+          <div className="tx-ch__intro">
+            <p className="tx-eyebrow">{t('hero.eyebrow')}</p>
+            <h1 className="tx-display tx-home__h1" id="home-title">
+              {t('hero.titleLine1')}{' '}
+              <span className="tx-home__h1-l2"><em className="tx-em">{t('hero.titleLine2')}</em></span>
             </h1>
+            <p className="tx-lead">{t('hero.sub')}</p>
+            <form className="tx-home__track" onSubmit={submitTrack} role="search">
+              <label className="tx-home__track-label" htmlFor="home-track">{t('hero.trackLabel')}</label>
+              <div className="tx-track">
+                <Search className="tx-track__icon" aria-hidden="true" />
+                <input
+                  id="home-track"
+                  className="tx-track__input"
+                  value={trackId}
+                  onChange={(e) => setTrackId(e.target.value.toUpperCase())}
+                  placeholder={t('hero.trackPlaceholder', { example: TRACKING_ID_EXAMPLE })}
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  maxLength={14}
+                />
+                <Button type="submit" variant="primary">{t('hero.trackButton')}</Button>
+              </div>
+            </form>
+          </div>
+          <div className="tx-ch__lane tx-lane--hero" aria-hidden="true">
+            <HeroGlobe />
+          </div>
+          <div className="tx-ch__rest">
+            <div className="tx-home__hero-btns">
+              <Link page="quote" onNavigate={onNavigate} className="tx-btn tx-btn--primary tx-btn--lg">{t('hero.quote')}</Link>
+              <Link page={BIKE_BOOKING.page} param={BIKE_BOOKING.param} onNavigate={onNavigate} className="tx-btn tx-btn--on-dark tx-btn--lg">{t('hero.bike')}</Link>
+            </div>
+            <ul className="tx-home__facts">
+              <li><Check aria-hidden="true" />{t('hero.facts.live')}</li>
+              <li><Check aria-hidden="true" />{t('hero.facts.photo')}</li>
+              <li><Check aria-hidden="true" />{t('hero.facts.languages')}</li>
+            </ul>
+          </div>
+        </div>
+        <Mountain className="tx-home__mount" />
+        <p className="tx-home__caption tx-home__hero-cap" aria-hidden="true">{t('hero.caption')}</p>
+      </section>
 
-            <p className="corp-hero-subtitle">
-              Express parcels, freight, vehicles and high-value cargo, moved across borders by a team that answers, with one tracking ID from pickup to signed delivery.
+      {/* 1 · Services (CONTENT §2.2): lane on the left, the road */}
+      <section className="tx-ch tx-ch--lane-left tx-ch--wide-lane tx-ch--services" id="services" data-chapter="1" aria-labelledby="home-services" tabIndex={-1}>
+        <div className="tx-ch__wrap tx-ch__grid">
+          <div className="tx-ch__intro" data-reveal>
+            <p className="tx-eyebrow">{t('services.eyebrow')}</p>
+            <h2 className="tx-h1 tx-home__chap-h" id="home-services"><Headline start={t('services.titleStart')} em={t('services.titleEm')} /></h2>
+            <p className="tx-lead">{t('services.intro')}</p>
+          </div>
+          <div className="tx-ch__lane tx-lane--road" aria-hidden="true">
+            <ServicesRoad />
+          </div>
+          <div className="tx-ch__rest">
+            <ul className="tx-home__cards">
+              {SERVICE_CARDS.map(({ key, icon: Icon, param }) => {
+                const isLocal = key === 'local';
+                return (
+                  <li key={key} className="tx-card tx-home__card" data-reveal>
+                    <span className="tx-card__icon" aria-hidden="true"><Icon /></span>
+                    <h3 className="tx-card__title">{t(`services.${key}.title`)}</h3>
+                    <p className="tx-card__body">{t(`services.${key}.body`)}</p>
+                    <Link
+                      page={isLocal ? BIKE_BOOKING.page : 'services'}
+                      param={isLocal ? BIKE_BOOKING.param : param}
+                      onNavigate={onNavigate}
+                      className="tx-link"
+                    >
+                      {isLocal ? t('services.local.cta') : t(`services.${key}.title`)}
+                      <ArrowRight aria-hidden="true" />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* 2 · Bike delivery (CONTENT §2.3): dark, lane on the right */}
+      <section className="tx-ch tx-ch--bike tx-dark" id="in-town" data-chapter="2" aria-labelledby="home-bike" tabIndex={-1}>
+        <div className="tx-ch__wrap tx-ch__grid">
+          <div className="tx-ch__intro" data-reveal>
+            <p className="tx-eyebrow">{t('bike.eyebrow')}</p>
+            <h2 className="tx-display tx-home__bike-h" id="home-bike"><Headline start={t('bike.titleStart')} em={t('bike.titleEm')} /></h2>
+            <p className="tx-lead">{t('bike.body')}</p>
+          </div>
+          <div className="tx-ch__lane tx-lane--bike" aria-hidden="true">
+            <span className="tx-home__orbit" />
+            <BikeHero />
+          </div>
+          <div className="tx-ch__rest" data-reveal>
+            <ol className="tx-home__steps" aria-label={t('bike.stepsLabel')}>
+              <li className="tx-chip tx-chip--active">{t('bike.steps.picked')}</li>
+              <li className="tx-chip tx-chip--outline">{t('bike.steps.way')}</li>
+              <li className="tx-chip tx-chip--outline">{t('bike.steps.delivered')}</li>
+            </ol>
+            <p className="tx-home__price">
+              {t('bike.priceStart')}{' '}
+              <span className="tx-home__mono">{t('bike.priceAmount', { amount: formatMoney(BUEA_FROM_PRICE, 'XAF', locale) })}</span>
             </p>
-
-            <div className="corp-hero-cta-row">
-              <button
-                type="button"
-                className="btn-corp-primary"
-                onClick={() => onNavigate('quote')}
-              >
-                <Calculator size={18} />
-                <span>Get a Rate Quote</span>
-                <ArrowRight size={16} />
-              </button>
-
-              <button
-                type="button"
-                className="btn-corp-ghost"
-                onClick={() => onNavigate('track')}
-              >
-                <Search size={18} />
-                <span>Track a Shipment</span>
-              </button>
+            <ul className="tx-home__points">
+              <li><span className="tx-home__ic" aria-hidden="true"><Users /></span>{t('bike.points.riders')}</li>
+              <li><span className="tx-home__ic" aria-hidden="true"><Navigation /></span>{t('bike.points.live')}</li>
+              <li><span className="tx-home__ic" aria-hidden="true"><Wallet /></span>{t('bike.points.pay')}</li>
+              <li><span className="tx-home__ic" aria-hidden="true"><Camera /></span>{t('bike.points.photo')}</li>
+            </ul>
+            <div className="tx-home__cta-row">
+              <Link page={BIKE_BOOKING.page} param={BIKE_BOOKING.param} onNavigate={onNavigate} className="tx-btn tx-btn--primary tx-btn--lg">{t('bike.cta')}</Link>
+              <Link page="help" onNavigate={onNavigate} className="tx-link">{t('bike.pricing')}<ArrowRight aria-hidden="true" /></Link>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Service promise panel */}
-          <div className="corp-hero-service-showcase animate-scale-in">
-            <div className="hero-showcase-header">
-              <div className="flex items-center gap-2">
-                <ShieldCheck size={18} className="text-accent" />
-                <span className="showcase-header-title font-mono">OUR SERVICE PROMISE</span>
-              </div>
+      {/* 3 · Truck delivery (CONTENT §2.4): cream, lane on the left */}
+      <section className="tx-ch tx-ch--lane-left tx-ch--truck" id="city-to-city" data-chapter="3" aria-labelledby="home-truck" tabIndex={-1}>
+        <div className="tx-ch__wrap tx-ch__grid">
+          <div className="tx-ch__intro" data-reveal>
+            <p className="tx-eyebrow">{t('truck.eyebrow')}</p>
+            <h2 className="tx-h1 tx-home__chap-h" id="home-truck"><Headline start={t('truck.titleStart')} em={t('truck.titleEm')} /></h2>
+            <p className="tx-lead">{t('truck.body')}</p>
+          </div>
+          <div className="tx-ch__lane tx-lane--truck" aria-hidden="true">
+            <TruckRoute beyond={t('truck.beyond')} />
+            <p className="tx-home__caption tx-home__lane-cap">{t('truck.caption')}</p>
+          </div>
+          <div className="tx-ch__rest" data-reveal>
+            <ul className="tx-home__checks">
+              <li><Check aria-hidden="true" />{t('truck.points.loads')}</li>
+              <li><Check aria-hidden="true" />{t('truck.points.ends')}</li>
+              <li><Check aria-hidden="true" />{t('truck.points.tracked')}</li>
+            </ul>
+            <Link page="quote" param="road" onNavigate={onNavigate} className="tx-btn tx-btn--primary tx-btn--lg">{t('truck.cta')}</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 4 · Global network (CONTENT §2.5): dark, lane on the right, then the real map */}
+      <section className="tx-ch tx-ch--world tx-dark" id="world" data-chapter="4" aria-labelledby="home-world" tabIndex={-1}>
+        <div className="tx-ch__wrap tx-ch__grid">
+          <div className="tx-ch__intro" data-reveal>
+            <p className="tx-eyebrow">{t('network.eyebrow')}</p>
+            <h2 className="tx-h1 tx-home__chap-h" id="home-world"><Headline start={t('network.titleStart')} em={t('network.titleEm')} /></h2>
+            <p className="tx-lead">{t('network.intro')}</p>
+          </div>
+          <div className="tx-ch__lane tx-lane--world" aria-hidden="true">
+            <WorldGlobe />
+          </div>
+          <div className="tx-ch__rest" data-reveal>
+            <ul className="tx-home__legend">
+              <li><span className="tx-home__lg-base" aria-hidden="true" />{t('network.legend.base')}</li>
+              <li><span className="tx-home__lg-gw" aria-hidden="true" />{t('network.legend.gateway')}</li>
+              <li><span className="tx-home__lg-lane" aria-hidden="true" />{t('network.legend.lane')}</li>
+            </ul>
+            <Link page="locations" onNavigate={onNavigate} className="tx-btn tx-btn--on-dark">{t('network.cta')}<ArrowRight aria-hidden="true" /></Link>
+          </div>
+        </div>
+        <div className="tx-ch__wrap tx-home__map">
+          <HomeNetworkMap activeCode={activeCode} onSelectGateway={setActiveCode} label={t('network.mapLabel')} pointTitle={pointTitle} />
+          <div className="tx-home__map-card">
+            <label className="tx-home__map-pick">
+              <span>{t('network.choose')}</span>
+              <select value={activeCode} onChange={(e) => setActiveCode(e.target.value)}>
+                {NETWORK_POINTS.map((g) => <option key={g.code} value={g.code}>{g.code} · {gatewayName(g, locale)}</option>)}
+              </select>
+            </label>
+            <div aria-live="polite">
+            <p className="tx-home__map-name">
+              <span className="tx-home__mono">{active.code}</span> {gatewayName(active, locale)}
+            </p>
+            <p className="tx-home__map-meta">{countryName(active.iso, active.country)} · {active.modes.map(modeLabel).join(' · ')}</p>
+            <p className="tx-home__map-meta">
+              {t('network.localTime')}: <span className="tx-home__mono">{activeTime.time}</span> {activeTime.offset}
+            </p>
+            {active.kind === 'gateway' && (
+              <Link page="contact" param={active.code} onNavigate={onNavigate} className="tx-link">{t('network.contactLane')}<ArrowRight aria-hidden="true" /></Link>
+            )}
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="hero-feature-rows">
-              <div className="hero-feat-item">
-                <div className="hero-feat-icon">
-                  <Clock size={20} className="text-accent" />
-                </div>
-                <div className="hero-feat-text">
-                  <strong>Agreed Delivery Windows</strong>
-                  <p>You get a committed pickup and delivery window, and we tell you the moment anything changes.</p>
-                </div>
+      {/* 5 · Smart labels (CONTENT §2.6): cream, lane on the left */}
+      <section className="tx-ch tx-ch--lane-left tx-ch--labels" id="label" data-chapter="5" aria-labelledby="home-labels" tabIndex={-1}>
+        <div className="tx-ch__wrap tx-ch__grid">
+          <div className="tx-ch__intro" data-reveal>
+            <p className="tx-eyebrow">{t('labels.eyebrow')}</p>
+            <h2 className="tx-h1 tx-home__chap-h" id="home-labels"><Headline start={t('labels.titleStart')} em={t('labels.titleEm')} /></h2>
+            <p className="tx-lead">{t('labels.body')}</p>
+          </div>
+          <div className="tx-ch__lane tx-lane--parcel" aria-hidden="true">
+            <ParcelLabel />
+            <span className="tx-home__scan" />
+            <p className="tx-home__caption tx-home__lane-cap">{t('labels.caption', { id: TRACKING_ID_EXAMPLE })}</p>
+          </div>
+          <div className="tx-ch__rest" data-reveal>
+            <ul className="tx-home__tiles">
+              {(['id', 'pieces', 'live'] as const).map((k) => (
+                <li key={k} className="tx-home__tile">
+                  <b>{t(`labels.tiles.${k}.value`)}</b>
+                  <span>{t(`labels.tiles.${k}.label`)}</span>
+                </li>
+              ))}
+            </ul>
+            <figure className="tx-home__label" aria-label={t('labels.demo.label')}>
+              <div className="tx-home__label-head">
+                <span>TANEX</span>
+                <img src={LOGO_MARK} alt="" width={LOGO_MARK_SIZE} height={LOGO_MARK_SIZE} loading="lazy" decoding="async" />
               </div>
-
-              <div className="hero-feat-item">
-                <div className="hero-feat-icon">
-                  <ShieldCheck size={20} className="text-emerald" />
-                </div>
-                <div className="hero-feat-text">
-                  <strong>Unbroken Chain of Custody</strong>
-                  <p>Every hand-off is scanned, every high-value item is sealed, and every delivery is signed.</p>
-                </div>
+              <dl>
+                <div><dt>{t('labels.demo.origin')}</dt><dd>{t('labels.demo.originValue')}</dd></div>
+                <div><dt>{t('labels.demo.destination')}</dt><dd>{t('labels.demo.destinationValue')}</dd></div>
+                <div><dt>{t('labels.demo.weight')}</dt><dd>{t('labels.demo.weightValue')}</dd></div>
+                <div><dt>{t('labels.demo.service')}</dt><dd>{t('labels.demo.serviceValue')}</dd></div>
+              </dl>
+              <div className="tx-home__label-code">
+                <Barcode value={TRACKING_ID_EXAMPLE} height={56} width={2} displayValue={false} lineColor="#1C120E" className="tx-home__barcode" />
+                <figcaption>{t('labels.demo.trackingId', { id: TRACKING_ID_EXAMPLE })}</figcaption>
               </div>
+            </figure>
+          </div>
+        </div>
+      </section>
 
-              <div className="hero-feat-item">
-                <div className="hero-feat-icon">
-                  <Headphones size={20} className="text-sky" />
+      {/* 6 · Get in touch (CONTENT §2.7): lane on the right, the bike parks */}
+      <section className="tx-ch tx-ch--contact" id="contact" data-chapter="6" aria-labelledby="home-contact" tabIndex={-1}>
+        <div className="tx-ch__wrap tx-ch__grid">
+          <div className="tx-ch__intro" data-reveal>
+            <h2 className="tx-h1 tx-home__chap-h" id="home-contact"><Headline start={t('contact.titleStart')} em={t('contact.titleEm')} /></h2>
+            <p className="tx-lead">{t('contact.body')}</p>
+          </div>
+          <div className="tx-ch__lane tx-lane--park" aria-hidden="true">
+            <ParkedBike />
+          </div>
+          <div className="tx-ch__rest">
+            <div className="tx-home__contact-cols">
+              <ul className="tx-home__channels" aria-label={t('contact.channelsLabel')} data-reveal>
+                {[PHONE, PHONE_2].filter(Boolean).map((p) => (
+                  <li key={p}>
+                    <span className="tx-home__ch-ic" aria-hidden="true"><Phone /></span>
+                    <div><small>{t('contact.call')}</small><a href={`tel:${p}`}>{formatPhone(p)}</a></div>
+                  </li>
+                ))}
+                {WHATSAPP && (
+                  <li>
+                    <span className="tx-home__ch-ic" aria-hidden="true"><MessageCircle /></span>
+                    <div><small>{t('contact.whatsapp')}</small><a href={`https://wa.me/${WHATSAPP.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">{formatPhone(WHATSAPP)}</a></div>
+                  </li>
+                )}
+                {EMAIL && (
+                  <li>
+                    <span className="tx-home__ch-ic" aria-hidden="true"><Mail /></span>
+                    <div><small>{t('contact.email')}</small><a href={`mailto:${EMAIL}`}>{EMAIL}</a></div>
+                  </li>
+                )}
+                <li>
+                  <span className="tx-home__ch-ic" aria-hidden="true"><MapPin /></span>
+                  <div><small>{t('contact.visitBuea')}</small><strong>{addressOf('Buea')}</strong></div>
+                </li>
+                <li>
+                  <span className="tx-home__ch-ic" aria-hidden="true"><MapPin /></span>
+                  <div><small>{t('contact.visitDouala')}</small><strong>{addressOf('Douala')}</strong></div>
+                </li>
+                <li>
+                  <span className="tx-home__ch-ic" aria-hidden="true"><Clock /></span>
+                  <div><small>{t('contact.open')}</small><strong>{hours}</strong></div>
+                </li>
+              </ul>
+              {reference ? (
+                <div className="tx-home__form tx-home__form--done" role="status">
+                  <p className="tx-home__done-title"><Check aria-hidden="true" />{t('contact.success.title')}</p>
+                  <p>{t('contact.success.body', { ref: reference })}</p>
+                  <Button variant="ghost" onClick={() => setReference(null)}>{t('contact.success.again')}</Button>
                 </div>
-                <div className="hero-feat-text">
-                  <strong>Real People, Every Time Zone</strong>
-                  <p>A named coordinator follows your shipment and replies around the clock.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="hero-showcase-bottom">
-              {supportPhone ? (
-                <>
-                  <Phone size={15} className="text-accent" />
-                  <span>Priority line: <strong><a href={`tel:${supportPhone.replace(/[^\d+]/g, '')}`}>{supportPhone}</a></strong></span>
-                </>
               ) : (
-                <>
-                  <Mail size={15} className="text-accent" />
-                  <span><strong><a href={`mailto:${dispatchEmail}`}>{dispatchEmail}</a></strong></span>
-                </>
+                <form className="tx-home__form" onSubmit={submitMessage} noValidate aria-labelledby="home-form-title" data-reveal>
+                  <h3 className="tx-h3" id="home-form-title">{t('contact.form.title')}</h3>
+                  <Input label={t('contact.form.name')} value={form.name} autoComplete="name" required
+                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} maxLength={120} />
+                  <Input label={t('contact.form.contact')} value={form.contact} autoComplete="email" required
+                    onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))} maxLength={160} />
+                  <Textarea label={t('contact.form.message')} value={form.message} rows={4} required
+                    onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} maxLength={4000} />
+                  {formError && <p className="tx-error" role="alert">{formError}</p>}
+                  <Button type="submit" variant="secondary" size="lg" disabled={sending}>
+                    {sending ? t('contact.form.sending') : t('contact.form.submit')}
+                  </Button>
+                </form>
               )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* =========================================================================
-          2. WHY SHIPPERS CHOOSE US (CONTENT.md §2.2)
-          ========================================================================= */}
-      <section className="corp-why-choose-section">
-        <div className="ngf-container-wide">
-          <div className="section-center-header">
-            <span className="section-eyebrow">WHY {COMPANY_SHORT.toUpperCase()}</span>
-            <h2>Why shippers around the world choose {COMPANY_SHORT}</h2>
-            <p className="section-desc-sub">
-              Global reach only matters if every shipment is handled like it’s the only one. That’s the standard we work to.
-            </p>
-            <div className="section-header-line" />
+      {/* 7 · FAQ (CONTENT §2.8) and blog (§2.9): no lane, reading first */}
+      <section className="tx-ch tx-ch--faq" id="faq" data-chapter="7" aria-labelledby="home-faq">
+        <div className="tx-ch__wrap tx-home__faq-grid">
+          <div className="tx-home__faq-intro">
+            <p className="tx-eyebrow">{t('faq.eyebrow')}</p>
+            <h2 className="tx-h1 tx-home__chap-h" id="home-faq">{t('faq.title')}</h2>
           </div>
-
-          <div className="why-choose-grid">
-            {/* Card 1 */}
-            <div className="why-card">
-              <div className="why-icon-bubble">
-                <Zap size={24} />
-              </div>
-              <h3>Priority Express, Worldwide</h3>
-              <p>
-                Door-to-door express for documents and parcels that can’t wait. Booked in minutes, collected fast, cleared and delivered on an agreed window.
-              </p>
-              <button
-                type="button"
-                className="btn-why-readmore"
-                onClick={() => onNavigate('services')}
-              >
-                <span>Read more</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-
-            {/* Card 2 */}
-            <div className="why-card">
-              <div className="why-icon-bubble">
-                <Truck size={24} />
-              </div>
-              <h3>Scheduled Freight on Every Mode</h3>
-              <p>
-                Air, ocean and road departures on fixed schedules. Consolidated or dedicated, with one booking, one tracking ID and one invoice.
-              </p>
-              <button
-                type="button"
-                className="btn-why-readmore"
-                onClick={() => onNavigate('services')}
-              >
-                <span>Read more</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-
-            {/* Card 3 */}
-            <div className="why-card">
-              <div className="why-icon-bubble">
-                <Activity size={24} />
-              </div>
-              <h3>Visibility at Every Checkpoint</h3>
-              <p>
-                Every scan, hand-off and customs milestone appears on your tracking page as it happens. No chasing, no guesswork.
-              </p>
-              <button
-                type="button"
-                className="btn-why-readmore"
-                onClick={() => onNavigate('track')}
-              >
-                <span>Read more</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          3. HOW IT WORKS (CONTENT.md §2.3)
-          ========================================================================= */}
-      <section className="corp-how-it-works-section">
-        <div className="ngf-container-wide">
-          <div className="section-center-header">
-            <span className="section-eyebrow">HOW IT WORKS</span>
-            <h2>How {COMPANY_SHORT} moves your shipment</h2>
-            <p className="section-desc-sub">
-              Four stages, one tracking ID, and full visibility from the first scan to the final signature.
-            </p>
-            <div className="section-header-line" />
-          </div>
-
-          <div className="kinetic-pipeline-container">
-            <div className="pipeline-laser-beam"><span className="pipeline-laser-track" aria-hidden="true" /></div>
-            <div className="pipeline-nodes-row">
-              {STEPS.map((step, i) => {
-                const num = String(i + 1).padStart(2, '0');
-                return (
-                  <div key={step.title} className="pipeline-step-node">
-                    <div className="pipeline-connector-top">
-                      <div className="node-ring font-mono">
-                        <span className="node-num">{num}</span>
-                        <div className="node-ring-pulse" />
-                      </div>
-                      <div className="node-icon-bubble">{step.icon}</div>
-                    </div>
-                    <div className="node-body">
-                      <span className="node-eyebrow font-mono">STEP {num}</span>
-                      <h3>{step.title}</h3>
-                      <p>{step.body}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* CTA strip: CONTENT.md §3.6 */}
-          <div className="how-it-works-action-strip">
-            <div className="flex items-center gap-3">
-              <Sparkles size={20} className="text-accent" />
-              <span>Ready to ship with {COMPANY_SHORT}? Get a rate in minutes, or talk to a coordinator about your lane.</span>
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="btn-corp-primary"
-                onClick={() => onNavigate('quote')}
-              >
-                <span>Get a Quote</span>
-                <ArrowRight size={16} />
-              </button>
-              <button
-                type="button"
-                className="btn-corp-ghost-dark"
-                onClick={() => onNavigate('contact')}
-              >
-                <span>Contact Us</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          4. ABOUT STRIP (CONTENT.md §2.4)
-          ========================================================================= */}
-      <section className="corp-about-section">
-        <div className="ngf-container-wide corp-about-grid">
-          {/* Left Stacked Image Stage */}
-          <div className="about-image-stage">
-            <div className="about-main-img-wrapper">
-              <ResponsiveImage
-                name="about-operations"
-                alt="Warehouse staff member checking stock on a tablet between loaded pallet racks"
-                sizes="(max-width: 1024px) 100vw, 45vw"
-                imgClassName="about-main-img"
-              />
-            </div>
-
-            {/* Floating Secondary Thumbnail */}
-            <div className="about-thumb-overlap">
-              <ResponsiveImage
-                name="about-team"
-                alt="Smiling support coordinator wearing a headset"
-                sizes="72px"
-                imgClassName="about-thumb-img"
-              />
-              <div className="about-thumb-caption">
-                <strong>Real People, Every Time Zone</strong>
-                <small>A named coordinator follows your shipment</small>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Text Content */}
-          <div className="about-text-content">
-            <span className="section-eyebrow">ABOUT {COMPANY_SHORT}</span>
-            <h2>We believe global shipping should feel local: visible, fast and dependable.</h2>
-            <p className="about-lead">
-              {COMPANY} was built for shippers who are tired of losing sight of their cargo the moment it leaves the building. We bring express, freight and secure transport under one roof, so one team owns your shipment from pickup to proof of delivery, wherever in the world it’s going.
-            </p>
-
-            {/* "Years moving cargo" stays hidden until the owner confirms the founding year;
-                "Continents served" (CONTENT §2.7) fills the third tile. */}
-            <div className="about-stats-strip">
-              <div className="about-stat-item">
-                <strong className="font-mono text-accent">24/7</strong>
-                <span>Global operations desk</span>
-              </div>
-              <div className="about-stat-item">
-                <strong className="font-mono text-accent">1</strong>
-                <span>Tracking ID from start to finish</span>
-              </div>
-              <div className="about-stat-item">
-                <strong className="font-mono text-accent">5</strong>
-                <span>Continents served</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="btn-corp-primary"
-              onClick={() => onNavigate('about')}
-            >
-              <span>More about {COMPANY_SHORT}</span>
-              <ArrowRight size={16} />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          5. SERVICES (CONTENT.md §2.5)
-          ========================================================================= */}
-      <section className="corp-services-section">
-        <div className="ngf-container-wide">
-          <div className="section-center-header light">
-            <span className="section-eyebrow text-accent">WHAT WE MOVE</span>
-            <h2>Specialised transport for cargo that matters</h2>
-            <div className="section-header-line accent" />
-          </div>
-
-          <div className="services-showcase-grid">
-            {SERVICES.map((service, i) => (
-              <div key={service.title} className="service-card">
-                <ResponsiveImage
-                  name={service.image}
-                  alt={service.alt}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="service-card-media"
-                  imgClassName="service-card-img"
-                />
-                <div className="service-card-overlay" />
-                <div className="service-card-content">
-                  <span className="service-num font-mono">{String(i + 1).padStart(2, '0')}</span>
-                  <h3>{service.title}</h3>
-                  <p>{service.body}</p>
-                  <button
-                    type="button"
-                    className="btn-service-arrow"
-                    onClick={() => onNavigate('services')}
-                  >
-                    <span>{service.cta}</span>
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
+          <div className="tx-home__faq-list" data-reveal>
+            {FAQ_KEYS.map((k, i) => (
+              <details key={k} className="tx-home__faq" open={i === 0}>
+                <summary>{t(`faq.items.${k}.q`)}<Plus aria-hidden="true" /></summary>
+                <p>{t(`faq.items.${k}.a`)}</p>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* =========================================================================
-          6. INDUSTRIES (CONTENT.md §2.6)
-          ========================================================================= */}
-      <section className="corp-industry-section">
-        <div className="ngf-container-wide">
-          <div className="section-center-header">
-            <span className="section-eyebrow">INDUSTRIES</span>
-            <h2>Logistics shaped around your industry</h2>
-            <div className="section-header-line" />
-          </div>
-
-          <div className="industry-tabs-bar">
-            {INDUSTRIES.map((ind) => (
-              <button
-                key={ind.id}
-                type="button"
-                className={`ind-tab-btn ${industryTab === ind.id ? 'active' : ''}`}
-                onClick={() => setIndustryTab(ind.id)}
-              >
-                {ind.icon}
-                <span>{ind.title}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content Display */}
-          <div className="industry-content-card animate-fade-in">
-            <div key={activeIndustry.id} className="industry-tab-grid">
-              <div className="ind-text-col">
-                <h3>{activeIndustry.title}</h3>
-                <p>{activeIndustry.body}</p>
-                <ul className="ind-feature-list">
-                  {activeIndustry.bullets.map((bullet) => (
-                    <li key={bullet}><CheckCircle2 size={16} className="text-emerald" /> {bullet}</li>
-                  ))}
-                </ul>
-                <button className="btn-corp-primary mt-4" onClick={() => onNavigate('quote')}>
-                  Get a Rate Quote
-                </button>
-              </div>
-              <div className="ind-img-col">
-                <ResponsiveImage
-                  name={activeIndustry.image}
-                  alt={activeIndustry.alt}
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  imgClassName="ind-showcase-img"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          7. GLOBAL NETWORK MAP (CONTENT.md §2.7)
-          ========================================================================= */}
-      <section className="corp-hubs-map-section">
-        <div className="ngf-container-wide">
-          <div className="hubs-map-header">
-            <div>
-              <span className="section-eyebrow text-accent">GLOBAL NETWORK</span>
-              <h2>Connected across the world's key trade lanes</h2>
-            </div>
-            <div className="hubs-selector-pills" role="group" aria-label="Select a gateway">
-              {GATEWAYS.map((gw) => (
-                <button
-                  key={gw.code}
-                  type="button"
-                  className={`hub-pill-btn ${activeGatewayCode === gw.code ? 'active' : ''}`}
-                  onClick={() => setActiveGatewayCode(gw.code)}
-                  aria-pressed={activeGatewayCode === gw.code}
-                  title={`${gw.city}, ${gw.country}`}
-                >
-                  <MapPin size={13} />
-                  <span>{gw.code}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="hubs-preview-grid">
-            <div className="hub-info-card">
-              <div className="hub-status-strip">
-                <span className="hub-dot-pulse" />
-                <strong>{activeGateway.city}, {activeGateway.country} ({activeGateway.code})</strong>
-              </div>
-
-              <div className="hub-metrics-grid-2x2">
-                <div className="hm-box">
-                  <small>MODES</small>
-                  <strong>{activeGateway.modes.join(' · ')}</strong>
-                </div>
-                <div className="hm-box">
-                  <small>LOCAL TIME</small>
-                  <strong>{activeGatewayTime.time}{activeGatewayTime.offset && <span className="hm-offset"> {activeGatewayTime.offset}</span>}</strong>
-                </div>
-                {activeGatewayLanes.length > 0 && (
-                  <div className="hm-box hm-box-wide">
-                    <small>DIRECT TRADE LANES</small>
-                    <strong>{activeGatewayLanes.join(' · ')}</strong>
-                  </div>
-                )}
-              </div>
-
-              <p className="hub-description-text">
-                Our gateways link Europe, the Middle East, Asia, the Americas and Oceania, so your shipment always has a direct, well-travelled route.
-              </p>
-
-              <div className="network-side-stats">
-                <div><strong>5</strong><small>Continents served</small></div>
-                <div><strong>Air · Ocean · Road</strong><small>Modes connected</small></div>
-                <div><strong>24/7</strong><small>Operations desk</small></div>
-              </div>
-
-              <button
-                type="button"
-                className="btn-why-readmore"
-                onClick={() => onNavigate('locations')}
-              >
-                <span>View our network</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-
-            {/* Interactive Leaflet Gateway Map */}
-            <HomeNetworkMap activeCode={activeGatewayCode} onSelectGateway={setActiveGatewayCode} />
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          8. TRUST MATRIX (CONTENT.md §2.8)
-          ========================================================================= */}
-      <section className="corp-trust-matrix-section">
-        <div className="ngf-container-wide">
-          <div className="section-center-header">
-            <span className="section-eyebrow">SAFE HANDS</span>
-            <h2>Your cargo is safe with us</h2>
-            <div className="section-header-line" />
-          </div>
-
-          <div className="trust-matrix-grid">
-            {TRUST_TILES.map((tile) => (
-              <div key={tile.title} className="trust-pillar-card">
-                <div className="trust-pillar-icon">{tile.icon}</div>
-                <div>
-                  <h3>{tile.title}</h3>
-                  <p>{tile.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          9. BARCODE SPOTLIGHT (CONTENT.md §2.9)
-          ========================================================================= */}
-      <section className="corp-barcode-spotlight-section">
-        <div className="ngf-container-wide barcode-spotlight-grid">
-          <div className="barcode-text-col">
-            <span className="section-eyebrow text-accent">SMART LABELS</span>
-            <h2>One label. Every checkpoint. Zero guesswork.</h2>
-            <p>
-              Every {COMPANY_SHORT} piece carries a high-density Code 128 barcode linked to your tracking ID. Each scan, at collection, at the gateway, through customs and at the door, updates your tracking page instantly.
-            </p>
-            <div className="barcode-specs-row">
-              <div className="b-spec">
-                <strong>8-character</strong>
-                <small>Tracking ID</small>
-              </div>
-              <div className="b-spec">
-                <strong>Every piece</strong>
-                <small>Individually scanned</small>
-              </div>
-              <div className="b-spec">
-                <strong>Live</strong>
-                <small>Milestone updates</small>
-              </div>
-            </div>
-          </div>
-
-          <div className="barcode-visual-col">
-            <div className="thermal-label-card">
-              <div className="thermal-perforation-top" />
-              <div className="thermal-header-strip">
-                <div>
-                  <strong className="thermal-brand font-mono">{COMPANY.toUpperCase()}</strong>
-                </div>
-                <img src={LOGO_MARK} alt="" className="thermal-mark" width={40} height={40} loading="lazy" />
-              </div>
-
-              <div className="thermal-body-grid font-mono">
-                <div className="th-cell">
-                  <small>ORIGIN</small>
-                  <strong>SIN (SINGAPORE)</strong>
-                </div>
-                <div className="th-cell">
-                  <small>DESTINATION</small>
-                  <strong>LHR (LONDON)</strong>
-                </div>
-                <div className="th-cell">
-                  <small>WEIGHT</small>
-                  <strong>20.4 KG</strong>
-                </div>
-                <div className="th-cell">
-                  <small>SERVICE</small>
-                  <strong>PRIORITY EXPRESS</strong>
-                </div>
-              </div>
-
-              <div className="bc-canvas-wrap-thermal">
-                <div className="laser-sweep-line" />
-                <Barcode value={TRACKING_ID_EXAMPLE} width={2.2} height={68} />
-              </div>
-
-              <div className="thermal-footer font-mono">
-                <span>TRACKING ID: {TRACKING_ID_EXAMPLE}</span>
-                <span>PIECE 01/01</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          10. OUR COMMITMENTS (CONTENT.md §2.10, Option A)
-          ========================================================================= */}
-      <section className="corp-testimonial-section">
-        <div className="ngf-container-wide">
-          <div className="section-center-header">
-            <span className="section-eyebrow">OUR COMMITMENTS</span>
-            <h2>What you can hold us to</h2>
-            <div className="section-header-line" />
-          </div>
-
-          <div className="commitments-grid">
-            {COMMITMENTS.map((item) => (
-              <div key={item.quote} className="testimonial-card-frame commitment-card">
-                <div className="quote-mark-icon" aria-hidden="true">“</div>
-                <p className="testimonial-quote-text">“{item.quote}”</p>
-                <p className="commitment-body">{item.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          11. MODES WE CONNECT (CONTENT.md §2.11)
-          ========================================================================= */}
-      <section className="corp-partners-strip">
-        <div className="ngf-container-wide">
-          <div className="partners-label">MODES WE CONNECT</div>
-          <ul className="modes-row">
-            {MODES.map((mode) => (
-              <li key={mode.label} className="mode-card">
-                {mode.icon}
-                <span>{mode.label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          12. CALLBACK BANNER (CONTENT.md §2.12)
-          ========================================================================= */}
-      <section className="corp-callback-banner">
-        <ResponsiveImage
-          name="callback-banner"
-          alt=""
-          sizes="100vw"
-          className="callback-banner-media"
-          imgClassName="callback-banner-img"
-        />
-        <div className="callback-banner-overlay" />
-        <div className="ngf-container callback-inner">
-          <div className="callback-text-block">
-            <h3>Need an urgent collection or a custom rate?</h3>
-            <p>Leave your number and a coordinator will call you back, usually within 30 minutes during business hours.</p>
-          </div>
-
-          {cbReference ? (
-            <div className="callback-success-alert animate-fade-in" role="status">
-              <CheckCircle2 size={24} className="text-emerald" />
+      {LATEST_POSTS.length > 0 && (
+        <section className="tx-ch tx-ch--blog" id="blog" aria-labelledby="home-blog">
+          <div className="tx-ch__wrap">
+            <div className="tx-home__blog-head">
               <div>
-                <strong>Request received!</strong>
-                <p>A coordinator will call you shortly. Your reference is <span className="font-mono">{cbReference}</span>.</p>
+                <p className="tx-eyebrow">{t('blog.eyebrow')}</p>
+                <h2 className="tx-h1 tx-home__chap-h" id="home-blog">{t('blog.title')}</h2>
               </div>
+              <Link page="blog" onNavigate={onNavigate} className="tx-link">{t('blog.all')}<ArrowRight aria-hidden="true" /></Link>
             </div>
-          ) : (
-            <form onSubmit={handleCallbackSubmit} className="callback-form-row">
-              <input
-                type="text"
-                placeholder="Name"
-                aria-label="Name"
-                value={cbName}
-                onChange={(e) => setCbName(e.target.value)}
-                className="cb-input"
-                required
-              />
-
-              <input
-                type="tel"
-                placeholder="Phone (with country code)"
-                aria-label="Phone (with country code)"
-                value={cbPhone}
-                onChange={(e) => setCbPhone(e.target.value)}
-                className="cb-input"
-                required
-              />
-
-              <input
-                type="text"
-                placeholder="Preferred time"
-                aria-label="Preferred time"
-                value={cbTime}
-                onChange={(e) => setCbTime(e.target.value)}
-                className="cb-input"
-              />
-
-              <button type="submit" className="btn-callback-submit" disabled={cbSubmitting}>
-                <span>{cbSubmitting ? 'Sending…' : 'Request a Callback'}</span>
-                <ArrowRight size={16} />
-              </button>
-            </form>
-          )}
-          {cbError && !cbReference && (
-            <p className="callback-error" role="alert">{cbError}</p>
-          )}
-        </div>
-      </section>
-
-      {/* =========================================================================
-          13. FAQ (CONTENT.md §2.13)
-          ========================================================================= */}
-      <section className="corp-faq-section">
-        <div className="ngf-container">
-          <div className="section-center-header">
-            <span className="section-eyebrow">COMMON QUESTIONS</span>
-            <h2>Frequently Asked Questions</h2>
-            <div className="section-header-line" />
+            <ul className="tx-home__posts">
+              {LATEST_POSTS.slice(0, 3).map((p) => (
+                <li key={p.slug} className="tx-card">
+                  <h3 className="tx-card__title"><Link page="blog" param={p.slug} onNavigate={onNavigate}>{p.title}</Link></h3>
+                  <p className="tx-card__body">{p.excerpt}</p>
+                </li>
+              ))}
+            </ul>
           </div>
+        </section>
+      )}
 
-          <div className="faq-accordion-list">
-            {FAQS.map((faq, index) => {
-              const isOpen = openFaq === index;
-              return (
-                <div key={index} className={`faq-item-card ${isOpen ? 'open' : ''}`}>
-                  <button
-                    type="button"
-                    className="faq-question-toggle"
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
-                    aria-expanded={isOpen}
-                  >
-                    <span>{faq.q}</span>
-                    {isOpen ? <ChevronUp size={18} className="text-accent" /> : <ChevronDown size={18} />}
-                  </button>
-                  {isOpen && (
-                    <div className="faq-answer-pane animate-fade-in">
-                      <p>{faq.a}</p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+      {/* 8 · Delivered: the bike stops at a door, just above the footer (MOTION_3D_SPEC §6) */}
+      <section className="tx-ch tx-ch--arrival tx-dark" id="delivered" data-chapter="8" aria-labelledby="home-arrival" tabIndex={-1}>
+        <div className="tx-ch__wrap tx-home__arrive">
+          <div className="tx-ch__lane tx-lane--door" aria-hidden="true">
+            <ArrivalDoor />
+          </div>
+          <div data-reveal>
+            <h2 className="tx-display tx-home__arrive-h" id="home-arrival"><em className="tx-em">{t('arrival.title')}</em></h2>
+            <p className="tx-home__arrive-p">{t('arrival.body')}</p>
           </div>
         </div>
       </section>

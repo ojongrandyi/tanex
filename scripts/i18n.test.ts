@@ -12,6 +12,8 @@ import enCommon from '../src/i18n/en/common.ts';
 import frCommon from '../src/i18n/fr/common.ts';
 import enNotFound from '../src/i18n/en/notFound.ts';
 import frNotFound from '../src/i18n/fr/notFound.ts';
+import enHome from '../src/i18n/en/home.ts';
+import frHome from '../src/i18n/fr/home.ts';
 import { translate } from '../src/i18n/runtime.ts';
 import { formatClock, formatDistanceKm, formatMoney, formatOpeningHoursIn, frenchSpacing } from '../src/i18n/format.ts';
 import { alternatePath, langOfPath } from '../src/router/routes.ts';
@@ -50,11 +52,21 @@ const SAME_IN_BOTH: Record<string, string> = {
   'common:footer.columns.services': 'same word in French',
   'common:footer.links.contact': 'same word in French',
   'events:event.status': 'variable only ({status} is translated by name)',
+  'home:bike.priceAmount': 'variable only (the amount is formatted per language)',
+  'home:labels.demo.originValue': 'airport code and place name',
+  'home:labels.demo.destination': 'same word in French',
+  'home:labels.demo.destinationValue': 'airport code and place name',
+  'home:labels.demo.service': 'same word in French',
+  'home:contact.whatsapp': 'brand name',
+  'home:contact.form.message': 'same word in French',
+  'home:rail.chapters.services': 'same word in French',
+  'home:rail.chapters.contact': 'same word in French',
 };
 
 const PAIRS: [string, Tree, Tree][] = [
   ['common', enCommon as unknown as Tree, frCommon as unknown as Tree],
   ['notFound', enNotFound as unknown as Tree, frNotFound as unknown as Tree],
+  ['home', enHome as unknown as Tree, frHome as unknown as Tree],
 ];
 
 test('fr dictionaries have exactly the English keys', () => {

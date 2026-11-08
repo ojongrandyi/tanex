@@ -46,6 +46,15 @@ export function loadLocale(locale: Locale): Promise<void> {
 type AreaEntry = { status: 'pending'; promise: Promise<unknown> } | { status: 'done'; value: Dict } | { status: 'error'; error: unknown };
 const areas = new Map<string, AreaEntry>();
 
+/**
+ * Registers an area dictionary that is already in the bundle, so its page renders without
+ * suspending. Used for the homepage's English text: Home is the most visited first paint, and
+ * waiting for a separate dictionary chunk would delay its largest contentful paint.
+ */
+export function primeArea<A extends AreaName>(area: A, locale: Locale, value: Translation<AreaMessages[A]>): void {
+  areas.set(`${locale}:${area}`, { status: 'done', value: value as unknown as Dict });
+}
+
 /** Returns a page area's dictionary, or throws the load promise for the nearest <Suspense>. */
 export function readArea<A extends AreaName>(area: A, locale: Locale): Translation<AreaMessages[A]> {
   const key = `${locale}:${area}`;
