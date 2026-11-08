@@ -250,6 +250,46 @@ En-têtes : `Service` · `Idéal pour` · `Rapidité` · `Suivi`
 - **Titres de section :** `Six façons de transporter` · `Quel service vous convient ?` · `De la réservation jusqu'à la porte` · `Des options quand vous en avez besoin`
 - `Services sur cette page` · `Nos services comparés` · `Rapidité` « n/a » s'écrit `Sans objet`
 
+## 4. Page À propos (ajouté avec E.3, **relecture native en attente**)
+
+- **Sur-titre :** `À PROPOS DE TANEX` · **H1 :** `De notre porte à Buea jusqu'à la vôtre, où qu'elle soit.`
+- **Texte :** `TanEx est une entreprise de livraison et de logistique basée à Buea, avec un bureau à Douala. Nous transportons les colis en ville à moto, entre les villes en camion, et du Cameroun vers le monde entier par avion, bateau, train et route.`
+- **Slogan :** `{{SLOGAN}}.` (gardé en anglais, à confirmer)
+- **Notre approche (4) :** sur-titre `NOTRE APPROCHE`
+  1. **Un seul numéro de suivi.** De la première à la dernière porte.
+  2. **Des livreurs identifiés.** Chaque livraison a un livreur ou un chauffeur TanEx qui en répond.
+  3. **Des preuves, pas des promesses.** Une photo et un nom à chaque livraison.
+  4. **Deux langues.** Nous vous servons en anglais et en français.
+- **Direction :** sur-titre `DIRECTION` · titre `Directeur général` · texte alternatif de la photo : voir §12
+- **Notre équipe :** `L'équipe TanEx porte le marron et l'orange que vous verrez à votre porte.`
+- **Histoire :** **H2** `Pourquoi TanEx` (masqué tant que le propriétaire n'a pas fourni le texte)
+
+---
+
+## 5. Page Réseau (ajouté avec E.3, **relecture native en attente**)
+
+- **Sur-titre :** `NOTRE RÉSEAU` · **H1 :** `Des racines locales. Une portée mondiale.`
+- **Texte :** `Nous livrons chaque jour à Buea, Limbe et Douala, et nous rejoignons par Douala les grands carrefours du commerce mondial.`
+- **Blocs :** `Où livrent nos livreurs` · `Nos portes d'entrée et routes commerciales`
+- **Champs des cartes :** Nom · Ville, pays · Modes · Heure locale (en direct) · `Nous contacter pour cette route`
+- **Rôles :** `Siège` · `Bureau` · `Livraison à moto` · modes `Aérien` · `Maritime` · `Routier`
+- **Note :** `Votre destination n'apparaît pas ? Nous expédions bien au-delà de ces carrefours. Parlez-nous de votre itinéraire.`
+
+## 9. Liste du réseau
+
+Noms affichés en français : Buea (siège) · Douala (bureau) · Limbe · Douala (porte d'entrée aéroport et port) ·
+Paris · Bruxelles · Londres · Francfort · Istanbul · Dubaï · Canton (Guangzhou) · Shanghai · Lagos · Abidjan ·
+Johannesburg · New York · Houston. Pays : noms français via `Intl.DisplayNames`.
+
+---
+
+## 12. Textes alternatifs des images
+
+| Emplacement | Texte alternatif |
+|---|---|
+| about-md | `{{MD_NAME}}, directeur général de TanEx, au bureau TanEx de Buea` (sans le nom : `Le directeur général de TanEx au bureau TanEx de Buea`) |
+| scènes moto / camion | (décoratif) |
+
 ## 6.3 Suivi : noms des statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)
 `Réservé` · `Récupéré` · `À la plateforme de départ` · `Parti` · `En transit` · `Arrivé à la plateforme de destination` ·
 `Dédouanement` · `En cours de livraison` · `Livré` · `En attente` · `Retardé` · `Retour à l'expéditeur` · `Annulé`

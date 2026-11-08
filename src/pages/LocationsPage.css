@@ -1,410 +1,52 @@
-/* ============================================================
-   LOCATIONS & FACILITY NETWORK STYLES (EXECUTIVE CORPORATE DESIGN)
-   Zero Freight/Train/Ship · 24/7 Dispatch Desk · Mobile-First
-   ============================================================ */
+/* Network page (E.3): delivery cities, the map on a dark band, gateways by region. */
+.tx-network { background: var(--tx-cream-100); color: var(--tx-text); }
+.tx-network__wrap { width: 100%; max-width: var(--tx-container, 1280px); margin: 0 auto; padding: 0 var(--tx-gutter, 40px); }
+.tx-network__section { padding: clamp(56px, 7vw, 96px) 0; }
+.tx-network__section--dark { background: var(--tx-choc-950); }
+.tx-network__section--dark .tx-lead { color: var(--tx-choc-200); }
 
-.ngf-page-locations {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding-bottom: 6rem;
-  background-color: #f8fafc;
-  color: var(--ngf-ink-900);
+.tx-network__cities { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.tx-network__roles { list-style: none; margin: 4px 0 14px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.tx-network__time { margin: 0; display: flex; gap: 8px; align-items: center; font-size: .88rem; color: var(--tx-text-muted); }
+.tx-network__time svg { width: 16px; height: 16px; }
+
+.tx-network__legend { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-wrap: wrap; gap: 12px 26px; font-size: .9rem; color: var(--tx-choc-200); }
+.tx-network__legend li { display: inline-flex; gap: 10px; align-items: center; }
+.tx-network__lg-base { width: 12px; height: 12px; border-radius: 50%; background: var(--tx-orange-500); box-shadow: 0 0 0 3px var(--tx-choc-950), 0 0 0 4.5px var(--tx-orange-500); }
+.tx-network__lg-gw { width: 10px; height: 10px; border-radius: 50%; background: var(--tx-cream-300); }
+.tx-network__lg-lane { width: 26px; border-top: 2px dashed var(--tx-orange-500); }
+#network-map { scroll-margin-top: calc(var(--tx-header-h, 72px) + 16px); }
+
+.tx-network__region + .tx-network__region { margin-top: 48px; }
+.tx-network__region-title { margin: 0 0 16px; font: 600 .78rem/1 var(--tx-font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--tx-choc-600); }
+.tx-network__gateways { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.tx-network__gw { background: var(--tx-white, #fff); border: 1px solid var(--tx-choc-100); border-radius: var(--tx-radius-card); padding: 20px; display: grid; gap: 14px; }
+.tx-network__gw-head { display: flex; gap: 14px; align-items: flex-start; }
+.tx-network__code { flex: none; display: grid; place-items: center; width: 52px; height: 40px; border-radius: 8px; background: var(--tx-choc-900); color: var(--tx-cream-100); font: 600 .85rem/1 var(--tx-font-mono); letter-spacing: .06em; }
+.tx-network__gw-name { margin: 0 0 4px; font: 700 1.1rem/1.25 var(--tx-font-display); }
+.tx-network__gw-country { margin: 0; display: flex; gap: 6px; align-items: center; font-size: .88rem; color: var(--tx-text-muted); }
+.tx-network__gw-country svg { width: 14px; height: 14px; }
+.tx-network__gw-facts { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 0; border-top: 1px solid var(--tx-choc-100); border-bottom: 1px solid var(--tx-choc-100); }
+.tx-network__gw-facts dt { font: 600 .66rem/1.4 var(--tx-font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--tx-choc-600); }
+.tx-network__gw-facts dd { margin: 2px 0 0; font-size: .92rem; }
+.tx-network__mono { font-family: var(--tx-font-mono); font-weight: 600; }
+.tx-network__gw-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.tx-network__show {
+  display: inline-flex; gap: 6px; align-items: center; min-height: 44px; padding: 0 12px; margin-left: -12px;
+  border: 0; border-radius: 10px; background: none; color: var(--tx-text); font: 600 .88rem/1 var(--tx-font-body); cursor: pointer;
 }
+.tx-network__show svg { width: 16px; height: 16px; }
+.tx-network__show:hover { background: var(--tx-cream-200); }
+.tx-network__show:focus-visible { outline: 2px solid var(--tx-orange-600); outline-offset: 2px; }
+.tx-network .tx-link { font-size: .88rem; }
+.tx-network .tx-link svg { width: 16px; height: 16px; }
+.tx-network__note { margin-top: 56px; padding: 28px; border-radius: var(--tx-radius-card); background: var(--tx-cream-200); display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between; }
+.tx-network__note p { margin: 0; max-width: 60ch; font-weight: 500; }
 
-/* ============================================================
-   1. CINEMATIC HERO SECTION
-   ============================================================ */
-.ngf-locations-hero {
-  position: relative;
-  background-color: var(--ngf-ink-950);
-  color: var(--ngf-white);
-  padding: 5.5rem 0 6rem;
-  overflow: hidden;
+@media (max-width: 900px) {
+  .tx-network__cities { grid-template-columns: 1fr; }
 }
-
-.locations-hero-media {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.locations-hero-media .locations-hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 35%;
-}
-
-.locations-hero-bg-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(var(--ngf-ink-rgb), 0.88) 0%,
-    rgba(var(--ngf-ink-rgb), 0.58) 50%,
-    rgba(15, 34, 56, 0.22) 100%
-  );
-  z-index: 1;
-}
-
-.locations-hero-inner {
-  position: relative;
-  z-index: 2;
-  max-width: 820px;
-}
-
-.locations-hero-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(var(--ngf-accent-rgb), 0.15);
-  color: var(--ngf-accent-400);
-  border: 1px solid rgba(var(--ngf-accent-rgb), 0.35);
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  margin-bottom: 1.25rem;
-}
-
-.locations-pulse-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--ngf-accent-500);
-  animation: pulse-dot 2s infinite ease-in-out;
-}
-
-.locations-hero-title {
-  font-family: var(--ngf-font-display);
-  font-size: 3.25rem;
-  font-weight: 800;
-  color: var(--ngf-white);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  margin-bottom: 1rem;
-}
-
-.locations-highlight-accent {
-  color: var(--ngf-accent-500);
-  font-weight: 800;
-}
-
-.locations-hero-lead {
-  font-size: 1.0625rem;
-  color: #cbd5e1;
-  line-height: 1.65;
-  max-width: 680px;
-}
-
-/* ============================================================
-   2. CONTENT SECTION: MAP & CARDS
-   ============================================================ */
-.ngf-locations-content {
-  margin-top: 3.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 4rem;
-}
-
-.locations-map-feature {
-  background: var(--ngf-white);
-  border: 1.5px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-2xl);
-  padding: 2.25rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-}
-
-.map-card-header {
-  margin-bottom: 1.75rem;
-}
-
-.map-badge-pill {
-  display: inline-block;
-  font-size: 0.6875rem;
-  font-weight: 800;
-  color: var(--tx-accent-text);
-  letter-spacing: 0.06em;
-  margin-bottom: 0.375rem;
-}
-
-.map-card-header h2 {
-  font-family: var(--ngf-font-display);
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--ngf-ink-900);
-  margin-bottom: 0.375rem;
-}
-
-.map-card-header p {
-  font-size: 0.9375rem;
-  color: var(--ngf-slate-600);
-  margin: 0;
-}
-
-.facilities-section-head {
-  text-align: center;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.facilities-section-head h2 {
-  font-family: var(--ngf-font-display);
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: var(--ngf-ink-900);
-  margin-bottom: 0.5rem;
-}
-
-.facilities-section-head p {
-  font-size: 1rem;
-  color: var(--ngf-slate-600);
-  line-height: 1.6;
-}
-
-.locations-list-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.75rem;
-}
-
-.facility-card {
-  background: var(--ngf-white);
-  border: 1.5px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-xl);
-  padding: 2rem 1.75rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-  display: flex;
-  flex-direction: column;
-  transition: var(--ngf-transition);
-}
-
-.facility-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--ngf-accent-400);
-  box-shadow: 0 12px 25px -5px rgba(var(--ngf-accent-rgb), 0.1);
-}
-
-.facility-icon-pill {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--ngf-radius-lg);
-  background: var(--ngf-accent-50);
-  color: var(--tx-accent-text);
-  border: 1px solid var(--ngf-accent-200);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.25rem;
-}
-
-.facility-card h3 {
-  font-size: 1.1875rem;
-  font-weight: 800;
-  color: var(--ngf-ink-900);
-  margin-bottom: 0.375rem;
-}
-
-.fac-type {
-  font-size: 0.6875rem;
-  font-weight: 800;
-  color: var(--tx-accent-text);
-  margin-bottom: 0.625rem;
-  display: block;
-}
-
-.fac-address {
-  font-size: 0.875rem;
-  color: var(--ngf-slate-600);
-  margin-bottom: 1.25rem;
-  line-height: 1.5;
-  flex: 1;
-}
-
-.fac-meta-info {
-  border-top: 1px solid var(--ngf-slate-100);
-  padding-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.fac-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-  color: var(--ngf-slate-600);
-}
-
-.fac-meta-row strong {
-  color: var(--ngf-ink-900);
-}
-
-/* Gateway cards */
-.gateway-regions {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-  margin-top: -2rem;
-}
-
-.gateway-region-group {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.gateway-region-title {
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ngf-slate-500);
-  border-bottom: 1px solid var(--ngf-slate-200);
-  padding-bottom: 0.5rem;
-  margin: 0;
-}
-
-.facility-card-top {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  margin-bottom: 0.5rem;
-}
-
-.facility-card-top h3 {
-  margin: 0;
-}
-
-.gateway-code-pill {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--tx-on-accent);
-  background: var(--ngf-accent-500);
-  padding: 0.2rem 0.45rem;
-  border-radius: 4px;
-}
-
-.facility-card .fac-address {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  flex: 0 0 auto;
-  margin-bottom: 1rem;
-}
-
-.gateway-modes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-  margin-bottom: 1.25rem;
-  flex: 1;
-  align-content: flex-start;
-}
-
-.gateway-mode-tag {
-  background: #f1f5f9;
-  border: 1px solid var(--ngf-slate-200);
-  color: var(--ngf-slate-700);
-  padding: 0.2rem 0.55rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.gateway-offset {
-  color: var(--ngf-slate-500);
-  font-size: 0.75rem;
-}
-
-.gateway-contact-btn {
-  margin-top: 1.25rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  background: transparent;
-  color: var(--tx-accent-text);
-  border: 1.5px solid var(--ngf-accent-500);
-  border-radius: var(--ngf-radius-md);
-  padding: 0.625rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--ngf-transition);
-}
-
-.gateway-contact-btn:hover {
-  background: var(--ngf-accent-500);
-  color: var(--tx-on-accent);
-}
-
-.gateway-contact-btn:focus-visible {
-  outline: 2px solid var(--ngf-accent-500);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--tx-focus-offset);
-}
-
-.gateways-footnote {
-  text-align: center;
-  font-size: 0.9375rem;
-  color: var(--ngf-slate-600);
-  margin: 0;
-}
-
-/* ============================================================
-   RESPONSIVE DESIGN & MOBILE BREAKPOINTS
-   ============================================================ */
-@media (max-width: 1024px) {
-  .locations-list-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .ngf-locations-hero {
-    padding: 3.5rem 0 3rem;
-  }
-  .locations-hero-title {
-    font-size: 2.125rem;
-    line-height: 1.2;
-  }
-  .locations-hero-lead {
-    font-size: 1rem;
-  }
-  .ngf-locations-content {
-    margin-top: 2rem;
-    gap: 2.5rem;
-  }
-  .locations-map-feature {
-    padding: 1.5rem 1.125rem;
-    border-radius: var(--ngf-radius-xl);
-  }
-  .map-card-header h2 {
-    font-size: 1.375rem;
-  }
-  .facilities-section-head h2 {
-    font-size: 1.75rem;
-  }
-  .locations-list-grid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-  .facility-card {
-    padding: 1.5rem 1.25rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .locations-hero-title {
-    font-size: 1.75rem;
-  }
-  .locations-hero-pill {
-    font-size: 0.6875rem;
-    padding: 0.25rem 0.625rem;
-  }
+@media (max-width: 760px) {
+  .tx-network__wrap { padding: 0 var(--tx-gutter-mobile, 16px); }
+  .tx-network__note .tx-btn { width: 100%; justify-content: center; }
 }

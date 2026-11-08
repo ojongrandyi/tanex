@@ -16,6 +16,10 @@ import enHome from '../src/i18n/en/home.ts';
 import frHome from '../src/i18n/fr/home.ts';
 import enServices from '../src/i18n/en/services.ts';
 import frServices from '../src/i18n/fr/services.ts';
+import enAbout from '../src/i18n/en/about.ts';
+import frAbout from '../src/i18n/fr/about.ts';
+import enNetwork from '../src/i18n/en/network.ts';
+import frNetwork from '../src/i18n/fr/network.ts';
 import { translate } from '../src/i18n/runtime.ts';
 import { formatClock, formatDistanceKm, formatMoney, formatOpeningHoursIn, frenchSpacing } from '../src/i18n/format.ts';
 import { alternatePath, langOfPath } from '../src/router/routes.ts';
@@ -67,6 +71,10 @@ const SAME_IN_BOTH: Record<string, string> = {
   'services:compare.service': 'same word in French',
   'services:items.rail.h4': 'intentionally empty: rail has three highlights',
   'services:items.road.h4': 'intentionally empty: road has three highlights',
+  'about:hero.slogan': 'variable only (the slogan stays in English, #102)',
+  'about:offices.douala': 'place name',
+  'network:gateways.regions.Europe': 'same word in French',
+  'network:gateways.modesLabel': 'same word in French',
 };
 
 const PAIRS: [string, Tree, Tree][] = [
@@ -74,6 +82,8 @@ const PAIRS: [string, Tree, Tree][] = [
   ['notFound', enNotFound as unknown as Tree, frNotFound as unknown as Tree],
   ['home', enHome as unknown as Tree, frHome as unknown as Tree],
   ['services', enServices as unknown as Tree, frServices as unknown as Tree],
+  ['about', enAbout as unknown as Tree, frAbout as unknown as Tree],
+  ['network', enNetwork as unknown as Tree, frNetwork as unknown as Tree],
 ];
 
 test('fr dictionaries have exactly the English keys', () => {

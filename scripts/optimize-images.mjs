@@ -4,6 +4,7 @@
 // Run with: node scripts/optimize-images.mjs            (everything)
 //           node scripts/optimize-images.mjs --brand    (logos, wordmarks, mark, icons and OG image only)
 //           node scripts/optimize-images.mjs --icons    (favicon and app icons only)
+//           node scripts/optimize-images.mjs --only about-md   (just these photos, merged into the manifest)
 // Outputs: Public/brand/* (logos, wordmarks, mark, icons, OG image) and Public/images/site/* (WebP + JPG
 // per width), plus src/data/siteImages.ts (the manifest <ResponsiveImage> reads).
 import sharp from 'sharp';
@@ -365,6 +366,9 @@ const PHOTOS = [
   { name: 'about-story', src: 'free-stock/about-story.jpg', kind: 'card' },
   // Shown as a 72 px thumbnail: crop tight on the face.
   { name: 'about-team', src: 'free-pexels/about-team.jpg', kind: 'card', crop: { left: 950, top: 80, width: 900, height: 900 } },
+  // TanEx owner photos (images/tanex files/, committed). About page leadership slot, 4:5 portrait
+  // kept from the top so the face and the TanEx wall sign stay in frame (CONTENT §4, §12).
+  { name: 'about-md', src: 'tanex files/Managing Director.png', kind: 'hero', aspect: 4 / 5, position: 'top', quality: { webp: 80, jpeg: 82 }, widths: [400, 640, 810] },
 ];
 
 // `position` picks which part of the source a cover crop keeps (sharp: 'centre', 'top', 'bottom', ...).
@@ -376,9 +380,9 @@ async function writeVariants(pipelineFactory, name, width, height, position = 'c
     .jpeg({ quality: quality.jpeg, mozjpeg: true, progressive: true }).toFile(`${base}.jpg`);
 }
 
-async function buildPhotos() {
+async function buildPhotos(only = null) {
   const manifest = {};
-  for (const p of PHOTOS) {
+  for (const p of PHOTOS.filter((x) => !only || only.includes(x.name))) {
     const srcPath = path.join(SRC, p.src);
     const factory = () => (p.crop ? sharp(srcPath).extract(p.crop) : sharp(srcPath));
     const meta = await factory().metadata();
@@ -439,6 +443,19 @@ export type SiteImageName = keyof typeof SITE_IMAGES;
 if (process.argv.includes('--icons')) {
   await buildIcons(await loadLogoParts());
   console.log('Icons done.');
+} else if (process.argv.includes('--only')) {
+  // --only <name>[,<name>] rebuilds just those photos and merges them into the existing manifest,
+  // for when the other photo originals aren't on this machine (they aren't kept in git).
+  const names = (process.argv[process.argv.indexOf('--only') + 1] || '').split(',').filter(Boolean);
+  const unknown = names.filter((n) => !PHOTOS.some((x) => x.name === n));
+  if (!names.length || unknown.length) throw new Error('Unknown or missing photo name(s): ' + (unknown.join(', ') || '(none)'));
+  const existing = {};
+  const re = /^  '([^']+)': \{ width: (\d+), height: (\d+), widths: \[([^\]]*)\] \},\r?$/gm;
+  for (const m of fs.readFileSync(MANIFEST_OUT, 'utf8').matchAll(re)) {
+    existing[m[1]] = { width: +m[2], height: +m[3], widths: m[4].split(',').map((v) => +v.trim()) };
+  }
+  writeManifest({ ...existing, ...(await buildPhotos(names)) });
+  console.log('Done: ' + names.join(', '));
 } else if (process.argv.includes('--brand')) {
   // --brand rebuilds logos, wordmarks, mark, icons and the OG image, leaving the photos untouched.
   await buildBrand();

@@ -94,6 +94,13 @@ export const PHONE_2 = '+237691194663';
 // TBD: which number is on WhatsApp (tracker #100). Stays '' until the owner confirms.
 export const WHATSAPP: string = '';
 
+// Secondary slogan from the owner's flyer (CLAUDE.md §2). Kept in English on the French site until
+// the owner says otherwise (tracker #102).
+export const SLOGAN = 'Saving Situations';
+// TBD (tracker #103): the Managing Director's name. While '' the About page shows the portrait and
+// the title only, never a made-up name.
+export const MD_NAME: string = '';
+
 export const HQ_ADDRESS = 'Check Point, opposite Molyko Omnisport Stadium, Buea, Cameroon';
 // French form of the addresses (CONTENT_FR placeholders {{HQ_ADDRESS}}, {{DOUALA_OFFICE}}).
 export const HQ_ADDRESS_FR = 'Check Point, en face du stade omnisports de Molyko, Buea, Cameroun';

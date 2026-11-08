@@ -20,6 +20,6 @@ import './AboutPage.css';
 import './ContactPage.css';
 import './HelpPage.css';
 import './LegalPage.css';
-import '../components/FacilityNetworkMap.css';
+import '../components/NetworkMapPanel.css';
 import './LocationsPage.css';
 import './NotFoundPage.css';

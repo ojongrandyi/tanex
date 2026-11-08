@@ -29,6 +29,7 @@ export const SITE_IMAGES = {
   'about-operations': { width: 340, height: 340, widths: [340, 640, 1024, 1400] },
   'about-story': { width: 340, height: 340, widths: [340, 640, 1024, 1400] },
   'about-team': { width: 340, height: 340, widths: [340, 640] },
+  'about-md': { width: 810, height: 1013, widths: [400, 640, 810] },
 } satisfies Record<string, SiteImageInfo>;
 
 export type SiteImageName = keyof typeof SITE_IMAGES;

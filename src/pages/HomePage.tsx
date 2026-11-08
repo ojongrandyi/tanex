@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight, Bike, Camera, Check, Clock, Mail, MapPin, MessageCircle, Navigation, Phone, Plane, Plus, Search,
   Ship, TrainFront, Truck, Users, Wallet, Warehouse,
 } from 'lucide-react';
 import { Barcode } from '../components/Barcode';
-import { HomeNetworkMap } from '../components/HomeNetworkMap';
+import { NetworkMapPanel } from '../components/NetworkMapPanel';
 import { Button, Input, Textarea } from '../components/ui';
 import { Link } from '../router/Link';
 import { BIKE_BOOKING } from '../router/bookingLinks';
@@ -12,12 +12,10 @@ import { api } from '../services/api';
 import {
   EMAIL, LOGO_MARK, LOGO_MARK_SIZE, OFFICES, PHONE, PHONE_2, TRACKING_ID_EXAMPLE, WHATSAPP, formatPhone,
 } from '../config/brand';
-import { HUB_CODE, NETWORK_POINTS, gatewayName, getGateway, formatGatewayTime, type Gateway } from '../data/gateways';
 import { useApiErrorText, useAreaT, useLocale } from '../i18n/I18nProvider';
 import { primeArea } from '../i18n/runtime';
 import { formatMoney, formatOpeningHoursIn } from '../i18n/format';
 import homeEn from '../i18n/en/home';
-import { useNow } from '../utils/useNow';
 import { ArrivalDoor, BikeHero, HeroGlobe, JourneySprite, Mountain, ParcelLabel, ParkedBike, ServicesRoad, TruckRoute, WorldGlobe } from './home/JourneyArt';
 import { RouteRail, type RailChapter } from './home/RouteRail';
 import './HomePage.css';
@@ -107,22 +105,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
     if (id) onTrack(id);
     else onNavigate('track');
   };
-
-  // ---- Network map selection ----
-  const [activeCode, setActiveCode] = useState(HUB_CODE);
-  const active = getGateway(activeCode) ?? getGateway(HUB_CODE)!;
-  const now = useNow();
-  const activeTime = formatGatewayTime(active.timeZone, now);
-  const countryName = useMemo(() => {
-    try {
-      const names = new Intl.DisplayNames([locale === 'fr' ? 'fr' : 'en'], { type: 'region' });
-      return (iso: string, fallback: string) => names.of(iso) ?? fallback;
-    } catch {
-      return (_iso: string, fallback: string) => fallback;
-    }
-  }, [locale]);
-  const pointTitle = useCallback((g: Gateway) => `${gatewayName(g, locale)}, ${countryName(g.iso, g.country)}`, [locale, countryName]);
-  const modeLabel = (m: Gateway['modes'][number]) => t(m === 'Air' ? 'network.modes.air' : m === 'Ocean' ? 'network.modes.ocean' : 'network.modes.road');
 
   // ---- Get in touch (reuses the contact API; the server issues the TX-TKT reference) ----
   const [form, setForm] = useState({ name: '', contact: '', message: '' });
@@ -343,27 +325,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
           </div>
         </div>
         <div className="tx-ch__wrap tx-home__map">
-          <HomeNetworkMap activeCode={activeCode} onSelectGateway={setActiveCode} label={t('network.mapLabel')} pointTitle={pointTitle} />
-          <div className="tx-home__map-card">
-            <label className="tx-home__map-pick">
-              <span>{t('network.choose')}</span>
-              <select value={activeCode} onChange={(e) => setActiveCode(e.target.value)}>
-                {NETWORK_POINTS.map((g) => <option key={g.code} value={g.code}>{g.code} · {gatewayName(g, locale)}</option>)}
-              </select>
-            </label>
-            <div aria-live="polite">
-            <p className="tx-home__map-name">
-              <span className="tx-home__mono">{active.code}</span> {gatewayName(active, locale)}
-            </p>
-            <p className="tx-home__map-meta">{countryName(active.iso, active.country)} · {active.modes.map(modeLabel).join(' · ')}</p>
-            <p className="tx-home__map-meta">
-              {t('network.localTime')}: <span className="tx-home__mono">{activeTime.time}</span> {activeTime.offset}
-            </p>
-            {active.kind === 'gateway' && (
-              <Link page="contact" param={active.code} onNavigate={onNavigate} className="tx-link">{t('network.contactLane')}<ArrowRight aria-hidden="true" /></Link>
-            )}
-            </div>
-          </div>
+          <NetworkMapPanel
+            locale={locale}
+            onNavigate={onNavigate}
+            labels={{
+              mapLabel: t('network.mapLabel'),
+              choose: t('network.choose'),
+              localTime: t('network.localTime'),
+              contact: t('network.contactLane'),
+              modes: { Air: t('network.modes.air'), Ocean: t('network.modes.ocean'), Road: t('network.modes.road') },
+            }}
+          />
         </div>
       </section>
 

@@ -1,0 +1,22 @@
+/* Network map + selected-place card (Home world chapter, Network page). Always on a dark band. */
+.tx-netpanel { position: relative; }
+.tx-netpanel__card {
+  position: absolute; left: 16px; bottom: 16px; z-index: 500; width: min(320px, calc(100% - 96px));
+  background: rgb(28 18 14 / .92); border: 1px solid rgb(217 194 181 / .18); border-radius: 12px; padding: 14px 16px; color: var(--tx-cream-100);
+}
+.tx-netpanel__card p { margin: 0; }
+.tx-netpanel__pick { min-width: 0; display: grid; gap: 6px; margin-bottom: 12px; font-size: .78rem; font-weight: 600; color: var(--tx-choc-200); }
+.tx-netpanel__pick select {
+  width: 100%; min-width: 0; min-height: 44px; border-radius: var(--tx-radius-input, 10px); border: 1px solid rgb(217 194 181 / .3);
+  background: var(--tx-choc-900); color: var(--tx-cream-100); font: 500 .9rem/1.2 var(--tx-font-body); padding: 0 10px;
+}
+.tx-netpanel__pick select:focus-visible { outline: 2px solid var(--tx-orange-500); outline-offset: 2px; }
+.tx-netpanel__name { font: 700 1.02rem/1.3 var(--tx-font-display); margin-bottom: 4px !important; }
+.tx-netpanel__mono { font-family: var(--tx-font-mono); font-weight: 600; color: var(--tx-orange-400, #FF9F2E); margin-right: 6px; }
+.tx-netpanel__meta { font-size: .85rem; color: var(--tx-choc-200); }
+.tx-netpanel__card .tx-link { margin-top: 8px; font-size: .85rem; color: var(--tx-cream-100); }
+.tx-netpanel__card .tx-link svg { width: 16px; height: 16px; }
+
+@media (max-width: 760px) {
+  .tx-netpanel__card { position: static; width: auto; margin-top: 12px; }
+}

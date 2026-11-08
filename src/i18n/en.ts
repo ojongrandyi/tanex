@@ -4,6 +4,8 @@ import common from './en/common';
 import type { NotFoundMessages } from './en/notFound';
 import home, { type HomeMessages } from './en/home';
 import type { ServicesMessages } from './en/services';
+import type { AboutMessages } from './en/about';
+import type { NetworkMessages } from './en/network';
 
 export const en = { common };
 
@@ -15,6 +17,8 @@ export interface AreaMessages {
   notFound: NotFoundMessages;
   home: HomeMessages;
   services: ServicesMessages;
+  about: AboutMessages;
+  network: NetworkMessages;
 }
 export type AreaName = keyof AreaMessages;
 
@@ -23,4 +27,6 @@ export const AREA_LOADERS_EN: { [A in AreaName]: () => Promise<AreaMessages[A]> 
   // Bundled with HomePage (which primes it via runtime.primeArea): Home is the main first paint.
   home: () => Promise.resolve(home),
   services: () => import('./en/services').then((m) => m.default),
+  about: () => import('./en/about').then((m) => m.default),
+  network: () => import('./en/network').then((m) => m.default),
 };

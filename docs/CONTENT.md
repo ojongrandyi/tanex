@@ -308,6 +308,12 @@ Uses §3.3.
 - **Story:** **H2** `Why TanEx` · `{{WALL_LINE}}` shown as a pull quote when supplied. Story text: owner to supply (founding year, first routes). Until then this block is hidden; don't invent a timeline.
 - **CTA:** §3.6.
 
+### 4.1 Interface strings added with E.3 (**owner to confirm**)
+- Approach heading `How we work` (under `OUR APPROACH`) · team eyebrow `OUR TEAM`
+- While `{{MD_NAME}}` is not supplied, the leadership block's heading is the title `Managing Director`; the name replaces it when known.
+- Offices block `Where to find us`: `Buea, head office` · `Douala` with the addresses, `Open {{HOURS}}` and the link `Contact us`
+- The slogan line under the hero shows `Saving Situations.` in both languages until #102 is answered.
+
 ---
 
 ## 5. Locations / Network page
@@ -317,6 +323,11 @@ Uses §3.3.
 - **Blocks:** `Where our riders deliver` (active delivery cities and zones from the database) · `Our gateways and trade lanes` (map + list, §9)
 - **Card fields:** Name · City, Country · Modes · Local time (live) · `Contact us about this lane`
 - **Note:** `Don't see your destination? We ship well beyond these hubs. Ask us about your route.`
+
+### 5.1 Interface strings added with E.3 (**owner to confirm**)
+- Riders block intro `Bike delivery inside each city, and trucks between them.` · role chips `Head office` · `Office` · `Bike delivery` · `Airport and port gateway`
+- Gateways block intro `Trade hubs we ship to from Douala. They are gateways we serve, not TanEx offices.` · region names `Africa` · `Europe` · `Middle East` · `Asia` · `Americas` · `Modes` (`Air` · `Sea` · `Road`) · `Show on the map` (screen readers: `Show on the map: {place}`) · `Choose a place` · note button `Ask about your route`
+- Gateway names in French: CONTENT_FR §9.
 
 ---
 ## 6. Track, Track Result, loading, support

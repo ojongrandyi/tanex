@@ -12,4 +12,6 @@ export const AREA_LOADERS_FR: { [A in AreaName]: () => Promise<Translation<AreaM
   notFound: () => import('./fr/notFound').then((m) => m.default),
   home: () => import('./fr/home').then((m) => m.default),
   services: () => import('./fr/services').then((m) => m.default),
+  about: () => import('./fr/about').then((m) => m.default),
+  network: () => import('./fr/network').then((m) => m.default),
 };
