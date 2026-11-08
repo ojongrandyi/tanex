@@ -6,7 +6,7 @@ import { RouteCheckpoint, ShipmentStatus } from '../types/shipment';
 import { calculateRouteGeometry, calculateEstimatedPosition, fetchLiveRoadRoute, findNearestPointOnPolyline, type TransportMode } from '../services/routingEngine';
 import { ZoomIn, ZoomOut, Compass, ChevronDown, AlertTriangle, Pause, Truck } from 'lucide-react';
 import { shipmentStatusLabel } from '../shared/shipmentStatus';
-import { TRANSPORT_LEG_LABELS } from '../shared/transportMode';
+import { useAreaT, useLocale } from '../i18n/I18nProvider';
 import './JourneyMap.css';
 
 // 1x1 transparent pixel — used as the errorTileUrl so a tile that fails to load
@@ -63,23 +63,23 @@ function splitRouteAt(polyline: RoutePoint[], pos: { lat: number; lng: number; i
 
 // Caption on the moving marker: the status name (CONTENT §6.3) when it explains where the
 // shipment is, otherwise a reminder that the position is schedule-based.
-function markerRoleText(status: string | undefined, progress: number, hasDelay: boolean): string {
-  if (progress >= 100 || status === 'DELIVERED') return shipmentStatusLabel('DELIVERED').toUpperCase();
-  if (status === 'ON_HOLD') return shipmentStatusLabel('ON_HOLD').toUpperCase();
-  if (hasDelay || status === 'DELAYED') return shipmentStatusLabel('DELAYED').toUpperCase();
-  if (progress === 0) return shipmentStatusLabel(status).toUpperCase();
-  return 'ESTIMATED POSITION';
+function markerRoleText(status: string | undefined, progress: number, hasDelay: boolean, locale: 'en' | 'fr', estimated: string): string {
+  if (progress >= 100 || status === 'DELIVERED') return shipmentStatusLabel('DELIVERED', locale).toUpperCase();
+  if (status === 'ON_HOLD') return shipmentStatusLabel('ON_HOLD', locale).toUpperCase();
+  if (hasDelay || status === 'DELAYED') return shipmentStatusLabel('DELAYED', locale).toUpperCase();
+  if (progress === 0) return shipmentStatusLabel(status, locale).toUpperCase();
+  return estimated.toUpperCase();
 }
 
 export const JourneyMap: React.FC<JourneyMapProps> = ({
   checkpoints = [],
-  currentLocationText = 'In transit',
+  currentLocationText = '',
   currentLat,
   currentLng,
-  lastEventDescription = 'Shipment in transit on its planned route.',
-  totalDistance = '2,790 miles',
-  transitTime = '24 Hours',
-  progressPercent = 15,
+  lastEventDescription = '',
+  totalDistance = '',
+  transitTime = '',
+  progressPercent = 0,
   shipmentStatus = 'IN_TRANSIT',
   delayNotice,
   onScrollToTimeline,
@@ -87,6 +87,8 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
   showLegend = true,
   transportMode,
 }) => {
+  const t = useAreaT('trackResult');
+  const locale = useLocale();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -129,20 +131,20 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
 
   const originPt = checkpoints.find(p => p.type === 'origin') || checkpoints[0] || {
     id: 'orig',
-    name: 'New York, NY',
-    state: 'NY',
+    name: '',
+    state: '',
     type: 'origin' as const,
-    statusLabel: 'Origin',
+    statusLabel: t('map.origin'),
     lat: 40.7128,
     lng: -74.0060
   };
 
   const destPt = checkpoints.find(p => p.type === 'destination') || checkpoints[checkpoints.length - 1] || {
     id: 'dest',
-    name: 'Los Angeles, CA',
-    state: 'CA',
+    name: '',
+    state: '',
     type: 'destination' as const,
-    statusLabel: 'Destination',
+    statusLabel: t('map.destination'),
     lat: 34.0522,
     lng: -118.2437
   };
@@ -306,40 +308,40 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
       // Create or update Origin Marker
       if (!originMarkerRef.current) {
         originMarkerRef.current = L.marker(originLatLng, {
-          icon: createCustomPin(L, 'pin-origin', originPt.name || 'Origin Terminal', 'ORIGIN TERMINAL')
+          icon: createCustomPin(L, 'pin-origin', originPt.name || t('map.origin'), t('map.origin').toUpperCase())
         }).addTo(map);
       } else {
         originMarkerRef.current.setLatLng(originLatLng);
         originMarkerRef.current.setIcon(
-          createCustomPin(L, 'pin-origin', originPt.name || 'Origin Terminal', 'ORIGIN TERMINAL')
+          createCustomPin(L, 'pin-origin', originPt.name || t('map.origin'), t('map.origin').toUpperCase())
         );
       }
 
       // Create or update Destination Marker
       if (!destMarkerRef.current) {
         destMarkerRef.current = L.marker(destLatLng, {
-          icon: createCustomPin(L, 'pin-destination', destPt.name || 'Destination Hub', 'DESTINATION HUB')
+          icon: createCustomPin(L, 'pin-destination', destPt.name || t('map.destination'), t('map.destination').toUpperCase())
         }).addTo(map);
       } else {
         destMarkerRef.current.setLatLng(destLatLng);
         destMarkerRef.current.setIcon(
-          createCustomPin(L, 'pin-destination', destPt.name || 'Destination Hub', 'DESTINATION HUB')
+          createCustomPin(L, 'pin-destination', destPt.name || t('map.destination'), t('map.destination').toUpperCase())
         );
       }
 
       // Create or update Moving Vehicle Marker
       const estPos = vehiclePos;
-      const roleText = markerRoleText(shipmentStatus, clampedProgress, Boolean(delayNotice?.hasDelay));
+      const roleText = markerRoleText(shipmentStatus, clampedProgress, Boolean(delayNotice?.hasDelay), locale, t('map.estimated'));
 
       if (!vehicleMarkerRef.current) {
         vehicleMarkerRef.current = L.marker([estPos.lat, estPos.lng], {
-          icon: createCustomPin(L, 'pin-current', currentLocationText || 'In transit', roleText),
+          icon: createCustomPin(L, 'pin-current', currentLocationText || t('map.inTransit'), roleText),
           zIndexOffset: 1000
         }).addTo(map);
       } else {
         vehicleMarkerRef.current.setLatLng([estPos.lat, estPos.lng]);
         vehicleMarkerRef.current.setIcon(
-          createCustomPin(L, 'pin-current', currentLocationText || 'In transit', roleText)
+          createCustomPin(L, 'pin-current', currentLocationText || t('map.inTransit'), roleText)
         );
       }
 
@@ -441,12 +443,12 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
 
     // 3. Smoothly glide vehicle marker position along the route coordinates
     const estPos = vehiclePos;
-    const roleText = markerRoleText(shipmentStatus, clampedProgress, Boolean(delayNotice?.hasDelay));
+    const roleText = markerRoleText(shipmentStatus, clampedProgress, Boolean(delayNotice?.hasDelay), locale, t('map.estimated'));
 
     if (vehicleMarkerRef.current) {
       vehicleMarkerRef.current.setLatLng([estPos.lat, estPos.lng]);
       vehicleMarkerRef.current.setIcon(
-        createCustomPin(L, 'pin-current', currentLocationText || 'In transit', roleText)
+        createCustomPin(L, 'pin-current', currentLocationText || t('map.inTransit'), roleText)
       );
     }
   }, [
@@ -513,9 +515,9 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
         <div className="stage-node-box origin-box">
           <div className="stage-tag-badge origin">
             <span className="dot-indicator green" />
-            <span>ORIGIN</span>
+            <span>{t('map.origin')}</span>
           </div>
-          <h4 className="stage-city-title">{originDisplay || 'Origin'}</h4>
+          <h4 className="stage-city-title">{originDisplay || t('map.origin')}</h4>
         </div>
 
         {/* Center Transit Corridor Pill */}
@@ -524,12 +526,12 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
             <Truck size={14} className="text-blue" />
             <span>
               {isHold
-                ? shipmentStatusLabel('ON_HOLD')
+                ? shipmentStatusLabel('ON_HOLD', locale)
                 : isDelayed
-                ? shipmentStatusLabel('DELAYED')
+                ? shipmentStatusLabel('DELAYED', locale)
                 : transportMode
-                ? TRANSPORT_LEG_LABELS[transportMode]
-                : shipmentStatusLabel(shipmentStatus)}
+                ? t(`modes.${transportMode}`)
+                : shipmentStatusLabel(shipmentStatus, locale)}
             </span>
           </div>
           <div className="transit-metrics-row">
@@ -537,7 +539,7 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
             <span className="metric-sep">•</span>
             <span className="metric-text font-semibold">{transitTime}</span>
             <span className="metric-sep">•</span>
-            <span className="metric-progress-tag text-blue font-bold">{progressPercent}% Complete</span>
+            <span className="metric-progress-tag text-blue font-bold">{t('corridor.complete', { n: progressPercent })}</span>
           </div>
         </div>
 
@@ -545,9 +547,9 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
         <div className="stage-node-box dest-box">
           <div className="stage-tag-badge destination">
             <span className="dot-indicator red" />
-            <span>DESTINATION</span>
+            <span>{t('map.destination')}</span>
           </div>
-          <h4 className="stage-city-title">{destDisplay || 'Destination'}</h4>
+          <h4 className="stage-city-title">{destDisplay || t('map.destination')}</h4>
         </div>
       </div>
 
@@ -558,35 +560,41 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
         {/* Floating Controls */}
         <div className="map-floating-controls">
           <div className="zoom-btn-group">
-            <button className="map-ctrl-btn" onClick={handleZoomIn} title="Zoom In">
+            <button className="map-ctrl-btn" onClick={handleZoomIn} title={t('map.zoomIn')} aria-label={t('map.zoomIn')} type="button">
               <ZoomIn size={16} />
             </button>
-            <button className="map-ctrl-btn" onClick={handleZoomOut} title="Zoom Out">
+            <button className="map-ctrl-btn" onClick={handleZoomOut} title={t('map.zoomOut')} aria-label={t('map.zoomOut')} type="button">
               <ZoomOut size={16} />
             </button>
-            <button className="map-ctrl-btn" onClick={handleRecenter} title="Recenter Complete Route">
+            <button className="map-ctrl-btn" onClick={handleRecenter} title={t('map.recenter')} aria-label={t('map.recenter')} type="button">
               <Compass size={16} />
             </button>
           </div>
 
-          <div className="layer-selector-group">
+          <div className="layer-selector-group" role="group" aria-label={t('map.layers')}>
             <button
               className={`layer-btn ${activeLayer === 'voyager' ? 'active' : ''}`}
               onClick={() => setActiveLayer('voyager')}
+              aria-pressed={activeLayer === 'voyager'}
+              type="button"
             >
-              Daylight
+              {t('map.layerStreets')}
             </button>
             <button
               className={`layer-btn ${activeLayer === 'satellite' ? 'active' : ''}`}
               onClick={() => setActiveLayer('satellite')}
+              aria-pressed={activeLayer === 'satellite'}
+              type="button"
             >
-              Satellite
+              {t('map.layerSatellite')}
             </button>
             <button
               className={`layer-btn ${activeLayer === 'dark' ? 'active' : ''}`}
               onClick={() => setActiveLayer('dark')}
+              aria-pressed={activeLayer === 'dark'}
+              type="button"
             >
-              Night
+              {t('map.layerDark')}
             </button>
           </div>
         </div>
@@ -601,20 +609,20 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
           <div className="map-floating-alert hold animate-fade-in">
             <div className="gps-alert-main">
               <Pause size={15} />
-              <span>{shipmentStatusLabel('ON_HOLD')}</span>
+              <span>{shipmentStatusLabel('ON_HOLD', locale)}</span>
             </div>
           </div>
         )}
         {delayNotice?.hasDelay && (
           <div className="map-floating-alert delayed animate-fade-in">
             <AlertTriangle size={15} />
-            <span>{shipmentStatusLabel('DELAYED')} (+{delayNotice.delayHours}h): {delayNotice.reason}</span>
+            <span>{t('map.delayed', { status: shipmentStatusLabel('DELAYED', locale), hours: delayNotice.delayHours, reason: delayNotice.reason })}</span>
           </div>
         )}
         {!delayNotice?.hasDelay && isDelayed && (
           <div className="map-floating-alert delayed animate-fade-in">
             <AlertTriangle size={15} />
-            <span>{shipmentStatusLabel('DELAYED')}</span>
+            <span>{shipmentStatusLabel('DELAYED', locale)}</span>
           </div>
         )}
       </div>
@@ -624,12 +632,12 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
         <div className="footer-status-left">
           <Compass size={16} className="text-blue" />
           <span>
-            <strong>Estimated Position (Schedule-based):</strong> {lastEventDescription || `Progressing along the planned route near ${currentLocationText}`}
+            <strong>{t('map.estimateNote')}</strong> {lastEventDescription || (currentLocationText ? t('map.near', { place: currentLocationText }) : t('map.defaultEvent'))}
           </span>
         </div>
         {onScrollToTimeline && (
           <button className="view-timeline-shortcut-btn" onClick={onScrollToTimeline}>
-            <span>Journey timeline</span>
+            <span>{t('map.timeline')}</span>
             <ChevronDown size={14} />
           </button>
         )}

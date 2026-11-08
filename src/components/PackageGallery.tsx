@@ -1,3 +1,4 @@
+import { useAreaT } from '../i18n/I18nProvider';
 import React, { lazy, Suspense, useRef, useState } from 'react';
 import './PackageGallery.css';
 
@@ -22,6 +23,7 @@ const FALLBACK_HEIGHT = 1200;
 
 /** Track Result "Package images" section (CONTENT.md §6.6). Renders nothing without photos. */
 export const PackageGallery: React.FC<PackageGalleryProps> = ({ images }) => {
+  const t = useAreaT('trackResult');
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -35,8 +37,8 @@ export const PackageGallery: React.FC<PackageGalleryProps> = ({ images }) => {
 
   return (
     <section className="ngf-gallery-section" aria-labelledby="track-gallery-title">
-      <h3 id="track-gallery-title" className="card-section-title">Package images</h3>
-      <p className="ngf-gallery-intro">Photos our team has added for this shipment.</p>
+      <h3 id="track-gallery-title" className="card-section-title">{t('gallery.title')}</h3>
+      <p className="ngf-gallery-intro">{t('gallery.intro')}</p>
       {/* data-count sets the columns from tablet width up: 1 photo full width, 2 halves, 3+ thirds. */}
       <ul className="ngf-gallery-grid" data-count={Math.min(images.length, 3)}>
         {images.map((image, index) => (
@@ -45,7 +47,7 @@ export const PackageGallery: React.FC<PackageGalleryProps> = ({ images }) => {
               <button
                 type="button"
                 className="ngf-gallery-thumb"
-                aria-label={`Open photo: ${image.caption}`}
+                aria-label={t('gallery.open', { caption: image.caption })}
                 onClick={(e) => {
                   openerRef.current = e.currentTarget;
                   setOpenIndex(index);

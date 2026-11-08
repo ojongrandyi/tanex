@@ -1,30 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Search,
-  ArrowRight,
-  Truck,
-  FileText,
-  AlertTriangle,
-  Clock,
-  Layers,
-  Phone,
-  Headphones,
-  X
-} from 'lucide-react';
+import { Search, ArrowRight, Truck, FileText, AlertTriangle, Clock, Layers, Headphones, X } from 'lucide-react';
 import { SupportModal } from '../components/SupportModal';
-import { ResponsiveImage } from '../components/ResponsiveImage';
 import { Shipment } from '../types/shipment';
 import { api } from '../services/api';
-import { useCompanyContact } from '../utils/useCompanyContact';
-import { COMPANY_SHORT, TRACKING_ID_EXAMPLE, TRACKING_PREFIX } from '../config/brand';
+import { TRACKING_ID_EXAMPLE, TRACKING_PREFIX } from '../config/brand';
 import { useEscapeKey } from '../utils/useEscapeKey';
 import { parseTrackingInput } from '../shared/trackingId';
 import { shipmentStatusLabel, shipmentStatusTone } from '../shared/shipmentStatus';
+import { useAreaT, useLocale } from '../i18n/I18nProvider';
 import './TrackPage.css';
+
+// Track page (CONTENT §6.1, §6.5). Behaviour is unchanged from before E.5: one ID or up to 10,
+// recent searches kept in this browser (ngf_recent_tracking), the not-found banner from App, and
+// the several-shipments results dialog fed by the same masked public endpoint.
 
 interface TrackPageProps {
   onTrack: (trackingNumber: string) => void;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, param?: string) => void;
   notFoundQuery?: string | null;
 }
 
@@ -52,41 +44,38 @@ function placeText(place: any): string {
 }
 
 export const TrackPage: React.FC<TrackPageProps> = ({ onTrack, onNavigate, notFoundQuery }) => {
-  // An empty phone hides its badge (no placeholder number).
-  const { phone: supportPhone } = useCompanyContact();
+  const t = useAreaT('track');
+  const locale = useLocale();
   const [activeTab, setActiveTab] = useState<'single' | 'batch'>('single');
   const [trackingNumber, setTrackingNumber] = useState('');
   const [multiInput, setMultiInput] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
 
-  // Batch Multi-Tracking Drawer State
+  // Several-shipments results dialog
   const [batchModalOpen, setBatchModalOpen] = useState(false);
   useEscapeKey(batchModalOpen, () => setBatchModalOpen(false));
   const [batchResults, setBatchResults] = useState<BatchResult[]>([]);
   const [batchFilter, setBatchFilter] = useState<'ALL' | 'IN_TRANSIT' | 'DELIVERED' | 'DELAYED'>('ALL');
 
-  // Load recent searches from localStorage
+  // Recent searches from this browser
   useEffect(() => {
     try {
       const saved = localStorage.getItem('ngf_recent_tracking');
-      if (saved) {
-        setRecentSearches(JSON.parse(saved).slice(0, 4));
-      }
-    } catch (e) {
-      // ignore
+      if (saved) setRecentSearches(JSON.parse(saved).slice(0, 4));
+    } catch {
+      // Storage blocked: no recent list.
     }
   }, []);
 
   const saveRecentSearch = (num: string) => {
     try {
       const clean = num.trim().toUpperCase();
-      const existing = recentSearches.filter(n => n.toUpperCase() !== clean);
-      const updated = [clean, ...existing].slice(0, 4);
+      const updated = [clean, ...recentSearches.filter((n) => n.toUpperCase() !== clean)].slice(0, 4);
       setRecentSearches(updated);
       localStorage.setItem('ngf_recent_tracking', JSON.stringify(updated));
-    } catch (e) {
-      // ignore
+    } catch {
+      // Storage blocked: the search still runs.
     }
   };
 
@@ -107,17 +96,14 @@ export const TrackPage: React.FC<TrackPageProps> = ({ onTrack, onNavigate, notFo
 
   const handleMultiSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const rawNumbers = multiInput.split('\n').map(s => s.trim()).filter(Boolean).slice(0, MAX_BATCH);
+    const rawNumbers = multiInput.split('\n').map((s) => s.trim()).filter(Boolean).slice(0, MAX_BATCH);
     if (rawNumbers.length === 0) return;
-
     if (rawNumbers.length === 1) {
       handleQuickTrack(rawNumbers[0]);
       return;
     }
-
-    // Each number is looked up through the same masked public endpoint single tracking
-    // uses (api.trackShipment -> /api/track/:id), so no unmasked details are exposed. An ID
-    // that isn't found is shown as not found (nothing is made up for it).
+    // Each number goes through the same masked public endpoint as single tracking
+    // (/api/track/:id). An ID that isn't found is shown as not found; nothing is made up.
     const resolved: BatchResult[] = await Promise.all(
       rawNumbers.map(async (num) => {
         const clean = num.toUpperCase();
@@ -125,23 +111,21 @@ export const TrackPage: React.FC<TrackPageProps> = ({ onTrack, onNavigate, notFo
           const real = await api.trackShipment(clean);
           if (real) return { query: clean, shipment: real };
         } catch {
-          // not found — shown as not found below
+          // not found: shown as not found below
         }
         return { query: clean, shipment: null };
-      })
+      }),
     );
-
     setBatchResults(resolved);
     setBatchFilter('ALL');
     setBatchModalOpen(true);
   };
 
   const found = batchResults.filter((r): r is { query: string; shipment: Shipment } => r.shipment !== null);
-  const inTransitCount = found.filter(r => batchPillClass(r.shipment) === 'transit').length;
-  const deliveredCount = found.filter(r => batchPillClass(r.shipment) === 'delivered').length;
-  const delayedCount = found.filter(r => isDelayedOrHeld(r.shipment)).length;
-
-  const visibleResults = batchResults.filter(r => {
+  const inTransitCount = found.filter((r) => batchPillClass(r.shipment) === 'transit').length;
+  const deliveredCount = found.filter((r) => batchPillClass(r.shipment) === 'delivered').length;
+  const delayedCount = found.filter((r) => isDelayedOrHeld(r.shipment)).length;
+  const visibleResults = batchResults.filter((r) => {
     if (batchFilter === 'ALL') return true;
     if (!r.shipment) return false;
     if (batchFilter === 'IN_TRANSIT') return batchPillClass(r.shipment) === 'transit';
@@ -149,286 +133,160 @@ export const TrackPage: React.FC<TrackPageProps> = ({ onTrack, onNavigate, notFo
     return isDelayedOrHeld(r.shipment);
   });
 
-  return (
-    <div className="ngf-page-track">
-      {/* =========================================================================
-          1. TRACKING HERO
-          ========================================================================= */}
-      <section className="track-hero-section">
-        <ResponsiveImage
-          name="track-hero"
-          alt="Lorry with its headlights on, driving a mountain road at dusk"
-          eager
-          sizes="100vw"
-          className="track-hero-media"
-          imgClassName="track-hero-img"
-        />
-        <div className="track-hero-bg-overlay" />
-        <div className="ngf-container-wide track-hero-container">
-          <div className="track-hero-header">
-            <h1 className="track-hero-headline animate-fade-in">Track your shipment</h1>
-            <p className="track-hero-subtext animate-fade-in">
-              Enter your 8-character {COMPANY_SHORT} tracking ID to see where your shipment is right now.
-            </p>
-          </div>
+  const notFoundIsMalformed = Boolean(notFoundQuery) && !parseTrackingInput(notFoundQuery!) && !notFoundQuery!.trim().toUpperCase().startsWith('QR');
 
-          {/* Not Found Alert Banner */}
+  return (
+    <div className="tx-track-page">
+      <section className="tx-track-page__hero tx-dark" aria-labelledby="track-title">
+        <div className="tx-track-page__wrap">
+          <p className="tx-eyebrow">{t('page.eyebrow')}</p>
+          <h1 className="tx-h1" id="track-title">{t('page.title')}</h1>
+          <p className="tx-lead">{t('page.sub')}</p>
+
           {notFoundQuery && (
-            <div className="track-not-found-banner animate-fade-in" role="alert">
-              <AlertTriangle size={20} className="text-red-500 flex-shrink-0" />
-              {/* Malformed input (neither a tracking ID nor a quote reference) gets format help;
-                  a well-formed ID that isn't on file gets "not found" (same split as /api/track 400/404). */}
-              {!parseTrackingInput(notFoundQuery) && !notFoundQuery.trim().toUpperCase().startsWith('QR') ? (
-                <p>Tracking IDs start with {TRACKING_PREFIX} and are 8 characters long, e.g. <span className="font-mono">{TRACKING_ID_EXAMPLE}</span>.</p>
+            <div className="tx-track-page__alert" role="alert">
+              <AlertTriangle aria-hidden="true" />
+              {notFoundIsMalformed ? (
+                <p>{t('page.invalid', { example: TRACKING_ID_EXAMPLE })}</p>
               ) : (
                 <p>
-                  We couldn't find a shipment with ID <span className="font-mono font-bold">{notFoundQuery.trim().toUpperCase()}</span>. Check the characters and try again, or{' '}
-                  <button type="button" className="track-inline-link" onClick={() => onNavigate('contact')}>contact us</button>{' '}
-                  and we'll look it up for you.
+                  {t('page.notFoundStart', { id: notFoundQuery.trim().toUpperCase() })}{' '}
+                  <button type="button" className="tx-track-page__inline" onClick={() => onNavigate('contact')}>{t('page.notFoundLink')}</button>{' '}
+                  {t('page.notFoundEnd')}
                 </p>
               )}
             </div>
           )}
 
-          {/* =========================================================================
-              2. TRACKING CARD
-              ========================================================================= */}
-          <div className="track-terminal-card animate-fade-in">
-            {/* Mode Switcher Tabs */}
-            <div className="terminal-tabs-row">
-              <button
-                type="button"
-                className={`terminal-tab-btn ${activeTab === 'single' ? 'active' : ''}`}
-                onClick={() => setActiveTab('single')}
-              >
-                <Search size={16} />
-                <span>One ID</span>
+          <div className="tx-track-page__card tx-light">
+            <div className="tx-track-page__tabs" role="group" aria-label={t('page.tabsLabel')}>
+              <button type="button" aria-pressed={activeTab === 'single'} className={activeTab === 'single' ? 'is-active' : ''} onClick={() => setActiveTab('single')}>
+                <Search aria-hidden="true" /><span>{t('page.tabOne')}</span>
               </button>
-
-              <button
-                type="button"
-                className={`terminal-tab-btn ${activeTab === 'batch' ? 'active' : ''}`}
-                onClick={() => setActiveTab('batch')}
-              >
-                <Layers size={16} />
-                <span>Track several shipments</span>
+              <button type="button" aria-pressed={activeTab === 'batch'} className={activeTab === 'batch' ? 'is-active' : ''} onClick={() => setActiveTab('batch')}>
+                <Layers aria-hidden="true" /><span>{t('page.tabSeveral')}</span>
               </button>
             </div>
 
-            {/* TAB 1: SINGLE TRACKING */}
             {activeTab === 'single' && (
-              <form onSubmit={handleSingleSubmit} className="terminal-form-single">
-                <div className="terminal-input-wrapper">
-                  <Search size={22} className="terminal-search-icon" />
+              <form onSubmit={handleSingleSubmit} className="tx-track-page__single" role="search">
+                <label className="tx-visually-hidden" htmlFor="track-input">{t('page.inputLabel')}</label>
+                <div className="tx-track">
+                  <Search className="tx-track__icon" aria-hidden="true" />
                   <input
+                    id="track-input"
                     type="text"
-                    placeholder={`e.g. ${TRACKING_ID_EXAMPLE}`}
-                    aria-label="Tracking ID"
+                    placeholder={t('page.placeholder', { example: TRACKING_ID_EXAMPLE })}
                     value={trackingNumber}
                     onChange={(e) => setTrackingNumber(e.target.value)}
-                    className="terminal-input font-mono"
+                    className="tx-track__input"
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
                     autoFocus
                   />
                   {trackingNumber && (
-                    <button
-                      type="button"
-                      className="terminal-clear-btn"
-                      onClick={() => setTrackingNumber('')}
-                      aria-label="Clear"
-                    >
-                      <X size={16} />
+                    <button type="button" className="tx-track-page__clear" onClick={() => setTrackingNumber('')} aria-label={t('page.clear')}>
+                      <X aria-hidden="true" />
                     </button>
                   )}
-                </div>
-
-                <button type="submit" className="btn-corp-primary terminal-submit-btn">
-                  <span>Track</span>
-                  <ArrowRight size={17} />
-                </button>
-              </form>
-            )}
-
-            {/* TAB 2: BATCH MULTI-TRACKING */}
-            {activeTab === 'batch' && (
-              <form onSubmit={handleMultiSubmit} className="terminal-form-batch">
-                <label className="batch-label" htmlFor="track-batch-input">
-                  Enter up to 10 tracking IDs, one per line.
-                </label>
-                <textarea
-                  id="track-batch-input"
-                  rows={4}
-                  value={multiInput}
-                  onChange={(e) => setMultiInput(e.target.value)}
-                  className="terminal-textarea font-mono"
-                  placeholder={`${TRACKING_ID_EXAMPLE}
-${TRACKING_PREFIX}8M4PQ6
-${TRACKING_PREFIX}3J7NKW`}
-                />
-                <div className="batch-actions-row">
-                  <button type="submit" className="btn-corp-primary terminal-submit-btn">
-                    <span>Track</span>
-                    <ArrowRight size={17} />
+                  <button type="submit" className="tx-btn tx-btn--primary">
+                    <span>{t('page.button')}</span><ArrowRight aria-hidden="true" />
                   </button>
                 </div>
               </form>
             )}
 
-            {/* Recent searches (only numbers this visitor has looked up) */}
+            {activeTab === 'batch' && (
+              <form onSubmit={handleMultiSubmit} className="tx-track-page__batch">
+                <label className="tx-label" htmlFor="track-batch-input">{t('page.batchLabel')}</label>
+                <textarea
+                  id="track-batch-input"
+                  rows={4}
+                  value={multiInput}
+                  onChange={(e) => setMultiInput(e.target.value)}
+                  className="tx-input tx-track-page__mono"
+                  placeholder={`${TRACKING_ID_EXAMPLE}\n${TRACKING_PREFIX}8M4PQ6\n${TRACKING_PREFIX}3J7NKW`}
+                  spellCheck={false}
+                />
+                <button type="submit" className="tx-btn tx-btn--primary">
+                  <span>{t('page.button')}</span><ArrowRight aria-hidden="true" />
+                </button>
+              </form>
+            )}
+
             {recentSearches.length > 0 && (
-              <div className="terminal-footer">
-                <div className="recent-searches-group">
-                  <span className="quick-samples-label">Recently tracked:</span>
-                  <div className="quick-chips-row">
-                    {recentSearches.map((num, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        className="recent-chip-btn font-mono"
-                        onClick={() => handleQuickTrack(num)}
-                      >
-                        <Clock size={12} />
-                        <span>{num}</span>
+              <div className="tx-track-page__recent">
+                <span className="tx-track-page__recent-label">{t('page.recent')}</span>
+                <ul>
+                  {recentSearches.map((num) => (
+                    <li key={num}>
+                      <button type="button" className="tx-chip tx-track-page__mono" onClick={() => handleQuickTrack(num)}>
+                        <Clock aria-hidden="true" /><span>{num}</span>
                       </button>
-                    ))}
-                  </div>
-                </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* =========================================================================
-          3. WHERE TO FIND YOUR ID
-          ========================================================================= */}
-      <section className="track-reference-section">
-        <div className="ngf-container-wide">
-          <div className="section-center-header">
-            <h2>Where to find your ID</h2>
-            <div className="section-header-line" />
-          </div>
-
-          <div className="track-reference-grid">
-            <div className="reference-card">
-              <div className="ref-icon-box accent">
-                <FileText size={24} />
-              </div>
-              <h3>Booking confirmation</h3>
-              <p>It's in the email or SMS we sent when your shipment was booked.</p>
-            </div>
-
-            <div className="reference-card">
-              <div className="ref-icon-box emerald">
-                <Truck size={24} />
-              </div>
-              <h3>Waybill / label</h3>
-              <p>Printed at the top of your waybill and on every piece label.</p>
-            </div>
-
-            <div className="reference-card">
-              <div className="ref-icon-box sky">
-                <Headphones size={24} />
-              </div>
-              <h3>Your coordinator</h3>
-              <p>Any {COMPANY_SHORT} coordinator can find it from your name, reference or phone number.</p>
-            </div>
-          </div>
+      {/* Where to find your ID (CONTENT §6.1) */}
+      <section className="tx-track-page__section" aria-labelledby="track-find">
+        <div className="tx-track-page__wrap">
+          <h2 className="tx-h2" id="track-find">{t('find.title')}</h2>
+          <ul className="tx-track-page__find">
+            {([['booking', FileText], ['waybill', Truck], ['coordinator', Headphones]] as const).map(([k, Icon]) => (
+              <li key={k} className="tx-card">
+                <span className="tx-card__icon" aria-hidden="true"><Icon /></span>
+                <h3 className="tx-card__title">{t(`find.${k}.title`)}</h3>
+                <p className="tx-card__body">{t(`find.${k}.body`)}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      {/* =========================================================================
-          4. HELP BANNER
-          ========================================================================= */}
-      <section className="track-support-section">
-        <div className="ngf-container-wide">
-          <div className="track-support-card">
-            <div className="support-card-content">
-              <h2>Need help with an active shipment?</h2>
-              <p>Our operations desk is available 24/7.</p>
-              {supportPhone && (
-                <div className="support-contact-strip">
-                  <div className="support-phone-badge">
-                    <Phone size={16} className="text-accent" />
-                    <span className="font-mono font-bold">{supportPhone}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="support-card-actions">
-              <button
-                type="button"
-                className="btn-corp-primary"
-                onClick={() => setSupportModalOpen(true)}
-              >
-                <span>Contact Support</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
+      {/* Help banner (CONTENT §6.1) */}
+      <section className="tx-track-page__help tx-dark" aria-labelledby="track-help">
+        <div className="tx-track-page__wrap tx-track-page__help-inner">
+          <div>
+            <h2 className="tx-h3" id="track-help">{t('help.title')}</h2>
+            <p>{t('help.body')}</p>
           </div>
+          <button type="button" className="tx-btn tx-btn--primary" onClick={() => setSupportModalOpen(true)}>
+            <span>{t('help.button')}</span><ArrowRight aria-hidden="true" />
+          </button>
         </div>
       </section>
 
-      {/* Support Modal */}
-      <SupportModal
-        isOpen={supportModalOpen}
-        onClose={() => setSupportModalOpen(false)}
-        initialTrackingNumber={trackingNumber.trim().toUpperCase()}
-      />
+      <SupportModal isOpen={supportModalOpen} onClose={() => setSupportModalOpen(false)} initialTrackingNumber={trackingNumber.trim().toUpperCase()} />
 
-      {/* =========================================================================
-          5. SEVERAL SHIPMENTS: RESULTS
-          ========================================================================= */}
+      {/* Several shipments: results */}
       {batchModalOpen && (
-        <div className="batch-modal-backdrop animate-fade-in" onClick={() => setBatchModalOpen(false)}>
-          <div
-            className="batch-modal-dialog animate-scale-in"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="batch-modal-title"
-            onClick={e => e.stopPropagation()}
-          >
+        <div className="batch-modal-backdrop" onClick={() => setBatchModalOpen(false)}>
+          <div className="batch-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="batch-modal-title" onClick={(e) => e.stopPropagation()}>
             <div className="batch-modal-header">
-              <div>
-                <div className="batch-header-title">
-                  <Truck size={20} className="text-accent" />
-                  <h3 id="batch-modal-title">Track several shipments</h3>
-                </div>
+              <div className="batch-header-title">
+                <Truck aria-hidden="true" />
+                <h3 id="batch-modal-title">{t('batch.title')}</h3>
               </div>
-              <button className="batch-modal-close" onClick={() => setBatchModalOpen(false)} aria-label="Close">×</button>
+              <button type="button" className="batch-modal-close" onClick={() => setBatchModalOpen(false)} aria-label={t('batch.close')}><X aria-hidden="true" /></button>
             </div>
 
-            <div className="batch-filter-bar">
-              <div className="batch-filter-pills">
-                <button
-                  type="button"
-                  className={`batch-filter-btn ${batchFilter === 'ALL' ? 'active' : ''}`}
-                  onClick={() => setBatchFilter('ALL')}
-                >
-                  All ({batchResults.length})
+            <div className="batch-filter-bar" role="group" aria-label={t('batch.filterLabel')}>
+              {([
+                ['ALL', t('batch.all', { n: batchResults.length })],
+                ['IN_TRANSIT', t('batch.count', { label: shipmentStatusLabel('IN_TRANSIT', locale), n: inTransitCount })],
+                ['DELIVERED', t('batch.count', { label: shipmentStatusLabel('DELIVERED', locale), n: deliveredCount })],
+                ['DELAYED', t('batch.delayedOrHeld', { delayed: shipmentStatusLabel('DELAYED', locale), held: shipmentStatusLabel('ON_HOLD', locale).toLowerCase(), n: delayedCount })],
+              ] as const).map(([key, label]) => (
+                <button key={key} type="button" aria-pressed={batchFilter === key} className={`batch-filter-btn${batchFilter === key ? ' active' : ''}`} onClick={() => setBatchFilter(key)}>
+                  {label}
                 </button>
-                <button
-                  type="button"
-                  className={`batch-filter-btn ${batchFilter === 'IN_TRANSIT' ? 'active' : ''}`}
-                  onClick={() => setBatchFilter('IN_TRANSIT')}
-                >
-                  {shipmentStatusLabel('IN_TRANSIT')} ({inTransitCount})
-                </button>
-                <button
-                  type="button"
-                  className={`batch-filter-btn ${batchFilter === 'DELIVERED' ? 'active' : ''}`}
-                  onClick={() => setBatchFilter('DELIVERED')}
-                >
-                  {shipmentStatusLabel('DELIVERED')} ({deliveredCount})
-                </button>
-                <button
-                  type="button"
-                  className={`batch-filter-btn ${batchFilter === 'DELAYED' ? 'active' : ''}`}
-                  onClick={() => setBatchFilter('DELAYED')}
-                >
-                  {shipmentStatusLabel('DELAYED')} / {shipmentStatusLabel('ON_HOLD').toLowerCase()} ({delayedCount})
-                </button>
-              </div>
+              ))}
             </div>
 
             <div className="batch-modal-body">
@@ -437,25 +295,17 @@ ${TRACKING_PREFIX}3J7NKW`}
                   if (!shipment) {
                     return (
                       <div key={`${query}-${index}`} className="batch-shipment-card batch-not-found">
-                        <div className="batch-card-top">
-                          <span className="batch-tracking-id">{query}</span>
-                        </div>
+                        <div className="batch-card-top"><span className="batch-tracking-id">{query}</span></div>
                         <p className="batch-not-found-text">
-                          {parseTrackingInput(query)
-                            ? `We couldn't find a shipment with ID ${query}. Check the characters and try again.`
-                            : `Tracking IDs start with ${TRACKING_PREFIX} and are 8 characters long, e.g. ${TRACKING_ID_EXAMPLE}.`}
+                          {parseTrackingInput(query) ? t('batch.notFound', { id: query }) : t('page.invalid', { example: TRACKING_ID_EXAMPLE })}
                         </p>
                       </div>
                     );
                   }
-
                   const origin = placeText(shipment.origin);
                   const destination = placeText(shipment.destination);
                   const current = shipment.currentFacility || placeText(shipment.currentLocation);
-                  const eta = typeof shipment.estimatedDelivery === 'string'
-                    ? shipment.estimatedDelivery
-                    : (shipment.estimatedDelivery as any)?.date;
-
+                  const eta = typeof shipment.estimatedDelivery === 'string' ? shipment.estimatedDelivery : (shipment.estimatedDelivery as any)?.date;
                   return (
                     <div key={`${query}-${index}`} className="batch-shipment-card">
                       <div className="batch-card-top">
@@ -463,49 +313,19 @@ ${TRACKING_PREFIX}3J7NKW`}
                           <span className="batch-tracking-id">{shipment.trackingNumber}</span>
                           {shipment.service && <span className="batch-service-sub">{shipment.service}</span>}
                         </div>
-
-                        <span className={`batch-status-pill ${batchPillClass(shipment)}`}>
-                          {shipmentStatusLabel(shipment.status)}
-                        </span>
+                        <span className={`batch-status-pill ${batchPillClass(shipment)}`}>{shipmentStatusLabel(shipment.status, locale)}</span>
                       </div>
-
                       <div className="batch-route-strip">
-                        <div className="batch-route-point">
-                          <small>Origin</small>
-                          <strong>{origin || '—'}</strong>
-                        </div>
-
-                        <div className="batch-route-arrow">
-                          <ArrowRight size={14} />
-                        </div>
-
-                        <div className="batch-route-point right">
-                          <small>Destination</small>
-                          <strong>{destination || '—'}</strong>
-                        </div>
+                        <div className="batch-route-point"><small>{t('batch.origin')}</small><strong>{origin || '—'}</strong></div>
+                        <div className="batch-route-arrow" aria-hidden="true"><ArrowRight size={14} /></div>
+                        <div className="batch-route-point right"><small>{t('batch.destination')}</small><strong>{destination || '—'}</strong></div>
                       </div>
-
                       <div className="batch-metrics-row">
-                        <div className="batch-metric-box">
-                          <small>Last seen</small>
-                          <strong>{current || '—'}</strong>
-                        </div>
-                        <div className="batch-metric-box">
-                          <small>Estimated delivery</small>
-                          <strong>{eta || '—'}</strong>
-                        </div>
+                        <div className="batch-metric-box"><small>{t('batch.lastSeen')}</small><strong>{current || '—'}</strong></div>
+                        <div className="batch-metric-box"><small>{t('batch.eta')}</small><strong>{eta || '—'}</strong></div>
                       </div>
-
-                      <button
-                        type="button"
-                        className="btn-inspect-batch-item"
-                        onClick={() => {
-                          setBatchModalOpen(false);
-                          handleQuickTrack(shipment.trackingNumber);
-                        }}
-                      >
-                        <span>Open tracking</span>
-                        <ArrowRight size={14} />
+                      <button type="button" className="btn-inspect-batch-item" onClick={() => { setBatchModalOpen(false); handleQuickTrack(shipment.trackingNumber); }}>
+                        <span>{t('batch.open')}</span><ArrowRight size={14} aria-hidden="true" />
                       </button>
                     </div>
                   );
@@ -514,17 +334,8 @@ ${TRACKING_PREFIX}3J7NKW`}
             </div>
 
             <div className="batch-modal-footer">
-              <span className="batch-footer-count">
-                <strong>{found.length}</strong> of {batchResults.length} found
-              </span>
-              <button
-                type="button"
-                className="btn-corp-ghost"
-                onClick={() => setBatchModalOpen(false)}
-                style={{ padding: '0.5rem 1.25rem' }}
-              >
-                Close
-              </button>
+              <span className="batch-footer-count">{t('batch.found', { n: found.length, m: batchResults.length })}</span>
+              <button type="button" className="tx-btn tx-btn--ghost tx-btn--sm" onClick={() => setBatchModalOpen(false)}>{t('batch.close')}</button>
             </div>
           </div>
         </div>

@@ -4,10 +4,12 @@ import './SupportModal.css';
 import { TRACKING_ID_EXAMPLE } from '../config/brand';
 import { api } from '../services/api';
 import { useEscapeKey } from '../utils/useEscapeKey';
-import { useApiErrorText } from '../i18n/I18nProvider';
+import { useApiErrorText, useAreaT } from '../i18n/I18nProvider';
 
 // CONTENT §6.4
+// Values are stored in the staff inbox subject (English, like the console); labels are translated.
 export const SUPPORT_ISSUE_TYPES = ['Delay', 'Address change', 'Damage', 'Customs question', 'Other'] as const;
+const ISSUE_KEYS = { Delay: 'delay', 'Address change': 'address', Damage: 'damage', 'Customs question': 'customs', Other: 'other' } as const;
 export type SupportIssueType = typeof SUPPORT_ISSUE_TYPES[number];
 
 interface SupportModalProps {
@@ -25,6 +27,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({
 }) => {
   // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
   const apiErrorText = useApiErrorText();
+  const t = useAreaT('track');
   const [trackingNumber, setTrackingNumber] = useState(initialTrackingNumber);
   const [issueType, setIssueType] = useState<SupportIssueType>(defaultIssueType);
   const [fullName, setFullName] = useState('');
@@ -67,7 +70,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({
       setTicket({ id: saved.id, trackingNumber: id, email: email.trim() });
       setMessage('');
     } catch (err) {
-      setError(apiErrorText(err, 'We couldn’t send your request. Please try again.'));
+      setError(apiErrorText(err, t('support.error')));
     } finally {
       setSubmitting(false);
     }
@@ -87,9 +90,9 @@ export const SupportModal: React.FC<SupportModalProps> = ({
             <div className="support-icon-pill">
               <Headphones size={18} />
             </div>
-            <h3 id="ngf-support-title">How can we help with this shipment?</h3>
+            <h3 id="ngf-support-title">{t('support.title')}</h3>
           </div>
-          <button type="button" className="support-close-btn" onClick={onClose} aria-label="Close">
+          <button type="button" className="support-close-btn" onClick={onClose} aria-label={t('support.close')}>
             <X size={20} />
           </button>
         </div>
@@ -98,31 +101,31 @@ export const SupportModal: React.FC<SupportModalProps> = ({
           <div className="ngf-support-success" role="status">
             <CheckCircle size={44} className="text-emerald" />
             <p>
-              Ticket <strong className="font-mono">{ticket.id}</strong> opened
-              {ticket.trackingNumber && <> for <strong className="font-mono">{ticket.trackingNumber}</strong></>}.
-              {' '}We'll reply to <strong>{ticket.email}</strong> shortly.
+              {ticket.trackingNumber
+                ? t('support.success', { ticket: ticket.id, id: ticket.trackingNumber, email: ticket.email })
+                : t('support.successNoId', { ticket: ticket.id, email: ticket.email })}
             </p>
             <button type="button" className="ngf-btn-secondary" onClick={onClose}>
-              Close
+              {t('support.close')}
             </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="ngf-support-form">
             <div className="form-row-2">
               <div className="form-group">
-                <label htmlFor="support-tracking">Tracking ID</label>
+                <label htmlFor="support-tracking">{t('support.tracking')}</label>
                 <input
                   id="support-tracking"
                   type="text"
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
-                  placeholder={`e.g. ${TRACKING_ID_EXAMPLE}`}
+                  placeholder={TRACKING_ID_EXAMPLE}
                   className="ngf-input font-mono"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="support-issue">Issue type</label>
+                <label htmlFor="support-issue">{t('support.issue')}</label>
                 <select
                   id="support-issue"
                   value={issueType}
@@ -130,14 +133,14 @@ export const SupportModal: React.FC<SupportModalProps> = ({
                   className="ngf-input"
                 >
                   {SUPPORT_ISSUE_TYPES.map((type) => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>{t(`support.issues.${ISSUE_KEYS[type]}`)}</option>
                   ))}
                 </select>
               </div>
             </div>
 
             <div className="form-group">
-              <label htmlFor="support-message">Message</label>
+              <label htmlFor="support-message">{t('support.message')}</label>
               <textarea
                 id="support-message"
                 required
@@ -150,7 +153,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({
 
             <div className="form-row-2">
               <div className="form-group">
-                <label htmlFor="support-name">Name</label>
+                <label htmlFor="support-name">{t('support.name')}</label>
                 <input
                   id="support-name"
                   type="text"
@@ -163,7 +166,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label htmlFor="support-email">Email</label>
+                <label htmlFor="support-email">{t('support.email')}</label>
                 <input
                   id="support-email"
                   type="email"
@@ -171,7 +174,6 @@ export const SupportModal: React.FC<SupportModalProps> = ({
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.com"
                   className="ngf-input"
                 />
               </div>
@@ -181,10 +183,10 @@ export const SupportModal: React.FC<SupportModalProps> = ({
 
             <div className="support-form-actions">
               <button type="button" className="ngf-btn-secondary" onClick={onClose}>
-                Cancel
+                {t('support.cancel')}
               </button>
               <button type="submit" className="ngf-btn-primary" disabled={submitting}>
-                <Send size={15} /> {submitting ? 'Opening…' : 'Open ticket'}
+                <Send size={15} /> {submitting ? t('support.sending') : t('support.submit')}
               </button>
             </div>
           </form>

@@ -1,0 +1,67 @@
+// English master, area "track": the Track page, the loading screen and the support modal
+// (CONTENT §6.1, §6.2, §6.4, §6.5, §6.12). Track Result text is in the area "trackResult".
+const track = {
+  page: {
+    eyebrow: 'Track',
+    title: 'Track your shipment',
+    sub: 'Enter your 8-character TanEx tracking ID to see where your shipment is right now.',
+    tabsLabel: 'How to track',
+    tabOne: 'One ID',
+    tabSeveral: 'Track several shipments',
+    inputLabel: 'Tracking ID',
+    placeholder: 'e.g. {example}',
+    clear: 'Clear',
+    button: 'Track',
+    batchLabel: 'Enter up to 10 tracking IDs, one per line.',
+    recent: 'Recently tracked',
+    invalid: 'Tracking IDs start with TX and are 8 characters long, e.g. {example}.',
+    notFoundStart: "We couldn't find a shipment with ID {id}. Check the characters and try again, or",
+    notFoundLink: 'contact us',
+    notFoundEnd: "and we'll look it up for you.",
+  },
+  find: {
+    title: 'Where to find your ID',
+    booking: { title: 'Booking confirmation.', body: "It's in the email or WhatsApp message we sent when your shipment was booked." },
+    waybill: { title: 'Waybill / label.', body: 'Printed at the top of your waybill and on every piece label.' },
+    coordinator: { title: 'Your coordinator.', body: 'Any TanEx coordinator can find it from your name, reference or phone number.' },
+  },
+  help: {
+    title: 'Need help with an active shipment?',
+    body: 'Our team is here to help.',
+    button: 'Contact Support',
+  },
+  batch: {
+    title: 'Track several shipments',
+    close: 'Close',
+    filterLabel: 'Show',
+    all: 'All ({n})',
+    count: '{label} ({n})',
+    delayedOrHeld: '{delayed} / {held} ({n})',
+    notFound: "We couldn't find a shipment with ID {id}. Check the characters and try again.",
+    origin: 'Origin',
+    destination: 'Destination',
+    lastSeen: 'Last seen',
+    eta: 'Estimated delivery',
+    open: 'Open tracking',
+    found: '{n} of {m} found',
+  },
+  support: {
+    title: 'How can we help with this shipment?',
+    close: 'Close',
+    tracking: 'Tracking ID',
+    issue: 'Issue type',
+    issues: { delay: 'Delay', address: 'Address change', damage: 'Damage', customs: 'Customs question', other: 'Other' },
+    message: 'Message',
+    name: 'Name',
+    email: 'Email',
+    cancel: 'Cancel',
+    submit: 'Open ticket',
+    sending: 'Opening…',
+    success: "Ticket {ticket} opened for {id}. We'll reply to {email} shortly.",
+    successNoId: "Ticket {ticket} opened. We'll reply to {email} shortly.",
+    error: "We couldn't send your request. Please try again.",
+  },
+};
+
+export default track;
+export type TrackMessages = typeof track;

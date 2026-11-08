@@ -45,6 +45,8 @@ function formatLocationString(currentLocation: unknown): string {
 export interface PlannedMilestone {
   id: string;
   stageName: string;
+  /** Status code the stage stands for, so pages can show its name in their language. */
+  stageStatus?: string;
   location: string;
   facility: string;
   plannedDateTime: string;
@@ -239,6 +241,7 @@ export function generateShipmentPlan(
     {
       id: 'plan-orig-intake',
       stageName: shipmentStatusLabel('RECEIVED'),
+      stageStatus: 'RECEIVED',
       location: `${origin.city}, ${origin.state}`,
       facility: originFacility,
       plannedDateTime: `${d0} · ${tm0}`,
@@ -249,6 +252,7 @@ export function generateShipmentPlan(
     {
       id: 'plan-linehaul-depart',
       stageName: shipmentStatusLabel('DEPARTED_FACILITY'),
+      stageStatus: 'DEPARTED_FACILITY',
       location: `${origin.city}, ${origin.state}`,
       facility: originFacility,
       plannedDateTime: `${d1} · ${tm1}`,
@@ -259,6 +263,7 @@ export function generateShipmentPlan(
     {
       id: 'plan-midpoint-sort',
       stageName: midStageName,
+      stageStatus: 'IN_TRANSIT',
       location: midLocation,
       facility: midFacility,
       plannedDateTime: `${d2} · ${tm2}`,
@@ -269,6 +274,7 @@ export function generateShipmentPlan(
     {
       id: 'plan-dest-arrive',
       stageName: shipmentStatusLabel('DESTINATION_PROCESSING'),
+      stageStatus: 'DESTINATION_PROCESSING',
       location: `${destination.city}, ${destination.state}`,
       facility: destFacility,
       plannedDateTime: `${d3} · ${tm3}`,
@@ -279,6 +285,7 @@ export function generateShipmentPlan(
     {
       id: 'plan-out-delivery',
       stageName: shipmentStatusLabel('OUT_FOR_DELIVERY'),
+      stageStatus: 'OUT_FOR_DELIVERY',
       location: `${destination.city}, ${destination.state}`,
       facility: destFacility,
       plannedDateTime: `${d4} · ${tm4}`,
@@ -289,6 +296,7 @@ export function generateShipmentPlan(
     {
       id: 'plan-delivered',
       stageName: shipmentStatusLabel('DELIVERED'),
+      stageStatus: 'DELIVERED',
       location: `${destination.city}, ${destination.state}`,
       facility: 'Consignee Delivery Location',
       plannedDateTime: `${d5} · by ${tm5}`,

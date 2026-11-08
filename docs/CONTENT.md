@@ -466,6 +466,12 @@ French title. These are the existing English titles, unchanged; events staff typ
 `Payment confirmed` (§6.8) · `Checkpoint Scan Verified` (event added without a title) · a status change without a title
 shows the status name (§6.3).
 
+### 6.12 Interface strings added with E.5 (**owner to confirm**)
+- **Track page:** eyebrow `Track` · tabs name `How to track` · `Clear` · batch filter name `Show` · `All ({n})` · results `Origin` · `Destination` · `Last seen` · `Estimated delivery` · `Open tracking` · `{n} of {m} found` · `Close`. The help band says `Our team is here to help.` (§6.1; the earlier "24/7" line was an unconfirmed claim and is gone). "Where to find your ID" says email or WhatsApp, as §6.1.
+- **Support dialog:** `Cancel` · `Close` · without a tracking ID: `Ticket TX-TKT-###### opened. We'll reply to {email} shortly.`
+- **Track Result:** metric labels `Service` · `Estimated delivery` · `Distance` · `Current status`; `Tracking ID` · `Copy tracking ID` · `Copied` · `Last scan` · `Revised` · `On schedule` · `Shipment type` · `Total weight`; route `Total route {distance} · {mode}` · `{n}% complete`; map `Origin` · `Destination` · `Current position` · `Estimated position` · `Zoom in` · `Zoom out` · `Show the whole route` · map style `Streets` / `Satellite` / `Dark` · `Estimated position (based on the schedule):` · `Progressing along the planned route near {place}`; timeline `{n} of {m} milestones` · `Confirmed` · `Current` · `Estimated` · `All scans` · `No scans recorded yet.`; cards `Sender and recipient` · `From (sender)` · `To (recipient)` · `Special handling` · `Fragile:` · `Signature required:` · `Oversized:` · `Yes` / `No`; cargo-type detail labels (pets, pallets, containers, freight, documents) as in the code.
+- Removed in E.5 (they promised things that don't happen or showed invented values): the "Get Delivery Alerts" form (#46, it saved nothing), "Transport type: Open Auto Carrier", "Vehicle handling: Standard No Liftgate Required", and the "New York" / "Los Angeles" placeholders shown when a city was missing.
+
 ---
 
 ## 7. Quote, Ship, Public Quote Result

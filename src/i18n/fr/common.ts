@@ -109,6 +109,11 @@ const common = {
     CONTACT_REQUIRED: 'Veuillez saisir une adresse e-mail ou un numéro de téléphone avec son indicatif pays.',
     INVALID_EMAIL: 'Veuillez saisir une adresse e-mail valide.',
   },
+  trackingLoading: {
+    locating: 'Localisation de votre envoi…',
+    scans: 'Vérification des derniers scans…',
+    route: "Tracé de l'itinéraire…",
+  },
 } satisfies Translation<CommonMessages>;
 
 export default common;

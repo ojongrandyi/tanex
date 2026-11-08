@@ -21,7 +21,6 @@ import {
   FileText,
   Activity,
   Layers,
-  Bell,
   ChevronDown,
   RotateCcw,
   PawPrint,
@@ -37,18 +36,16 @@ import {
 import { Shipment, TrackingEvent, RouteCheckpoint, ShipmentStatus } from '../types/shipment';
 import { Barcode } from '../components/Barcode';
 import { JourneyMap } from '../components/JourneyMap';
-import { ResponsiveImage } from '../components/ResponsiveImage';
 import { MultiPieceList } from '../components/MultiPieceList';
 import { PackageGallery, type GalleryImage } from '../components/PackageGallery';
 import { legacyPhotoUrls } from '../shared/legacyPhotos';
 import { shipmentStatusLabel, shipmentStatusTone } from '../shared/shipmentStatus';
 import { eventTitleText } from '../shared/eventTitles';
-import { useLocale } from '../i18n/I18nProvider';
+import { useAreaT, useLocale } from '../i18n/I18nProvider';
 import { SupportModal } from '../components/SupportModal';
 import { calculateRouteGeometry, inferTransportMode } from '../services/routingEngine';
 import { timeZoneForPlace } from '../shared/timeZones';
 import { formatDimensions, formatDistance, formatWeight } from '../shared/units';
-import { TRANSPORT_LEG_LABELS } from '../shared/transportMode';
 import { useUnitSystem } from '../utils/useUnitSystem';
 import { UnitToggle } from '../components/forms/UnitControls';
 import { simulationEngine } from '../services/simulationEngine';
@@ -81,6 +78,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   // Status names and server-written event titles follow the page language (I18N_SPEC §5); the
   // rest of this page is translated with task E.5.
   const locale = useLocale();
+  const t = useAreaT('trackResult');
 
   useEffect(() => {
     setLiveShipment(prev => applyForwardOnlyShipmentUpdate(prev, shipment));
@@ -135,10 +133,6 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   const [supportOpen, setSupportOpen] = useState(false);
   const [copiedNumber, setCopiedNumber] = useState(false);
   const [showEarlierEvents, setShowEarlierEvents] = useState(false);
-  const [alertsModalOpen, setAlertsModalOpen] = useState(false);
-  const [alertPhone, setAlertPhone] = useState('');
-  const [alertEmail, setAlertEmail] = useState('');
-  const [alertSuccess, setAlertSuccess] = useState(false);
 
   // Safe field extraction from synchronized liveShipment
   const trackingNum = liveShipment?.trackingNumber || shipment?.trackingNumber || '';
@@ -163,7 +157,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   const isPet = liveShipment?.shipmentType === 'Pets' || !!liveShipment?.petDetails;
   const pet = liveShipment?.petDetails;
   
-  const originCity = liveShipment?.origin?.city || shipment?.origin?.city || 'New York';
+  const originCity = liveShipment?.origin?.city || shipment?.origin?.city || '';
   const originState = liveShipment?.origin?.state || shipment?.origin?.state || 'NY';
   // No fallback — ZIP is optional at booking (CreateShipmentView), and showing a fake one for
   // a shipment that genuinely doesn't have it on file is exactly the "shows a placeholder
@@ -172,7 +166,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   // that value only ever survives in memory until the next refetch, when it silently reverts
   // to nothing; postalCode on the party record is what actually round-trips through the API.
   const originZip = (liveShipment?.sender as any)?.postalCode || (liveShipment?.origin as any)?.zip || (shipment?.sender as any)?.postalCode || (shipment?.origin as any)?.zip;
-  const destCity = liveShipment?.destination?.city || shipment?.destination?.city || 'Los Angeles';
+  const destCity = liveShipment?.destination?.city || shipment?.destination?.city || '';
   const destState = liveShipment?.destination?.state || shipment?.destination?.state || 'CA';
   const destZip = (liveShipment?.recipient as any)?.postalCode || (liveShipment?.destination as any)?.zip || (shipment?.recipient as any)?.postalCode || (shipment?.destination as any)?.zip;
   // Facility names only when stored (no invented terminal names).
@@ -226,7 +220,6 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   const cargoType = liveShipment?.shipmentType || 'Freight';
   const cargoDescription = liveShipment?.cargoDescription || shipment?.cargoDescription || 'General cargo';
   const shipmentType = cargoType === 'Vehicle' ? 'Freight' : cargoType;
-  const transportType = 'Open Auto Carrier';
   // Stored in pounds; shown in the viewer's units (no invented fallback weight)
   const totalWeight = Number(liveShipment?.totalWeightLbs || shipment?.totalWeightLbs || 0);
   const [unitSystem] = useUnitSystem();
@@ -237,13 +230,13 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   // CreateShipmentView); Company/Email/Phone are explicitly optional there, so a blank one
   // must not show a fabricated fallback value here: those fields are conditionally rendered
   // below and simply omitted when empty.
-  const senderName = shipment?.sender?.name || 'Shipper';
+  const senderName = shipment?.sender?.name || t('parties.sender');
   const senderCompany = shipment?.sender?.company;
   const senderAddress = shipment?.sender?.addressLine;
   const senderPhone = shipment?.sender?.phone;
   const senderEmail = shipment?.sender?.email;
 
-  const recipientName = shipment?.recipient?.name || 'Consignee';
+  const recipientName = shipment?.recipient?.name || t('parties.recipient');
   const recipientCompany = shipment?.recipient?.company;
   const recipientAddress = shipment?.recipient?.addressLine;
   const recipientPhone = shipment?.recipient?.phone;
@@ -259,7 +252,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
       name: originCity,
       state: originState,
       type: 'origin',
-      statusLabel: 'Origin',
+      statusLabel: t('map.origin'),
       lat: (liveShipment?.origin as any)?.lat || (shipment?.origin as any)?.lat || originGeo.lat,
       lng: (liveShipment?.origin as any)?.lng || (shipment?.origin as any)?.lng || originGeo.lng,
     },
@@ -268,7 +261,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
       name: currentCity,
       state: currentState,
       type: 'current',
-      statusLabel: 'Current Location',
+      statusLabel: t('map.current'),
       lat: (liveShipment?.currentLocation as any)?.lat || currentGeo.lat,
       lng: (liveShipment?.currentLocation as any)?.lng || currentGeo.lng,
     },
@@ -277,7 +270,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
       name: destCity,
       state: destState,
       type: 'destination',
-      statusLabel: 'Destination',
+      statusLabel: t('map.destination'),
       dateLabel: `${estDeliveryDate} • ${estDeliveryTime}`,
       lat: (liveShipment?.destination as any)?.lat || (shipment?.destination as any)?.lat || destGeo.lat,
       lng: (liveShipment?.destination as any)?.lng || (shipment?.destination as any)?.lng || destGeo.lng,
@@ -360,7 +353,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   // Captioned package images first, then older uncaptioned photos (CONTENT.md §6.6).
   const galleryImages: GalleryImage[] = useMemo(() => [
     ...(liveShipment.images ?? []),
-    ...legacyPhotoUrls(liveShipment.photos).map((url, i) => ({ url, caption: `Shipment photo ${i + 1}`, width: null, height: null })),
+    ...legacyPhotoUrls(liveShipment.photos).map((url, i) => ({ url, caption: t('gallery.untitled', { n: i + 1 }), width: null, height: null })),
   ], [liveShipment.images, liveShipment.photos]);
 
   const eventsList: TrackingEvent[] = useMemo(() => {
@@ -430,7 +423,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
     );
     return milestones.map((m, idx) => ({
       id: m.id,
-      title: m.stageName,
+      title: m.stageStatus ? shipmentStatusLabel(m.stageStatus, locale) : m.stageName,
       dateStr: m.plannedDateTime,
       location: m.location,
       statusType: (idx === lastConfirmedIndex && status !== 'DELIVERED')
@@ -440,7 +433,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
           : ('estimated' as const),
       description: m.description
     }));
-  }, [plan.plannedMilestones, status]);
+  }, [plan.plannedMilestones, status, locale]);
 
   const scrollToTimeline = () => {
     const el = document.getElementById('shipment-timeline-section');
@@ -449,20 +442,11 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
     }
   };
 
-  const handleSubscribeAlerts = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAlertSuccess(true);
-    setTimeout(() => {
-      setAlertSuccess(false);
-      setAlertsModalOpen(false);
-    }, 2000);
-  };
-
   // CONTENT §6.3 lines. The ETA is given in the destination's local time zone.
   const destZone = timeZoneForPlace({ city: destCity, state: destState });
-  const destZoneName = destZone === 'UTC' ? 'UTC' : `${(destZone.split('/').pop() || destZone).replace(/_/g, ' ')} time`;
+  const destZoneName = destZone === 'UTC' ? 'UTC' : t('summary.zoneTime', { zone: (destZone.split('/').pop() || destZone).replace(/_/g, ' ') });
   const etaLine = estDeliveryDate
-    ? `Estimated delivery: ${[estDeliveryDate, estDeliveryTime].filter(Boolean).join(', ')} (${destZoneName})`
+    ? t('summary.etaLine', { date: [estDeliveryDate, estDeliveryTime].filter(Boolean).join(', '), zone: destZoneName })
     : '';
   // Delivered: date and time of the delivery scan; the signer comes from the admin's delivery
   // record ("Delivered (Signed by …)"), already masked by the public API.
@@ -472,7 +456,10 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
   const deliveredTime = deliveredEvent?.displayTime || lastUpdatedTime;
   const signerMatch = /signed (?:for )?by ([^().]+)/i.exec(`${liveShipment?.statusText || ''} ${deliveredEvent?.description || ''}`);
   const signer = signerMatch ? signerMatch[1].trim() : '';
-  const deliveredLine = `Delivered ${deliveredDate}${deliveredTime ? ` at ${deliveredTime}` : ''}.${signer ? ` Signed by ${signer}.` : ''}`;
+  const deliveredLine = [
+    deliveredTime ? t('summary.deliveredLineTime', { date: deliveredDate, time: deliveredTime }) : t('summary.deliveredLine', { date: deliveredDate }),
+    signer ? t('summary.signedBy', { name: signer }) : '',
+  ].filter(Boolean).join(' ');
   const statusLine = isDelivered ? deliveredLine : etaLine;
 
   return (
@@ -481,17 +468,6 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
           0. HERO BANNER
           ========================================================================= */}
       <section className="ngf-cinematic-hero-section">
-        <div className="ngf-hero-backdrop-img">
-          <ResponsiveImage
-            name="track-hero"
-            alt="Lorry with its headlights on, driving a mountain road at dusk"
-            eager
-            sizes="100vw"
-            className="hero-bg-media"
-            imgClassName="hero-bg-photo"
-          />
-          <div className="ngf-hero-overlay" />
-        </div>
 
         <div className="ngf-hero-content-wrap">
           {/* Top Breadcrumb & Status */}
@@ -502,7 +478,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
               onClick={() => onNavigate('track')}
             >
               <ArrowLeft size={16} />
-              <span>Back to tracking</span>
+              <span>{t('back')}</span>
             </button>
           </div>
 
@@ -519,12 +495,12 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
           <div className="hero-route-strip">
             <div className="hero-route-stop">
               <MapPin size={16} className="text-blue" />
-              <span>{originCity}, {originState}</span>
+              <span>{[originCity, originState].filter(Boolean).join(', ')}</span>
             </div>
             <ArrowRight size={14} className="hero-route-arrow" />
             <div className="hero-route-stop">
               <MapPin size={16} className="text-blue" />
-              <span>{destCity}, {destState}</span>
+              <span>{[destCity, destState].filter(Boolean).join(', ')}</span>
             </div>
           </div>
 
@@ -535,7 +511,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <Zap size={18} />
               </div>
               <div className="hero-metric-text">
-                <span className="hero-metric-lbl">Service Level</span>
+                <span className="hero-metric-lbl">{t('metrics.service')}</span>
                 <strong className="hero-metric-val">{service}</strong>
               </div>
             </div>
@@ -547,7 +523,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <Calendar size={18} />
               </div>
               <div className="hero-metric-text">
-                <span className="hero-metric-lbl">Est. Delivery</span>
+                <span className="hero-metric-lbl">{t('metrics.eta')}</span>
                 <strong className="hero-metric-val">{estDeliveryText}</strong>
               </div>
             </div>
@@ -559,7 +535,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <Truck size={18} />
               </div>
               <div className="hero-metric-text">
-                <span className="hero-metric-lbl">Distance</span>
+                <span className="hero-metric-lbl">{t('metrics.distance')}</span>
                 <strong className="hero-metric-val">{formatDistance(routeGeom.distanceMiles, unitSystem)}</strong>
               </div>
             </div>
@@ -571,7 +547,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <Activity size={18} />
               </div>
               <div className="hero-metric-text">
-                <span className="hero-metric-lbl">Current Status</span>
+                <span className="hero-metric-lbl">{t('metrics.status')}</span>
                 <strong className={`hero-metric-val ${hasRevisedSchedule ? 'text-amber' : 'text-emerald'}`}>
                   {statusDisplayLabel}
                 </strong>
@@ -602,7 +578,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
             <RotateCcw size={18} className="text-amber" />
             <div>
               <strong>{shipmentStatusLabel('RETURNED')} ({shipment.returnLeg.reason})</strong>
-              <p>Returning to {originCity}{originState ? `, ${originState}` : ''}. Return tracking ID: <span className="font-mono">{shipment.returnLeg.returnTrackingNumber}</span></p>
+              <p>{t('returning', { place: [originCity, originState].filter(Boolean).join(', '), id: shipment.returnLeg.returnTrackingNumber })}</p>
             </div>
           </div>
         )}
@@ -613,7 +589,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
             <RotateCcw size={18} className="text-amber" />
             <div>
               <strong>{shipmentStatusLabel('RETURNED')}</strong>
-              <p>This is the return of shipment <span className="font-mono">{shipment.returnOf}</span> to its sender.</p>
+              <p>{t('returnOf', { id: shipment.returnOf })}</p>
             </div>
           </div>
         )}
@@ -625,14 +601,15 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
           <div className="hero-summary-grid">
             {/* Column 1: Tracking Number & Barcode */}
             <div className="hero-col-barcode">
-              <span className="hero-col-label">Tracking Number</span>
+              <span className="hero-col-label">{t('summary.trackingId')}</span>
               <div className="tracking-number-row">
                 <h3 className="tracking-number-val font-mono">{trackingNum}</h3>
                 <button
                   type="button"
                   className="copy-btn-inline"
                   onClick={handleCopyTrackingNumber}
-                  title="Copy Tracking Number"
+                  title={t('summary.copy')}
+                  aria-label={copiedNumber ? t('summary.copied') : t('summary.copy')}
                 >
                   {copiedNumber ? <Check size={16} className="text-emerald" /> : <Copy size={16} />}
                 </button>
@@ -652,7 +629,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
 
             {/* Column 2: Current Status & Details */}
             <div className="hero-col-status">
-              <span className="hero-col-label">Current Status</span>
+              <span className="hero-col-label">{t('summary.status')}</span>
               <h2 className="status-hero-heading">
                 {statusDisplayLabel}
               </h2>
@@ -663,14 +640,14 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
               )}
 
               <div className="last-recorded-checkpoint-box">
-                <span className="chk-label">LAST SCAN</span>
+                <span className="chk-label">{t('summary.lastScan')}</span>
                 <span className="chk-val">{currentLocationText}{currentLocationText ? ' · ' : ''}{lastUpdated}</span>
               </div>
             </div>
 
             {/* Column 3: Estimated Delivery & Meta Specs */}
             <div className="hero-col-eta-specs">
-              <span className="hero-col-label">ESTIMATED DELIVERY</span>
+              <span className="hero-col-label">{t('summary.eta')}</span>
               <div className="eta-highlight-box">
                 <div className="eta-date-row">
                   <Calendar size={22} className="text-blue" />
@@ -682,12 +659,12 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 {hasRevisedSchedule ? (
                   <span className="on-schedule-pill revised">
                     <Clock size={13} />
-                    <span>Revised</span>
+                    <span>{t('summary.revised')}</span>
                   </span>
                 ) : (
                   <span className="on-schedule-pill">
                     <CheckCircle2 size={13} />
-                    <span>On Schedule</span>
+                    <span>{t('summary.onSchedule')}</span>
                   </span>
                 )}
               </div>
@@ -695,21 +672,15 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
               {/* Meta Specs Table */}
               <div className="hero-specs-mini-table">
                 <div className="spec-item-row">
-                  <span className="s-lbl">Service Level:</span>
+                  <span className="s-lbl">{t('summary.service')}</span>
                   <span className="s-val">{service}</span>
                 </div>
                 <div className="spec-item-row">
-                  <span className="s-lbl">Shipment Type:</span>
+                  <span className="s-lbl">{t('summary.type')}</span>
                   <span className="s-val">{shipmentType}</span>
                 </div>
-                {isVehicle && (
                 <div className="spec-item-row">
-                  <span className="s-lbl">Transport Type:</span>
-                  <span className="s-val">{transportType}</span>
-                </div>
-                )}
-                <div className="spec-item-row">
-                  <span className="s-lbl">Total Weight:</span>
+                  <span className="s-lbl">{t('summary.weight')}</span>
                   <span className="s-val">{totalWeightText}</span>
                 </div>
               </div>
@@ -723,8 +694,8 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <Navigation size={16} />
               </div>
               <div className="corridor-point-text">
-                <span className="corridor-label">ORIGIN</span>
-                <strong className="corridor-city">{originCity}, {originState}</strong>
+                <span className="corridor-label">{t('corridor.origin')}</span>
+                <strong className="corridor-city">{[originCity, originState].filter(Boolean).join(', ') || '—'}</strong>
                 {originFacility && <small className="corridor-facility">{originFacility}</small>}
               </div>
             </div>
@@ -732,13 +703,13 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
             <div className="corridor-track-wrapper">
               <div className="corridor-meta-badges">
                 <span className="corridor-dist-badge">
-                  <span>Total route {formatDistance(routeGeom.distanceMiles, unitSystem)} · {TRANSPORT_LEG_LABELS[transportMode]}</span>
+                  <span>{t('corridor.total', { distance: formatDistance(routeGeom.distanceMiles, unitSystem), mode: t(`modes.${transportMode}`) })}</span>
                 </span>
                 <span className="corridor-status-badge">
                   {status === 'DELIVERED' ? (
-                    <span className="text-emerald font-bold">✓ 100% Completed</span>
+                    <span className="text-emerald font-bold">✓ {t('corridor.complete', { n: 100 })}</span>
                   ) : (
-                    <span>● {progressPercent}% Completed</span>
+                    <span>● {t('corridor.complete', { n: progressPercent })}</span>
                   )}
                 </span>
                 <span className="corridor-sla-badge">
@@ -750,7 +721,8 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                   className={`corridor-progress-fill ${status === 'DELIVERED' ? 'delivered' : ''}`}
                   style={{ width: `${Math.min(Math.max(progressPercent, 5), 100)}%` }}
                 >
-                  <span className="corridor-hauler-indicator" title={`${progressPercent}% progress`}>
+                  <span className="corridor-hauler-indicator" title={t('corridor.progress', { n: progressPercent })}
+                    aria-hidden="true">
                     📦
                   </span>
                 </div>
@@ -762,8 +734,8 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <MapPin size={16} />
               </div>
               <div className="corridor-point-text">
-                <span className="corridor-label">DESTINATION</span>
-                <strong className="corridor-city">{destCity}, {destState}</strong>
+                <span className="corridor-label">{t('corridor.destination')}</span>
+                <strong className="corridor-city">{[destCity, destState].filter(Boolean).join(', ') || '—'}</strong>
                 {destFacility && <small className="corridor-facility">{destFacility}</small>}
               </div>
             </div>
@@ -774,15 +746,15 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
             2. FULL-WIDTH INTERACTIVE ROUTE MAP
             ========================================================================= */}
         <section className="ngf-route-map-section" aria-labelledby="track-route-title">
-          <h3 id="track-route-title" className="card-section-title ngf-route-title">Route</h3>
+          <h3 id="track-route-title" className="card-section-title ngf-route-title">{t('route.title')}</h3>
           <JourneyMap
             checkpoints={routeCheckpoints}
             currentLocationText={currentLocationText}
             currentLat={currentLat}
             currentLng={currentLng}
-            lastEventDescription={isDelivered ? statusDisplayLabel : `${statusDisplayLabel} · ${TRANSPORT_LEG_LABELS[transportMode].toLowerCase()} to ${destCity}`}
+            lastEventDescription={isDelivered ? statusDisplayLabel : t('route.towards', { status: statusDisplayLabel, mode: t(`modes.${transportMode}`).toLowerCase(), city: destCity })}
             totalDistance={formatDistance(routeGeom.distanceMiles, unitSystem)}
-            transitTime={`${plan.serviceCommitmentHours} Hours`}
+            transitTime={t('route.hours', { n: plan.serviceCommitmentHours })}
             progressPercent={progressPercent}
             shipmentStatus={status}
             delayNotice={liveShipment.delayNotice}
@@ -810,9 +782,9 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
           <div id="shipment-timeline-section" className="content-col-timeline">
             <div className="timeline-card">
               <div className="timeline-card-header">
-                <h3 className="card-section-title" style={{ margin: 0 }}>Journey timeline</h3>
+                <h3 className="card-section-title" style={{ margin: 0 }}>{t('timeline.title')}</h3>
                 <span className="timeline-count-tag font-mono">
-                  {referenceTimelineEvents.filter(e => e.statusType === 'confirmed' || e.statusType === 'current').length} of {referenceTimelineEvents.length} milestones
+                  {t('timeline.count', { n: referenceTimelineEvents.filter(e => e.statusType === 'confirmed' || e.statusType === 'current').length, m: referenceTimelineEvents.length })}
                 </span>
               </div>
 
@@ -842,7 +814,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                         <div className="t-event-head-row">
                           <h4 className={`t-event-title ${isCurrent ? 'text-blue' : ''}`}>{eventTitleText(evt, locale)}</h4>
                           <span className={`t-tag ${evt.statusType}`}>
-                            {evt.statusType === 'confirmed' ? 'Confirmed' : evt.statusType === 'current' ? 'Current' : 'Estimated'}
+                            {evt.statusType === 'confirmed' ? t('timeline.confirmed') : evt.statusType === 'current' ? t('timeline.current') : t('timeline.estimated')}
                           </span>
                         </div>
                         <div className="t-event-meta-sub">
@@ -862,7 +834,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 className="view-full-timeline-action-btn"
                 onClick={() => setShowEarlierEvents(!showEarlierEvents)}
               >
-                <span>{showEarlierEvents ? 'Hide scan history' : 'Show scan history'}</span>
+                <span>{showEarlierEvents ? t('timeline.hide') : t('timeline.show')}</span>
                 <ChevronDown size={15} style={{ transform: showEarlierEvents ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
               </button>
 
@@ -870,17 +842,17 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
               {showEarlierEvents && (
                 <div className="timeline-extended-logs animate-fade-in">
                   <div className="extended-logs-header">
-                    <span className="font-mono text-xs text-slate-500 font-bold uppercase tracking-wider">All scans</span>
+                    <span className="font-mono text-xs text-slate-500 font-bold uppercase tracking-wider">{t('timeline.allScans')}</span>
                   </div>
                   {eventsList.length === 0 && (
                     <div className="extended-scan-item">
-                      <div className="scan-title">No scans recorded yet.</div>
+                      <div className="scan-title">{t('timeline.none')}</div>
                     </div>
                   )}
                   {eventsList.map((evt, idx) => (
                     <div key={evt.id || idx} className="extended-scan-item">
                       <div className="scan-time font-mono">{evt.displayDate} · {evt.displayTime}</div>
-                      <div className="scan-title">{eventTitleText(evt, locale)} —{[evt.city, evt.state].filter(Boolean).join(', ')}</div>
+                      <div className="scan-title">{eventTitleText(evt, locale)}{evt.city || evt.state ? ` · ${[evt.city, evt.state].filter(Boolean).join(', ')}` : ''}</div>
                       <div className="scan-facility text-xs text-slate-500">{evt.facility}</div>
                     </div>
                   ))}
@@ -899,47 +871,47 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 Details" card below already covers everything relevant for them. */}
             {!isVehicle && isPet && pet && (
               <div className="shipment-details-spec-card">
-                <h3 className="card-section-title">Live Animal Details</h3>
+                <h3 className="card-section-title">{t('pet.title')}</h3>
                 <div className="shipment-details-two-col-grid">
                   <div className="detail-cell">
                     <PawPrint size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Pet Name</small>
+                      <small>{t('pet.name')}</small>
                       <strong>{pet.name || '—'}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Heart size={18} className="dtl-icon text-blue" />
                     <div className="dtl-cell-content">
-                      <small>Species / Breed</small>
+                      <small>{t('pet.species')}</small>
                       <strong>{[pet.species, pet.breed].filter(Boolean).join(' — ') || '—'}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Scale size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Weight</small>
+                      <small>{t('pet.weight')}</small>
                       <strong>{pet.weightLbs ? formatWeight(pet.weightLbs, unitSystem) : '—'}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Box size={18} className="dtl-icon text-blue" />
                     <div className="dtl-cell-content">
-                      <small>Crate Type</small>
+                      <small>{t('pet.crate')}</small>
                       <strong>{pet.crateType || '—'}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <FileText size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Microchip Number</small>
+                      <small>{t('pet.microchip')}</small>
                       <strong className="font-mono">{pet.microchipNumber || '—'}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Stethoscope size={18} className="dtl-icon text-blue" />
                     <div className="dtl-cell-content">
-                      <small>Vet Clinic</small>
+                      <small>{t('pet.vet')}</small>
                       <strong>{pet.vetClinicName || '—'}</strong>
                     </div>
                   </div>
@@ -949,34 +921,34 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
 
             {!isVehicle && liveShipment?.shipmentType === 'Pallet' && liveShipment?.palletDetails && (
               <div className="shipment-details-spec-card">
-                <h3 className="card-section-title">Pallet Specifications</h3>
+                <h3 className="card-section-title">{t('pallet.title')}</h3>
                 <div className="shipment-details-two-col-grid">
                   <div className="detail-cell">
                     <Layers size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Pallet Standard</small>
+                      <small>{t('pallet.standard')}</small>
                       <strong>{liveShipment.palletDetails.standard}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Box size={18} className="dtl-icon text-blue" />
                     <div className="dtl-cell-content">
-                      <small>Skid Count</small>
+                      <small>{t('pallet.count')}</small>
                       <strong>{liveShipment.palletDetails.count}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Scale size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Weight Per Skid</small>
+                      <small>{t('pallet.perSkid')}</small>
                       <strong>{formatWeight(liveShipment.palletDetails.weightPerSkidLbs, unitSystem)}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <ShieldCheck size={18} className="dtl-icon text-emerald" />
                     <div className="dtl-cell-content">
-                      <small>Stackable</small>
-                      <strong>{liveShipment.palletDetails.stackable ? 'Yes' : 'No — Top-Tier Only'}</strong>
+                      <small>{t('pallet.stackable')}</small>
+                      <strong>{liveShipment.palletDetails.stackable ? t('handling.yes') : t('pallet.notStackable')}</strong>
                     </div>
                   </div>
                 </div>
@@ -985,33 +957,33 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
 
             {!isVehicle && liveShipment?.shipmentType === 'Container' && liveShipment?.containerDetails && (
               <div className="shipment-details-spec-card">
-                <h3 className="card-section-title">Intermodal Container Details</h3>
+                <h3 className="card-section-title">{t('container.title')}</h3>
                 <div className="shipment-details-two-col-grid">
                   <div className="detail-cell">
                     <Container size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Container Number</small>
+                      <small>{t('container.number')}</small>
                       <strong className="font-mono">{liveShipment.containerDetails.containerNumber}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Box size={18} className="dtl-icon text-blue" />
                     <div className="dtl-cell-content">
-                      <small>ISO Size</small>
+                      <small>{t('container.size')}</small>
                       <strong>{liveShipment.containerDetails.isoSize}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Lock size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Bolt Seal</small>
+                      <small>{t('container.seal')}</small>
                       <strong className="font-mono">{liveShipment.containerDetails.boltSeal}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Building2 size={18} className="dtl-icon text-blue" />
                     <div className="dtl-cell-content">
-                      <small>Terminal</small>
+                      <small>{t('container.terminal')}</small>
                       <strong>{liveShipment.containerDetails.terminal}</strong>
                     </div>
                   </div>
@@ -1021,41 +993,41 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
 
             {!isVehicle && liveShipment?.shipmentType === 'Freight' && liveShipment?.freightDetails && (
               <div className="shipment-details-spec-card">
-                <h3 className="card-section-title">Heavy Freight & LTL Details</h3>
+                <h3 className="card-section-title">{t('freight.title')}</h3>
                 <div className="shipment-details-two-col-grid">
                   <div className="detail-cell">
                     <Truck size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Freight Class</small>
+                      <small>{t('freight.class')}</small>
                       <strong>{liveShipment.freightDetails.freightClass}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <FileText size={18} className="dtl-icon text-blue" />
                     <div className="dtl-cell-content">
-                      <small>NMFC Code</small>
+                      <small>{t('freight.nmfc')}</small>
                       <strong className="font-mono">{liveShipment.freightDetails.nmfcCode}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Box size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Loading Method</small>
+                      <small>{t('freight.loading')}</small>
                       <strong>{liveShipment.freightDetails.loadingMethod}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <ShieldCheck size={18} className="dtl-icon text-emerald" />
                     <div className="dtl-cell-content">
-                      <small>Liftgate</small>
+                      <small>{t('freight.liftgate')}</small>
                       <strong>
                         {liveShipment.freightDetails.liftgatePickup && liveShipment.freightDetails.liftgateDelivery
-                          ? 'Pickup & Delivery'
+                          ? t('freight.liftBoth')
                           : liveShipment.freightDetails.liftgateDelivery
-                            ? 'Delivery Only'
+                            ? t('freight.liftDelivery')
                             : liveShipment.freightDetails.liftgatePickup
-                              ? 'Pickup Only'
-                              : 'Not Required'}
+                              ? t('freight.liftPickup')
+                              : t('freight.liftNone')}
                       </strong>
                     </div>
                   </div>
@@ -1065,33 +1037,33 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
 
             {!isVehicle && liveShipment?.shipmentType === 'Document' && liveShipment?.documentDetails && (
               <div className="shipment-details-spec-card">
-                <h3 className="card-section-title">Secure Document Details</h3>
+                <h3 className="card-section-title">{t('document.title')}</h3>
                 <div className="shipment-details-two-col-grid">
                   <div className="detail-cell">
                     <FileText size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Envelope / Pouch Type</small>
+                      <small>{t('document.pouch')}</small>
                       <strong>{liveShipment.documentDetails.envelopeType}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Lock size={18} className="dtl-icon text-blue" />
                     <div className="dtl-cell-content">
-                      <small>Seal Number</small>
+                      <small>{t('document.seal')}</small>
                       <strong className="font-mono">{liveShipment.documentDetails.sealNumber}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <ShieldCheck size={18} className="dtl-icon text-emerald" />
                     <div className="dtl-cell-content">
-                      <small>Signature Requirement</small>
-                      <strong>{liveShipment.documentDetails.directSignOnly ? 'Direct Signature Only' : 'Standard Signature'}</strong>
+                      <small>{t('document.signature')}</small>
+                      <strong>{liveShipment.documentDetails.directSignOnly ? t('document.signDirect') : t('document.signStandard')}</strong>
                     </div>
                   </div>
                   <div className="detail-cell">
                     <Clock size={18} className="dtl-icon text-slate-500" />
                     <div className="dtl-cell-content">
-                      <small>Delivery Deadline</small>
+                      <small>{t('document.deadline')}</small>
                       <strong>{liveShipment.documentDetails.urgentDeadline || '—'}</strong>
                     </div>
                   </div>
@@ -1102,7 +1074,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
             {/* Card 2: Shipment Details (2-Column Icon Grid) */}
             <div className="shipment-details-spec-card">
               <div className="ngf-heading-with-units">
-                <h3 className="card-section-title">Shipment summary</h3>
+                <h3 className="card-section-title">{t('details.title')}</h3>
                 <UnitToggle />
               </div>
               <div className="shipment-details-two-col-grid">
@@ -1110,14 +1082,15 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="detail-cell">
                   <FileText size={18} className="dtl-icon text-slate-500" />
                   <div className="dtl-cell-content">
-                    <small>Tracking Number</small>
+                    <small>{t('details.trackingId')}</small>
                     <div className="tracking-with-copy">
                       <strong className="font-mono">{trackingNum}</strong>
                       <button
                         type="button"
                         onClick={handleCopyTrackingNumber}
                         className="inline-copy-btn"
-                        title="Copy tracking number"
+                        title={t('summary.copy')}
+                        aria-label={t('summary.copy')}
                       >
                         <Copy size={12} />
                       </button>
@@ -1128,9 +1101,9 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="detail-cell">
                   <MapPin size={18} className="dtl-icon text-blue" />
                   <div className="dtl-cell-content">
-                    <small>Origin</small>
+                    <small>{t('details.origin')}</small>
                     <strong>
-                      {originCity}, {originState}
+                      {[originCity, originState].filter(Boolean).join(', ') || '—'}
                       <span className="gps-sub font-mono">
                         ({Number(routeCheckpoints[0].lat).toFixed(4)}, {Number(routeCheckpoints[0].lng).toFixed(4)})
                       </span>
@@ -1142,7 +1115,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="detail-cell">
                   <Car size={18} className="dtl-icon text-slate-500" />
                   <div className="dtl-cell-content">
-                    <small>Cargo</small>
+                    <small>{t('details.cargo')}</small>
                     <strong>{cargoDescription}</strong>
                   </div>
                 </div>
@@ -1150,9 +1123,9 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="detail-cell">
                   <MapPin size={18} className="dtl-icon text-blue" />
                   <div className="dtl-cell-content">
-                    <small>Destination</small>
+                    <small>{t('details.destination')}</small>
                     <strong>
-                      {destCity}, {destState}
+                      {[destCity, destState].filter(Boolean).join(', ') || '—'}
                       <span className="gps-sub font-mono">
                         ({Number(routeCheckpoints[2].lat).toFixed(4)}, {Number(routeCheckpoints[2].lng).toFixed(4)})
                       </span>
@@ -1164,7 +1137,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="detail-cell">
                   <Scale size={18} className="dtl-icon text-slate-500" />
                   <div className="dtl-cell-content">
-                    <small>Weight</small>
+                    <small>{t('details.weight')}</small>
                     <strong>{totalWeightText}</strong>
                   </div>
                 </div>
@@ -1172,7 +1145,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="detail-cell">
                   <Package size={18} className="dtl-icon text-blue" />
                   <div className="dtl-cell-content">
-                    <small>Service Level</small>
+                    <small>{t('details.service')}</small>
                     <strong>{service}</strong>
                   </div>
                 </div>
@@ -1181,7 +1154,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="detail-cell">
                   <Box size={18} className="dtl-icon text-slate-500" />
                   <div className="dtl-cell-content">
-                    <small>Dimensions</small>
+                    <small>{t('details.dimensions')}</small>
                     <strong>{dimensionsText || '—'}</strong>
                   </div>
                 </div>
@@ -1189,7 +1162,7 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="detail-cell">
                   <ShieldCheck size={18} className="dtl-icon text-emerald" />
                   <div className="dtl-cell-content">
-                    <small>Status</small>
+                    <small>{t('details.status')}</small>
                     <strong className="status-highlight text-emerald">
                       <span className="mini-green-pulse" />
                       {statusDisplayLabel}
@@ -1210,18 +1183,18 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
 
             {/* Card 3: Shipment Parties (Side-by-side Sender and Recipient) */}
             <div className="shipment-parties-card">
-              <h3 className="card-section-title">Shipment Parties</h3>
+              <h3 className="card-section-title">{t('parties.title')}</h3>
               <div className="parties-two-col-layout">
                 {/* Sender */}
                 <div className="party-box sender-box">
                   <div className="party-header-tag">
                     <User size={15} className="text-blue" />
-                    <span>From (Sender)</span>
+                    <span>{t('parties.from')}</span>
                   </div>
                   <h4 className="party-name">{senderName}</h4>
                   {senderCompany && <p className="party-company">{senderCompany}</p>}
                   {senderAddress && <p className="party-address">{senderAddress}</p>}
-                  <p className="party-city-state">{originCity}, {originState}{originZip ? ` ${originZip}` : ''}</p>
+                  <p className="party-city-state">{[originCity, originState].filter(Boolean).join(', ')}{originZip ? ` ${originZip}` : ''}</p>
                   {senderPhone && (
                     <a href={`tel:${senderPhone.replace(/[^0-9+]/g, '')}`} className="party-phone-link font-mono">
                       <Phone size={13} />
@@ -1240,12 +1213,12 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 <div className="party-box recipient-box">
                   <div className="party-header-tag">
                     <User size={15} className="text-blue" />
-                    <span>To (Recipient)</span>
+                    <span>{t('parties.to')}</span>
                   </div>
                   <h4 className="party-name">{recipientName}</h4>
                   {recipientCompany && <p className="party-company">{recipientCompany}</p>}
                   {recipientAddress && <p className="party-address">{recipientAddress}</p>}
-                  <p className="party-city-state">{destCity}, {destState}{destZip ? ` ${destZip}` : ''}</p>
+                  <p className="party-city-state">{[destCity, destState].filter(Boolean).join(', ')}{destZip ? ` ${destZip}` : ''}</p>
                   {recipientPhone && (
                     <a href={`tel:${recipientPhone.replace(/[^0-9+]/g, '')}`} className="party-phone-link font-mono">
                       <Phone size={13} />
@@ -1267,30 +1240,24 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
                 "Signature Required: Yes") that showed the same values for every shipment
                 regardless of what was actually set, and never surfaced `oversized` at all. */}
             <div className="special-handling-card">
-              <h3 className="card-section-title">Special Handling</h3>
+              <h3 className="card-section-title">{t('handling.title')}</h3>
               <div className="handling-items-row">
                 <div className="handling-pill">
-                  <span className="h-label">Fragile:</span>
+                  <span className="h-label">{t('handling.fragile')}</span>
                   <strong className={`h-val ${liveShipment?.handlingRequirements?.fragile ? 'text-amber' : ''}`}>
-                    {liveShipment?.handlingRequirements?.fragile ? 'Yes' : 'No'}
+                    {liveShipment?.handlingRequirements?.fragile ? t('handling.yes') : t('handling.no')}
                   </strong>
                 </div>
                 <div className="handling-pill">
-                  <span className="h-label">Signature Required:</span>
+                  <span className="h-label">{t('handling.signature')}</span>
                   <strong className={`h-val ${liveShipment?.handlingRequirements?.signatureRequired ? 'text-emerald' : ''}`}>
-                    {liveShipment?.handlingRequirements?.signatureRequired ? 'Yes' : 'No'}
+                    {liveShipment?.handlingRequirements?.signatureRequired ? t('handling.yes') : t('handling.no')}
                   </strong>
                 </div>
                 {liveShipment?.handlingRequirements?.oversized && (
                   <div className="handling-pill">
-                    <span className="h-label">Oversized:</span>
-                    <strong className="h-val text-amber">Yes</strong>
-                  </div>
-                )}
-                {isVehicle && (
-                  <div className="handling-pill">
-                    <span className="h-label">Vehicle Handling:</span>
-                    <strong className="h-val">Standard No Liftgate Required</strong>
+                    <span className="h-label">{t('handling.oversized')}</span>
+                    <strong className="h-val text-amber">{t('handling.yes')}</strong>
                   </div>
                 )}
               </div>
@@ -1307,16 +1274,9 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
             ========================================================================= */}
         <section className="ngf-help-banner-card">
           <div className="help-banner-left">
-            <ResponsiveImage
-              name="track-result-vehicle"
-              alt="Lorry travelling along a highway beneath mountains at dusk"
-              sizes="72px"
-              className="help-banner-photo"
-              imgClassName="help-banner-photo-img"
-            />
             <div>
-              <h3>Need help?</h3>
-              <p>Our operations desk is available 24/7.</p>
+              <h3>{t('help.title')}</h3>
+              <p>{t('help.body')}</p>
             </div>
           </div>
 
@@ -1329,68 +1289,11 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
             )}
             <button className="help-btn contact-btn" onClick={() => setSupportOpen(true)} type="button">
               <Headphones size={15} />
-              <span>Contact Support</span>
+              <span>{t('help.contact')}</span>
             </button>
           </div>
         </section>
       </div>
-
-      {/* =========================================================================
-          SUBSCRIBE TO ALERTS MODAL
-          ========================================================================= */}
-      {alertsModalOpen && (
-        <div className="alerts-modal-overlay animate-fade-in" onClick={() => setAlertsModalOpen(false)}>
-          <div className="alerts-modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="alerts-modal-header">
-              <div className="flex items-center gap-2">
-                <Bell size={20} className="text-blue" />
-                <h3>Get Delivery Alerts</h3>
-              </div>
-              <button className="modal-close-icon" onClick={() => setAlertsModalOpen(false)} type="button">×</button>
-            </div>
-            <p className="alerts-modal-sub">
-              Receive automatic SMS or email notifications whenever consignment <strong>{trackingNum}</strong> reaches a major sort hub or departs for final delivery.
-            </p>
-
-            {alertSuccess ? (
-              <div className="alerts-success-box animate-fade-in">
-                <CheckCircle2 size={24} className="text-emerald" />
-                <div>
-                  <h4>Subscribed Successfully!</h4>
-                  <p>You will receive live transit updates for this consignment.</p>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribeAlerts} className="alerts-modal-form">
-                <div className="form-group">
-                  <label>Mobile Number (SMS Updates)</label>
-                  <input
-                    type="tel"
-                    className="form-control"
-                    placeholder="(555) 000-0000"
-                    value={alertPhone}
-                    onChange={(e) => setAlertPhone(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Email Address</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="you@company.com"
-                    value={alertEmail}
-                    onChange={(e) => setAlertEmail(e.target.value)}
-                  />
-                </div>
-                <button type="submit" className="btn-confirm-alerts">
-                  <span>Activate Live Alerts</span>
-                  <ArrowRight size={16} />
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Support Dialog */}
       <SupportModal

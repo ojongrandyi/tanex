@@ -394,6 +394,47 @@ H1 : `Mentions légales`. Onglets : **Politique de confidentialité · Condition
 2. *Ce que nous faisons.* Les formulaires, boutons et menus fonctionnent au clavier et les champs ont des libellés. · Les images ont des alternatives textuelles, et le texte est dimensionné et coloré pour rester lisible. · Les cartes animées respectent le réglage de réduction des animations de votre appareil. · Les pages de suivi donnent l'itinéraire et chaque scan sous forme de texte, pas seulement sur la carte.
 3. *Signaler un obstacle.* Si quelque chose sur ce site est difficile à utiliser, écrivez à {{EMAIL}}. Indiquez la page et ce qui s'est passé : nous vous aiderons à obtenir ce dont vous avez besoin autrement pendant que nous corrigeons le problème.
 
+## 6. Suivi, résultat du suivi, chargement, assistance (ajouté avec E.5, **relecture native en attente**)
+
+### 6.1 Page Suivi
+- **H1 :** `Suivre votre envoi`
+- **Texte :** `Saisissez votre numéro de suivi TanEx à 8 caractères pour voir où se trouve votre envoi en ce moment.`
+- **Champ :** `ex. TX7K2M9P` · **Bouton :** `Suivre`
+- **Validation :** `Les numéros de suivi commencent par TX et comptent 8 caractères, ex. TX7K2M9P.`
+- **Introuvable :** `Nous n'avons trouvé aucun envoi avec le numéro {id}. Vérifiez les caractères et réessayez, ou contactez-nous et nous le retrouverons pour vous.`
+- **« Où trouver votre numéro » (3 cartes) :**
+  1. **Confirmation de réservation.** Dans l'e-mail ou le message WhatsApp envoyé lors de la réservation.
+  2. **Lettre de transport / étiquette.** Imprimé en haut de votre lettre de transport et sur l'étiquette de chaque colis.
+  3. **Votre coordinateur.** Tout coordinateur TanEx peut le retrouver à partir de votre nom, d'une référence ou de votre numéro de téléphone.
+- **Suivi multiple :** **Suivre plusieurs envois** · `Saisissez jusqu'à 10 numéros de suivi, un par ligne.`
+- **Bandeau d'aide :** **Besoin d'aide pour un envoi en cours ?** `Notre équipe est là pour vous aider.` → `Contacter l'assistance`
+
+### 6.2 Écran de chargement
+`Localisation de votre envoi…` · `Vérification des derniers scans…` · `Tracé de l'itinéraire…`
+
+### 6.3 Résultat du suivi : libellés
+- Statuts : **Réservé** · **Enlevé** · **À la porte d'entrée d'origine** · **Parti** · **En transit** · **Arrivé à la porte d'entrée de destination** · **Dédouanement** · **En cours de livraison** · **Livré** · **En attente** · **Retardé** · **Retour à l'expéditeur**
+- Panneaux : **Résumé de l'envoi** · **Itinéraire** · **Historique du trajet** · **Colis** · **Documents** · **Besoin d'aide ?**
+- Modes : `Par avion` · `Par bateau` · `Par route`
+- Site public pour les actions de l'administration : `Centre des opérations TanEx`
+- Livraison estimée : `Livraison estimée : {date}, {créneau} ({fuseau horaire local})`
+- Livré : `Livré le {date} à {heure}. Signé par {nom masqué}.`
+
+### 6.4 Fenêtre d'assistance
+- **H3 :** `Comment pouvons-nous vous aider pour cet envoi ?`
+- Champs : Numéro de suivi · Type de problème (Retard · Changement d'adresse · Dommage · Question de douane · Autre) · Message · E-mail · Nom
+- Bouton : `Ouvrir un ticket` · **Succès :** `Ticket TX-TKT-###### ouvert pour {numéro de suivi}. Nous répondrons à {e-mail} rapidement.`
+
+### 6.5 Libellés d'interface
+- Onglets : `Un numéro` · `Suivre plusieurs envois` · recherches récentes : `Suivis récemment`
+- Résultats multiples : `Ouvrir le suivi` · `Dernier passage` · `{n} sur {m} trouvés`
+- Résultat : `Retour au suivi` · `Dernier scan` · `Afficher l'historique des scans` / `Masquer l'historique des scans`
+- Anciens statuts : Exception → En attente · Tentative de livraison → Retardé · Sur un site → En transit · Créé / En attente d'enlèvement → Réservé · Annulé → `Annulé`
+
+### 6.6 Photos du colis
+- `Photos du colis` · `Photos ajoutées par notre équipe pour cet envoi.` · `Aucune photo n'a encore été ajoutée pour cet envoi.`
+- Sans légende : `Photo de l'envoi {n}` · Visionneuse : `Photo {n} sur {total}` · `Photo précédente` · `Photo suivante` · `Fermer` · `Ouvrir la photo : {légende}`
+
 ## 6.3 Suivi : noms des statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)
 `Réservé` · `Récupéré` · `À la plateforme de départ` · `Parti` · `En transit` · `Arrivé à la plateforme de destination` ·
 `Dédouanement` · `En cours de livraison` · `Livré` · `En attente` · `Retardé` · `Retour à l'expéditeur` · `Annulé`

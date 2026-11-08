@@ -26,6 +26,10 @@ import enContact from '../src/i18n/en/contact.ts';
 import frContact from '../src/i18n/fr/contact.ts';
 import enLegal from '../src/i18n/en/legal.ts';
 import frLegal from '../src/i18n/fr/legal.ts';
+import enTrack from '../src/i18n/en/track.ts';
+import frTrack from '../src/i18n/fr/track.ts';
+import enTrackResult from '../src/i18n/en/trackResult.ts';
+import frTrackResult from '../src/i18n/fr/trackResult.ts';
 import { legalDocs } from '../src/data/legalDocs.ts';
 import { HELP_ARTICLES } from '../src/data/helpArticles.ts';
 import { translate } from '../src/i18n/runtime.ts';
@@ -86,6 +90,21 @@ const SAME_IN_BOTH: Record<string, string> = {
   'contact:channels.whatsapp': 'brand name',
   'contact:offices.douala': 'place name',
   'contact:form.message': 'same word in French',
+  'track:batch.count': 'variables only',
+  'track:batch.delayedOrHeld': 'variables only',
+  'track:batch.destination': 'same word in French',
+  'track:support.message': 'same word in French',
+  'trackResult:metrics.service': 'same word in French',
+  'trackResult:metrics.distance': 'same word in French',
+  'trackResult:summary.service': 'same word in French',
+  'trackResult:corridor.destination': 'same word in French',
+  'trackResult:map.destination': 'same word in French',
+  'trackResult:map.layerSatellite': 'same word in French',
+  'trackResult:container.terminal': 'same word in French',
+  'trackResult:document.signature': 'same word in French',
+  'trackResult:details.destination': 'same word in French',
+  'trackResult:details.service': 'same word in French',
+  'trackResult:details.dimensions': 'same word in French',
 };
 
 const PAIRS: [string, Tree, Tree][] = [
@@ -98,6 +117,8 @@ const PAIRS: [string, Tree, Tree][] = [
   ['help', enHelp as unknown as Tree, frHelp as unknown as Tree],
   ['contact', enContact as unknown as Tree, frContact as unknown as Tree],
   ['legal', enLegal as unknown as Tree, frLegal as unknown as Tree],
+  ['track', enTrack as unknown as Tree, frTrack as unknown as Tree],
+  ['trackResult', enTrackResult as unknown as Tree, frTrackResult as unknown as Tree],
 ];
 
 test('fr dictionaries have exactly the English keys', () => {

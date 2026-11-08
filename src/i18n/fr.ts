@@ -17,4 +17,6 @@ export const AREA_LOADERS_FR: { [A in AreaName]: () => Promise<Translation<AreaM
   help: () => import('./fr/help').then((m) => m.default),
   contact: () => import('./fr/contact').then((m) => m.default),
   legal: () => import('./fr/legal').then((m) => m.default),
+  track: () => import('./fr/track').then((m) => m.default),
+  trackResult: () => import('./fr/trackResult').then((m) => m.default),
 };

@@ -1,3 +1,4 @@
+import { useAreaT } from '../i18n/I18nProvider';
 import React from 'react';
 import { PackagePiece } from '../types/shipment';
 import { Barcode } from './Barcode';
@@ -21,11 +22,12 @@ export const MultiPieceList: React.FC<MultiPieceListProps> = ({
   locationText,
   className = '',
 }) => {
+  const t = useAreaT('trackResult');
   const [unitSystem] = useUnitSystem();
   return (
     <div className={`ngf-pieces-card ${className}`}>
       <div className="ngf-pieces-header">
-        <h3 className="ngf-pieces-title">Pieces</h3>
+        <h3 className="ngf-pieces-title">{t('pieces.title')}</h3>
         <span className="ngf-pieces-count-badge">{pieces.length}</span>
       </div>
 
@@ -34,7 +36,7 @@ export const MultiPieceList: React.FC<MultiPieceListProps> = ({
           <div key={piece.id} className="ngf-piece-item">
             <div className="piece-item-top">
               <div className="piece-meta">
-                <span className="piece-label">Piece {String(piece.pieceNumber).padStart(2, '0')}</span>
+                <span className="piece-label">{t('pieces.piece', { n: String(piece.pieceNumber).padStart(2, '0') })}</span>
                 <span className="piece-tracking-id">{piece.trackingNumber}</span>
               </div>
               <div className="piece-status-wrap">

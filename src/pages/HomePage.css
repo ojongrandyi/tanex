@@ -56,7 +56,7 @@
   font: 600 1rem/1 var(--tx-font-mono); letter-spacing: .04em; color: var(--tx-choc-950);
 }
 .tx-track__input::placeholder { font-family: var(--tx-font-body); font-weight: 400; letter-spacing: 0; color: var(--tx-choc-500); }
-.tx-track__input:focus { outline: none; }
+.tx-track__input:focus, .tx-track__input:focus-visible { outline: none; box-shadow: none; }
 .tx-track:focus-within { box-shadow: var(--tx-shadow-lift), var(--tx-focus-ring, 0 0 0 3px rgb(244 136 0 / .55)); }
 .tx-track .tx-btn { border-radius: var(--tx-radius-pill, 999px); }
 .tx-home__hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }

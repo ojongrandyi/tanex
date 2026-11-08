@@ -112,6 +112,12 @@ const common = {
     social: 'Social media',
     copyright: '© {year} {legalName}. All rights reserved.',
   },
+  // CONTENT §6.2: shown while a tracking lookup runs (outside any page, so it lives in common).
+  trackingLoading: {
+    locating: 'Locating your shipment…',
+    scans: 'Checking the latest scans…',
+    route: 'Plotting the route…',
+  },
   errors,
 };
 
