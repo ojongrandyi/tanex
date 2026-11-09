@@ -34,6 +34,10 @@ import enQuote from '../src/i18n/en/quote.ts';
 import frQuote from '../src/i18n/fr/quote.ts';
 import enShip from '../src/i18n/en/ship.ts';
 import frShip from '../src/i18n/fr/ship.ts';
+import enPayment from '../src/i18n/en/payment.ts';
+import frPayment from '../src/i18n/fr/payment.ts';
+import { PAYMENT_TERMS_FR, paymentTerm } from '../src/i18n/paymentTerms.ts';
+import { PAYMENT_METHODS } from '../src/shared/paymentMethods.ts';
 import { legalDocs } from '../src/data/legalDocs.ts';
 import { HELP_ARTICLES } from '../src/data/helpArticles.ts';
 import { translate } from '../src/i18n/runtime.ts';
@@ -138,6 +142,7 @@ const PAIRS: [string, Tree, Tree][] = [
   ['trackResult', enTrackResult as unknown as Tree, frTrackResult as unknown as Tree],
   ['quote', enQuote as unknown as Tree, frQuote as unknown as Tree],
   ['ship', enShip as unknown as Tree, frShip as unknown as Tree],
+  ['payment', enPayment as unknown as Tree, frPayment as unknown as Tree],
 ];
 
 test('fr dictionaries have exactly the English keys', () => {
@@ -342,4 +347,18 @@ test('help: every article has a question and an answer in both languages', () =>
       assert.ok(entry?.q && entry?.a, a.key);
     }
   }
+});
+
+test('payment registry: every customer-facing string has French (src/i18n/paymentTerms.ts)', () => {
+  const missing: string[] = [];
+  const dummy: Record<string, string> = { link: 'https://x', url: 'https://x', cashtag: '$x', username: '@x', email: 'a@b.c', network: 'TRC20' };
+  for (const d of Object.values(PAYMENT_METHODS)) {
+    const texts = [d.label, ...d.fields.map((f) => f.label), d.note ?? '', d.link?.(dummy)?.label ?? ''].filter(Boolean);
+    for (const text of texts) if (PAYMENT_TERMS_FR[text] === undefined) missing.push(text);
+    const warning = d.warning?.(dummy);
+    if (warning) assert.notEqual(paymentTerm(warning, 'fr'), warning, warning);
+  }
+  assert.deepEqual(missing, []);
+  assert.equal(paymentTerm('Cash on delivery', 'fr'), 'Paiement à la livraison');
+  assert.equal(paymentTerm('Cash on delivery', 'en'), 'Cash on delivery');
 });

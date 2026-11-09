@@ -9,6 +9,8 @@ import {
 import { COMPANY_SHORT } from '../config/brand.js';
 
 export const PAYMENT_METHOD_TYPES = [
+  // TanEx's local methods first (CONTENT §6.10, tracker E.6)
+  'mtn_momo', 'orange_money', 'cash_on_delivery',
   'paypal', 'bitcoin', 'usdt', 'ethereum', 'zelle', 'cashapp', 'venmo', 'applepay', 'googlepay',
   'us_bank', 'uk_bank', 'intl_wire', 'wise', 'revolut', 'card_link', 'western_union', 'moneygram',
 ] as const;
@@ -60,7 +62,34 @@ const NAME = (label = 'Account name', required = true): PaymentField => ({ name:
 const cryptoWarning = (coin: string) => (d: Details) =>
   d.network ? `Send only ${coin} on the ${d.network} network. Funds sent on another network can be lost.` : null;
 
+// The transaction ID from the confirmation SMS is the reference for Mobile Money proofs (CONTENT §6.10).
+const MOBILE_MONEY_NOTE = 'Enter the transaction ID from your confirmation SMS.';
+
 export const PAYMENT_METHODS: Record<PaymentMethodType, PaymentMethodDefinition> = {
+  mtn_momo: {
+    type: 'mtn_momo', label: 'MTN Mobile Money', iconKey: 'smartphone', group: 'wallet',
+    fields: [
+      NAME('Account name'),
+      { name: 'number', label: 'MoMo number', kind: 'phone', required: true, placeholder: '+237 6XX XX XX XX' },
+      { name: 'merchantCode', label: 'Merchant code', kind: 'text' },
+    ],
+    note: MOBILE_MONEY_NOTE,
+  },
+  orange_money: {
+    type: 'orange_money', label: 'Orange Money', iconKey: 'smartphone', group: 'wallet',
+    fields: [
+      NAME('Account name'),
+      { name: 'number', label: 'Orange Money number', kind: 'phone', required: true, placeholder: '+237 6XX XX XX XX' },
+      { name: 'merchantCode', label: 'Merchant code', kind: 'text' },
+    ],
+    note: MOBILE_MONEY_NOTE,
+  },
+  cash_on_delivery: {
+    // No account details: the customer pays the rider. Used for local jobs (phase G).
+    type: 'cash_on_delivery', label: 'Cash on delivery', iconKey: 'banknote', group: 'cash',
+    fields: [],
+    note: 'Pay the rider in cash when your parcel arrives. Ask for your receipt reference.',
+  },
   paypal: {
     type: 'paypal', label: 'PayPal', iconKey: 'paypal', group: 'wallet',
     fields: [

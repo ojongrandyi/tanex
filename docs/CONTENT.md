@@ -457,6 +457,8 @@ Shown only when the shipment has a payment request. Hidden completely when the r
 | `Orange Money` | `Account name` · `Orange Money number` · `Merchant code` (optional) | admin instructions |
 | `Cash on delivery` | (none) | `Pay the rider in cash when your parcel arrives. Ask for your receipt reference.` |
 - **Reference hint for MoMo/OM proofs:** `Enter the transaction ID from your confirmation SMS.`
+- *Added with E.6 (owner to confirm):* payment requests are in XAF by default and shown as `15,000 FCFA` / `15 000 FCFA`; cash on delivery is not offered as an account to send proof for. French texts for every method, field and note: CONTENT_FR §6.7 / `src/i18n/paymentTerms.ts`.
+- *Console (E.6):* Settings field `Business registration (RCCM / NIU)` (optional; replaces the U.S. carrier number, #39) with the hint `Optional. Shown on the public Contact page when filled in.`
 
 ### 6.11 Timeline events written by the system (added 2026-11-08 with D.3, **owner to confirm**)
 Titles the server writes itself (`src/shared/eventTitles.ts`); stored with a key so the French track page shows the

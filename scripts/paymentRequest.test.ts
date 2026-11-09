@@ -9,11 +9,16 @@ const paypal = { type: 'paypal', details: { email: 'payments@example.com' } };
 const btc = { type: 'bitcoin', label: 'BTC wallet', details: { network: 'Bitcoin', address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq' }, instructions: 'Send the exact amount.' };
 
 test('payment request: valid input is normalised', () => {
-  const res = validatePaymentRequest({ amount: '120.005', chargeReason: '  Customs   duty – Invoice TX-INV-104233 ', dueDate: '2026-11-01', methods: [paypal, { ...btc, id: 'keep-me' }] }, newId);
+  const res = validatePaymentRequest({ amount: '120.005', currency: 'USD', chargeReason: '  Customs   duty – Invoice TX-INV-104233 ', dueDate: '2026-11-01', methods: [paypal, { ...btc, id: 'keep-me' }] }, newId);
   assert.ok(res.ok);
   if (!res.ok) return;
   assert.equal(res.value.amount, 120.01);
-  assert.equal(res.value.currency, 'USD'); // default (D-6)
+  assert.equal(res.value.currency, 'USD');
+  // E.6: XAF is the default currency, in whole francs.
+  const xaf = validatePaymentRequest({ amount: '15000', chargeReason: 'Delivery', methods: [paypal] }, newId);
+  assert.ok(xaf.ok && xaf.value.currency === 'XAF' && xaf.value.amount === 15000);
+  const xafDecimals = validatePaymentRequest({ amount: '1500.5', chargeReason: 'Delivery', methods: [paypal] }, newId);
+  assert.ok(!xafDecimals.ok && xafDecimals.errors.amount);
   assert.equal(res.value.chargeReason, 'Customs duty – Invoice TX-INV-104233');
   assert.equal(res.value.methods.length, 2);
   assert.match(res.value.methods[0].id, /^gen-/);

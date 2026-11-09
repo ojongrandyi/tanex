@@ -8,7 +8,7 @@ import { PAYMENT_ICON_PATHS } from '../src/assets/payment-icons/index.ts';
 import { PAYMENT_METHOD_TYPES, PAYMENT_METHODS } from '../src/shared/paymentMethods.ts';
 
 const dir = path.join(process.cwd(), 'src', 'assets', 'payment-icons');
-const LUCIDE_FALLBACKS = ['landmark', 'globe', 'credit-card'];
+const LUCIDE_FALLBACKS = ['landmark', 'globe', 'credit-card', 'smartphone', 'banknote'];
 
 test('payment icons: each method has a bundled icon or a lucide fallback', () => {
   for (const t of PAYMENT_METHOD_TYPES) {

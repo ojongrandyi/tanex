@@ -3,6 +3,8 @@ import { AlertTriangle, Check, ChevronDown, Copy, ExternalLink, Info, QrCode } f
 import type { CustomerMethodView } from '../shared/paymentMethods';
 import { PaymentIcon } from './PaymentIcon';
 import { PaymentQr } from './PaymentQr';
+import { useAreaT, useLocale } from '../i18n/I18nProvider';
+import { paymentTerm } from '../i18n/paymentTerms';
 import './PaymentMethodCard.css';
 
 interface PaymentMethodCardProps {
@@ -24,6 +26,9 @@ interface PaymentMethodCardProps {
 export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
   view, instructions, collapsible = false, expanded = true, onToggle, onCopyMessage,
 }) => {
+  const t = useAreaT('payment');
+  const locale = useLocale();
+  const term = (text: string) => paymentTerm(text, locale);
   const [copied, setCopied] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const [showQr, setShowQr] = useState(false);
@@ -37,9 +42,9 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
     try {
       await navigator.clipboard.writeText(value);
       setCopied(label);
-      announce(`${label} copied`);
+      announce(t('card.copiedField', { field: term(label) }));
     } catch {
-      announce(`Could not copy. Select the ${label} and copy it manually.`);
+      announce(t('card.copyFailed', { field: term(label) }));
     }
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setCopied(null), 2000);
@@ -48,7 +53,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
   const headContent = (
     <>
       <span className="ngf-pm-card-icon"><PaymentIcon type={view.type} size={22} /></span>
-      <strong className="ngf-pm-card-name">{view.label}</strong>
+      <strong className="ngf-pm-card-name">{term(view.label)}</strong>
     </>
   );
   const open = !collapsible || expanded;
@@ -65,7 +70,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
             onClick={onToggle}
           >
             {headContent}
-            <span className="ngf-sr-only">{expanded ? 'Hide details' : 'Show details'}</span>
+            <span className="ngf-sr-only">{expanded ? t('card.hideDetails') : t('card.showDetails')}</span>
             <ChevronDown className="ngf-pm-card-chevron" size={18} aria-hidden="true" />
           </button>
         </h4>
@@ -77,7 +82,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
         {view.warning && (
           <p className="ngf-pm-card-warning">
             <AlertTriangle size={15} aria-hidden="true" />
-            <span>{view.warning}</span>
+            <span>{term(view.warning)}</span>
           </p>
         )}
 
@@ -85,7 +90,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
           <dl className="ngf-pm-card-fields">
             {view.fields.map((field) => (
               <div className="ngf-pm-card-field" key={field.label}>
-                <dt>{field.label}</dt>
+                <dt>{term(field.label)}</dt>
                 <dd>
                   <span className="ngf-pm-card-value">{field.value}</span>
                   {field.copyable && (
@@ -93,10 +98,10 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
                       type="button"
                       className={`ngf-pm-copy${copied === field.label ? ' is-copied' : ''}`}
                       onClick={() => copy(field.label, field.value)}
-                      aria-label={`Copy ${field.label}`}
+                      aria-label={t('card.copyField', { field: term(field.label) })}
                     >
                       {copied === field.label ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-                      <span>{copied === field.label ? 'Copied' : 'Copy'}</span>
+                      <span>{copied === field.label ? t('card.copied') : t('card.copy')}</span>
                     </button>
                   )}
                 </dd>
@@ -107,7 +112,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
 
         {view.link && (
           <a className="ngf-pm-card-link" href={view.link.url} target="_blank" rel="noopener noreferrer">
-            <span>{view.link.label}</span>
+            <span>{term(view.link.label)}</span>
             <ExternalLink size={14} aria-hidden="true" />
           </a>
         )}
@@ -115,7 +120,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
         {view.note && (
           <p className="ngf-pm-card-note">
             <Info size={15} aria-hidden="true" />
-            <span>{view.note}</span>
+            <span>{term(view.note)}</span>
           </p>
         )}
 
@@ -128,9 +133,9 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
               onClick={() => setShowQr((v) => !v)}
             >
               <QrCode size={15} aria-hidden="true" />
-              <span>{showQr ? 'Hide QR code' : 'Show QR code'}</span>
+              <span>{showQr ? t('card.hideQr') : t('card.showQr')}</span>
             </button>
-            {showQr && <PaymentQr value={view.qr} methodLabel={view.label} />}
+            {showQr && <PaymentQr value={view.qr} methodLabel={term(view.label)} alt={t('card.qrAlt', { method: term(view.label) })} caption={t('card.qrCaption')} />}
           </div>
         )}
 

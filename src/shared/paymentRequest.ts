@@ -2,14 +2,18 @@
 // accounts the courier typed for this shipment. Shared by the server (validation, the public
 // track response) and the admin editor, so both apply the same rules.
 import type { PublicProofStatus } from './paymentProof.js';
+import { formatCurrencyAmount } from './currency.js';
 import {
   CustomerMethodView, Details, PaymentMethodType, customerMethodView, isPaymentMethodType, validatePaymentDetails,
 } from './paymentMethods.js';
 
-/** USD only for now (update.md D-6, D-7); the column stays ISO 4217 so more can be added later. */
-export const PAYMENT_CURRENCIES = ['USD'] as const;
+/**
+ * TanEx bills in XAF by default (owner decision 2026-11-06); USD and EUR stay available for
+ * international customers (E.6, replacing the earlier USD-only rule D-6). Stored as ISO 4217.
+ */
+export const PAYMENT_CURRENCIES = ['XAF', 'USD', 'EUR'] as const;
 export type PaymentCurrency = typeof PAYMENT_CURRENCIES[number];
-export const DEFAULT_PAYMENT_CURRENCY: PaymentCurrency = 'USD';
+export const DEFAULT_PAYMENT_CURRENCY: PaymentCurrency = 'XAF';
 
 export const PAYMENT_STATUSES = ['AWAITING_PAYMENT', 'UNDER_REVIEW', 'PAID', 'CANCELLED'] as const;
 export type PaymentStatus = typeof PAYMENT_STATUSES[number];
@@ -90,6 +94,9 @@ export function validatePaymentRequest(input: unknown, newId: () => string): Pay
   const amount = typeof src.amount === 'string' ? Number(src.amount.trim()) : Number(src.amount);
   if (src.amount === undefined || src.amount === '' || !Number.isFinite(amount) || amount <= 0) {
     errors.amount = 'Enter the amount due (more than 0).';
+  } else if (src.currency === undefined || src.currency === 'XAF' ? !Number.isInteger(amount) : false) {
+    // The CFA franc has no minor unit.
+    errors.amount = 'XAF amounts are whole francs (no decimals).';
   } else if (amount > PAYMENT_LIMITS.maxAmount) {
     errors.amount = 'That amount is too large.';
   }
@@ -203,9 +210,5 @@ export function publicPaymentView(payment: ShipmentPayment, latestProof: PublicP
 
 /** Formats an amount in its currency, e.g. 120 USD -> "$120.00". */
 export function formatPaymentAmount(amount: number, currency: string, locale?: string): string {
-  try {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
-  } catch {
-    return `${amount.toFixed(2)} ${currency}`;
-  }
+  return formatCurrencyAmount(amount, currency, locale);
 }

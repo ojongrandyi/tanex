@@ -54,13 +54,22 @@ test('crypto addresses: format per coin and network', () => {
   assert.equal(validateCryptoAddress('0x52908400098527886E0F7030069857D2E4169EE7', 'USDT', 'BEP20 (BNB Smart Chain)').ok, true);
 });
 
-test('registry: 17 types, no gift cards, every type has fields and a label', () => {
-  assert.equal(PAYMENT_METHOD_TYPES.length, 17);
+test('registry: 20 types (17 + MTN MoMo, Orange Money, cash on delivery), no gift cards, labels and fields', () => {
+  assert.equal(PAYMENT_METHOD_TYPES.length, 20);
+  assert.deepEqual(PAYMENT_METHOD_TYPES.slice(0, 3), ['mtn_momo', 'orange_money', 'cash_on_delivery']);
   assert.equal(PAYMENT_METHOD_TYPES.some((t) => /gift/i.test(t)), false);
   for (const t of PAYMENT_METHOD_TYPES) {
     assert.equal(PAYMENT_METHODS[t].type, t);
-    assert.ok(PAYMENT_METHODS[t].fields.length > 0 && PAYMENT_METHODS[t].label);
+    assert.ok(PAYMENT_METHODS[t].label);
+    // Every method has account fields, except cash on delivery (the rider collects it).
+    assert.ok(PAYMENT_METHODS[t].fields.length > 0 || t === 'cash_on_delivery', t);
   }
+  // Mobile Money: name and a valid number required, merchant code optional (CONTENT §6.10).
+  const momo = validatePaymentDetails('mtn_momo', { accountName: 'Tanex SARL', number: '+237 651 05 93 45' });
+  assert.deepEqual(momo, { ok: true, details: { accountName: 'Tanex SARL', number: '+237651059345' } });
+  const bad = validatePaymentDetails('orange_money', { accountName: 'Tanex SARL', number: '12' });
+  assert.equal(bad.ok, false);
+  assert.deepEqual(validatePaymentDetails('cash_on_delivery', {}), { ok: true, details: {} });
   assert.equal(isPaymentMethodType('paypal'), true);
   assert.equal(isPaymentMethodType('giftcard'), false);
   assert.equal(isPaymentMethodType('__proto__'), false);

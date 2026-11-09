@@ -1,7 +1,8 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import type { PaymentStatus, PublicPayment } from '../shared/paymentRequest';
 import { formatPaymentAmount, paymentStatusLabel } from '../shared/paymentRequest';
-import { useLocale } from '../i18n/I18nProvider';
+import { useAreaT, useLocale } from '../i18n/I18nProvider';
+import { paymentTerm } from '../i18n/paymentTerms';
 import { AlertCircle, CheckCircle2, ChevronDown, Clock, Upload, Wallet } from 'lucide-react';
 import { PaymentMethodCard } from './PaymentMethodCard';
 import { PaymentProofForm } from './PaymentProofForm';
@@ -21,25 +22,25 @@ const STATUS_BADGES: Record<PaymentStatus, { tone: string }> = {
 };
 
 /** Due dates are stored as YYYY-MM-DD; read them as calendar dates so no time zone shifts the day. */
-function formatDueDate(value: string): string {
+function formatDueDate(value: string, lang?: string): string {
   const d = new Date(`${value}T00:00:00Z`);
   if (Number.isNaN(d.getTime())) return value;
-  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeZone: 'UTC' }).format(d);
+  return new Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeZone: 'UTC' }).format(d);
 }
 
-function formatPaidDate(value: string | null): string | null {
+function formatPaidDate(value: string | null, lang?: string): string | null {
   if (!value) return null;
   const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(d);
+  return Number.isNaN(d.getTime()) ? null : new Intl.DateTimeFormat(lang, { dateStyle: 'medium' }).format(d);
 }
 
 /** "Oct 10, 2026" and "3:04 PM" in the visitor's own locale and time zone. */
-function formatSubmitted(value: string): { date: string; time: string } | null {
+function formatSubmitted(value: string, lang?: string): { date: string; time: string } | null {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return null;
   return {
-    date: new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(d),
-    time: new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(d),
+    date: new Intl.DateTimeFormat(lang, { dateStyle: 'medium' }).format(d),
+    time: new Intl.DateTimeFormat(lang, { timeStyle: 'short' }).format(d),
   };
 }
 
@@ -99,6 +100,8 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
   const status: PaymentStatus = sentAt && payment.status === 'AWAITING_PAYMENT' ? 'UNDER_REVIEW' : payment.status;
   const badgeStatus: PaymentStatus = STATUS_BADGES[status] ? status : 'AWAITING_PAYMENT';
   const locale = useLocale();
+  const t = useAreaT('payment');
+  const lang = locale === 'fr' ? 'fr-CM' : 'en-US';
   const badge = { tone: STATUS_BADGES[badgeStatus].tone, label: paymentStatusLabel(badgeStatus, locale) };
   const narrow = useIsNarrow();
   const [openId, setOpenId] = useState<string | null>(payment.methods[0]?.id ?? null);
@@ -122,25 +125,27 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
   // A cancelled request is not shown to the customer (the track page doesn't render this either).
   if (payment.status === 'CANCELLED') return null;
 
-  const paidDate = formatPaidDate(payment.paidAt);
+  const paidDate = formatPaidDate(payment.paidAt, lang);
   // Proof states from the server (F.4); this visitor's own just-sent proof shows the thank-you line instead.
   const latest = payment.proof;
   const underReview = !sentAt && status === 'UNDER_REVIEW';
-  const submitted = underReview && latest?.status === 'SUBMITTED' ? formatSubmitted(latest.submittedAt) : null;
+  const submitted = underReview && latest?.status === 'SUBMITTED' ? formatSubmitted(latest.submittedAt, lang) : null;
   const rejected = !sentAt && status === 'AWAITING_PAYMENT' && latest?.status === 'REJECTED' ? latest : null;
   const count = payment.methods.length;
+  // Cash on delivery is paid to the rider: no proof to upload for it.
+  const proofAccounts = payment.methods.filter((m) => m.type !== 'cash_on_delivery').length;
 
   return (
     <section className="ngf-pay-section" aria-labelledby="track-payment-title">
       <div className="ngf-pay-summary">
         <div className="ngf-pay-summary-head">
-          <h3 id="track-payment-title" className="card-section-title ngf-pay-title">Payment</h3>
+          <h3 id="track-payment-title" className="card-section-title ngf-pay-title">{t('section.title')}</h3>
           <span className={`ngf-pay-badge is-${badge.tone}`}>{badge.label}</span>
         </div>
 
         {status === 'AWAITING_PAYMENT' && (
           <p className="ngf-pay-intro">
-            A payment is due for this shipment. Pay using any one of the accounts below, then send us your proof of payment.
+            {t('section.intro')}
           </p>
         )}
 
@@ -148,32 +153,32 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
           <div className="ngf-pay-received">
             <CheckCircle2 size={20} aria-hidden="true" />
             <div>
-              <strong>Payment received</strong>
-              <p>{paidDate ? `Thank you. We received your payment on ${paidDate}.` : 'Thank you. We have received your payment.'}</p>
+              <strong>{t('section.received')}</strong>
+              <p>{paidDate ? t('section.receivedOn', { date: paidDate }) : t('section.receivedNoDate')}</p>
             </div>
           </div>
         )}
 
         <dl className="ngf-pay-facts">
           <div className="ngf-pay-fact ngf-pay-fact-amount">
-            <dt>Amount due</dt>
-            <dd className="ngf-pay-amount">{formatPaymentAmount(payment.amount, payment.currency)}</dd>
+            <dt>{t('section.amountDue')}</dt>
+            <dd className="ngf-pay-amount">{formatPaymentAmount(payment.amount, payment.currency, lang)}</dd>
           </div>
           <div className="ngf-pay-fact">
-            <dt>For</dt>
+            <dt>{t('section.for')}</dt>
             <dd>{payment.chargeReason}</dd>
           </div>
           {payment.dueDate && (
             <div className="ngf-pay-fact">
-              <dt>Due by</dt>
-              <dd>{formatDueDate(payment.dueDate)}</dd>
+              <dt>{t('section.dueBy')}</dt>
+              <dd>{formatDueDate(payment.dueDate, lang)}</dd>
             </div>
           )}
         </dl>
 
         {payment.customerNote && (
           <div className="ngf-pay-note">
-            <strong>Note from our team</strong>
+            <strong>{t('section.note')}</strong>
             <p>{payment.customerNote}</p>
           </div>
         )}
@@ -183,12 +188,12 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
         <div className="ngf-pay-methods">
           <PaymentTab
             icon={<Wallet size={18} />}
-            title={isPaid ? (showMethods ? 'Hide payment accounts' : 'Show payment accounts') : 'How to pay'}
-            sub={isPaid ? undefined : count === 1 ? '1 payment option' : `Choose one of ${count} payment options`}
+            title={isPaid ? (showMethods ? t('section.hideAccounts') : t('section.showAccounts')) : t('section.howToPay')}
+            sub={isPaid ? undefined : count === 1 ? t('section.oneOption') : t('section.options', { n: count })}
             open={showMethods}
             onToggle={() => setShowMethods((v) => !v)}
           >
-            {!isPaid && <p className="ngf-pay-methods-sub">Choose one account. You only need to pay once.</p>}
+            {!isPaid && <p className="ngf-pay-methods-sub">{t('section.chooseOne')}</p>}
             <ul className={`ngf-pay-methods-list${narrow ? ' is-accordion' : ''}`}>
               {payment.methods.map((method) => (
                 <li key={method.id}>
@@ -211,8 +216,8 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
         <div className="ngf-proof-state is-review">
           <Clock size={18} aria-hidden="true" />
           <div>
-            <strong>Proof under review</strong>
-            {submitted && <p>We received your proof on {submitted.date} at {submitted.time}. Our team will check it and update this page.</p>}
+            <strong>{t('section.underReview')}</strong>
+            {submitted && <p>{t('section.receivedProof', { date: submitted.date, time: submitted.time })}</p>}
           </div>
         </div>
       )}
@@ -221,24 +226,24 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
         <div className="ngf-proof-state is-rejected">
           <AlertCircle size={18} aria-hidden="true" />
           <div>
-            <strong>Proof not accepted{rejected.rejectionReason ? `: ${rejected.rejectionReason}` : ''}</strong>
-            <p>Please check the details and send a new proof below.</p>
+            <strong>{rejected.rejectionReason ? t('section.rejectedReason', { reason: rejected.rejectionReason }) : t('section.rejected')}</strong>
+            <p>{t('section.rejectedHelp')}</p>
           </div>
         </div>
       )}
 
       {sentAt && (
         <p className="ngf-proof-sent" role="status">
-          Thank you. Your proof of payment was sent. We'll check it and update this page.
+          {t('section.sent')}
         </p>
       )}
 
-      {status === 'AWAITING_PAYMENT' && count > 0 && (
+      {status === 'AWAITING_PAYMENT' && proofAccounts > 0 && (
         <div className="ngf-pay-proof">
           <PaymentTab
             icon={<Upload size={18} />}
-            title="Send proof of payment"
-            sub="Already paid? Upload your receipt so we can confirm it."
+            title={t('section.sendProof')}
+            sub={t('section.sendProofSub')}
             open={showProofForm}
             onToggle={() => setShowProofForm((v) => !v)}
           >

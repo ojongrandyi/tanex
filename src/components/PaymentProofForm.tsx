@@ -4,7 +4,8 @@ import type { PublicPayment } from '../shared/paymentRequest';
 import { validateProofSubmission } from '../shared/paymentProof';
 import { compressImage } from '../services/imageCompress';
 import { api } from '../services/api';
-import { useApiErrorText } from '../i18n/I18nProvider';
+import { useApiErrorText, useAreaT, useLocale } from '../i18n/I18nProvider';
+import { paymentTerm } from '../i18n/paymentTerms';
 
 interface PaymentProofFormProps {
   trackingNumber: string;
@@ -15,13 +16,6 @@ interface PaymentProofFormProps {
   embedded?: boolean;
 }
 
-// Customer-facing text (CONTENT.md §6.8).
-const MSG = {
-  noImage: 'Add a screenshot of the payment.',
-  notImage: 'This file isn\'t an image. Upload a JPG, PNG, WebP or HEIC.',
-  unreadable: 'This image could not be read. Try another file or take a new screenshot.',
-  network: 'We couldn\'t send your proof. Check your connection and try again.',
-};
 
 // Same check as the compressor: some browsers give HEIC photos an empty type.
 const IMAGE_FILE = /\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i;
@@ -37,6 +31,8 @@ const FIELD_ORDER: Field[] = ['methodId', 'payerName', 'amountSent', 'reference'
 export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumber, payment, onSent, embedded = false }) => {
   // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
   const apiErrorText = useApiErrorText();
+  const t = useAreaT('payment');
+  const locale = useLocale();
   const id = useId();
   const fileInput = useRef<HTMLInputElement>(null);
   const [methodId, setMethodId] = useState(payment.methods.length === 1 ? payment.methods[0].id : '');
@@ -68,7 +64,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
     if (!file) return;
     setErrors((e) => ({ ...e, image: undefined }));
     if (!file.type.startsWith('image/') && !IMAGE_FILE.test(file.name)) {
-      setErrors((e) => ({ ...e, image: MSG.notImage }));
+      setErrors((e) => ({ ...e, image: t('proof.notImage') }));
       return;
     }
     setPreparing(true);
@@ -77,7 +73,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
       setImage({ dataUrl: `data:${compressed.mimeType};base64,${compressed.base64}` });
     } catch {
       setImage(null);
-      setErrors((e) => ({ ...e, image: MSG.unreadable }));
+      setErrors((e) => ({ ...e, image: t('proof.unreadable') }));
     } finally {
       setPreparing(false);
       if (fileInput.current) fileInput.current.value = '';
@@ -91,7 +87,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
     const body = { methodId, payerName, amountSent, reference };
     const checked = validateProofSubmission(body, payment.methods.map((m) => m.id));
     const errs: Partial<Record<Field, string>> = checked.ok ? {} : { ...checked.errors };
-    if (!image) errs.image = MSG.noImage;
+    if (!image) errs.image = t('proof.noImage');
     setErrors(errs);
     if (!checked.ok || !image) {
       focusFirstError(errs);
@@ -110,7 +106,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
         // The server's own text: no longer awaiting, too many open proofs, or too many attempts.
         setFormError(apiErrorText(err));
       } else {
-        setFormError(MSG.network);
+        setFormError(t('proof.network'));
       }
     } finally {
       setSending(false);
@@ -118,21 +114,21 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
   };
 
   const describedBy = (f: Field, hint?: string) => [hint, errors[f] ? errorId(f) : null].filter(Boolean).join(' ') || undefined;
-  const errorText = (f: Field) => errors[f] && <p id={errorId(f)} className="ngf-proof-error">{errors[f]}</p>;
+  const errorText = (f: Field) => errors[f] && <p id={errorId(f)} className="ngf-proof-error">{paymentTerm(errors[f]!, locale)}</p>;
 
   return (
     <form
       className={`ngf-proof-form${embedded ? ' is-embedded' : ''}`}
       onSubmit={submit}
       noValidate
-      {...(embedded ? { 'aria-label': 'Send proof of payment' } : { 'aria-labelledby': `${id}-title` })}
+      {...(embedded ? { 'aria-label': t('section.sendProof') } : { 'aria-labelledby': `${id}-title` })}
     >
-      {!embedded && <h4 id={`${id}-title`} className="ngf-pay-methods-title">Send proof of payment</h4>}
-      <p className="ngf-pay-methods-sub">After paying, upload a screenshot or photo of the receipt so our team can confirm it.</p>
+      {!embedded && <h4 id={`${id}-title`} className="ngf-pay-methods-title">{t('section.sendProof')}</h4>}
+      <p className="ngf-pay-methods-sub">{t('proof.intro')}</p>
 
       <div className="ngf-proof-grid">
         <div className="ngf-proof-field">
-          <label htmlFor={fieldId('methodId')}>Account you paid to</label>
+          <label htmlFor={fieldId('methodId')}>{t('proof.account')}</label>
           <select
             id={fieldId('methodId')}
             value={methodId}
@@ -140,14 +136,14 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
             aria-invalid={!!errors.methodId}
             aria-describedby={describedBy('methodId')}
           >
-            <option value="">Choose an account</option>
-            {payment.methods.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+            <option value="">{t('proof.chooseAccount')}</option>
+            {payment.methods.filter((m) => m.type !== 'cash_on_delivery').map((m) => <option key={m.id} value={m.id}>{paymentTerm(m.label, locale)}</option>)}
           </select>
           {errorText('methodId')}
         </div>
 
         <div className="ngf-proof-field">
-          <label htmlFor={fieldId('payerName')}>Your name</label>
+          <label htmlFor={fieldId('payerName')}>{t('proof.name')}</label>
           <input
             id={fieldId('payerName')}
             type="text"
@@ -158,12 +154,12 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
             aria-invalid={!!errors.payerName}
             aria-describedby={describedBy('payerName', `${id}-payerName-hint`)}
           />
-          <p id={`${id}-payerName-hint`} className="ngf-proof-hint">The name the payment was sent from</p>
+          <p id={`${id}-payerName-hint`} className="ngf-proof-hint">{t('proof.nameHint')}</p>
           {errorText('payerName')}
         </div>
 
         <div className="ngf-proof-field">
-          <label htmlFor={fieldId('amountSent')}>Amount sent</label>
+          <label htmlFor={fieldId('amountSent')}>{t('proof.amount')}</label>
           <div className="ngf-proof-amount">
             <input
               id={fieldId('amountSent')}
@@ -182,7 +178,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
         </div>
 
         <div className="ngf-proof-field">
-          <label htmlFor={fieldId('reference')}>Payment reference (optional)</label>
+          <label htmlFor={fieldId('reference')}>{t('proof.reference')}</label>
           <input
             id={fieldId('reference')}
             type="text"
@@ -192,14 +188,14 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
             aria-invalid={!!errors.reference}
             aria-describedby={describedBy('reference', `${id}-reference-hint`)}
           />
-          <p id={`${id}-reference-hint`} className="ngf-proof-hint">Transaction ID, MTCN or reference number</p>
+          <p id={`${id}-reference-hint`} className="ngf-proof-hint">{t('proof.referenceHint')}</p>
           {errorText('reference')}
         </div>
       </div>
 
       <div className="ngf-proof-field ngf-proof-image">
-        <span className="ngf-proof-label" id={`${id}-image-label`}>Screenshot of the payment</span>
-        <p id={`${id}-image-hint`} className="ngf-proof-hint">JPG, PNG, WebP or HEIC. Only our team can see it.</p>
+        <span className="ngf-proof-label" id={`${id}-image-label`}>{t('proof.image')}</span>
+        <p id={`${id}-image-hint`} className="ngf-proof-hint">{t('proof.imageHint')}</p>
         <input
           ref={fileInput}
           id={fieldId('image')}
@@ -210,7 +206,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
           aria-hidden="true"
           onChange={(e) => chooseFile(e.target.files?.[0])}
         />
-        {image && <img className="ngf-proof-preview" src={image.dataUrl} alt="Your payment screenshot" />}
+        {image && <img className="ngf-proof-preview" src={image.dataUrl} alt={t('proof.imageAlt')} />}
         <div className="ngf-proof-image-actions">
           <button
             id={`${id}-image-button`}
@@ -221,10 +217,10 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
             aria-describedby={describedBy('image', `${id}-image-label ${id}-image-hint`)}
           >
             {preparing ? <Loader2 size={15} className="ngf-proof-spin" aria-hidden="true" /> : <ImagePlus size={15} aria-hidden="true" />}
-            <span>{image ? 'Change image' : 'Choose image'}</span>
+            <span>{image ? t('proof.change') : t('proof.choose')}</span>
           </button>
           {image && (
-            <button type="button" className="ngf-proof-link" onClick={() => setImage(null)}>Remove image</button>
+            <button type="button" className="ngf-proof-link" onClick={() => setImage(null)}>{t('proof.remove')}</button>
           )}
         </div>
         {errorText('image')}
@@ -234,7 +230,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
 
       <button type="submit" className="ngf-btn-primary ngf-proof-submit" disabled={sending || preparing}>
         {sending && <Loader2 size={16} className="ngf-proof-spin" aria-hidden="true" />}
-        <span>{sending ? 'Sending…' : 'Send proof'}</span>
+        <span>{sending ? t('proof.sending') : t('proof.send')}</span>
       </button>
     </form>
   );

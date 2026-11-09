@@ -306,14 +306,17 @@ export const SettingsView: React.FC = () => {
                 </div>
 
                 <div className="settings-field">
-                  <label>USDOT & Carrier Authority Number</label>
+                  {/* Stored under the existing key `dotNumber` (no renamed settings, CLAUDE.md rule 10). */}
+                  <label htmlFor="settings-registration">Business registration (RCCM / NIU)</label>
                   <input
+                    id="settings-registration"
                     type="text"
                     value={dotNumber}
                     onChange={e => setDotNumber(e.target.value)}
                     className="settings-input font-mono"
+                    placeholder="RCCM … · NIU …"
                   />
-                  <small>Federal Motor Carrier Safety Administration (FMCSA) registration.</small>
+                  <small>Optional. Shown on the public Contact page when filled in.</small>
                 </div>
               </div>
 

@@ -95,6 +95,15 @@
 | 15 | Card payment link | Checkout URL (Stripe, Square, etc.) | "Pay by card" button + QR |
 | 16 | Western Union | Receiver full name, country, city | Copy fields + "send MTCN as reference" note |
 | 17 | MoneyGram | Receiver full name, country, city | Copy fields + reference note |
+| 18 | MTN Mobile Money (TanEx, E.6) | Account name, MoMo number, merchant code (optional) | Copy fields + "transaction ID from your confirmation SMS" note |
+| 19 | Orange Money (TanEx, E.6) | Account name, Orange Money number, merchant code (optional) | Copy fields + same note |
+| 20 | Cash on delivery (TanEx, E.6) | (none) | "Pay the rider in cash…" note; not offered as a proof-of-payment account |
+
+**TanEx (E.6):** the three local methods are listed first. Payment requests are in **XAF by default** (whole
+francs), USD or EUR on request; this replaces the earlier USD-only rule (D-6). Customer pages show the registry's
+text in French through `src/i18n/paymentTerms.ts` (a test checks every registry string has French). **Icons:** no
+CC0 mark for MTN Mobile Money or Orange Money is bundled (Simple Icons has none we could verify offline), so they use
+lucide `Smartphone` and cash on delivery uses `Banknote`; the method's name is always shown next to the icon.
 
 Every method also has: display label (optional override), **instructions** (free text, optional),
 **enabled** on/off and sort order. The admin can store **several accounts of the same type** (e.g. two bank accounts).

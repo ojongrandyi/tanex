@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreditCard, Globe, Landmark, Wallet } from 'lucide-react';
+import { Banknote, CreditCard, Globe, Landmark, Smartphone, Wallet } from 'lucide-react';
 import { PAYMENT_METHODS, isPaymentMethodType } from '../shared/paymentMethods';
 import { PAYMENT_ICON_PATHS } from '../assets/payment-icons';
 
@@ -16,7 +16,11 @@ const ICON_COLORS: Record<string, string> = {
   revolut: '#191C1F', stripe: '#635BFF', westernunion: '#1A1A1A', moneygram: '#DA291C',
 };
 
+// Neutral marks where no clean, licensed brand mark is bundled: MTN Mobile Money and Orange Money
+// (no CC0 mark in Simple Icons; the name is always shown next to the icon), and cash on delivery.
 const FALLBACKS: Record<string, typeof Wallet> = {
+  smartphone: Smartphone,
+  banknote: Banknote,
   landmark: Landmark,
   globe: Globe,
   'credit-card': CreditCard,

@@ -40,13 +40,33 @@ export function resolveCurrency(settings: CurrencySettings | null | undefined): 
   return { currency: chosen, rate, missingRate: false };
 }
 
-/** Formats a USD amount in the display currency, e.g. "₦525,000.00" or "$350.00". */
-export function formatMoney(usdAmount: unknown, resolved: ResolvedCurrency, options: { decimals?: number } = {}): string {
+/**
+ * An amount in a currency for display. XAF is written the TanEx way, with no decimals and "FCFA"
+ * after the number ("1,500 FCFA" / "1 500 FCFA", as the owner's flyer and src/i18n/format.ts);
+ * other currencies use their symbol. `locale` is a BCP 47 tag; default en-US.
+ */
+export function formatCurrencyAmount(amount: number, currency: string, locale = 'en-US', decimals?: number): string {
+  const code = (currency || '').toUpperCase();
+  if (code === 'XAF' || code === 'XOF') {
+    const n = new Intl.NumberFormat(locale, { minimumFractionDigits: decimals ?? 0, maximumFractionDigits: decimals ?? 0 }).format(amount);
+    return `${n}\u00A0${code === 'XAF' ? 'FCFA' : 'F CFA'}`;
+  }
+  const d = decimals ?? 2;
+  try {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol', minimumFractionDigits: d, maximumFractionDigits: d }).format(amount);
+  } catch {
+    return `${amount.toFixed(d)} ${code}`;
+  }
+}
+
+/** Formats a USD amount in the display currency, e.g. "₦525,000.00", "$350.00" or "1,500 FCFA". */
+export function formatMoney(usdAmount: unknown, resolved: ResolvedCurrency, options: { decimals?: number; locale?: string } = {}): string {
   const n = typeof usdAmount === 'string' ? parseFloat(usdAmount) : typeof usdAmount === 'number' ? usdAmount : NaN;
   const amount = Number.isFinite(n) ? n * resolved.rate : 0;
+  if (resolved.currency === 'XAF') return formatCurrencyAmount(amount, 'XAF', options.locale, options.decimals);
   // XAF has no minor units, so it is shown without decimals unless a caller asks otherwise.
-  const decimals = options.decimals ?? (resolved.currency === 'XAF' ? 0 : 2);
-  return new Intl.NumberFormat('en-US', {
+  const decimals = options.decimals ?? 2;
+  return new Intl.NumberFormat(options.locale || 'en-US', {
     style: 'currency',
     currency: resolved.currency,
     // "₦525,000.00" rather than "NGN 525,000.00"

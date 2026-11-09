@@ -461,6 +461,33 @@ H1 : `Mentions légales`. Onglets : **Politique de confidentialité · Condition
 - **Expédier :** `Réserver un enlèvement` · `Dépôt au bureau TanEx` · `Heure d'enlèvement`; `Nom de l'expéditeur` · `Nom du destinataire` · `Téléphone` · `Adresse` · `Entreprise` · `Instructions de livraison` · `Contenu`; `Continuer` · `Retour` · `Ajouter un colis` · `Réserver l'envoi` · `Imprimer les étiquettes` · `Copier le numéro de suivi` · `Réserver un autre envoi`
 - **Note du récapitulatif :** `Votre coordinateur confirme le tarif avant l'enlèvement.`
 
+### 6.7 Moyens de paiement : libellés
+- Copie : `Copier` → `Copié` · `{champ} copié` · `Impossible de copier. Sélectionnez {champ} et copiez-le manuellement.`
+- Avertissement crypto : `Envoyez uniquement des {coin} sur le réseau {network}. Les fonds envoyés sur un autre réseau peuvent être perdus.`
+- Western Union : `Après l'envoi, saisissez le MTCN (numéro de contrôle du transfert) comme référence de paiement.`
+- MoneyGram : `Après l'envoi, saisissez le numéro de référence MoneyGram comme référence de paiement.`
+- Noms des champs : voir le tableau §6.7 (traductions dans `src/i18n/fr/payment.ts`, relecture native).
+
+### 6.8 Section paiement
+- **Titre :** `Paiement` · **Intro :** `Un paiement est dû pour cet envoi. Payez sur l'un des comptes ci-dessous, puis envoyez-nous votre preuve de paiement.`
+- **Libellés :** `Montant dû` · `Objet` · `À payer avant le` · `Note de notre équipe`
+- **Statuts :** `En attente de paiement` · `Preuve en cours de vérification` · `Payé` · `Annulé`
+- **Comptes :** `Comment payer` · `Choisissez l'un des {n} moyens de paiement` (`1 moyen de paiement`) · `Choisissez un compte. Vous ne payez qu'une seule fois.` · `Afficher les détails` / `Masquer les détails` · `Afficher le QR code` / `Masquer le QR code` · `QR code pour {method}` · `Scannez avec votre portefeuille ou l'appareil photo.`
+- **Payé :** `Paiement reçu` · `Merci. Nous avons reçu votre paiement le {date}.` · `Merci. Nous avons bien reçu votre paiement.` · `Afficher les comptes de paiement` / `Masquer les comptes de paiement`
+- **Preuve :** `Envoyer une preuve de paiement` · `Déjà payé ? Envoyez votre reçu pour que nous puissions le confirmer.` · `Après le paiement, envoyez une capture d'écran ou une photo du reçu pour que notre équipe le confirme.`
+- **Champs :** `Compte sur lequel vous avez payé` (`Choisissez un compte`) · `Votre nom` (`Le nom de l'expéditeur du paiement`) · `Montant envoyé` · `Référence du paiement (facultatif)` (`ID de transaction, MTCN ou numéro de référence`) · `Capture d'écran du paiement` (`JPG, PNG, WebP ou HEIC. Seule notre équipe peut la voir.`)
+- **Boutons :** `Choisir une image` · `Changer d'image` · `Retirer l'image` · `Envoyer la preuve` · `Envoi…`
+- **Erreurs :** `Choisissez le compte sur lequel vous avez payé.` · `Saisissez le nom de l'expéditeur du paiement.` · `Saisissez le montant envoyé.` · `Ajoutez une capture d'écran du paiement.` · `Ce fichier n'est pas une image. Envoyez un JPG, PNG, WebP ou HEIC.` · `Impossible de lire cette image. Essayez un autre fichier ou faites une nouvelle capture d'écran.`
+- **Succès :** `Merci. Votre preuve de paiement a été envoyée. Nous la vérifierons et mettrons cette page à jour.`
+- **En vérification :** `Preuve en cours de vérification` · `Nous avons reçu votre preuve le {date} à {heure}. Notre équipe va la vérifier et mettre cette page à jour.`
+- **Refusée :** `Preuve non acceptée : {motif}` · `Vérifiez les informations et envoyez une nouvelle preuve ci-dessous.`
+
+### 6.10 Moyens de paiement ajoutés pour TanEx
+- `MTN Mobile Money` : `Nom du compte` · `Numéro MoMo` · `Code marchand` (facultatif)
+- `Orange Money` : `Nom du compte` · `Numéro Orange Money` · `Code marchand` (facultatif)
+- `Paiement à la livraison` : `Payez le livreur en espèces à l'arrivée de votre colis. Demandez la référence de votre reçu.`
+- **Aide pour les preuves MoMo/OM :** `Saisissez l'ID de transaction de votre SMS de confirmation.`
+
 ## 6.3 Suivi : noms des statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)
 `Réservé` · `Récupéré` · `À la plateforme de départ` · `Parti` · `En transit` · `Arrivé à la plateforme de destination` ·
 `Dédouanement` · `En cours de livraison` · `Livré` · `En attente` · `Retardé` · `Retour à l'expéditeur` · `Annulé`

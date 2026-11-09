@@ -47,7 +47,9 @@ test('currency: USD stored, shown in the admin currency only with a rate', () =>
   assert.equal(formatMoney(350, resolveCurrency({ displayCurrency: 'EUR', exchangeRates: { EUR: 0.9 } })), '€315.00');
   // XAF (TanEx default): no decimals; without a rate it stays in USD.
   assert.deepEqual(resolveCurrency({ displayCurrency: 'XAF' }), { currency: 'USD', rate: 1, missingRate: true });
-  assert.match(formatMoney(350, resolveCurrency({ displayCurrency: 'XAF', exchangeRates: { XAF: 600 } })), /^FCFA\s210,000$/);
+  // XAF after the amount, no decimals (D.3 decision, owner flyer "500 FCFA"); French grouping in French.
+  assert.match(formatMoney(350, resolveCurrency({ displayCurrency: 'XAF', exchangeRates: { XAF: 600 } })), /^210,000\sFCFA$/);
+  assert.match(formatMoney(350, resolveCurrency({ displayCurrency: 'XAF', exchangeRates: { XAF: 600 } }), { locale: 'fr-CM' }), /^210\s000\sFCFA$/);
   // Admin enters ₦525,000 -> stored as $350
   assert.equal(fromDisplayAmount(525000, ngn), 350);
   assert.equal(toDisplayAmount(350, ngn), 525000);
