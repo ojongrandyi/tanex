@@ -177,12 +177,13 @@
 
 /* ---------- Route rail (desktop) and progress bar (mobile) ---------- */
 .tx-rail { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 40; }
-.tx-rail__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; position: relative; }
+.tx-rail__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; position: relative; }
 .tx-rail__list::before { content: ""; position: absolute; left: 50%; top: 6px; bottom: 6px; border-left: 2px dashed rgb(156 115 96 / .55); transform: translateX(-1px); }
-.tx-rail__item { position: relative; display: grid; place-items: center; width: 34px; height: 14px; }
+/* Each link is a 34 x 24 px target (WCAG 2.5.8); the visible dot is drawn inside it. */
+.tx-rail__item { position: relative; display: grid; place-items: center; width: 34px; height: 24px; }
 .tx-rail__dot { position: relative; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; background: var(--tx-cream-100); border: 2px solid var(--tx-choc-400); color: var(--tx-choc-950); }
 /* 24 px hit area around each 14 px dot (WCAG 2.5.8). */
-.tx-rail__dot::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+.tx-rail__dot::after { content: ""; position: absolute; inset: -5px -10px; border-radius: 12px; }
 .tx-rail__dot.is-done { background: var(--tx-choc-400); }
 .tx-rail__dot.is-current { width: 34px; height: 34px; background: var(--tx-orange-500); border: 0; box-shadow: 0 0 0 4px rgb(244 136 0 / .2); }
 .tx-rail__bike { width: 19px; height: 19px; }

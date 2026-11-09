@@ -158,7 +158,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
   return (
     <div className="tx-home" ref={rootRef}>
       <JourneySprite />
-      <RouteRail chapters={railChapters} label={t('rail.label')} />
 
       {/* 0 · Hero: your door (CONTENT §2.1) */}
       <section className="tx-ch tx-ch--hero tx-dark" id="door" data-chapter="0" aria-labelledby="home-title" tabIndex={-1}>
@@ -503,6 +502,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
           </div>
         </div>
       </section>
+      {/* Fixed on screen; last in the DOM so keyboard users reach the page content first. */}
+      <RouteRail chapters={railChapters} label={t('rail.label')} />
     </div>
   );
 };

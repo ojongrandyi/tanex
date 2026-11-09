@@ -2680,3 +2680,7 @@
 
 
 
+
+/* E.8: readable pill text on its tinted background (WCAG 1.4.3). */
+.on-schedule-pill, .on-schedule-pill span { color: var(--tx-success-700); }
+.on-schedule-pill.revised, .on-schedule-pill.revised span { color: var(--tx-warning-800); }
