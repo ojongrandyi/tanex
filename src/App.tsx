@@ -7,11 +7,11 @@ import { HomePage } from './pages/HomePage';
 // Every other public page is its own chunk, fetched when it opens, so the landing page only
 // downloads its own code. Their stylesheets stay in the main bundle, in the original order.
 import './pages/pageStyles';
-// The admin console's code is its own chunk, fetched only when the admin page opens, so public
-// visitors never download it (MOTION_3D_SPEC §2). Its stylesheets stay in the main bundle, in
-// their original place (see admin/styles.ts); that also keeps the `admin-login-shell`
-// placeholder styled while the session check and the chunk load.
-import './admin/styles';
+// The admin console's code and stylesheets are their own chunk, fetched only when the admin page
+// opens, so public visitors never download them (MOTION_3D_SPEC §2, #138). The console rules that
+// public pages also use, and the `admin-login-shell` placeholder shown while the session check and
+// the chunk load, are copied here, where the console stylesheets used to sit in the cascade.
+import './styles/legacy-shared.css';
 import { TrackingLoadingScreen } from './components/TrackingLoadingScreen';
 import { AdminDataProvider, useAdminData } from './context/AdminDataContext';
 import { AuthProvider, useAuth } from './auth/AuthContext';

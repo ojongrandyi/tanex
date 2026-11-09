@@ -1,0 +1,188 @@
+/* Rules from the console stylesheets that public pages also use (#138, #41).
+
+   The console's CSS now loads with the console chunk (src/admin/styles.ts, imported by AdminApp).
+   Before that it shipped in the main stylesheet, and some public pages and shared components
+   picked up these rules from it. They are copied here unchanged, in the original cascade order,
+   and App.tsx imports this file where it used to import the console styles, so public pages
+   render exactly as before. The console files keep their own copies.
+
+   Do not add new rules here: new public styles go in the page or component stylesheet. When a
+   public page stops using one of these classes, remove it here. */
+
+/* QuoteRequestsView.css: Track Result parties. */
+.party-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.party-name {
+  font-size: 0.95rem;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+/* EditShipmentModal.css: Ship page form sections. */
+.form-section-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.form-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+@media (max-width: 640px) {
+  .form-fields-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* AllShipmentsView.css: colour utilities (these !important values are what public pages show),
+   status highlight and piece cards (Ship, Quote, Track Result, support modal). */
+.text-blue { color: #2563eb !important; }
+.text-accent { color: var(--tx-accent-text) !important; }
+.text-emerald { color: #059669 !important; }
+
+.status-highlight {
+  color: var(--tx-accent-text) !important;
+}
+
+.piece-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.p-badge {
+  font-size: 0.625rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+/* CreateShipmentView.css: Ship steps, Track Result corridor and summary values, and the
+   modalPop animation of the support modal (SupportModal.css). */
+.step-sub {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.corridor-city {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.corridor-label {
+  font-size: 0.625rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.s-val {
+  color: var(--ngf-ink-950);
+  font-weight: 700;
+  text-align: right;
+}
+
+@keyframes modalPop {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* TrackingEventsView.css: the pulse-ring animation used by TrackResultPage.css. */
+@keyframes pulse-ring {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--ngf-accent-rgb), 0.3); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(var(--ngf-accent-rgb), 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--ngf-accent-rgb), 0); }
+}
+
+/* DocumentCenterView.css: document logo (DocumentBrand) and Quote Result charge rows. */
+.doc-preview-logo-img {
+  height: 72px;
+  width: auto;
+  max-width: 320px;
+  object-fit: contain;
+  display: block;
+}
+
+.charge-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: #334155;
+}
+
+/* SettingsView.css: two-column form rows (Quote page, support modal). */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* AdminLogin.css: the console's loading placeholder (App.tsx) shows this shell before the
+   sign-in chunk and its stylesheet arrive. */
+.admin-login-shell {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ngf-ink-950);
+  background-image:
+    radial-gradient(ellipse at center, rgba(10, 12, 16, 0.35) 0%, rgba(10, 12, 16, 0.82) 75%),
+    linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.25) 45%, rgba(10, 12, 16, 0.7) 100%),
+    url('/images/site/locations-hero-1600.jpg');
+  background-image:
+    radial-gradient(ellipse at center, rgba(10, 12, 16, 0.35) 0%, rgba(10, 12, 16, 0.82) 75%),
+    linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.25) 45%, rgba(10, 12, 16, 0.7) 100%),
+    image-set(url('/images/site/locations-hero-1600.webp') type('image/webp'), url('/images/site/locations-hero-1600.jpg') type('image/jpeg'));
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  font-family: var(--ngf-font-sans, 'Inter', sans-serif);
+}
+
+@media (max-width: 768px) {
+  .admin-login-shell {
+    background-image:
+      radial-gradient(ellipse at center, rgba(10, 12, 16, 0.35) 0%, rgba(10, 12, 16, 0.82) 75%),
+      linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.25) 45%, rgba(10, 12, 16, 0.7) 100%),
+      image-set(url('/images/site/locations-hero-1024.webp') type('image/webp'), url('/images/site/locations-hero-1024.jpg') type('image/jpeg'));
+  }
+}
+
+@media (min-width: 1800px) {
+  .admin-login-shell {
+    background-image:
+      radial-gradient(ellipse at center, rgba(10, 12, 16, 0.35) 0%, rgba(10, 12, 16, 0.82) 75%),
+      linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.25) 45%, rgba(10, 12, 16, 0.7) 100%),
+      image-set(url('/images/site/locations-hero-2400.webp') type('image/webp'), url('/images/site/locations-hero-2400.jpg') type('image/jpeg'));
+  }
+}

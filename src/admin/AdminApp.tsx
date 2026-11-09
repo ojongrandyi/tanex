@@ -1,3 +1,5 @@
+// Console stylesheets first, in their original order (see ./styles.ts).
+import './styles';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AdminLayout, AdminViewType } from './AdminLayout';
 import { OperationsCenter } from './pages/OperationsCenter';

@@ -1,10 +1,8 @@
-// Admin stylesheets, loaded with the main bundle even though the admin code is lazy-loaded.
+// Console stylesheets, loaded with the console chunk: AdminApp.tsx imports this file first, so
+// they keep the order the console's import graph originally gave them (#138, #41).
 //
-// Public pages currently rely on some rules that live only in these files (shared utility
-// classes such as .text-emerald, .text-accent, .icon-emerald, .form-row-2). Keeping every file
-// here, in the same order the admin import graph used to add them, leaves the cascade for
-// both the public site and the console exactly as it was. Move those shared rules into the
-// public styles before dropping any file from this list.
+// Public visitors never download them. The few rules public pages also use are copied in
+// src/styles/legacy-shared.css, which stays in the main stylesheet.
 import './AdminLayout.css';
 import './pages/OperationsCenter.css';
 import './pages/QuoteRequestsView.css';

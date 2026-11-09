@@ -64,14 +64,9 @@
     </script>
     <!-- /tx:head -->
 
-    <!-- Fonts are self-hosted (src/styles/fonts.ts) and bundled with the main stylesheet. -->
-
-    <!-- Home hero (the largest paint on the landing page), fetched before the app script runs. Same
-         sources, sizes and breakpoint as ResponsiveImage in HomePage.tsx, so it is not downloaded twice. -->
-    <link rel="preload" as="image" type="image/webp" media="(max-width: 767px)" fetchpriority="high" imagesizes="100vw"
-          imagesrcset="/images/site/hero-home-mobile-640.webp 640w, /images/site/hero-home-mobile-1024.webp 1024w, /images/site/hero-home-mobile-1290.webp 1290w">
-    <link rel="preload" as="image" type="image/webp" media="(min-width: 768px)" fetchpriority="high" imagesizes="100vw"
-          imagesrcset="/images/site/hero-home-640.webp 640w, /images/site/hero-home-1024.webp 1024w, /images/site/hero-home-1600.webp 1600w, /images/site/hero-home-2400.webp 2400w">
+    <!-- Fonts are self-hosted (src/styles/fonts.ts) and bundled with the main stylesheet. They are
+         not preloaded: measured under mobile throttling, preloading the hero weights competed with
+         the app script and did not improve LCP (#138). -->
   </head>
   <body>
     <div id="root"></div>
