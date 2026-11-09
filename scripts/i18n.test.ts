@@ -32,6 +32,8 @@ import enTrackResult from '../src/i18n/en/trackResult.ts';
 import frTrackResult from '../src/i18n/fr/trackResult.ts';
 import enQuote from '../src/i18n/en/quote.ts';
 import frQuote from '../src/i18n/fr/quote.ts';
+import enShip from '../src/i18n/en/ship.ts';
+import frShip from '../src/i18n/fr/ship.ts';
 import { legalDocs } from '../src/data/legalDocs.ts';
 import { HELP_ARTICLES } from '../src/data/helpArticles.ts';
 import { translate } from '../src/i18n/runtime.ts';
@@ -117,6 +119,9 @@ const SAME_IN_BOTH: Record<string, string> = {
   'quote:result.transportRoute': 'same word in French',
   'quote:result.service': 'same word in French',
   'quote:result.dimensionsShort': 'same word in French',
+  'ship:fields.province': 'same word in French',
+  'ship:fields.serviceGroup': 'same word in French',
+  'ship:summary.service': 'same word in French',
 };
 
 const PAIRS: [string, Tree, Tree][] = [
@@ -132,6 +137,7 @@ const PAIRS: [string, Tree, Tree][] = [
   ['track', enTrack as unknown as Tree, frTrack as unknown as Tree],
   ['trackResult', enTrackResult as unknown as Tree, frTrackResult as unknown as Tree],
   ['quote', enQuote as unknown as Tree, frQuote as unknown as Tree],
+  ['ship', enShip as unknown as Tree, frShip as unknown as Tree],
 ];
 
 test('fr dictionaries have exactly the English keys', () => {

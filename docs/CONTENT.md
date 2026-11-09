@@ -511,6 +511,12 @@ Reused where possible: service names and summaries (§3.1), add-ons (§3.4), sta
 - Messages: `Please complete all required fields (origin and destination country and city, weight, contents, name and email).` · `We couldn't send your quote request: {reason}. Nothing was saved; please try again.` · `{n} piece` / `{n} pieces`.
 - Quote Result: the side card is `TanEx Operations Desk` (§7.4; the earlier "24/7 Operations Desk" was an unconfirmed claim) · charge `Transport` when there is no route · print table headers `Charge` · `Amount ({currency})`.
 
+### 7.7 Ship page changes with E.5 (**owner to confirm**, closes #33)
+- Collection choice `Book a Collection` / `Drop-off at the TanEx office` (§7.4). **Collection time** `Today` · `Tomorrow morning` · `Tomorrow afternoon` with the hint `Your coordinator confirms the exact time.` (the previous fixed hour windows were not TanEx's).
+- Extras: `Signature confirmation` (`Delivery is released only against a named signature.`). **Weekend delivery is not offered** until the opening days are known (#119).
+- "How booking works" uses the four steps of §3.3 (`Book.` · `Collect.` · `Move.` · `Deliver.`).
+- A booking no longer stamps "{city} Regional Gateway" or a fixed "2-3 Business Days / by 5:00 PM" estimate: the first scan shows the city, and the estimate stays empty ("—") until staff set it. Messages: `Each piece must have a valid weight ({unit}).` · `We couldn't find {place}. Check the city and country, then try again.` · `We couldn't register your shipment: {reason}. Nothing was saved; please try again.` · `Remove piece {n}` · `Piece {n} of {total}` · `{n} ({weight} gross)`.
+
 ### 7.5 Local delivery booking (`/local-delivery`, added 2026-11-06, DISPATCH_SPEC §8)
 - **H1:** `Book a bike delivery` · **Sub:** `Across Buea, Limbe or Douala. A TanEx rider collects from the door and delivers to the recipient, and you follow the ride live.`
 - **Steps:** `1. City` · `2. Pickup` · `3. Drop-off` · `4. Parcel` · `5. Payment` · `Summary`

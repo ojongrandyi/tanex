@@ -20,4 +20,5 @@ export const AREA_LOADERS_FR: { [A in AreaName]: () => Promise<Translation<AreaM
   track: () => import('./fr/track').then((m) => m.default),
   trackResult: () => import('./fr/trackResult').then((m) => m.default),
   quote: () => import('./fr/quote').then((m) => m.default),
+  ship: () => import('./fr/ship').then((m) => m.default),
 };

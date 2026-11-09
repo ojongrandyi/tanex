@@ -650,8 +650,9 @@ const normalizeShipment = (s: any): Shipment => {
         postalCode: tq.destZip || tq.destination?.postalCode || undefined,
         country: tq.destCountry || destGeo?.country || ''
       },
-      estimatedDelivery: 'Aug 25, 2026',
-      estimatedDeliveryDetail: 'by 5:00 PM',
+      // No invented estimate (#33): staff set it on the shipment.
+      estimatedDelivery: '',
+      estimatedDeliveryDetail: '',
       pieces: [
         {
           pieceNumber: 1,
@@ -810,22 +811,23 @@ const normalizeShipment = (s: any): Shipment => {
 
   const createShipment = async (shipmentData: Partial<Shipment>): Promise<Shipment> => {
 
-    const originCity = typeof shipmentData.origin === 'object' ? shipmentData.origin.city : (shipmentData.origin || 'New York');
-    const originState = typeof shipmentData.origin === 'object' ? shipmentData.origin.state : 'NY';
-    const destCity = typeof shipmentData.destination === 'object' ? shipmentData.destination.city : (shipmentData.destination || 'Los Angeles');
-    const destState = typeof shipmentData.destination === 'object' ? shipmentData.destination.state : 'CA';
+    const originCity = typeof shipmentData.origin === 'object' ? shipmentData.origin.city : (shipmentData.origin || '');
+    const originState = typeof shipmentData.origin === 'object' ? shipmentData.origin.state : '';
+    const destCity = typeof shipmentData.destination === 'object' ? shipmentData.destination.city : (shipmentData.destination || '');
+    const destState = typeof shipmentData.destination === 'object' ? shipmentData.destination.state : '';
 
     const normalizedLocation = typeof shipmentData.currentLocation === 'string'
       ? shipmentData.currentLocation
       : (typeof shipmentData.currentLocation === 'object' && (shipmentData.currentLocation as any)?.city
           ? `${(shipmentData.currentLocation as any).city}, ${(shipmentData.currentLocation as any).state || ''}`
-          : `${originCity}, ${originState}`);
+          : [originCity, originState].filter(Boolean).join(', '));
 
     const normalizedDelivery = typeof shipmentData.estimatedDelivery === 'string'
       ? shipmentData.estimatedDelivery
       : (typeof shipmentData.estimatedDelivery === 'object' && (shipmentData.estimatedDelivery as any)?.date
           ? (shipmentData.estimatedDelivery as any).date
-          : '3-5 Business Days');
+          // No invented estimate (#33): staff set it; until then tracking shows "—".
+          : '');
 
     // Draft: the tracking ID, barcode and piece labels come from the server (withTrackingId).
     // Any trackingNumber the caller passed is only a preview and is not sent.
@@ -891,7 +893,7 @@ const normalizeShipment = (s: any): Shipment => {
       sender: shipmentData.sender || { name: 'Shipper', city: originCity, state: originState, country: resolveLocation(`${originCity}, ${originState}`)?.country || '' },
       recipient: shipmentData.recipient || { name: 'Consignee', city: destCity, state: destState, country: resolveLocation(`${destCity}, ${destState}`)?.country || '' },
       estimatedDelivery: normalizedDelivery,
-      estimatedDeliveryDetail: shipmentData.estimatedDeliveryDetail || (typeof shipmentData.estimatedDelivery === 'object' ? (shipmentData.estimatedDelivery as any)?.timeWindow : null) || 'by 5:00 PM',
+      estimatedDeliveryDetail: shipmentData.estimatedDeliveryDetail || (typeof shipmentData.estimatedDelivery === 'object' ? (shipmentData.estimatedDelivery as any)?.timeWindow : null) || '',
       routeCheckpoints: shipmentData.routeCheckpoints || [],
       passportStages: shipmentData.passportStages || [],
       timeline: shipmentData.timeline || [],

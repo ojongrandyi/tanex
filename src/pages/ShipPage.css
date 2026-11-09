@@ -1524,3 +1524,11 @@
     background: rgba(var(--ngf-ink-rgb), 0.85);
   }
 }
+
+/* E.5: the design system's dark band instead of the stock photo (later rule wins). */
+.ngf-ship-hero, .ngf-ship-hero-bg { background: var(--tx-choc-950); background-image: none; }
+@media (max-width: 768px) { .ngf-ship-hero { background: var(--tx-choc-950); background-image: none; } }
+/* E.5: step tabs show the title and its summary on two lines. */
+.form-steps-nav .step-label-group { display: flex; flex-direction: column; min-width: 0; }
+.form-steps-nav .step-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ngf-page-ship .tx-btn svg { width: 16px; height: 16px; }

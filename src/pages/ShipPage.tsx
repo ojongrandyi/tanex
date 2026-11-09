@@ -14,8 +14,6 @@ import {
   Check,
   Building,
   Layers,
-  Car,
-  Lock,
   Printer,
   ListChecks
 } from 'lucide-react';
@@ -25,19 +23,19 @@ import { resolveAddressPrecise } from '../services/geocodingService';
 import './ShipPage.css';
 import { pieceLabel } from '../shared/trackingId';
 import { shipmentStatusLabel } from '../shared/shipmentStatus';
-import { COMPANY, COMPANY_SHORT } from '../config/brand';
+import { COMPANY } from '../config/brand';
 import { SERVICE_OPTIONS, type ServiceOptionId } from '../data/serviceOptions';
 import { Plane as IconAir, Ship as IconSea, TrainFront as IconRail, Truck as IconRoad, Warehouse as IconStore, Bike as IconBike } from 'lucide-react';
 import { documentTitle } from '../components/DocumentBrand';
 import { CountrySelect } from '../components/forms/CountrySelect';
 import { PhoneInput } from '../components/forms/PhoneInput';
 import { MeasureInput, MoneyInput, UnitToggle, useUnitLabels } from '../components/forms/UnitControls';
-import { getCountry, postcodeLabel, regionLabel, shortRegion } from '../data/countries';
+import { getCountry, shortRegion } from '../data/countries';
 import { formatDimensions, formatWeight } from '../shared/units';
-import { TRANSPORT_MODE_LABELS, type TransportMode } from '../shared/transportMode';
+import { type TransportMode } from '../shared/transportMode';
 import { useCurrency } from '../utils/useCurrency';
 import { isPlainClick } from '../router/Link';
-import { useApiErrorText } from '../i18n/I18nProvider';
+import { useApiErrorText, useAreaT } from '../i18n/I18nProvider';
 
 interface ShipPageProps {
   onTrack: (trackingNumber: string) => void;
@@ -65,41 +63,41 @@ interface AddressFieldsProps {
   postcode: string;
   onPostcode: (v: string) => void;
   cityPlaceholder: string;
+  labels: { country: string; countrySearch: string; city: string; region: string; postcode: string; optional: string };
 }
 
 // Country first (searchable), then city, then the optional region and postcode for that country.
 const AddressFields: React.FC<AddressFieldsProps> = (f) => (
   <>
     <div className="form-group">
-      <label htmlFor={`${f.idPrefix}-country`}>Country *</label>
-      <CountrySelect id={`${f.idPrefix}-country`} value={f.country} onChange={f.onCountry} className="ngf-input" required />
+      <label htmlFor={`${f.idPrefix}-country`}>{f.labels.country} *</label>
+      <CountrySelect id={`${f.idPrefix}-country`} value={f.country} onChange={f.onCountry} className="ngf-input" required placeholder={f.labels.countrySearch} />
     </div>
     <div className="form-group">
-      <label htmlFor={`${f.idPrefix}-city`}>City *</label>
+      <label htmlFor={`${f.idPrefix}-city`}>{f.labels.city} *</label>
       <input id={`${f.idPrefix}-city`} type="text" required value={f.city} onChange={(e) => f.onCity(e.target.value)} className="ngf-input" placeholder={f.cityPlaceholder} />
     </div>
     <div className="form-group">
-      <label htmlFor={`${f.idPrefix}-region`}>{regionLabel(f.country)} <span className="ngf-field-optional">(optional)</span></label>
+      <label htmlFor={`${f.idPrefix}-region`}>{f.labels.region} <span className="ngf-field-optional">{f.labels.optional}</span></label>
       <input id={`${f.idPrefix}-region`} type="text" value={f.region} onChange={(e) => f.onRegion(e.target.value)} className="ngf-input" />
     </div>
     <div className="form-group">
-      <label htmlFor={`${f.idPrefix}-postcode`}>{postcodeLabel(f.country)} <span className="ngf-field-optional">(optional)</span></label>
+      <label htmlFor={`${f.idPrefix}-postcode`}>{f.labels.postcode} <span className="ngf-field-optional">{f.labels.optional}</span></label>
       <input id={`${f.idPrefix}-postcode`} type="text" value={f.postcode} onChange={(e) => f.onPostcode(e.target.value)} className="ngf-input font-mono" />
     </div>
   </>
 );
 
-// "Houston, TX" / "Lagos, Nigeria" for summaries
+// "Buea, Cameroon" / "Houston, TX" for summaries
 const placeText = (city: string, region: string, countryCode: string) =>
   [city, countryCode === 'US' ? region.trim().toUpperCase() : getCountry(countryCode)?.name].filter(Boolean).join(', ');
 
-const PICKUP_WINDOWS = [
-  'Today, 2:00 PM – 5:00 PM (local time)',
-  'Tomorrow morning, 8:00 AM – 12:00 PM (local time)',
-  'Tomorrow afternoon, 1:00 PM – 5:00 PM (local time)'
-];
+// Collection windows without promised hours (#33): the coordinator confirms the time. Stored in
+// English (the console reads them); the page shows the translated label.
+const PICKUP_WINDOWS = ['Today', 'Tomorrow morning', 'Tomorrow afternoon'] as const;
+const PICKUP_WINDOW_KEYS = { Today: 'today', 'Tomorrow morning': 'tomorrowMorning', 'Tomorrow afternoon': 'tomorrowAfternoon' } as const;
 
-const DROP_OFF_LABEL = `Drop-off at a ${COMPANY_SHORT} gateway`;
+const DROP_OFF_LABEL = 'Drop-off at the TanEx office';
 
 const SERVICE_ICONS: Record<ServiceOptionId, React.ElementType> = {
   air: IconAir,
@@ -110,27 +108,19 @@ const SERVICE_ICONS: Record<ServiceOptionId, React.ElementType> = {
   'local-delivery': IconBike,
 };
 
-// CONTENT §7.3 steps
-const STEP_TITLES = ['Sender & collection', 'Recipient & delivery', 'Pieces', 'Service & extras'];
-
-// CONTENT §7.3 "How booking works": stage names, bodies from §2.3 (as on Services §3.5).
-const BOOKING_STAGES = [
-  { title: 'Booking', body: `Book online or with a coordinator. You get your 8-character ${COMPANY_SHORT} tracking ID and a barcode label for every piece straight away.` },
-  { title: 'Gateway scan', body: 'We collect from your door, weigh and scan every piece at the origin gateway, and prepare the export and customs documents.' },
-  { title: 'Linehaul & border crossing', body: 'Your cargo travels on the fastest suitable lane: air, ocean or road. Customs clearance and each transfer are logged live.' },
-  { title: 'Proof of delivery', body: 'Final-mile delivery to the door, with a signed digital proof of delivery sent to you the moment it lands.' }
-];
-
-// CONTENT §7.3 next steps
-const NEXT_STEPS = [
-  'Print and attach a label to each piece',
-  'Have the shipment ready at the collection time',
-  'Track progress any time with your ID'
-];
 
 export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
   // API errors in the page language (codes, I18N_SPEC §5); English keeps the server text.
   const apiErrorText = useApiErrorText();
+  const t = useAreaT('ship');
+  const tsv = useAreaT('services');
+  const STEP_TITLES = [t('steps.sender'), t('steps.recipient'), t('steps.pieces'), t('steps.service')];
+  const BOOKING_STAGES = (['book', 'collect', 'move', 'deliver'] as const).map((k) => ({ title: t(`how.${k}.title`), body: t(`how.${k}.body`) }));
+  const NEXT_STEPS = [t('done.stepLabel'), t('done.stepReady'), t('done.stepTrack')];
+  const regionLabel = (code: string) => (code === 'US' ? t('fields.state') : code === 'CA' ? t('fields.province') : t('fields.region'));
+  const postcodeLabel = (code: string) => (code === 'US' ? t('fields.zip') : code === 'CA' ? t('fields.postal') : t('fields.postcode'));
+  const addressLabels = (country: string) => ({ country: t('fields.country'), countrySearch: t('fields.countrySearch'), city: t('fields.city'), region: regionLabel(country), postcode: postcodeLabel(country), optional: t('fields.optional') });
+  const modeLabel = (m: TransportMode) => t(`modes.${m}`);
   const { createShipment, generateDocument } = useAdminData();
   const units = useUnitLabels();
   const money = useCurrency();
@@ -149,7 +139,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
   const [senderState, setSenderState] = useState('');
   const [senderZip, setSenderZip] = useState('');
   const [pickupType, setPickupType] = useState<'pickup' | 'dropoff'>('pickup');
-  const [pickupWindow, setPickupWindow] = useState(PICKUP_WINDOWS[0]);
+  const [pickupWindow, setPickupWindow] = useState<string>(PICKUP_WINDOWS[0]);
 
   // Form State - Recipient (Destination)
   const [recipientCompany, setRecipientCompany] = useState('');
@@ -180,7 +170,8 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
   const [transportMode, setTransportMode] = useState<TransportMode | ''>('');
   const [declaredValue, setDeclaredValue] = useState<number | ''>('');
   const [requireSignature, setRequireSignature] = useState(true);
-  const [saturdayDelivery, setSaturdayDelivery] = useState(false);
+  // Weekend delivery is not offered until the owner confirms opening days (#119).
+  const saturdayDelivery = false;
 
   // Submission State
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -225,18 +216,18 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
     if (step === 1) {
       // State/region and postcode are optional (not every country has them).
       if (!senderContact.trim() || !senderPhone.trim() || !senderAddress.trim() || !senderCountry || !senderCity.trim()) {
-        setFormError('Please fill out all required sender and pickup address fields (name, phone, street, country and city) before continuing.');
+        setFormError(t('errors.sender'));
         return false;
       }
     } else if (step === 2) {
       if (!recipientContact.trim() || !recipientPhone.trim() || !recipientAddress.trim() || !recipientCountry || !recipientCity.trim()) {
-        setFormError('Please fill out all required recipient fields (name, phone, street, country and city) before continuing.');
+        setFormError(t('errors.recipient'));
         return false;
       }
     } else if (step === 3) {
       for (const p of piecesList) {
         if (p.weight === '' || p.weight <= 0) {
-          setFormError(`Each piece must have a valid scale weight (${units.weight}).`);
+          setFormError(t('errors.weight', { unit: units.weight }));
           return false;
         }
       }
@@ -261,6 +252,10 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
     (SERVICE_OPTIONS.find((s) => s.id === selectedService) || SERVICE_OPTIONS[0]).name;
 
   const collectionText = pickupType === 'pickup' ? pickupWindow : DROP_OFF_LABEL;
+  const serviceLabel = (id: ServiceOptionId) => tsv(`items.${(SERVICE_OPTIONS.find((o) => o.id === id) || SERVICE_OPTIONS[0]).key}.name`);
+  const collectionLabel = pickupType === 'pickup'
+    ? t(`windows.${PICKUP_WINDOW_KEYS[pickupWindow as keyof typeof PICKUP_WINDOW_KEYS] ?? 'today'}`)
+    : t('fields.dropoff');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,7 +308,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
     ]);
     if (!originGeo || !destGeo) {
       const missing = !originGeo ? `${senderCity}, ${getCountry(senderCountry)?.name}` : `${recipientCity}, ${getCountry(recipientCountry)?.name}`;
-      setFormError(`We couldn't find ${missing}. Check the city and country, then try again.`);
+      setFormError(t('errors.notFound', { place: missing }));
       setIsSubmitting(false);
       return;
     }
@@ -334,7 +329,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
         transportMode: transportMode || undefined,
         shipmentType: 'Parcel',
         cargoCategory: 'Commercial Goods',
-        cargoDescription: piecesList[0]?.description || 'Commercial Express Consignment',
+        cargoDescription: piecesList[0]?.description || 'Parcel',
         totalWeightLbs: totalWeight,
         totalPieces: totalPieces,
         declaredValue: declaredValue === '' ? 0 : declaredValue,
@@ -354,11 +349,9 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
           lng: destGeo.lng
         },
         currentLocation: originLabel,
-        currentFacility: `${senderCity.trim()} Regional Gateway`,
+        currentFacility: originLabel,
         sender: party(senderCompany, senderContact, senderPhone, senderAddress, senderCity, senderState, senderZip, senderCountry),
         recipient: party(recipientCompany, recipientContact, recipientPhone, recipientAddress, recipientCity, recipientState, recipientZip, recipientCountry),
-        estimatedDelivery: '2-3 Business Days',
-        estimatedDeliveryDetail: 'by 5:00 PM',
         pieces: piecesFormatted,
         // Collection and extras chosen on the form, for the operations team.
         pickupWindow: collectionText,
@@ -372,7 +365,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
       });
       newTrackingId = created.trackingNumber;
     } catch (err: any) {
-      setFormError(`We couldn't register your shipment: ${apiErrorText(err, 'the server did not respond')}. Nothing was saved; please try again.`);
+      setFormError(t('errors.save', { reason: apiErrorText(err, t('errors.noReply')) }));
       setIsSubmitting(false);
       return;
     }
@@ -430,13 +423,13 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
       <section className="ngf-ship-hero">
         <div className="ngf-ship-hero-bg" />
         <div className="ngf-container-wide ship-hero-container">
-          <nav className="ngf-ship-breadcrumbs" aria-label="Breadcrumb">
-            <a href="/" onClick={(e) => { if (!isPlainClick(e)) return; e.preventDefault(); onNavigate('home'); }} className="crumb-link">Home</a>
+          <nav className="ngf-ship-breadcrumbs" aria-label={t('breadcrumb')}>
+            <a href="/" onClick={(e) => { if (!isPlainClick(e)) return; e.preventDefault(); onNavigate('home'); }} className="crumb-link">{t('home')}</a>
             <span className="crumb-sep">/</span>
-            <span className="crumb-current" aria-current="page">Book a shipment</span>
+            <span className="crumb-current" aria-current="page">{t('title')}</span>
           </nav>
 
-          <h1 className="ship-hero-title animate-fade-in">Book a shipment</h1>
+          <h1 className="ship-hero-title">{t('title')}</h1>
         </div>
       </section>
 
@@ -449,10 +442,8 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
           <div className="ngf-booking-confirmed-card animate-fade-in">
             <div className="confirm-header" role="status">
               <CheckCircle2 size={56} className="confirm-check-icon text-emerald" />
-              <h2>Shipment booked</h2>
-              <p>
-                Your tracking ID is <strong className="font-mono">{generatedTracking}</strong>. Labels for each piece are ready to print.
-              </p>
+              <h2>{t('done.title')}</h2>
+              <p>{t('done.body', { id: generatedTracking })}</p>
             </div>
 
             {/* Tracking ID and piece labels: this block is what "Print labels" prints. */}
@@ -460,7 +451,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
             <div className="confirm-barcode-block">
               <div className="barcode-block-header">
                 <span className="barcode-tag">{COMPANY}</span>
-                <span className="barcode-service">{getServiceName()}</span>
+                <span className="barcode-service">{serviceLabel(selectedService)}</span>
               </div>
 
               <div className="barcode-render-stage">
@@ -474,10 +465,10 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
               </div>
 
               <div className="barcode-block-meta">
-                <div><strong>Route:</strong> {placeText(senderCity, senderState, senderCountry)} → {placeText(recipientCity, recipientState, recipientCountry)}</div>
-                <div><strong>Pieces:</strong> {totalPieces} ({formatWeight(totalWeight, units.system)} gross)</div>
-                {transportMode && <div><strong>Mode:</strong> {TRANSPORT_MODE_LABELS[transportMode]}</div>}
-                <div><strong>Collection:</strong> {collectionText}</div>
+                <div><strong>{t('done.route')}</strong> {placeText(senderCity, senderState, senderCountry)} → {placeText(recipientCity, recipientState, recipientCountry)}</div>
+                <div><strong>{t('done.pieces')}</strong> {t('done.piecesValue', { n: totalPieces, weight: formatWeight(totalWeight, units.system) })}</div>
+                {transportMode && <div><strong>{t('done.mode')}</strong> {modeLabel(transportMode)}</div>}
+                <div><strong>{t('done.collection')}</strong> {collectionLabel}</div>
               </div>
             </div>
 
@@ -486,7 +477,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
               {piecesList.map((piece, idx) => (
                 <div key={piece.id} className="confirm-piece-card">
                   <div className="piece-card-header">
-                    <span className="font-bold">Piece {idx + 1} of {piecesList.length}</span>
+                    <span className="font-bold">{t('done.piece', { n: idx + 1, total: piecesList.length })}</span>
                     <small>{[formatWeight(piece.weight, units.system), formatDimensions(piece, units.system)].filter(Boolean).join(' • ')}</small>
                   </div>
                   <div className="piece-barcode-render">
@@ -507,7 +498,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
             <div className="confirm-instructions-card">
               <div className="inst-icon"><ListChecks size={20} className="text-accent flex-shrink-0" /></div>
               <div>
-                <h3>Next steps</h3>
+                <h3>{t('done.next')}</h3>
                 <ul className="ship-next-steps">
                   {NEXT_STEPS.filter((step, i) => i !== 1 || pickupType === 'pickup').map((step) => (
                     <li key={step}>{step}</li>
@@ -520,50 +511,50 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
             <div className="confirm-action-row">
               <button
                 type="button"
-                className="btn-corp-primary"
+                className="tx-btn tx-btn--primary"
                 onClick={() => window.print()}
               >
                 <Printer size={16} />
-                <span>Print labels</span>
+                <span>{t('done.print')}</span>
               </button>
 
               <button
                 type="button"
-                className="btn-corp-ghost"
+                className="tx-btn tx-btn--ghost"
                 onClick={() => onTrack(generatedTracking)}
               >
-                <span>Track a Shipment</span>
+                <span>{t('done.track')}</span>
                 <ArrowRight size={16} />
               </button>
 
               <button
                 type="button"
-                className="btn-corp-ghost"
+                className="tx-btn tx-btn--ghost"
                 onClick={handleCopyTracking}
               >
                 {copiedTracking ? (
                   <>
                     <Check size={16} className="text-emerald" />
-                    <span>Copied</span>
+                    <span>{t('done.copied')}</span>
                   </>
                 ) : (
                   <>
                     <Copy size={16} />
-                    <span>Copy tracking ID</span>
+                    <span>{t('done.copy')}</span>
                   </>
                 )}
               </button>
 
               <button
                 type="button"
-                className="btn-corp-ghost"
+                className="tx-btn tx-btn--ghost"
                 onClick={() => {
                   setSubmittedBooking(false);
                   setTransportMode('');
                   setCurrentStep(1);
                 }}
               >
-                <span>Book another shipment</span>
+                <span>{t('done.another')}</span>
               </button>
             </div>
           </div>
@@ -582,7 +573,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <span className="step-num">{currentStep > 1 ? '✓' : '1'}</span>
                   <div className="step-label-group">
                     <span className="step-title">{STEP_TITLES[0]}</span>
-                    <span className="step-sub">{senderCity ? placeText(senderCity, senderState, senderCountry) : 'From'}</span>
+                    <span className="step-sub">{senderCity ? placeText(senderCity, senderState, senderCountry) : t('steps.from')}</span>
                   </div>
                 </button>
 
@@ -594,7 +585,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <span className="step-num">{currentStep > 2 ? '✓' : '2'}</span>
                   <div className="step-label-group">
                     <span className="step-title">{STEP_TITLES[1]}</span>
-                    <span className="step-sub">{recipientCity ? placeText(recipientCity, recipientState, recipientCountry) : 'To'}</span>
+                    <span className="step-sub">{recipientCity ? placeText(recipientCity, recipientState, recipientCountry) : t('steps.to')}</span>
                   </div>
                 </button>
 
@@ -606,7 +597,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <span className="step-num">{currentStep > 3 ? '✓' : '3'}</span>
                   <div className="step-label-group">
                     <span className="step-title">{STEP_TITLES[2]}</span>
-                    <span className="step-sub">{[`${totalPieces} ${totalPieces === 1 ? 'piece' : 'pieces'}`, formatWeight(totalWeight, units.system)].filter(Boolean).join(' · ')}</span>
+                    <span className="step-sub">{[t(totalPieces === 1 ? 'steps.piece' : 'steps.piecesN', { n: totalPieces }), formatWeight(totalWeight, units.system)].filter(Boolean).join(' · ')}</span>
                   </div>
                 </button>
 
@@ -618,7 +609,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <span className="step-num">4</span>
                   <div className="step-label-group">
                     <span className="step-title">{STEP_TITLES[3]}</span>
-                    <span className="step-sub">{getServiceName()}</span>
+                    <span className="step-sub">{serviceLabel(selectedService)}</span>
                   </div>
                 </button>
               </div>
@@ -656,7 +647,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
 
                   <div className="form-fields-grid">
                     <div className="form-group span-2">
-                      <label htmlFor="ship-sender-company">Company <span className="ngf-field-optional">(optional)</span></label>
+                      <label htmlFor="ship-sender-company">{t('fields.company')} <span className="ngf-field-optional">{t('fields.optional')}</span></label>
                       <input
                         id="ship-sender-company"
                         type="text"
@@ -667,7 +658,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="ship-sender-name">Sender name *</label>
+                      <label htmlFor="ship-sender-name">{t('fields.senderName')} *</label>
                       <input
                         id="ship-sender-name"
                         type="text"
@@ -679,12 +670,12 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="sender-phone">Phone *</label>
-                      <PhoneInput id="sender-phone" required value={senderPhone} onChange={setSenderPhone} defaultCountry={senderCountry || 'US'} className="ngf-input" />
+                      <label htmlFor="sender-phone">{t('fields.phone')} *</label>
+                      <PhoneInput id="sender-phone" required value={senderPhone} onChange={setSenderPhone} defaultCountry={senderCountry || 'CM'} className="ngf-input" placeholder={t('fields.phonePlaceholder')} codeLabel={t('fields.callingCode')} />
                     </div>
 
                     <div className="form-group span-2">
-                      <label htmlFor="ship-sender-address">Street address *</label>
+                      <label htmlFor="ship-sender-address">{t('fields.street')} *</label>
                       <input
                         id="ship-sender-address"
                         type="text"
@@ -705,13 +696,14 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                       onRegion={setSenderState}
                       postcode={senderZip}
                       onPostcode={setSenderZip}
-                      cityPlaceholder="e.g. Lagos"
+                      cityPlaceholder={t('fields.cityFromPlaceholder')}
+                      labels={addressLabels(senderCountry)}
                     />
                   </div>
 
                   {/* Collection or drop-off */}
                   <div className="tender-mode-wrap">
-                    <span className="section-sublabel" id="ship-collection-label">Collection</span>
+                    <span className="section-sublabel" id="ship-collection-label">{t('fields.collection')}</span>
                     <div className="tender-toggle-row" role="radiogroup" aria-labelledby="ship-collection-label">
                       <button
                         type="button"
@@ -722,7 +714,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                       >
                         <Truck size={22} className="text-accent" />
                         <div>
-                          <strong>Book a Collection</strong>
+                          <strong>{t('fields.collect')}</strong>
                         </div>
                       </button>
 
@@ -735,14 +727,14 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                       >
                         <Building size={22} className="text-accent" />
                         <div>
-                          <strong>{DROP_OFF_LABEL}</strong>
+                          <strong>{t('fields.dropoff')}</strong>
                         </div>
                       </button>
                     </div>
 
                     {pickupType === 'pickup' && (
                       <div className="pickup-window-select">
-                        <label htmlFor="ship-collection-window">Collection time</label>
+                        <label htmlFor="ship-collection-window">{t('fields.collectionTime')}</label>
                         <select
                           id="ship-collection-window"
                           value={pickupWindow}
@@ -750,9 +742,10 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                           className="ngf-input"
                         >
                           {PICKUP_WINDOWS.map((w) => (
-                            <option key={w} value={w}>{w}</option>
+                            <option key={w} value={w}>{t(`windows.${PICKUP_WINDOW_KEYS[w]}`)}</option>
                           ))}
                         </select>
+                        <p className="tx-hint">{t('fields.collectionHint')}</p>
                       </div>
                     )}
                   </div>
@@ -760,10 +753,10 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <div className="form-step-actions">
                     <button
                       type="button"
-                      className="btn-corp-primary"
+                      className="tx-btn tx-btn--primary"
                       onClick={handleNextStep}
                     >
-                      <span>Continue</span>
+                      <span>{t('actions.continue')}</span>
                       <ArrowRight size={16} />
                     </button>
                   </div>
@@ -782,7 +775,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
 
                   <div className="form-fields-grid">
                     <div className="form-group span-2">
-                      <label htmlFor="ship-recipient-company">Company <span className="ngf-field-optional">(optional)</span></label>
+                      <label htmlFor="ship-recipient-company">{t('fields.company')} <span className="ngf-field-optional">{t('fields.optional')}</span></label>
                       <input
                         id="ship-recipient-company"
                         type="text"
@@ -793,7 +786,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="ship-recipient-name">Recipient name *</label>
+                      <label htmlFor="ship-recipient-name">{t('fields.recipientName')} *</label>
                       <input
                         id="ship-recipient-name"
                         type="text"
@@ -805,12 +798,12 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="recipient-phone">Phone *</label>
+                      <label htmlFor="recipient-phone">{t('fields.phone')} *</label>
                       <PhoneInput id="recipient-phone" required value={recipientPhone} onChange={setRecipientPhone} defaultCountry={recipientCountry || senderCountry || 'US'} className="ngf-input" />
                     </div>
 
                     <div className="form-group span-2">
-                      <label htmlFor="ship-recipient-address">Street address *</label>
+                      <label htmlFor="ship-recipient-address">{t('fields.street')} *</label>
                       <input
                         id="ship-recipient-address"
                         type="text"
@@ -831,11 +824,12 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                       onRegion={setRecipientState}
                       postcode={recipientZip}
                       onPostcode={setRecipientZip}
-                      cityPlaceholder="e.g. London"
+                      cityPlaceholder={t('fields.cityToPlaceholder')}
+                      labels={addressLabels(recipientCountry)}
                     />
 
                     <div className="form-group span-2">
-                      <label htmlFor="ship-delivery-instructions">Delivery instructions <span className="ngf-field-optional">(optional)</span></label>
+                      <label htmlFor="ship-delivery-instructions">{t('fields.instructions')} <span className="ngf-field-optional">{t('fields.optional')}</span></label>
                       <input
                         id="ship-delivery-instructions"
                         type="text"
@@ -849,19 +843,19 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <div className="form-step-actions dual">
                     <button
                       type="button"
-                      className="btn-corp-ghost"
+                      className="tx-btn tx-btn--ghost"
                       onClick={handlePrevStep}
                     >
                       <ArrowLeft size={16} />
-                      <span>Back</span>
+                      <span>{t('actions.back')}</span>
                     </button>
 
                     <button
                       type="button"
-                      className="btn-corp-primary"
+                      className="tx-btn tx-btn--primary"
                       onClick={handleNextStep}
                     >
-                      <span>Continue</span>
+                      <span>{t('actions.continue')}</span>
                       <ArrowRight size={16} />
                     </button>
                   </div>
@@ -876,14 +870,14 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                     <div className="sec-title-wrap">
                       <div>
                         <h2>3. {STEP_TITLES[2]}</h2>
-                        <UnitToggle className="ship-unit-toggle" />
+                        <UnitToggle className="ship-unit-toggle" label={t('fields.units')} />
                       </div>
                       <button
                         type="button"
                         className="add-piece-btn"
                         onClick={handleAddPiece}
                       >
-                        <Plus size={15} /> Add a piece
+                        <Plus size={15} aria-hidden="true" /> {t('fields.addPiece')}
                       </button>
                     </div>
                   </div>
@@ -898,7 +892,8 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                               type="button"
                               className="p-delete-btn"
                               onClick={() => handleRemovePiece(index)}
-                              title="Remove this piece"
+                              title={t('fields.removePiece', { n: piece.id })}
+                              aria-label={t('fields.removePiece', { n: piece.id })}
                             >
                               <Trash2 size={15} />
                             </button>
@@ -908,7 +903,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                         <div className="piece-inputs-col">
                           <div className="piece-dim-grid">
                             <div className="p-field">
-                              <label htmlFor={`piece-${index}-weight`}>Weight ({units.weight}) *</label>
+                              <label htmlFor={`piece-${index}-weight`}>{t('fields.weight', { unit: units.weight })} *</label>
                               <MeasureInput
                                 id={`piece-${index}-weight`}
                                 kind="weight"
@@ -922,7 +917,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                             </div>
 
                             <div className="p-field">
-                              <label htmlFor={`piece-${index}-length`}>Length ({units.length})</label>
+                              <label htmlFor={`piece-${index}-length`}>{t('fields.length', { unit: units.length })}</label>
                               <MeasureInput
                                 id={`piece-${index}-length`}
                                 kind="length"
@@ -934,7 +929,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                             </div>
 
                             <div className="p-field">
-                              <label htmlFor={`piece-${index}-width`}>Width ({units.length})</label>
+                              <label htmlFor={`piece-${index}-width`}>{t('fields.width', { unit: units.length })}</label>
                               <MeasureInput
                                 id={`piece-${index}-width`}
                                 kind="length"
@@ -946,7 +941,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                             </div>
 
                             <div className="p-field">
-                              <label htmlFor={`piece-${index}-height`}>Height ({units.length})</label>
+                              <label htmlFor={`piece-${index}-height`}>{t('fields.height', { unit: units.length })}</label>
                               <MeasureInput
                                 id={`piece-${index}-height`}
                                 kind="length"
@@ -959,13 +954,13 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                           </div>
 
                           <div className="p-field-desc">
-                            <label htmlFor={`ship-piece-${index}-contents`}>Contents <span className="ngf-field-optional">(optional)</span></label>
+                            <label htmlFor={`ship-piece-${index}-contents`}>{t('fields.contents')} <span className="ngf-field-optional">{t('fields.optional')}</span></label>
                             <input
                               id={`ship-piece-${index}-contents`}
                               type="text"
                               value={piece.description}
                               onChange={(e) => handleUpdatePiece(index, 'description', e.target.value)}
-                              placeholder="e.g. Machine spare parts"
+                              placeholder={t('fields.contentsPlaceholder')}
                               className="ngf-input"
                             />
                           </div>
@@ -977,19 +972,19 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <div className="form-step-actions dual">
                     <button
                       type="button"
-                      className="btn-corp-ghost"
+                      className="tx-btn tx-btn--ghost"
                       onClick={handlePrevStep}
                     >
                       <ArrowLeft size={16} />
-                      <span>Back</span>
+                      <span>{t('actions.back')}</span>
                     </button>
 
                     <button
                       type="button"
-                      className="btn-corp-primary"
+                      className="tx-btn tx-btn--primary"
                       onClick={handleNextStep}
                     >
-                      <span>Continue</span>
+                      <span>{t('actions.continue')}</span>
                       <ArrowRight size={16} />
                     </button>
                   </div>
@@ -1007,7 +1002,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   </div>
 
                   {/* Service cards: the four §7.1 services, summaries from §3.1 */}
-                  <div className="services-select-grid" role="radiogroup" aria-label="Service">
+                  <div className="services-select-grid" role="radiogroup" aria-label={t('fields.serviceGroup')}>
                     {SERVICE_OPTIONS.map((s) => {
                       const Icon = SERVICE_ICONS[s.id];
                       return (
@@ -1021,9 +1016,9 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                         >
                           <div className="serv-head">
                             <Icon size={20} className="text-accent" />
-                            <strong>{s.name}</strong>
+                            <strong>{tsv(`items.${s.key}.name`)}</strong>
                           </div>
-                          <small>{s.summary}</small>
+                          <small>{tsv(`items.${s.key}.summary`)}</small>
                         </button>
                       );
                     })}
@@ -1031,17 +1026,17 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
 
                   {/* Transport mode (tracker 2.8) */}
                   <div className="transport-mode-row">
-                    <label htmlFor="ship-mode" className="section-sublabel">Transport mode</label>
+                    <label htmlFor="ship-mode" className="section-sublabel">{t('fields.mode')}</label>
                     <select
                       id="ship-mode"
                       value={transportMode}
                       onChange={(e) => setTransportMode(e.target.value as TransportMode | '')}
                       className="ngf-input"
                     >
-                      <option value="">Let {COMPANY} recommend</option>
-                      <option value="Air">{TRANSPORT_MODE_LABELS.Air}</option>
-                      <option value="Sea">{TRANSPORT_MODE_LABELS.Sea}</option>
-                      <option value="Road">{TRANSPORT_MODE_LABELS.Road}</option>
+                      <option value="">{t('fields.modeAuto')}</option>
+                      <option value="Air">{modeLabel('Air')}</option>
+                      <option value="Sea">{modeLabel('Sea')}</option>
+                      <option value="Road">{modeLabel('Road')}</option>
                     </select>
                   </div>
 
@@ -1055,26 +1050,14 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                         onChange={(e) => setRequireSignature(e.target.checked)}
                       />
                       <label htmlFor="signCheck">
-                        <strong>Signature Confirmation</strong>
-                        <small>Delivery is released only against a named signature.</small>
+                        <strong>{t('fields.signature')}</strong>
+                        <small>{t('fields.signatureHint')}</small>
                       </label>
                     </div>
 
-                    <div className="addon-checkbox-row">
-                      <input
-                        type="checkbox"
-                        id="satCheck"
-                        checked={saturdayDelivery}
-                        onChange={(e) => setSaturdayDelivery(e.target.checked)}
-                      />
-                      <label htmlFor="satCheck">
-                        <strong>Weekend Delivery</strong>
-                        <small>Saturday delivery on selected lanes.</small>
-                      </label>
-                    </div>
 
                     <div className="declared-value-row">
-                      <label htmlFor="ship-declared-value">Declared value ({money.currency}) <span className="ngf-field-optional">(optional)</span></label>
+                      <label htmlFor="ship-declared-value">{t('fields.declared', { currency: money.currency })} <span className="ngf-field-optional">{t('fields.optional')}</span></label>
                       <div className="value-input-wrap">
                         <span className="curr-sym">{money.symbol}</span>
                         <MoneyInput
@@ -1091,28 +1074,28 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <div className="form-step-actions dual">
                     <button
                       type="button"
-                      className="btn-corp-ghost"
+                      className="tx-btn tx-btn--ghost"
                       onClick={handlePrevStep}
                     >
                       <ArrowLeft size={16} />
-                      <span>Back</span>
+                      <span>{t('actions.back')}</span>
                     </button>
 
                     <button
                       type="button"
                       disabled={isSubmitting}
                       aria-busy={isSubmitting}
-                      className="btn-corp-primary submit-booking-btn"
+                      className="tx-btn tx-btn--primary submit-booking-btn"
                       onClick={handleSubmit}
                     >
                       {isSubmitting ? (
                         <>
                           <span className="spinner-border" />
-                          <span>Booking…</span>
+                          <span>{t('actions.booking')}</span>
                         </>
                       ) : (
                         <>
-                          <span>Book shipment</span>
+                          <span>{t('actions.book')}</span>
                           <ArrowRight size={17} />
                         </>
                       )}
@@ -1126,14 +1109,14 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
             <aside className="ngf-ship-sidebar">
               <div className="sidebar-sticky-card">
                 <div className="sidebar-head">
-                  <h2>Summary</h2>
+                  <h2>{t('summary.title')}</h2>
                 </div>
 
                 <div className="sidebar-route-preview">
                   <div className="route-loc origin">
                     <MapPin size={16} className="text-accent" />
                     <div>
-                      <small>From</small>
+                      <small>{t('summary.from')}</small>
                       <strong>{senderCity ? placeText(senderCity, senderState, senderCountry) : '—'}</strong>
                     </div>
                   </div>
@@ -1144,7 +1127,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
                   <div className="route-loc dest">
                     <MapPin size={16} className="text-accent" />
                     <div>
-                      <small>To</small>
+                      <small>{t('summary.to')}</small>
                       <strong>{recipientCity ? placeText(recipientCity, recipientState, recipientCountry) : '—'}</strong>
                     </div>
                   </div>
@@ -1152,42 +1135,36 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
 
                 <div className="sidebar-specs-list">
                   <div className="spec-row">
-                    <span>Pieces</span>
+                    <span>{t('summary.pieces')}</span>
                     <strong>{totalPieces}</strong>
                   </div>
                   <div className="spec-row">
-                    <span>Weight</span>
+                    <span>{t('summary.weight')}</span>
                     <strong>{formatWeight(totalWeight, units.system) || '—'}</strong>
                   </div>
                   <div className="spec-row">
-                    <span>Service</span>
+                    <span>{t('summary.service')}</span>
                     <strong className="text-accent">
-                      {getServiceName()}
+                      {serviceLabel(selectedService)}
                     </strong>
                   </div>
                   <div className="spec-row">
-                    <span>Transport mode</span>
-                    <strong>{transportMode ? TRANSPORT_MODE_LABELS[transportMode] : `${COMPANY_SHORT} recommends`}</strong>
+                    <span>{t('summary.mode')}</span>
+                    <strong>{transportMode ? modeLabel(transportMode) : t('summary.modeAuto')}</strong>
                   </div>
                   <div className="spec-row">
-                    <span>Collection</span>
-                    <strong>{pickupType === 'pickup' ? pickupWindow : DROP_OFF_LABEL}</strong>
+                    <span>{t('summary.collection')}</span>
+                    <strong>{collectionLabel}</strong>
                   </div>
                   <div className="spec-row">
-                    <span>Signature Confirmation</span>
-                    <strong>{requireSignature ? 'Yes' : 'No'}</strong>
+                    <span>{t('summary.signature')}</span>
+                    <strong>{requireSignature ? t('summary.yes') : t('summary.no')}</strong>
                   </div>
-                  {saturdayDelivery && (
-                    <div className="spec-row">
-                      <span>Weekend Delivery</span>
-                      <strong>Yes</strong>
-                    </div>
-                  )}
                 </div>
 
                 <div className="sidebar-pricing-breakdown">
                   <p className="admin-publishing-note">
-                    Your coordinator confirms the rate before collection.
+                    {t('summary.note')}
                   </p>
                 </div>
               </div>
@@ -1202,7 +1179,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
       <section className="ngf-ship-process-section">
         <div className="ngf-container-wide">
           <div className="section-center-header">
-            <h2>How booking works</h2>
+            <h2>{t('how.title')}</h2>
             <div className="section-header-line" />
           </div>
 

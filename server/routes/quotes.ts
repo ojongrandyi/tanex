@@ -372,8 +372,9 @@ quotesRouter.post('/:id/convert', requirePermission('quotes.manage'), requirePer
       15,
       'Just now',
       createdAt,
-      'August 25, 2026',
-      'by 5:00 PM',
+      // No invented estimate (#33): staff set it on the shipment; until then the page shows "—".
+      '',
+      '',
       s.service || q.service,
       s.shipmentType || q.shipmentType,
       s.cargoDescription || q.cargoDescription,
@@ -435,8 +436,8 @@ quotesRouter.post('/:id/convert', requirePermission('quotes.manage'), requirePer
       originLabel,
       'Origin Gateway',
       createdTime.timestamp,
-      `Consignment generated from approved quote ${q.id}. Linear Code 128 barcode assigned.`,
-      `Converted by ${actorName(req)}. Tariff: ${q.pricing?.finalPrice || '350.00'}`,
+      `Consignment generated from approved quote ${q.id}. Barcode label assigned.`,
+      `Converted by ${actorName(req)}.${q.pricing?.finalPrice ? ` Tariff: ${q.pricing.finalPrice}` : ''}`,
       0, 1, 1, 1,
       createdTime.occurredAtTs, createdTime.timeZone, registered.titleKey, registered.titleVarsJson
     );
