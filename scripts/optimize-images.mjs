@@ -345,6 +345,13 @@ const PHOTOS = [
   // TanEx owner photos (images/tanex files/, committed). About page leadership slot, 4:5 portrait
   // kept from the top so the face and the TanEx wall sign stay in frame (CONTENT §4, §12).
   { name: 'about-md', src: 'tanex files/Managing Director.png', kind: 'hero', aspect: 4 / 5, position: 'top', quality: { webp: 80, jpeg: 82 }, widths: [400, 640, 810] },
+  // Homepage service photo cards (owner's reference, 2026-11-09), 10:11 like the cards. Optional:
+  // a missing source is skipped and that card keeps its brand panel. Drop the photos into
+  // images/services/ (licence in images/services/SOURCES.md), then run:
+  //   node scripts/optimize-images.mjs --only svc-air,svc-road,svc-warehousing,svc-maritime,svc-rail,svc-local
+  ...['air', 'road', 'warehousing', 'maritime', 'rail', 'local'].map((key) => (
+    { name: `svc-${key}`, src: `services/${key}.jpg`, kind: 'hero', aspect: 10 / 11, widths: [400, 640, 900], optional: true }
+  )),
 ];
 
 // `position` picks which part of the source a cover crop keeps (sharp: 'centre', 'top', 'bottom', ...).
@@ -360,6 +367,10 @@ async function buildPhotos(only = null) {
   const manifest = {};
   for (const p of PHOTOS.filter((x) => !only || only.includes(x.name))) {
     const srcPath = path.join(SRC, p.src);
+    if (p.optional && !fs.existsSync(srcPath)) {
+      console.log(`Skipped ${p.name}: no ${p.src} yet.`);
+      continue;
+    }
     const factory = () => (p.crop ? sharp(srcPath).extract(p.crop) : sharp(srcPath));
     const meta = await factory().metadata();
     const srcW = p.crop ? p.crop.width : meta.width;

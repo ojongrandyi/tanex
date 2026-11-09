@@ -147,15 +147,18 @@ Order: 2.1 Hero · 2.2 Services · 2.3 Bike delivery · 2.4 Truck delivery · 2.
 - **Mini facts under the buttons (no numbers):** `Live rider tracking in town` · `Photo proof of delivery` · `English & French support`
 - **Motion control:** see §2.10
 
-### 2.2 Services (6 cards)
+### 2.2 Services (6 photo cards)
 - **Eyebrow:** `OUR SERVICES` · **H2:** `Every way to move it, under one roof`
 - **Intro:** `From a document across Buea to a container across the ocean, choose the mode that fits your cargo. We handle the booking, the paperwork and every hand-off.`
-1. **Air freight.** Fast international shipping for documents, parcels and urgent cargo, with customs documents prepared for you. → `Air freight`
-2. **Maritime freight.** Full (FCL) and shared (LCL) container shipping for heavier and larger loads, through Cameroon's ports. → `Maritime freight`
-3. **Rail freight.** Cost-effective inland transport for heavy and bulk cargo on routes served by rail. **[confirm]** → `Rail freight`
-4. **Road freight.** Trucks and vans between cities in Cameroon and across borders in the region. **[confirm cross-border]** → `Road freight`
-5. **Warehousing.** Secure storage, stock checks, packing and dispatch when you're ready. **[confirm facilities]** → `Warehousing`
-6. **Local delivery.** Bike couriers across Buea, Limbe and Douala, with live tracking and photo proof. → `Book a bike delivery`
+Photo cards in the owner's menu order (reference design 2026-11-09): title, small tag, text, `Learn more →`. Tags **owner to confirm**.
+1. **Air transport** · tag `Worldwide` · Fast international shipping for documents, parcels and urgent cargo, with customs documents prepared for you.
+2. **Road transport** · tag `Cameroon & the region` · Trucks and vans between cities in Cameroon and across borders in the region. **[confirm cross-border]**
+3. **Warehousing** · tag `Storage & dispatch` · Secure storage, stock checks, packing and dispatch when you're ready. **[confirm facilities]**
+4. **Maritime transport** · tag `Worldwide` · Full (FCL) and shared (LCL) container shipping for heavier and larger loads, through Cameroon's ports.
+5. **Rail transport** · tag `Inland routes` · Cost-effective inland transport for heavy and bulk cargo on routes served by rail. **[confirm]**
+6. **Local delivery** · tag `Buea · Limbe · Douala` · Bike couriers across Buea, Limbe and Douala, with live tracking and photo proof. → `Book a bike delivery`
+
+Photos: `images/services/` (see its SOURCES.md); until then each card shows a brand panel with the service icon (tracker #142).
 
 ### 2.3 Bike delivery
 - **Eyebrow:** `IN-TOWN DELIVERY` · **H2:** `Across town, while you watch.`

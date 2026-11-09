@@ -111,6 +111,7 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 - **Animation :** voir §2.10
 
 ### 2.2 Services (6)
+Cartes photo (2026-11-09, **à confirmer**) : titres Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale ; étiquettes `Monde entier` · `Cameroun et région` · `Stockage et expédition` · `Monde entier` · `Liaisons intérieures` · `Buea · Limbe · Douala` ; lien `En savoir plus`.
 - **Sur-titre :** `NOS SERVICES` · **H2 :** `Tous les moyens de transport, sous un même toit`
 - **Intro :** `D'un document à travers Buea à un conteneur de l'autre côté de l'océan, choisissez le mode adapté à votre marchandise. Nous nous occupons de la réservation, des documents et de chaque transfert.`
 1. **Fret aérien.** Expédition internationale rapide de documents, colis et marchandises urgentes, avec les documents douaniers préparés pour vous.

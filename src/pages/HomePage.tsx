@@ -4,6 +4,8 @@ import {
   Ship, TrainFront, Truck, Users, Wallet, Warehouse,
 } from 'lucide-react';
 import { Barcode } from '../components/Barcode';
+import { ResponsiveImage } from '../components/ResponsiveImage';
+import { SITE_IMAGES, type SiteImageName } from '../data/siteImages';
 import { NetworkMapPanel } from '../components/NetworkMapPanel';
 import { Button, Input, Textarea } from '../components/ui';
 import { Link } from '../router/Link';
@@ -47,14 +49,25 @@ const LATEST_POSTS: HomePost[] = [];
 const CHAPTER_IDS = ['door', 'services', 'in-town', 'city-to-city', 'world', 'label', 'contact', 'delivered'] as const;
 const RAIL_KEYS = ['door', 'services', 'town', 'city', 'world', 'label', 'contact', 'delivered'] as const;
 
+// Photo cards in the owner's menu order (owner's reference, 2026-11-09). A card shows the photo
+// `svc-<key>` once scripts/optimize-images.mjs has added it to src/data/siteImages.ts; until
+// then it shows the brand panel with its icon.
+const svcPhoto = (key: string): SiteImageName | undefined =>
+  `svc-${key}` in SITE_IMAGES ? (`svc-${key}` as SiteImageName) : undefined;
+
 const SERVICE_CARDS = [
   { key: 'air', icon: Plane, param: 'air' },
-  { key: 'maritime', icon: Ship, param: 'maritime' },
-  { key: 'rail', icon: TrainFront, param: 'rail' },
   { key: 'road', icon: Truck, param: 'road' },
   { key: 'warehousing', icon: Warehouse, param: 'warehousing' },
+  { key: 'maritime', icon: Ship, param: 'maritime' },
+  { key: 'rail', icon: TrainFront, param: 'rail' },
   { key: 'local', icon: Bike, param: 'local-delivery' },
-] as const;
+].map((card) => ({ ...card, photo: svcPhoto(card.key) })) as readonly {
+  key: 'air' | 'road' | 'warehousing' | 'maritime' | 'rail' | 'local';
+  icon: typeof Plane;
+  param: string;
+  photo?: SiteImageName;
+}[];
 
 const FAQ_KEYS = ['account', 'town', 'live', 'pay', 'international', 'language'] as const;
 
@@ -219,22 +232,33 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
             <ServicesRoad />
           </div>
           <div className="tx-ch__rest">
-            <ul className="tx-home__cards">
-              {SERVICE_CARDS.map(({ key, icon: Icon, param }) => {
+            <ul className="tx-home__svc">
+              {SERVICE_CARDS.map(({ key, icon: Icon, param, photo }) => {
                 const isLocal = key === 'local';
                 return (
-                  <li key={key} className="tx-card tx-home__card" data-reveal>
-                    <span className="tx-card__icon" aria-hidden="true"><Icon /></span>
-                    <h3 className="tx-card__title">{t(`services.${key}.title`)}</h3>
-                    <p className="tx-card__body">{t(`services.${key}.body`)}</p>
+                  <li key={key} className="tx-home__svc-item" data-reveal>
                     <Link
                       page={isLocal ? BIKE_BOOKING.page : 'services'}
                       param={isLocal ? BIKE_BOOKING.param : param}
                       onNavigate={onNavigate}
-                      className="tx-link"
+                      className={`tx-svc-card${photo ? '' : ' tx-svc-card--art'}`}
                     >
-                      {isLocal ? t('services.local.cta') : t(`services.${key}.title`)}
-                      <ArrowRight aria-hidden="true" />
+                      {photo ? (
+                        <ResponsiveImage name={photo} alt="" sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1024px) 50vw, 410px" className="tx-svc-card__media" imgClassName="tx-svc-card__img" />
+                      ) : (
+                        <span className="tx-svc-card__art" aria-hidden="true"><Icon /></span>
+                      )}
+                      <span className="tx-svc-card__top">
+                        <span className="tx-svc-card__title">{t(`services.${key}.title`)}</span>
+                        <span className="tx-svc-card__tag">{t(`services.tags.${key}`)}</span>
+                      </span>
+                      <span className="tx-svc-card__bottom">
+                        <span className="tx-svc-card__body">{t(`services.${key}.body`)}</span>
+                        <span className="tx-svc-card__more">
+                          {isLocal ? t('services.local.cta') : t('services.more')}
+                          <ArrowRight aria-hidden="true" />
+                        </span>
+                      </span>
                     </Link>
                   </li>
                 );

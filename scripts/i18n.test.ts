@@ -89,6 +89,7 @@ const SAME_IN_BOTH: Record<string, string> = {
   'home:labels.demo.destinationValue': 'airport code and place name',
   'home:labels.demo.service': 'same word in French',
   'home:contact.whatsapp': 'brand name',
+  'home:services.tags.local': 'place names',
   'home:contact.form.message': 'same word in French',
   'home:rail.chapters.services': 'same word in French',
   'home:rail.chapters.contact': 'same word in French',
