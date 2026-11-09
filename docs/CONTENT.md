@@ -846,3 +846,20 @@ Plain text, short, signed `— TanEx`. `{link}` = the public tracking URL in the
 - **Until F.3 ("coming soon" page at /blog, noindex; added 2026-11-09, owner to confirm):** eyebrow `Blog` · H1 `Articles coming soon` · sub `We're preparing news, guides and shipping tips from the {{COMPANY}} team. Check back soon.` · buttons `Track a shipment` · `Contact us`
 - **Index:** eyebrow `TANEX BLOG` · H1 `News, guides and shipping tips` · sub `Practical advice on sending parcels in Cameroon and abroad, and news from the TanEx team.` · category chip `All` · empty state `Our first articles are on their way.` · `Read more` · `{n} min read` · pagination `Newer` · `Older`
 - **Article:** `By {author}` · `{date}` · `{n} min read` · `Share` (`WhatsApp` · `Facebook` · `LinkedIn` · `X` · `Copy link` → `Link copied`) · `Related articles` · `Read in French` / `Lire en anglais` (only when a translation exists) · end CTA `Need to send something? Get a Quote`
+
+## 16. Careers and CSR Policy (footer only; added 2026-11-09, **draft: owner to approve before launch**)
+Owner's note: "Extra pages to be added only on footer: CSR Policy, Careers, Privacy Policy" (Privacy Policy = /legal).
+Commitments only: no figures, open positions, certifications or partners. Footer *Company*: `Careers` · `CSR Policy`.
+
+**Careers (/careers):** eyebrow `Careers` · H1 `Work with {{COMPANY}}` · sub `We move parcels from doors in Buea, Limbe and Douala to the rest of the world. If you are reliable, careful and good with people, we'd like to hear from you.`
+- `Where you could fit` / `Teams at {{COMPANY}}`: **Riders** Collect and deliver parcels across town by bike. · **Drivers** Carry larger loads between cities by truck and van. · **Operations and office** Book shipments, prepare documents, help customers and keep every parcel moving.
+- `What matters to us` / `How we work`: **Reliability** Being on time and doing what we promised. · **Care** Handling every parcel as if it were our own. · **Service** Friendly, clear help for every customer, in English or French.
+- `How to apply`: `No open positions are listed here at the moment. Send your CV and a short message to {{EMAIL}}, saying which team and which city (Buea, Limbe or Douala) interest you. We'll contact you if there's a match.` · button `Email your CV` (email subject `Job application`)
+
+**CSR Policy (/csr-policy):** eyebrow `CSR Policy` · H1 `Our responsibility` · sub `How {{COMPANY}} works to be a safe, fair and responsible company in the communities we serve.`
+- **Safety on the road.** Our riders and drivers follow the traffic rules and wear the right safety equipment. We plan loads and routes so that no delivery is worth taking a risk for.
+- **Fair work.** We treat our staff and couriers with respect, pay them on time, and give them the training and equipment the job needs.
+- **Honest service.** A clear price before you ship, tracking you can check yourself, and proof of every delivery. We protect your personal data as our Privacy Policy explains. → `Read our Privacy Policy`
+- **Environment.** Bikes for short trips in town, combined loads between cities and fewer empty journeys. Where we can, we reuse packaging and reduce waste.
+- **Local community.** We are based in Buea and work with businesses across Buea, Limbe and Douala, helping them reach customers at home and abroad.
+- `Questions or suggestions about how we work? Write to us at {{EMAIL}}.`

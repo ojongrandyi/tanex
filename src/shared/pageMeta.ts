@@ -81,6 +81,14 @@ const PAGES: Record<InnerRoute, Record<Lang, PageMetaText>> = {
     en: { title: `Blog | ${COMPANY}`, description: `News, guides and shipping tips from the ${COMPANY} team.` },
     fr: { title: `Blog | ${COMPANY}`, description: `Actualités, guides et conseils d'expédition de l'équipe ${COMPANY}.` },
   },
+  careers: {
+    en: { title: `Careers | ${COMPANY}`, description: `Work with ${COMPANY} in Buea, Limbe and Douala: riders, drivers, operations and office. Send us your CV.` },
+    fr: { title: `Carrières | ${COMPANY}`, description: `Travaillez avec ${COMPANY} à Buea, Limbe et Douala : livreurs, chauffeurs, opérations et bureau. Envoyez-nous votre CV.` },
+  },
+  csr: {
+    en: { title: `CSR Policy | ${COMPANY}`, description: `How ${COMPANY} works safely, fairly and responsibly: road safety, fair work, honest service, the environment and the local community.` },
+    fr: { title: `Politique RSE | ${COMPANY}`, description: `Comment ${COMPANY} travaille de façon sûre, juste et responsable : sécurité routière, travail équitable, service honnête, environnement et communauté locale.` },
+  },
 };
 
 /** CONTENT §1.1a; the French title is built from the CONTENT_FR §1.1a heading (owner to confirm). */

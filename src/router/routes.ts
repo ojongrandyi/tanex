@@ -19,7 +19,9 @@ export type RouteId =
   | 'help'
   | 'locations'
   | 'legal'
-  | 'blog';
+  | 'blog'
+  | 'careers'
+  | 'csr';
 
 export interface RouteDef {
   id: RouteId;
@@ -53,6 +55,9 @@ export const ROUTES: readonly RouteDef[] = [
   { id: 'legal', en: '/legal', fr: '/fr/mentions-legales', param: true },
   // "Coming soon" page until F.3: no article paths yet (param joins with F.3), not indexed.
   { id: 'blog', en: '/blog', fr: '/fr/blog', noindex: true },
+  // Footer-only company pages (owner's note 2026-11-09).
+  { id: 'careers', en: '/careers', fr: '/fr/carrieres' },
+  { id: 'csr', en: '/csr-policy', fr: '/fr/politique-rse' },
 ];
 
 export interface RouteMatch {

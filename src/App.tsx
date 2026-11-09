@@ -53,6 +53,8 @@ const ContactPage = lazy(() => import('./pages/ContactPage').then((m) => ({ defa
 const HelpPage = lazy(() => import('./pages/HelpPage').then((m) => ({ default: m.HelpPage })));
 const LegalPage = lazy(() => import('./pages/LegalPage').then((m) => ({ default: m.LegalPage })));
 const LocationsPage = lazy(() => import('./pages/LocationsPage').then((m) => ({ default: m.LocationsPage })));
+const CareersPage = lazy(() => import('./pages/CompanyPages').then((m) => ({ default: m.CareersPage })));
+const CsrPage = lazy(() => import('./pages/CompanyPages').then((m) => ({ default: m.CsrPage })));
 const BlogPage = lazy(() => import('./pages/BlogPage').then((m) => ({ default: m.BlogPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
@@ -487,6 +489,14 @@ function MainAppContent() {
 
         {currentPage === 'blog' && (
           <BlogPage onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'careers' && (
+          <CareersPage onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'csr' && (
+          <CsrPage onNavigate={handleNavigate} />
         )}
 
         {currentPage === 'not-found' && (

@@ -38,6 +38,8 @@ import enPayment from '../src/i18n/en/payment.ts';
 import frPayment from '../src/i18n/fr/payment.ts';
 import enBlog from '../src/i18n/en/blog.ts';
 import frBlog from '../src/i18n/fr/blog.ts';
+import enCompany from '../src/i18n/en/company.ts';
+import frCompany from '../src/i18n/fr/company.ts';
 import { PAYMENT_TERMS_FR, paymentTerm } from '../src/i18n/paymentTerms.ts';
 import { PAYMENT_METHODS } from '../src/shared/paymentMethods.ts';
 import { legalDocs } from '../src/data/legalDocs.ts';
@@ -72,6 +74,7 @@ const SAME_IN_BOTH: Record<string, string> = {
   'common:header.menu': 'same word in French',
   'common:footer.links.blog': 'same word in French',
   'blog:eyebrow': 'same word in French',
+  'company:careers.values.service.title': 'same word in French',
   'common:header.cities': 'place names',
   'common:language.en': 'language code',
   'common:language.fr': 'language code',
@@ -146,6 +149,7 @@ const PAIRS: [string, Tree, Tree][] = [
   ['ship', enShip as unknown as Tree, frShip as unknown as Tree],
   ['payment', enPayment as unknown as Tree, frPayment as unknown as Tree],
   ['blog', enBlog as unknown as Tree, frBlog as unknown as Tree],
+  ['company', enCompany as unknown as Tree, frCompany as unknown as Tree],
 ];
 
 test('fr dictionaries have exactly the English keys', () => {

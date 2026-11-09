@@ -1,0 +1,30 @@
+/* Careers and CSR Policy pages (footer only). */
+.tx-company { background: var(--tx-cream-100); color: var(--tx-text); }
+.tx-company__wrap { width: 100%; max-width: var(--tx-container, 1280px); margin: 0 auto; padding: 0 var(--tx-gutter, 40px); }
+.tx-company__section { padding: clamp(56px, 7vw, 104px) 0; }
+.tx-company__section--alt { background: var(--tx-cream-200); }
+.tx-company__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+.tx-company__cta { background: var(--tx-choc-950); padding: clamp(56px, 7vw, 96px) 0; }
+.tx-company__cta-inner { display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap; }
+.tx-company__cta-inner > div { flex: 1 1 520px; }
+.tx-company__cta .tx-h2 { margin: 0 0 10px; }
+.tx-company__cta .tx-lead { margin: 0; max-width: 62ch; color: var(--tx-choc-200); }
+.tx-company__cta .tx-lead a { color: var(--tx-cream-50, #fff); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+.tx-company__policy { max-width: 880px; display: grid; gap: 36px; }
+.tx-company__item { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start; }
+.tx-company__item-title { margin: 4px 0 8px; font: 700 clamp(1.2rem, 1rem + .6vw, 1.45rem)/1.3 var(--tx-font-display); letter-spacing: -.01em; }
+.tx-company__item p { margin: 0 0 10px; max-width: 68ch; line-height: 1.65; color: var(--tx-text-muted); }
+.tx-company__contact { margin: 12px 0 0; padding-top: 28px; border-top: 1px solid var(--tx-choc-200); }
+.tx-company__contact a { color: var(--tx-text); font-weight: 600; }
+
+@media (max-width: 1024px) {
+  .tx-company__grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 760px) {
+  .tx-company__wrap { padding: 0 var(--tx-gutter-mobile, 16px); }
+  .tx-company__grid { grid-template-columns: 1fr; }
+  .tx-company__item { grid-template-columns: 1fr; gap: 12px; }
+  .tx-company__cta-inner .tx-btn { flex: 1 1 100%; justify-content: center; }
+}
