@@ -7,8 +7,8 @@ import { Link } from '../router/Link';
 import { useAreaT } from '../i18n/I18nProvider';
 import './CompanyPages.css';
 
-// Careers and CSR Policy (footer only, owner's note 2026-11-09). Text: "company" area, a draft
-// the owner approves (CONTENT §16). No open positions, figures or certifications are claimed.
+// Careers and CSR Policy (footer only, owner's note 2026-11-09). Text: "company" area, approved
+// by the owner 2026-11-10 (CONTENT §16). No open positions, figures or certifications are claimed.
 
 const EMAIL_MARK = '[[email]]';
 

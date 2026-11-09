@@ -850,7 +850,7 @@ Plain text, short, signed `— TanEx`. `{link}` = the public tracking URL in the
 - **Index:** eyebrow `TANEX BLOG` · H1 `News, guides and shipping tips` · sub `Practical advice on sending parcels in Cameroon and abroad, and news from the TanEx team.` · category chip `All` · empty state `Our first articles are on their way.` · `Read more` · `{n} min read` · pagination `Newer` · `Older`
 - **Article:** `By {author}` · `{date}` · `{n} min read` · `Share` (`WhatsApp` · `Facebook` · `LinkedIn` · `X` · `Copy link` → `Link copied`) · `Related articles` · `Read in French` / `Lire en anglais` (only when a translation exists) · end CTA `Need to send something? Get a Quote`
 
-## 16. Careers and CSR Policy (footer only; added 2026-11-09, **draft: owner to approve before launch**)
+## 16. Careers and CSR Policy (footer only; added 2026-11-09, **approved by the owner 2026-11-10**)
 Owner's note: "Extra pages to be added only on footer: CSR Policy, Careers, Privacy Policy" (Privacy Policy = /legal).
 Commitments only: no figures, open positions, certifications or partners. Footer *Company*: `Careers` · `CSR Policy`.
 

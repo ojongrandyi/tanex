@@ -21,3 +21,14 @@ the short side. Record each one below, then run:
 
 | File | Source page | Licence | Photographer / owner |
 |---|---|---|---|
+| air.jpg | https://unsplash.com/photos/a-large-white-cargo-airplane-with-stairs-attached-PEf3deR3l_U | Unsplash License | Peaky_82 |
+| road.jpg | https://unsplash.com/photos/semi-truck-on-highway-at-dusk-ucuOscdCaO4 | Unsplash License | Josiah Farrow |
+| warehousing.jpg | https://unsplash.com/photos/warehouse-shelving-with-cardboard-boxes-jcav1COVvOc | Unsplash License | Jacques Dillies |
+| maritime.jpg | https://unsplash.com/photos/container-ship-at-industrial-port-yx20mpDyr2I | Unsplash License | Timelab |
+| rail.jpg | https://unsplash.com/photos/a-freight-train-travels-through-a-dry-rural-landscape-q2QWsSe26mA | Unsplash License | Emmanuel Munoz |
+| local.jpg | https://unsplash.com/photos/motorcycle-overloaded-with-people-and-goods-on-road-nyr7SXwjoEc | Unsplash License | Random Institute |
+
+Downloaded 2026-11-09 from images.unsplash.com (2400 px wide; free photos, not Unsplash+). Unsplash License:
+free for commercial use, no attribution required, may be modified; not allowed to sell unaltered copies
+or imply endorsement by people shown. Chosen for showing the service with no prominent airline,
+shipping-line or rail-operator branding (owner, 2026-11-09: "perfectly high quality images").

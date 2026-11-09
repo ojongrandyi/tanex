@@ -1,5 +1,5 @@
 // English master, area "company": the Careers and CSR Policy pages (footer only, owner's note
-// 2026-11-09). CONTENT §16, a draft for the owner to approve: commitments only, no figures,
+// 2026-11-09). CONTENT §16, approved by the owner 2026-11-10: commitments only, no figures,
 // open positions or claims. Email comes from brand.ts as {email}.
 const company = {
   careers: {

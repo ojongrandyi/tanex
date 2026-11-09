@@ -5,3 +5,6 @@ dist-server/
 .env
 *.local
 .claude/
+
+# Photo originals stay out of git (repo size); licences in images/services/SOURCES.md.
+images/services/*.jpg

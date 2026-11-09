@@ -548,6 +548,6 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 | `payment.proof_received` (ajouté après B.6, à confirmer) | Objet `Preuve de paiement reçue pour {id}` · `Un client a envoyé une preuve de paiement pour {id}. Vérifiez-la dans la console, rubrique Paiements : {url}` |
 | `mail.test` (ajouté avec B.6, à confirmer) | Objet `E-mail de test TanEx` · `Ceci est un e-mail de test envoyé depuis la console TanEx. Si vous pouvez le lire, l'envoi d'e-mails fonctionne.` |
 
-## 16. Carrières et Politique RSE (pied de page ; ajouté le 2026-11-09, **brouillon à valider par le propriétaire**)
+## 16. Carrières et Politique RSE (pied de page ; ajouté le 2026-11-09, **approuvé par le propriétaire le 2026-11-10**)
 Texte complet dans `src/i18n/fr/company.ts` (traduction de CONTENT §16). Pied de page *Entreprise* : `Carrières` · `Politique RSE`.
 Chemins : `/fr/carrieres`, `/fr/politique-rse`. Titres : `Travaillez avec {{COMPANY}}` · `Notre responsabilité`.

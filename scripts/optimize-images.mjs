@@ -350,7 +350,7 @@ const PHOTOS = [
   // images/services/ (licence in images/services/SOURCES.md), then run:
   //   node scripts/optimize-images.mjs --only svc-air,svc-road,svc-warehousing,svc-maritime,svc-rail,svc-local
   ...['air', 'road', 'warehousing', 'maritime', 'rail', 'local'].map((key) => (
-    { name: `svc-${key}`, src: `services/${key}.jpg`, kind: 'hero', aspect: 10 / 11, widths: [400, 640, 900], optional: true }
+    { name: `svc-${key}`, src: `services/${key}.jpg`, kind: 'hero', aspect: 10 / 11, widths: [400, 640, 900], maxWidth: 900, optional: true }
   )),
 ];
 
