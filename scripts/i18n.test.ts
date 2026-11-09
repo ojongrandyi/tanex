@@ -187,7 +187,7 @@ test('every public API error code has a text in both languages', () => {
 test('t(): variables and French typography', () => {
   assert.equal(translate(enCommon as any, 'footer.copyright', 'en', { year: 2026, legalName: 'Tanex SARL' }), '© 2026 Tanex SARL. All rights reserved.');
   assert.equal(translate(frCommon as any, 'header.needHelp', 'fr'), `Besoin d'aide${NNBSP}?`);
-  assert.equal(translate(frCommon as any, 'header.open', 'fr', { hours: '9 h' }), 'Ouvert de 9 h');
+  assert.equal(translate(frCommon as any, 'header.open', 'fr', { hours: 'de 9 h' }), 'Ouvert de 9 h');
   assert.equal(translate(enCommon as any, 'header.nope', 'en'), 'header.nope');
   assert.equal(frenchSpacing('« Bonjour » : oui ; non ! quoi ?'), `«${NBSP}Bonjour${NBSP}»${NBSP}: oui${NNBSP}; non${NNBSP}! quoi${NNBSP}?`);
   assert.equal(frenchSpacing('https://tanexsarl.com/fr/ 16:00'), 'https://tanexsarl.com/fr/ 16:00');
@@ -200,7 +200,10 @@ test('format: XAF without decimals, French grouping, clocks, distances', () => {
   assert.match(formatMoney(350, 'EUR', 'fr'), /350,00/);
   assert.equal(formatClock('16:00', 'fr'), `16${NBSP}h${NBSP}00`);
   assert.equal(formatClock('09:00', 'en'), `9:00${NBSP}AM`);
-  assert.equal(formatOpeningHoursIn('fr'), `9${NBSP}h${NBSP}00 – 16${NBSP}h${NBSP}00`);
+  assert.equal(formatOpeningHoursIn('fr'), `24${NBSP}h/24, 7${NBSP}j/7`);
+  assert.equal(formatOpeningHoursIn('en'), '24/7');
+  assert.equal(formatOpeningHoursIn('fr', { opens: '09:00', closes: '16:00' }), `de 9${NBSP}h${NBSP}00 à 16${NBSP}h${NBSP}00`);
+  assert.equal(formatOpeningHoursIn('en', { opens: '09:00', closes: '16:00' }), `9:00${NBSP}AM – 4:00${NBSP}PM`);
   assert.equal(formatDistanceKm(2.5, 'fr'), `2,5${NBSP}km`);
 });
 

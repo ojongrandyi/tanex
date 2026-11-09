@@ -1,6 +1,6 @@
 // English master, area "about": the About page (CONTENT §4, §3.6, §4.1, alt text §12).
-// The founding story, the wall-sign line and the MD's name are not written for the owner: those
-// blocks stay hidden until supplied (#102, #103).
+// The founding story and the wall-sign line are not written for the owner: those blocks stay
+// hidden until supplied (#102). Names of the leadership team come from brand.ts (#103).
 const about = {
   hero: {
     eyebrow: 'About TanEx',
@@ -21,6 +21,8 @@ const about = {
     role: 'Managing Director',
     alt: 'The Managing Director of TanEx at the TanEx office in Buea',
     altNamed: '{name}, Managing Director of TanEx, at the TanEx office in Buea',
+    headOfOperations: 'Head of Operations',
+    regionalManager: 'Regional Manager',
   },
   team: {
     eyebrow: 'Our team',

@@ -260,7 +260,8 @@ En-têtes : `Service` · `Idéal pour` · `Rapidité` · `Suivi`
   2. **Des livreurs identifiés.** Chaque livraison a un livreur ou un chauffeur TanEx qui en répond.
   3. **Des preuves, pas des promesses.** Une photo et un nom à chaque livraison.
   4. **Deux langues.** Nous vous servons en anglais et en français.
-- **Direction :** sur-titre `DIRECTION` · titre `Directeur général` · texte alternatif de la photo : voir §12
+- **Direction :** sur-titre `DIRECTION` · titre `Directeur général` · puis `Responsable des opérations` et `Responsable régional` · texte alternatif de la photo : voir §12
+- **Horaires :** `Ouvert 24 h/24, 7 j/7`
 - **Notre équipe :** `L'équipe TanEx porte le marron et l'orange que vous verrez à votre porte.`
 - **Histoire :** **H2** `Pourquoi TanEx` (masqué tant que le propriétaire n'a pas fourni le texte)
 

@@ -170,7 +170,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
   const [transportMode, setTransportMode] = useState<TransportMode | ''>('');
   const [declaredValue, setDeclaredValue] = useState<number | ''>('');
   const [requireSignature, setRequireSignature] = useState(true);
-  // Weekend delivery is not offered until the owner confirms opening days (#119).
+  // TanEx is open 7 days (#119), so no separate weekend option; the collection windows cover every day.
   const saturdayDelivery = false;
 
   // Submission State

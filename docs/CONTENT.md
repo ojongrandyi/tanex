@@ -26,12 +26,12 @@ element if the value is empty.
 | `{{SLOGAN}}` | Saving Situations (from the owner flyer) |
 | `{{WALL_LINE}}` | Office wall sign line, probably "Saving situations across continents": TBD |
 | `{{SOCIAL}}` | Handle `Tanex_2025` on Facebook, Instagram, LinkedIn: profile URLs TBD (no icons until real URLs) |
-| `{{MD_NAME}}` | Managing Director's name, TBD (owner) |
+| `{{MD_NAME}}` | Perry Tanyoh (owner, 2026-11-09) |
 | `{{YEAR_FOUNDED}}` | TBD (owner). If unknown, no "years" stat |
 | `{{JURISDICTION}}` | Republic of Cameroon (Tanex SARL), lawyer to confirm |
 | `{{LOCAL_CITIES}}` | Buea, Limbe and Douala (from the active delivery cities in the database) |
 
-**Claims policy.** No "24/7", response-time promises, statistics, testimonials, partner logos or certifications
+**Claims policy.** "Open 24/7" is confirmed by the owner (2026-11-09) and is used only for opening hours. No response-time promises, statistics, testimonials, partner logos or certifications
 unless the owner confirms them. Items marked **[confirm]** are best-knowledge drafts the owner must approve
 (tracker #104).
 
@@ -303,7 +303,8 @@ Uses §3.3.
   2. **Named couriers.** Every delivery has a TanEx rider or driver accountable for it.
   3. **Proof, not promises.** Photo and name at every delivery.
   4. **Two languages.** We serve you in English and French.
-- **Leadership:** eyebrow `LEADERSHIP` · photo `about-md` · name `{{MD_NAME}}` (hidden until supplied) · title `Managing Director` · a short message only if the owner supplies it (never written for him).
+- **Leadership:** eyebrow `LEADERSHIP` · photo `about-md` · name `{{MD_NAME}}` · title `Managing Director` · then `Enoh Arnold`, `Head of Operations` and `Eyoung Delgo`, `Regional Manager` (owner, 2026-11-09) · a short message only if the owner supplies it (never written for him).
+- **Opening hours:** `Open 24/7` (header, footer, About, Contact, homepage).
 - **Our team:** `The TanEx team wears the brown and orange you'll see at your door.` (photo `about-team` when supplied)
 - **Story:** **H2** `Why TanEx` · `{{WALL_LINE}}` shown as a pull quote when supplied. Story text: owner to supply (founding year, first routes). Until then this block is hidden; don't invent a timeline.
 - **CTA:** §3.6.

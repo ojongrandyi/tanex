@@ -43,15 +43,16 @@ Every change must keep the platform:
 | Tagline | From Your Door to the World · FR: De votre porte au monde entier |
 | Email · Domain | info@tanexsarl.com · tanexsarl.com (`www.` → apex) |
 | Offices | **Buea (head office):** Check Point, directly opposite Molyko Omnisport Stadium · **Douala:** Kotto, La Canadienne |
-| Phone | +237 651 05 93 45 · +237 691 19 46 63 (which one is on WhatsApp: TBD) |
-| Opening hours | 9:00 AM – 4:00 PM (days of the week: TBD) |
+| Phone | +237 651 05 93 45 · +237 691 19 46 63 (both on WhatsApp; 651… is also MTN MoMo, 691… Orange Money) |
+| Opening hours | **24/7** (owner, 2026-11-09; the flyer's 9:00 AM – 4:00 PM is superseded) |
+| Leadership | Perry Tanyoh (Managing Director) · Enoh Arnold (Head of Operations) · Eyoung Delgo (Regional Manager) |
 | Marketing facts | Secondary slogan "Saving Situations" · Buea bike delivery "from 500 FCFA" (owner flyer) |
 | In-town delivery cities | Buea, Limbe, Douala (managed in the console) |
 | Console URL | https://tanexsarl.com/private-user/ (staff console + courier app, same app and domain) |
 | Tracking ID | `TX` + 6 characters = **exactly 8** (e.g. `TX7K2M9P`); pieces `TX7K2M9P-01` |
 | Other references | `TX-TKT-`, `TX-INV-`, `TX-SL-`, `TX-CSH-` + 6 digits; quotes `QR-YYYY-#####` |
 | Default currency | XAF (FCFA); other currencies stay available |
-| WhatsApp number / opening days / wall-sign line / MD name / social URLs / domain conflict (flyer says tanexx.com) | **TBD: owner will supply. Never invent.** |
+| Wall-sign line / social URLs / domain conflict (flyer says tanexx.com) | **TBD: owner will supply. Never invent.** |
 
 Values live in `src/config/brand.ts` (after task A.2). Anything not here or in BRAND_GUIDE: **ask**.
 

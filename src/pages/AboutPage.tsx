@@ -4,14 +4,14 @@ import { PageHero } from '../components/ui';
 import { ResponsiveImage } from '../components/ResponsiveImage';
 import { Link } from '../router/Link';
 import { BIKE_BOOKING } from '../router/bookingLinks';
-import { MD_NAME, OFFICES, SLOGAN } from '../config/brand';
+import { HEAD_OF_OPERATIONS_NAME, MD_NAME, OFFICES, REGIONAL_MANAGER_NAME, SLOGAN } from '../config/brand';
 import { useAreaT, useLocale } from '../i18n/I18nProvider';
 import { formatOpeningHoursIn } from '../i18n/format';
 import './AboutPage.css';
 
 // About page (CONTENT §4, §4.1). Facts only from CONTENT and brand.ts: the founding story, the
-// wall-sign line, team photos and the Managing Director's name are hidden until the owner sends
-// them (#102, #103); nothing is written on their behalf.
+// wall-sign line and team photos are hidden until the owner sends them (#102, #103); nothing is
+// written on their behalf. Leadership names come from brand.ts.
 
 interface AboutPageProps {
   onNavigate: (page: string, param?: string) => void;
@@ -33,6 +33,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
     return office ? (locale === 'fr' ? office.addressFr : office.address) : '';
   };
   const portraitAlt = MD_NAME ? t('leadership.altNamed', { name: MD_NAME }) : t('leadership.alt');
+  // Rest of the leadership team, shown once a name is set in brand.ts.
+  const team = [
+    { name: HEAD_OF_OPERATIONS_NAME, role: t('leadership.headOfOperations') },
+    { name: REGIONAL_MANAGER_NAME, role: t('leadership.regionalManager') },
+  ].filter((m) => m.name);
 
   return (
     <div className="tx-about">
@@ -70,6 +75,16 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             {/* With no name yet, the role is the heading; the name becomes the heading when supplied. */}
             <h2 className="tx-h2" id="about-leadership">{MD_NAME || t('leadership.role')}</h2>
             {MD_NAME && <p className="tx-about__role">{t('leadership.role')}</p>}
+            {team.length > 0 && (
+              <ul className="tx-about__people">
+                {team.map((m) => (
+                  <li key={m.role}>
+                    <strong>{m.name}</strong>
+                    <span className="tx-about__role">{m.role}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
             <div className="tx-about__team">
               <p className="tx-eyebrow">{t('team.eyebrow')}</p>
               <p className="tx-about__team-body">{t('team.body')}</p>

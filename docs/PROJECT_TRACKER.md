@@ -103,15 +103,15 @@ Numbers stay stable (docs refer to them). #100+ are TanEx items; lower numbers a
 
 | # | Item | Needed for |
 |---|---|---|
-| 100 | ~~Phone numbers~~ received 2026-11-06 (+237 651 05 93 45, +237 691 19 46 63). Still open: **which number is on WhatsApp** (powers the "Chat with us" links). | A.2, E.4, G.8 |
+| 100 | ~~Phone numbers~~ received 2026-11-06. ~~Which number is on WhatsApp~~ **answered 2026-11-09: both**; the site links to +237 651 05 93 45 (`WHATSAPP`), `WHATSAPP_NUMBERS` lists both. | done |
 | 101 | **Vector logo** (SVG/AI/PDF) or a transparent PNG at ≥ 2000 px. | A.3 |
 | 102 | The full company line on the office wall sign. The flyer's logo lockup reads "Saving Situations", so the wall line is probably **"Saving situations across continents"**: confirm. Also: keep "Saving Situations" in English on the French site? | E.3 |
-| 103 | **Real photos** (team in uniform, riders and bikes, trucks, office) with consent; **Managing Director's name and title** (photo supplied). | E.3, E.7 |
+| 103 | **Real photos** (team in uniform, riders and bikes, trucks, office) with consent. ~~MD name~~ **answered 2026-11-09:** Perry Tanyoh (Managing Director), Enoh Arnold (Head of Operations), Eyoung Delgo (Regional Manager), shown on About. Still open: photos of the team. | E.3, E.7 |
 | 104 | Confirm the **[confirm]** copy: rail freight routes, cross-border road, warehousing facilities, "same-day" bike delivery, add-ons, parcel size limits. | E.1, E.2 |
 | 105 | Confirm the **network list** (CONTENT §9): which lanes TanEx actually serves. | E.3, H.2 |
 | 106 | **Local delivery setup** (entered by the admin in the console): zones per city, rates, express surcharge, average speeds; terms for paying COD money to senders. | G.2, G.9 |
-| 107 | **Company MTN MoMo and Orange Money accounts** (name, number, merchant code), entered in the console. | E.6, G.8 |
-| 108 | A **native French reviewer** for CONTENT_FR and the French UI. | D.3, J.4 |
+| 107 | ~~Company MoMo / Orange Money numbers~~ **answered 2026-11-09: the current phone lines** (MTN MoMo +237 651 05 93 45, Orange Money +237 691 19 46 63, by operator prefix); staff payment requests pre-fill them. Still open: the **account name** as registered with each operator and any merchant code (staff enter them per request). | E.6, G.8 |
+| 108 | ~~A native French reviewer~~ **answered 2026-11-09: the owner's team reviewed the French and approved it.** New French text added later still needs the same check. | done |
 | 109 | **Live chat:** TanEx's own Smartsupp key (the previous one is not TanEx's) or keep chat off. Chat is **off** since A.2 (`SMARTSUPP_KEY = ''`). | A.2 |
 | 110 | Keep the console at `/private-user/`? (Assumed yes.) | B.4 |
 | 111 | **Social media profile URLs.** The flyer shows the handle `Tanex_2025` on Facebook, Instagram and LinkedIn; send the exact profile links (no icons until then). | E.1 |
@@ -121,7 +121,7 @@ Numbers stay stable (docs refer to them). #100+ are TanEx items; lower numbers a
 | 115 | **Courier onboarding:** number of riders/drivers, their phones (Android version), mobile data; vehicle and plate details. | G.4, G.9 |
 | 117 | **3D artist for the bike + rider and truck models** (brief from H.0; budget and rights owned by TanEx). Until then the Journey uses a primitives-built bike. | H.0, H.6 |
 | 118 | **Domain conflict:** the brief says **tanexsarl.com**, the flyer shows **www.Tanexx.com**. Which domain does the site launch on (and does the other redirect to it)? Email stays info@tanexsarl.com unless told otherwise. | A.2, J.6 |
-| 119 | **Opening days** (the flyer gives 9:00 AM – 4:00 PM but not the days), and whether the Douala office keeps the same hours. Needed for the contact page and the Organization/LocalBusiness data. | E.4 |
+| 119 | ~~Opening days~~ **answered 2026-11-09: open 24/7** (both offices). Shown as "Open 24/7" / « Ouvert 24 h/24, 7 j/7 ». | done |
 | 120 | **Exact map pins** for both offices (Buea: Check Point opposite Molyko Omnisport Stadium; Douala: Kotto, La Canadienne), e.g. a Google Maps link for each. | E.3, E.4 |
 | 121 | The flyer images (TanEx-painted aircraft, ship and boxes) look computer-generated. They are **not used on the site as real photos**, because they would suggest TanEx owns aircraft and ships. The rider image is used only as a style reference for the 3D model (H.0). Confirm, or send real photos. | E.7, H.0 |
 | 116 | Business registration details to print on documents and the footer (RCCM, NIU), if TanEx wants them shown. | E.6 |
@@ -207,6 +207,7 @@ Numbers stay stable (docs refer to them). #100+ are TanEx items; lower numbers a
 ## Change log
 | Date | Task | Note |
 |---|---|---|
+| 2026-11-09 | Owner answers | **Leadership, hours, WhatsApp, Mobile Money, French review.** brand.ts: `MD_NAME` Perry Tanyoh, `HEAD_OF_OPERATIONS_NAME` Enoh Arnold, `REGIONAL_MANAGER_NAME` Eyoung Delgo (About lists them under the MD, EN/FR roles); `OPENING_HOURS.allDay` (UI shows "Open 24/7" / « Ouvert 24 h/24, 7 j/7 »; French templates now "Ouvert {hours}", the formatter adds "de … à …" for ranges); `WHATSAPP` = first number, `WHATSAPP_NUMBERS` both, so the WhatsApp links on Home and Contact appear; `MTN_MOMO_NUMBER` / `ORANGE_MONEY_NUMBER` pre-fill MoMo and Orange Money accounts in the console payment editor. CLAUDE.md §2, CONTENT §0/§4, CONTENT_FR §4 updated; #100, #108, #119 closed, #103 and #107 narrowed. Tests updated for the 24/7 formatter. |
 | 2026-11-06 | P.1–P.2 | TanEx plan agreed; all docs and PROMPTS.md rewritten for TanEx. No code changed yet. The earlier change history belongs to the previous deployment and stays in that project's git history (this repo gets fresh history at J.6). |
 | 2026-11-06 | Owner facts from `images/tanex files/info.png` | Phones +237 651 05 93 45 / +237 691 19 46 63; offices Buea (Check Point, opposite Molyko Omnisport Stadium, head office) and Douala (Kotto, La Canadienne); hours 9:00–16:00; slogan "Saving Situations"; Buea delivery "from 500 FCFA"; handle Tanex_2025. Applied to CLAUDE.md, PROMPTS, TANEX_PLAN, CONTENT, CONTENT_FR. New questions #118–#121. |
 | 2026-11-06 | Journey revision | Owner asked for 3D/GSAP across the whole homepage with a bike carrying the visitor down the page: MOTION_3D_SPEC rewritten (Stage, chapters 0–8, route rail, budgets), CONTENT/CONTENT_FR §2.10, PROMPTS C1/E1 and phase H (H0–H7), TANEX_PLAN, BRAND_GUIDE updated. |

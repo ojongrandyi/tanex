@@ -91,15 +91,25 @@ export const REFERENCE_PREFIX = 'TX';
 // Phone numbers in E.164. Always display them through formatPhone().
 export const PHONE = '+237651059345';
 export const PHONE_2 = '+237691194663';
-// TBD: which number is on WhatsApp (tracker #100). Stays '' until the owner confirms.
-export const WHATSAPP: string = '';
+// Both numbers are on WhatsApp (owner, 2026-11-09, #100). WHATSAPP is the one the site links to;
+// WHATSAPP_NUMBERS lists both for pages that show every contact line.
+export const WHATSAPP: string = PHONE;
+export const WHATSAPP_NUMBERS: readonly string[] = [PHONE, PHONE_2];
+
+// Company Mobile Money numbers (owner, 2026-11-09, #107): the existing phone lines. 651 is an MTN
+// prefix and 691 an Orange prefix in Cameroon. Staff payment requests pre-fill these; the account
+// name stays for staff to enter, as registered with the operator.
+export const MTN_MOMO_NUMBER: string = PHONE;
+export const ORANGE_MONEY_NUMBER: string = PHONE_2;
 
 // Secondary slogan from the owner's flyer (CLAUDE.md §2). Kept in English on the French site until
 // the owner says otherwise (tracker #102).
 export const SLOGAN = 'Saving Situations';
-// TBD (tracker #103): the Managing Director's name. While '' the About page shows the portrait and
-// the title only, never a made-up name.
-export const MD_NAME: string = '';
+// Leadership (owner, 2026-11-09, #103). Only the MD has a portrait so far; the others are listed by
+// name and role on the About page.
+export const MD_NAME: string = 'Perry Tanyoh';
+export const HEAD_OF_OPERATIONS_NAME: string = 'Enoh Arnold';
+export const REGIONAL_MANAGER_NAME: string = 'Eyoung Delgo';
 
 export const HQ_ADDRESS = 'Check Point, opposite Molyko Omnisport Stadium, Buea, Cameroon';
 // French form of the addresses (CONTENT_FR placeholders {{HQ_ADDRESS}}, {{DOUALA_OFFICE}}).
@@ -125,12 +135,14 @@ export const OFFICES: readonly Office[] = [
 // Office time zone (CLAUDE.md §7): console dates and audit date filters use it.
 export const OFFICE_TIME_ZONE = 'Africa/Douala';
 
-// Opening hours, 24-hour local time (Africa/Douala). The days of the week are TBD: while `days`
-// is empty, UI shows the hours only.
-export const OPENING_HOURS: { opens: string; closes: string; days: readonly string[] } = {
-  opens: '09:00',
-  closes: '16:00',
-  days: [],
+// Opening hours, 24-hour local time (Africa/Douala). TanEx is open 24 hours a day, 7 days a week
+// (owner, 2026-11-09, #119): with `allDay` set, UI shows "24/7" and ignores opens/closes.
+export interface OpeningHours { opens: string; closes: string; allDay?: boolean }
+export const OPENING_HOURS: OpeningHours & { days: readonly string[] } = {
+  opens: '00:00',
+  closes: '24:00',
+  allDay: true,
+  days: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
 };
 
 // "09:00" -> "9:00 AM". English; pages in a chosen language use formatOpeningHoursIn
@@ -140,8 +152,9 @@ function formatClock(hhmm: string): string {
   return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
 }
 
-/** Opening hours for display, e.g. "9:00 AM – 4:00 PM". */
-export function formatOpeningHours(hours: { opens: string; closes: string } = OPENING_HOURS): string {
+/** Opening hours for display: "24/7", or a range such as "9:00 AM – 4:00 PM". */
+export function formatOpeningHours(hours: OpeningHours = OPENING_HOURS): string {
+  if (hours.allDay) return '24/7';
   return `${formatClock(hours.opens)} – ${formatClock(hours.closes)}`;
 }
 

@@ -10,6 +10,7 @@ import {
 } from '../../shared/paymentRequest';
 import type { PaymentRequestBody } from '../../services/api';
 import { PaymentIcon } from '../../components/PaymentIcon';
+import { MTN_MOMO_NUMBER, ORANGE_MONEY_NUMBER, formatPhone } from '../../config/brand';
 import { PaymentMethodCard } from '../../components/PaymentMethodCard';
 import { REFERENCE_PREFIX } from '../../config/brand';
 import './PaymentRequestEditor.css';
@@ -90,6 +91,9 @@ export function paymentDraftSummary(d: PaymentDraft): string {
 function blankDetails(type: PaymentMethodType): Record<string, string> {
   const details: Record<string, string> = {};
   for (const f of PAYMENT_METHODS[type].fields) details[f.name] = f.options && f.required ? f.options[0] : '';
+  // Company Mobile Money lines (brand.ts, #107); staff can still change them per request.
+  if (type === 'mtn_momo' && MTN_MOMO_NUMBER) details.number = formatPhone(MTN_MOMO_NUMBER);
+  if (type === 'orange_money' && ORANGE_MONEY_NUMBER) details.number = formatPhone(ORANGE_MONEY_NUMBER);
   return details;
 }
 

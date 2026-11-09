@@ -31,6 +31,7 @@ test('formatPhone leaves other numbers as entered', () => {
 });
 
 test('formatOpeningHours', () => {
-  assert.equal(formatOpeningHours(), '9:00 AM – 4:00 PM');
+  assert.equal(formatOpeningHours(), '24/7');
+  assert.equal(formatOpeningHours({ opens: '09:00', closes: '16:00' }), '9:00 AM – 4:00 PM');
   assert.equal(formatOpeningHours({ opens: '00:30', closes: '12:00' }), '12:30 AM – 12:00 PM');
 });

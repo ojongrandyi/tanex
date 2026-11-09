@@ -22,6 +22,8 @@ const about = {
     role: 'Directeur général',
     alt: 'Le directeur général de TanEx au bureau TanEx de Buea',
     altNamed: '{name}, directeur général de TanEx, au bureau TanEx de Buea',
+    headOfOperations: 'Responsable des opérations',
+    regionalManager: 'Responsable régional',
   },
   team: {
     eyebrow: 'Notre équipe',
@@ -31,7 +33,7 @@ const about = {
     eyebrow: 'Où nous trouver',
     buea: 'Buea, siège',
     douala: 'Douala',
-    hours: 'Ouvert de {hours}',
+    hours: 'Ouvert {hours}',
     contact: 'Nous contacter',
   },
   cta: {

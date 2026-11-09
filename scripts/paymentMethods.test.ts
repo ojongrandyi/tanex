@@ -112,3 +112,11 @@ test('customerMethodView: link, QR, warning and note per type', () => {
   assert.equal(card.link?.label, 'Pay by card');
   assert.match(customerMethodView('western_union', { receiverName: 'A', country: 'B', city: 'C' }).note!, /MTCN/);
 });
+
+test('company Mobile Money numbers pass validation as pre-filled in the console (#107)', async () => {
+  const { MTN_MOMO_NUMBER, ORANGE_MONEY_NUMBER, formatPhone } = await import('../src/config/brand.ts');
+  for (const [type, number] of [['mtn_momo', MTN_MOMO_NUMBER], ['orange_money', ORANGE_MONEY_NUMBER]] as const) {
+    const r = validatePaymentDetails(type, { accountName: 'Tanex SARL', number: formatPhone(number), merchantCode: '' });
+    assert.ok(r.ok, `${type}: ${JSON.stringify(r)}`);
+  }
+});
