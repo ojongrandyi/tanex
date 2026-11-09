@@ -27,6 +27,7 @@ import { pieceLabel } from '../shared/trackingId';
 import { shipmentStatusLabel } from '../shared/shipmentStatus';
 import { COMPANY, COMPANY_SHORT } from '../config/brand';
 import { SERVICE_OPTIONS, type ServiceOptionId } from '../data/serviceOptions';
+import { Plane as IconAir, Ship as IconSea, TrainFront as IconRail, Truck as IconRoad, Warehouse as IconStore, Bike as IconBike } from 'lucide-react';
 import { documentTitle } from '../components/DocumentBrand';
 import { CountrySelect } from '../components/forms/CountrySelect';
 import { PhoneInput } from '../components/forms/PhoneInput';
@@ -101,10 +102,12 @@ const PICKUP_WINDOWS = [
 const DROP_OFF_LABEL = `Drop-off at a ${COMPANY_SHORT} gateway`;
 
 const SERVICE_ICONS: Record<ServiceOptionId, React.ElementType> = {
-  express: Clock,
-  freight: Truck,
-  vehicle: Car,
-  vault: Lock
+  air: IconAir,
+  maritime: IconSea,
+  rail: IconRail,
+  road: IconRoad,
+  warehousing: IconStore,
+  'local-delivery': IconBike,
 };
 
 // CONTENT §7.3 steps
@@ -172,7 +175,7 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
   ]);
 
   // Form State - Service (one of the four §7.1 services)
-  const [selectedService, setSelectedService] = useState<ServiceOptionId>('express');
+  const [selectedService, setSelectedService] = useState<ServiceOptionId>('air');
   // '' = let us recommend
   const [transportMode, setTransportMode] = useState<TransportMode | ''>('');
   const [declaredValue, setDeclaredValue] = useState<number | ''>('');

@@ -435,6 +435,32 @@ H1 : `Mentions légales`. Onglets : **Politique de confidentialité · Condition
 - `Photos du colis` · `Photos ajoutées par notre équipe pour cet envoi.` · `Aucune photo n'a encore été ajoutée pour cet envoi.`
 - Sans légende : `Photo de l'envoi {n}` · Visionneuse : `Photo {n} sur {total}` · `Photo précédente` · `Photo suivante` · `Fermer` · `Ouvrir la photo : {légende}`
 
+## 7. Devis, Expédier, Résultat du devis (ajouté avec E.5, **relecture native en attente**)
+
+### 7.1 Page Devis
+- **H1 :** `Demander un devis`
+- **Texte :** `Dites-nous ce que vous transportez et où. Un coordinateur confirmera votre tarif, généralement le jour ouvrable même. [à confirmer]`
+- **Carte latérale :** **Des réponses claires, sans surprise.** `Votre devis indique le service, le délai de transit estimé et tous les frais connus : le prix que vous acceptez est le prix que vous payez (droits et taxes selon le cas).`
+- **Succès :** `Demande de devis reçue`
+- **Et ensuite :** 1. Un coordinateur étudie votre itinéraire et votre marchandise. 2. Vous recevez votre tarif par e-mail avec un lien sécurisé vers le devis. 3. Acceptez-le en ligne et nous réservons votre enlèvement.
+
+### 7.2 Résultat du devis
+- **H1 :** `Votre devis TanEx` · `Référence du devis` · `Valable jusqu'au` · `Itinéraire` · `Service` · `Transit estimé` · `Détail des frais` · `Total`
+- Pied : `{{DOMAIN}} · Lien de devis sécurisé` · Boutons : `Accepter et réserver` · `Télécharger le PDF` · `Poser une question`
+
+### 7.3 Page Expédier
+- **H1 :** `Réserver un envoi`
+- Étapes : **1. Expéditeur et enlèvement** · **2. Destinataire et livraison** · **3. Colis** · **4. Service et options** · **Récapitulatif**
+- **Succès :** `Envoi réservé` · `Votre numéro de suivi est {ID}. Les étiquettes de chaque colis sont prêtes à imprimer.`
+- **Et ensuite :** Imprimez et collez une étiquette sur chaque colis · Tenez l'envoi prêt à l'heure d'enlèvement · Suivez l'avancement à tout moment avec votre numéro
+
+### 7.4 Libellés d'interface
+- **Formulaire de devis :** `1. Itinéraire` (`De` / `À`) · `2. Marchandise` · `3. Service` · `4. Vos coordonnées`; `Colis` · `Poids` · `Valeur déclarée` · `Dimensions` · `Contenu` · `Service` · `Mode de transport` · `Instructions particulières` · `Nom` · `Entreprise` · `E-mail` · `Téléphone`; bouton `Demander un devis`
+- **Succès du devis :** `Référence du devis {ref}` · `Et ensuite` · `Voir votre devis` · `Demander un autre devis`
+- **Résultat :** statuts `En cours d'étude` · `Prêt` · `Accepté` · `Réservé` · `Refusé` · `Expiré`; `Transport ({route})` · `Manutention hors gabarit` · `Manutention spéciale`; `Devis accepté` · `Nous allons réserver votre enlèvement.` · `Numéro de suivi {ID}` · `Copier la référence` · `Vos coordonnées` · `Bureau des opérations TanEx`
+- **Expédier :** `Réserver un enlèvement` · `Dépôt au bureau TanEx` · `Heure d'enlèvement`; `Nom de l'expéditeur` · `Nom du destinataire` · `Téléphone` · `Adresse` · `Entreprise` · `Instructions de livraison` · `Contenu`; `Continuer` · `Retour` · `Ajouter un colis` · `Réserver l'envoi` · `Imprimer les étiquettes` · `Copier le numéro de suivi` · `Réserver un autre envoi`
+- **Note du récapitulatif :** `Votre coordinateur confirme le tarif avant l'enlèvement.`
+
 ## 6.3 Suivi : noms des statuts (ajouté le 2026-11-08 avec D.3, **à confirmer**)
 `Réservé` · `Récupéré` · `À la plateforme de départ` · `Parti` · `En transit` · `Arrivé à la plateforme de destination` ·
 `Dédouanement` · `En cours de livraison` · `Livré` · `En attente` · `Retardé` · `Retour à l'expéditeur` · `Annulé`

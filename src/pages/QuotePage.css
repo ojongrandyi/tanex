@@ -1,3 +1,13 @@
+/* E.5: dark hero on the design system (replaces the photo hero) and form polish. */
+.tx-quote__hero { background: var(--tx-choc-950); padding: clamp(48px, 6vw, 88px) 0; }
+.tx-quote__wrap { width: 100%; max-width: var(--tx-container, 1280px); margin: 0 auto; padding: 0 var(--tx-gutter, 40px); }
+.tx-quote__hero .tx-h1 { margin: 0 0 14px; }
+.tx-quote__hero .tx-lead { margin: 0; color: var(--tx-choc-200); max-width: 62ch; }
+.tx-quote .quote-dims-label { display: block; margin-bottom: .5rem; font-weight: 600; font-size: .875rem; color: var(--tx-text); }
+.tx-quote .quote-confirm-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.tx-quote .quote-confirm-actions svg, .tx-quote .submit-quote-btn svg { width: 18px; height: 18px; }
+@media (max-width: 760px) { .tx-quote__wrap { padding: 0 var(--tx-gutter-mobile, 16px); } }
+
 /* ============================================================
    QUOTE & TARIFF CALCULATOR STYLES (EXECUTIVE CORPORATE DESIGN)
    Zero Freight/Train/Ship · 24/7 Dispatch Desk · Mobile-First

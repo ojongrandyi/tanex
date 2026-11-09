@@ -25,6 +25,10 @@ test('inferTransportMode: stored mode wins, otherwise distance/region/cargo', ()
   assert.equal(inferTransportMode({ mode: 'ocean', origin: LAGOS, destination: LONDON }), 'Sea');
   assert.equal(inferTransportMode({ origin: LAGOS, destination: LONDON, service: 'Express' }), 'Air');
   assert.equal(inferTransportMode({ origin: HOUSTON, destination: ROTTERDAM, service: 'Freight' }), 'Sea');
+  // TanEx service names say their mode (#137): 'Air freight' must not read as sea.
+  assert.equal(inferTransportMode({ origin: LAGOS, destination: LONDON, service: 'Air freight' }), 'Air');
+  assert.equal(inferTransportMode({ origin: LAGOS, destination: LONDON, service: 'Maritime freight' }), 'Sea');
+  assert.equal(inferTransportMode({ origin: LAGOS, destination: LONDON, service: 'Road freight' }), 'Road');
   assert.equal(inferTransportMode({ origin: HOUSTON, destination: ROTTERDAM, shipmentType: 'Container' }), 'Sea');
   // The pre-worldwide U.S. road network keeps its road routes.
   assert.equal(inferTransportMode({ origin: NEW_YORK, destination: LOS_ANGELES }), 'Road');

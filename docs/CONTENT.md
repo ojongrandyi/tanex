@@ -504,6 +504,13 @@ Reused where possible: service names and summaries (§3.1), add-ons (§3.4), sta
 - **Ship page:** collection choice `Book a Collection` (§8.1) · `Drop-off at the TanEx office` · `Collection time`; field labels `Sender name` · `Recipient name` · `Phone` · `Street address` · `Company` · `Delivery instructions` · `Contents`; buttons `Continue` · `Back` · `Add a piece` · `Book shipment` · `Print labels` · `Copy tracking ID` · `Book another shipment`.
 - **Ship summary note:** `Your coordinator confirms the rate before collection.`
 
+### 7.6 Quote changes with E.5 (**owner to confirm**)
+- **Services on the Quote and Ship forms** are TanEx's six (§3.1): `Air freight` · `Maritime freight` · `Rail freight` · `Road freight` · `Warehousing` · `Local delivery` (they replace the previous Express / Freight / Vehicle / Secure Vault list; older quotes keep the name they were saved with). "Get a Quote" on a service preselects it.
+- Defaults: origin country Cameroon, phone calling code +237. Placeholders `e.g. Buea` (from) · `e.g. Paris` (to) · contents `e.g. Machine spare parts`.
+- Field labels: `Country` · `Search country…` · `City` · `State` / `Province` / `Region` · `ZIP code` / `Postal code` / `Postcode` · `(optional)` · `Units` · `Weight ({unit})` · `Declared value ({currency})` · `Dimensions (L × W × H, {unit})` · `Length` / `Width` / `Height ({unit})` · `Transport mode` · `Let TanEx recommend` · modes `Air` · `Sea` · `Road` · `Phone number` · `Country calling code`.
+- Messages: `Please complete all required fields (origin and destination country and city, weight, contents, name and email).` · `We couldn't send your quote request: {reason}. Nothing was saved; please try again.` · `{n} piece` / `{n} pieces`.
+- Quote Result: the side card is `TanEx Operations Desk` (§7.4; the earlier "24/7 Operations Desk" was an unconfirmed claim) · charge `Transport` when there is no route · print table headers `Charge` · `Amount ({currency})`.
+
 ### 7.5 Local delivery booking (`/local-delivery`, added 2026-11-06, DISPATCH_SPEC §8)
 - **H1:** `Book a bike delivery` · **Sub:** `Across Buea, Limbe or Douala. A TanEx rider collects from the door and delivers to the recipient, and you follow the ride live.`
 - **Steps:** `1. City` · `2. Pickup` · `3. Drop-off` · `4. Parcel` · `5. Payment` · `Summary`

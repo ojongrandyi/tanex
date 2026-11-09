@@ -123,7 +123,12 @@ export function inferTransportMode(input: {
   const { origin, destination } = input;
   const miles = haversineMiles(origin.lat, origin.lng, destination.lat, destination.lng);
   if (miles <= ROAD_INFERENCE_MAX_MILES || (inNorthAmerica(origin) && inNorthAmerica(destination))) return 'Road';
-  if (/container/i.test(input.shipmentType || '') || /freight|ocean|sea|fcl|lcl/i.test(input.service || '')) return 'Sea';
+  // A service that names its mode decides it (TanEx's 'Air freight', 'Maritime freight', 'Road freight', tracker #137)
+  // before the older generic rule, which reads any 'freight' service as sea.
+  const service = input.service || '';
+  if (/\bair\b/i.test(service)) return 'Air';
+  if (/\b(road|truck|local|bike|rail)\b/i.test(service)) return 'Road';
+  if (/container/i.test(input.shipmentType || '') || /freight|ocean|sea|maritime|fcl|lcl/i.test(input.service || '')) return 'Sea';
   return 'Air';
 }
 

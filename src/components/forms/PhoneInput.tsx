@@ -13,6 +13,8 @@ interface PhoneInputProps {
   className?: string;
   placeholder?: string;
   required?: boolean;
+  /** Accessible name of the calling-code picker, in the page language. */
+  codeLabel?: string;
 }
 
 function split(value: string, fallbackCountry: string): { country: string; national: string } {
@@ -30,11 +32,12 @@ function split(value: string, fallbackCountry: string): { country: string; natio
 export const PhoneInput: React.FC<PhoneInputProps> = ({
   value,
   onChange,
-  defaultCountry = 'US',
+  defaultCountry = 'CM',
   id,
   className = '',
   placeholder = 'Phone number',
-  required
+  required,
+  codeLabel = 'Country calling code'
 }) => {
   const initial = split(value, defaultCountry);
   const [country, setCountry] = useState(initial.country || defaultCountry);
@@ -67,7 +70,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   return (
     <div className="ngf-phone-input">
       <select
-        aria-label="Country calling code"
+        aria-label={codeLabel}
         className={`${className} ngf-phone-code`}
         value={country}
         onChange={(e) => {

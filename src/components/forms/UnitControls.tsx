@@ -8,10 +8,10 @@ import {
 import './FormControls.css';
 
 /** kg/cm | lb/in switch. Applies to every form and display on the page. */
-export const UnitToggle: React.FC<{ className?: string }> = ({ className = '' }) => {
+export const UnitToggle: React.FC<{ className?: string; label?: string }> = ({ className = '', label = 'Units' }) => {
   const [system, setSystem] = useUnitSystem();
   return (
-    <div className={`ngf-unit-toggle ${className}`} role="group" aria-label="Units">
+    <div className={`ngf-unit-toggle ${className}`} role="group" aria-label={label}>
       <button type="button" aria-pressed={system === 'metric'} className={system === 'metric' ? 'active' : ''} onClick={() => setSystem('metric')}>
         kg / cm
       </button>

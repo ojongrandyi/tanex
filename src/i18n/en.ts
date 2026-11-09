@@ -11,6 +11,7 @@ import type { ContactMessages } from './en/contact';
 import type { LegalMessages } from './en/legal';
 import type { TrackMessages } from './en/track';
 import type { TrackResultMessages } from './en/trackResult';
+import type { QuoteMessages } from './en/quote';
 
 export const en = { common };
 
@@ -29,6 +30,7 @@ export interface AreaMessages {
   legal: LegalMessages;
   track: TrackMessages;
   trackResult: TrackResultMessages;
+  quote: QuoteMessages;
 }
 export type AreaName = keyof AreaMessages;
 
@@ -44,4 +46,5 @@ export const AREA_LOADERS_EN: { [A in AreaName]: () => Promise<AreaMessages[A]> 
   legal: () => import('./en/legal').then((m) => m.default),
   track: () => import('./en/track').then((m) => m.default),
   trackResult: () => import('./en/trackResult').then((m) => m.default),
+  quote: () => import('./en/quote').then((m) => m.default),
 };

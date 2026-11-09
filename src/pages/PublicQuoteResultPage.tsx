@@ -16,12 +16,12 @@ import {
 import { QuoteRequest } from '../types/admin';
 import { useAdminData } from '../context/AdminDataContext';
 import { useCompanyContact } from '../utils/useCompanyContact';
-import { COMPANY_SHORT, DOMAIN, LEGAL_NAME, LOGO, LOGO_ALT, LOGO_HEIGHT, LOGO_WIDTH } from '../config/brand';
+import { DOMAIN, LEGAL_NAME, LOGO, LOGO_ALT, LOGO_HEIGHT, LOGO_WIDTH } from '../config/brand';
 import { useCurrency } from '../utils/useCurrency';
 import { useUnitSystem } from '../utils/useUnitSystem';
 import { formatDimensions as formatDims, formatWeight } from '../shared/units';
-import { TRANSPORT_MODE_LABELS } from '../shared/transportMode';
-import { QUOTE_NEXT_STEPS } from '../data/quoteNextSteps';
+import { useAreaT } from '../i18n/I18nProvider';
+import { findServiceOption, SERVICE_OPTIONS } from '../data/serviceOptions';
 import './PublicQuoteResultPage.css';
 
 interface PublicQuoteResultPageProps {
@@ -30,27 +30,28 @@ interface PublicQuoteResultPageProps {
   onNavigate: (page: string) => void;
 }
 
-// Status names shown to the customer for the stored quote status codes.
-const QUOTE_STATUS_LABELS: Record<string, string> = {
-  NEW: 'In review',
-  UNDER_REVIEW: 'In review',
-  QUOTE_PUBLISHED: 'Ready',
-  RATE_PUBLISHED: 'Ready',
-  ACCEPTED: 'Accepted',
-  CONVERTED: 'Booked',
-  DECLINED: 'Declined',
-  EXPIRED: 'Expired'
+// Status names shown to the customer for the stored quote status codes (CONTENT §7.4).
+const QUOTE_STATUS_KEYS: Record<string, 'review' | 'ready' | 'accepted' | 'booked' | 'declined' | 'expired'> = {
+  NEW: 'review',
+  UNDER_REVIEW: 'review',
+  QUOTE_PUBLISHED: 'ready',
+  RATE_PUBLISHED: 'ready',
+  ACCEPTED: 'accepted',
+  CONVERTED: 'booked',
+  DECLINED: 'declined',
+  EXPIRED: 'expired'
 };
-
-// CONTENT §7.1 side card, reused as the quote's terms.
-const QUOTE_PROMISE = 'Your quote includes the service, estimated transit time and every known charge, so the price you accept is the price you pay (duties and taxes as applicable).';
 
 export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
   quote,
   onTrackShipment,
   onNavigate,
 }) => {
+  const t = useAreaT('quote');
   const { updateQuoteStatus, settings } = useAdminData();
+  // CONTENT §7.1 side card, reused as the quote's terms; and the three next steps.
+  const QUOTE_PROMISE = t('page.sideBody');
+  const QUOTE_NEXT_STEPS = [t('steps.review'), t('steps.email'), t('steps.accept')];
   // Empty phone/address values hide their element (no placeholders).
   const { phone: supportPhone, email: dispatchEmail, address: headquartersAddress } = useCompanyContact();
   const companyName = settings.companyName || LEGAL_NAME;
@@ -67,7 +68,9 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
   const originText = place(quote.originCity, quote.originState, quote.originCountry, quote.originCountryCode);
   const destText = place(quote.destCity, quote.destState, quote.destCountry, quote.destCountryCode);
   const routeText = originText && destText ? `${originText} → ${destText}` : '';
-  const serviceText = [quote.requestedService || q.service, quote.transportMode ? TRANSPORT_MODE_LABELS[quote.transportMode] : '']
+  const storedService: string = quote.requestedService || q.service || '';
+  const knownService = SERVICE_OPTIONS.some((s) => s.name.toLowerCase() === storedService.toLowerCase());
+  const serviceText = [knownService ? t(`services.${findServiceOption(storedService).key}`) : storedService, quote.transportMode ? t(`modes.${quote.transportMode}`) : '']
     .filter(Boolean).join(' · ');
   const pieceCount = typeof q.pieces === 'number' ? q.pieces : quote.quantity || 1;
   const companyText = quote.requesterCompany || q.company || '';
@@ -82,7 +85,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
   const isPublished = quote.status === 'QUOTE_PUBLISHED' || quote.status === 'ACCEPTED' || quote.status === 'CONVERTED' || (quote.pricing && quote.pricing.finalPrice > 0);
   // Accept only a quote that is on offer (not declined or expired).
   const canAccept = quote.status === 'QUOTE_PUBLISHED' || quote.status === 'RATE_PUBLISHED';
-  const statusLabel = QUOTE_STATUS_LABELS[quote.status] || quote.status.replace(/_/g, ' ').toLowerCase();
+  const statusLabel = QUOTE_STATUS_KEYS[quote.status] ? t(`status.${QUOTE_STATUS_KEYS[quote.status]}`) : quote.status.replace(/_/g, ' ').toLowerCase();
 
   // Structured inches when the quote has them (converted to the viewer's units), otherwise the
   // stored display string of older quotes; '—' when nothing was given.
@@ -96,9 +99,9 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
   // Charges exactly as published by the coordinator: zero lines are left out.
   const finalPrice = quote.pricing?.finalPrice || 0;
   const charges = [
-    { label: `Transport${routeText ? ` (${routeText})` : ''}`, amount: quote.pricing?.baseShipping || 0 },
-    { label: 'Oversize handling', amount: quote.pricing?.oversizeHandling || 0 },
-    { label: 'Special handling', amount: quote.pricing?.specialHandling || 0 }
+    { label: routeText ? t('result.transportRoute', { route: routeText }) : t('result.transport'), amount: quote.pricing?.baseShipping || 0 },
+    { label: t('result.oversize'), amount: quote.pricing?.oversizeHandling || 0 },
+    { label: t('result.special'), amount: quote.pricing?.specialHandling || 0 }
   ].filter((c) => c.amount > 0);
 
   const askQuestion = () => onNavigate('contact');
@@ -113,21 +116,21 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
         <div className="quote-res-hero">
           <div className="ngf-container-wide hero-content-flex">
             <div>
-              <h1>Your {COMPANY_SHORT} quote</h1>
+              <h1>{t('result.title')}</h1>
               <p className="hero-subtext">
-                Quote reference <span className="font-mono text-blue">{quote.id}</span>
+                {t('result.reference', { ref: quote.id })}
               </p>
             </div>
 
             <div className="hero-actions-box">
               <button className="btn-copy-quote-id" onClick={handleCopyId}>
                 {copiedId ? <Check size={14} className="text-emerald" /> : <Copy size={14} />}
-                <span>{copiedId ? 'Copied' : 'Copy reference'}</span>
+                <span>{copiedId ? t('result.copied') : t('result.copy')}</span>
               </button>
               {/* Opens the browser's print dialog, where the quote can be saved as a PDF. */}
               <button className="btn-print-quote" onClick={() => window.print()}>
                 <Download size={14} />
-                <span>Download PDF</span>
+                <span>{t('result.pdf')}</span>
               </button>
             </div>
           </div>
@@ -144,10 +147,10 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                 <Clock size={24} className="text-amber" />
               )}
               <div>
-                <h3>{isPublished ? `Total ${money.format(finalPrice)}` : 'Quote request received'}</h3>
+                <h3>{isPublished ? t('result.total', { amount: money.format(finalPrice) }) : t('done.title')}</h3>
                 <p>
                   {isPublished
-                    ? (validUntil ? `Valid until ${validUntil}` : QUOTE_PROMISE)
+                    ? (validUntil ? t('result.validUntil', { date: validUntil }) : QUOTE_PROMISE)
                     : QUOTE_NEXT_STEPS[0]}
                 </p>
               </div>
@@ -167,7 +170,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                 <div className="published-rate-highlight-card">
                   <div className="rate-card-header">
                     <div>
-                      <span className="rate-card-label">Total</span>
+                      <span className="rate-card-label">{t('result.totalLabel')}</span>
                       <div className="rate-big-figure">
                         <strong className="amount font-mono">
                           {money.format(finalPrice)}
@@ -180,7 +183,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                       <div className="validity-lock-box">
                         <ShieldCheck size={20} className="text-emerald" />
                         <div>
-                          <small>Valid until</small>
+                          <small>{t('result.validLabel')}</small>
                           <strong>{validUntil}</strong>
                         </div>
                       </div>
@@ -188,7 +191,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                   </div>
 
                   <div className="tariff-breakdown-subdeck">
-                    <span className="deck-title">Charges breakdown</span>
+                    <span className="deck-title">{t('result.breakdown')}</span>
                     <div className="charges-table">
                       {charges.map((c) => (
                         <div key={c.label} className="charge-row">
@@ -197,7 +200,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                         </div>
                       ))}
                       <div className="charge-row total">
-                        <strong>Total</strong>
+                        <strong>{t('result.totalLabel')}</strong>
                         <strong className="total-amount font-mono text-emerald">
                           {money.format(finalPrice)} {money.currency}
                         </strong>
@@ -211,13 +214,13 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                       <div className="quote-converted-notice">
                         <CheckCircle2 size={20} className="text-emerald" />
                         <div>
-                          <strong>Quote accepted</strong>
+                          <strong>{t('result.accepted')}</strong>
                           {quote.convertedShipmentId ? (
                             <p>
-                              Tracking ID <strong className="font-mono text-blue">{quote.convertedShipmentId}</strong>
+                              {t('result.trackingId', { id: quote.convertedShipmentId })}
                             </p>
                           ) : (
-                            <p>We'll book your collection.</p>
+                            <p>{t('result.acceptedNext')}</p>
                           )}
                         </div>
                         {quote.convertedShipmentId && (
@@ -225,7 +228,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                             className="btn-track-converted"
                             onClick={() => onTrackShipment(quote.convertedShipmentId!)}
                           >
-                            Track a Shipment <ExternalLink size={14} />
+                            {t('result.track')} <ExternalLink size={14} aria-hidden="true" />
                           </button>
                         )}
                       </div>
@@ -242,7 +245,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                             updateQuoteStatus(quote.id, 'ACCEPTED');
                           }}
                         >
-                          <Check size={16} /> Accept &amp; Book
+                          <Check size={16} aria-hidden="true" /> {t('result.accept')}
                         </button>
                       </div>
                     ) : null}
@@ -253,7 +256,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                   <div className="waiting-spinner-box">
                     <Clock size={40} className="text-amber" />
                   </div>
-                  <h3>What happens next</h3>
+                  <h3>{t('done.next')}</h3>
                   <ol className="quote-res-next-steps">
                     {QUOTE_NEXT_STEPS.map((step) => <li key={step}>{step}</li>)}
                   </ol>
@@ -263,12 +266,12 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
               {/* ROUTE, SERVICE & CARGO */}
               <div className="quote-specs-card">
                 <h3 className="section-head-title">
-                  <Truck size={17} className="text-blue" /> Route
+                  <Truck size={17} className="text-blue" aria-hidden="true" /> {t('result.route')}
                 </h3>
 
                 <div className="route-banner-grid">
                   <div className="route-loc origin">
-                    <span className="loc-tag">From</span>
+                    <span className="loc-tag">{t('result.from')}</span>
                     <strong>{originText || '—'}</strong>
                     {quote.originZip && <small className="font-mono">{quote.originZip}</small>}
                   </div>
@@ -278,7 +281,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                     <div className="line" />
                   </div>
                   <div className="route-loc dest">
-                    <span className="loc-tag">To</span>
+                    <span className="loc-tag">{t('result.to')}</span>
                     <strong>{destText || '—'}</strong>
                     {quote.destZip && <small className="font-mono">{quote.destZip}</small>}
                   </div>
@@ -286,28 +289,28 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
 
                 <div className="specs-detail-grid">
                   <div className="spec-box">
-                    <small>Service</small>
+                    <small>{t('result.service')}</small>
                     <strong className="text-blue">{serviceText || '—'}</strong>
                   </div>
                   <div className="spec-box">
-                    <small>Contents</small>
+                    <small>{t('result.contents')}</small>
                     <strong>{quote.cargoDescription || '—'}</strong>
                   </div>
                   <div className="spec-box">
-                    <small>Weight</small>
+                    <small>{t('result.weight')}</small>
                     <strong>{weightText}</strong>
                   </div>
                   <div className="spec-box">
-                    <small>Pieces</small>
+                    <small>{t('result.pieces')}</small>
                     <strong>{pieceCount}</strong>
                   </div>
                   <div className="spec-box">
-                    <small>Dimensions (L × W × H)</small>
+                    <small>{t('result.dimensions')}</small>
                     <strong className="font-mono">{formatDimensions(quote.dimensions)}</strong>
                   </div>
                   {q.declaredValue > 0 && (
                     <div className="spec-box">
-                      <small>Declared value</small>
+                      <small>{t('result.declared')}</small>
                       <strong className="font-mono">{money.format(q.declaredValue)}</strong>
                     </div>
                   )}
@@ -315,7 +318,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
 
                 {quote.specialRequirements || q.specialInstructions ? (
                   <div className="special-inst-box">
-                    <small>Special instructions</small>
+                    <small>{t('result.instructions')}</small>
                     <p>{quote.specialRequirements || q.specialInstructions}</p>
                   </div>
                 ) : null}
@@ -327,26 +330,26 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
               <div className="side-detail-card">
                 <div className="card-head">
                   <User size={15} className="text-blue" />
-                  <h4>Your details</h4>
+                  <h4>{t('result.yourDetails')}</h4>
                 </div>
                 <div className="card-body">
                   <div className="info-row">
-                    <small>Name</small>
+                    <small>{t('result.name')}</small>
                     <strong>{quote.requesterName || q.customerName || '—'}</strong>
                   </div>
                   {companyText && (
                     <div className="info-row">
-                      <small>Company</small>
+                      <small>{t('result.company')}</small>
                       <strong>{companyText}</strong>
                     </div>
                   )}
                   <div className="info-row">
-                    <small>Email</small>
+                    <small>{t('result.email')}</small>
                     <strong className="text-blue">{quote.requesterEmail || q.customerEmail || '—'}</strong>
                   </div>
                   {(quote.requesterPhone || q.customerPhone) && (
                     <div className="info-row">
-                      <small>Phone</small>
+                      <small>{t('result.phone')}</small>
                       <strong className="font-mono">{quote.requesterPhone || q.customerPhone}</strong>
                     </div>
                   )}
@@ -356,7 +359,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
               <div className="side-detail-card guarantee-card">
                 <div className="card-head">
                   <ShieldCheck size={16} className="text-emerald" />
-                  <h4>Straight answers, no surprises.</h4>
+                  <h4>{t('page.sideTitle')}</h4>
                 </div>
                 <div className="card-body">
                   <p className="guarantee-text">{QUOTE_PROMISE}</p>
@@ -367,19 +370,19 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                 <div className="desk-head">
                   <Phone size={18} className="text-blue" />
                   <div>
-                    <h4>24/7 Operations Desk</h4>
+                    <h4>{t('result.desk')}</h4>
                   </div>
                 </div>
                 <strong className="desk-phone">{supportPhone || dispatchEmail}</strong>
                 <button type="button" className="btn-ask-question" onClick={askQuestion}>
                   <MessageCircle size={15} />
-                  <span>Ask a question</span>
+                  <span>{t('result.ask')}</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <p className="quote-res-footer-line">{DOMAIN} · Secure quote link</p>
+          <p className="quote-res-footer-line">{t('result.secure', { domain: DOMAIN })}</p>
         </div>
       </div>
 
@@ -398,14 +401,14 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
           </div>
 
           <div className="print-header-right">
-            <div className="print-doc-type-badge">Your {COMPANY_SHORT} quote</div>
+            <div className="print-doc-type-badge">{t('result.title')}</div>
             <div className="print-doc-meta-row">
-              <span>Quote reference</span>
+              <span>{t('done.refLabel')}</span>
               <strong className="font-mono text-blue">{quote.id}</strong>
             </div>
             {validUntil && (
               <div className="print-doc-meta-row">
-                <span>Valid until</span>
+                <span>{t('result.validLabel')}</span>
                 <strong className="text-emerald">{validUntil}</strong>
               </div>
             )}
@@ -416,7 +419,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
 
         <div className="print-parties-grid">
           <div className="print-party-box">
-            <span className="box-title">From</span>
+            <span className="box-title">{t('result.from')}</span>
             <strong>{quote.requesterName || q.customerName || '—'}</strong>
             {companyText && <span>{companyText}</span>}
             <span>{[originText, quote.originZip].filter(Boolean).join(' ') || '—'}</span>
@@ -425,20 +428,20 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
           </div>
 
           <div className="print-party-box">
-            <span className="box-title">To</span>
+            <span className="box-title">{t('result.to')}</span>
             <span>{[destText, quote.destZip].filter(Boolean).join(' ') || '—'}</span>
-            <span>Service: <strong>{serviceText || '—'}</strong></span>
+            <span>{t('result.serviceLine')} <strong>{serviceText || '—'}</strong></span>
           </div>
         </div>
 
         <table className="print-table">
           <thead>
             <tr>
-              <th>Contents</th>
-              <th>Pieces</th>
-              <th>Weight</th>
-              <th>Dimensions</th>
-              <th className="text-right">Declared value</th>
+              <th>{t('result.contents')}</th>
+              <th>{t('result.pieces')}</th>
+              <th>{t('result.weight')}</th>
+              <th>{t('result.dimensionsShort')}</th>
+              <th className="text-right">{t('result.declared')}</th>
             </tr>
           </thead>
           <tbody>
@@ -454,12 +457,12 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
 
         {isPublished && (
           <>
-            <div className="print-section-title">Charges breakdown</div>
+            <div className="print-section-title">{t('result.breakdown')}</div>
             <table className="print-table pricing-table">
               <thead>
                 <tr>
-                  <th>Charge</th>
-                  <th className="text-right">Amount ({money.currency})</th>
+                  <th>{t('result.charge')}</th>
+                  <th className="text-right">{t('result.amount', { currency: money.currency })}</th>
                 </tr>
               </thead>
               <tbody>
@@ -470,7 +473,7 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
                   </tr>
                 ))}
                 <tr className="print-total-row">
-                  <td><strong>Total</strong></td>
+                  <td><strong>{t('result.totalLabel')}</strong></td>
                   <td className="text-right font-mono print-grand-total">
                     {money.format(finalPrice)} {money.currency}
                   </td>
@@ -482,14 +485,14 @@ export const PublicQuoteResultPage: React.FC<PublicQuoteResultPageProps> = ({
 
         <div className="print-terms-footer">
           <div className="terms-left">
-            <span className="terms-header">Straight answers, no surprises.</span>
+            <span className="terms-header">{t('page.sideTitle')}</span>
             <p>{QUOTE_PROMISE}</p>
           </div>
         </div>
 
         <div className="print-bottom-watermark">
-          <span>Quote reference {quote.id}</span>
-          <span>{DOMAIN} · Secure quote link</span>
+          <span>{t('result.reference', { ref: quote.id })}</span>
+          <span>{t('result.secure', { domain: DOMAIN })}</span>
         </div>
       </div>
     </div>

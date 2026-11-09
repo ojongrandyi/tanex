@@ -975,3 +975,34 @@
   color: #64748b;
   margin: 2rem 0 0;
 }
+
+/* E.5: the design system's dark band instead of the photo (later rule wins). */
+.quote-res-hero { background: var(--tx-choc-950); }
+@media (max-width: 768px) { .quote-res-hero { background: var(--tx-choc-950); } }
+
+/* #52: grid columns may shrink below their content width, so phones never scroll sideways. */
+.quote-two-column-layout { grid-template-columns: minmax(0, 1fr) 360px; }
+.quote-main-col, .quote-side-col { min-width: 0; }
+.quote-res-next-steps li { overflow-wrap: anywhere; }
+@media (max-width: 960px) { .quote-two-column-layout { grid-template-columns: minmax(0, 1fr); } }
+
+/* E.5: TanEx palette for the screen view (the print view keeps its own black-on-white rules). */
+.screen-only-quotation-view { background: var(--tx-cream-100); }
+.screen-only-quotation-view .text-blue { color: var(--tx-choc-900); }
+.btn-copy-quote-id { background: rgb(217 194 181 / .14); color: var(--tx-cream-100); border: 1px solid rgb(217 194 181 / .3); }
+.btn-copy-quote-id:hover { background: rgb(217 194 181 / .24); }
+.btn-print-quote, .btn-accept-rate { background: var(--tx-orange-500); color: var(--tx-choc-950); }
+.btn-print-quote:hover, .btn-accept-rate:hover { background: var(--tx-orange-400, #FF9F2E); }
+.btn-track-converted, .btn-ask-question { background: var(--tx-choc-900); color: var(--tx-cream-100); }
+.contact-desk-card { background: var(--tx-choc-900); color: var(--tx-cream-100); }
+.contact-desk-card .desk-phone { color: var(--tx-orange-400, #FF9F2E); }
+.quote-res-hero .hero-subtext .font-mono, .quote-res-hero .text-blue { color: var(--tx-orange-400, #FF9F2E); }
+.btn-copy-quote-id:focus-visible, .btn-print-quote:focus-visible, .btn-accept-rate:focus-visible,
+.btn-track-converted:focus-visible, .btn-ask-question:focus-visible { outline: 2px solid var(--tx-orange-600); outline-offset: 2px; }
+@media (max-width: 600px) {
+  .route-banner-grid { flex-direction: column; align-items: stretch; gap: 10px; }
+  .route-banner-grid .route-center-line { display: none; }
+  .route-banner-grid .route-loc.origin, .route-banner-grid .route-loc.dest { display: block; text-align: left; min-width: 0; overflow-wrap: anywhere; }
+  .route-banner-grid .route-loc .loc-tag { display: block; float: none; width: auto; margin: 0 0 4px; }
+}
+.quote-res-footer-line { color: var(--tx-choc-600); }
