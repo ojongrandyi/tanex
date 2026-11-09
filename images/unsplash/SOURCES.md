@@ -1,5 +1,7 @@
 # Unsplash photos (Unsplash License)
 
+> **E.7 (2026-11-09):** the TanEx redesign no longer uses these photos on the public site; their optimised copies were removed from `Public/images/site/`. Only `locations-hero` (free-stock) remains, as the console sign-in background until I.1. Records kept for history.
+
 These four hero photos were hotlinked from images.unsplash.com in the page stylesheets. On
 2026-10-13 they were downloaded once (2400 px wide) and resized into `Public/images/site/` as
 `<slot>-1024` and `<slot>-1600` (.webp and .jpg), so the site no longer depends on Unsplash's CDN.

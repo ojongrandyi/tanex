@@ -337,35 +337,11 @@ async function buildBrand() {
 // `widths` limits a hero to the step widths its page actually uses.
 // free-stock/* are full-resolution Pexels originals (see images/free-stock/SOURCES.md); each hero
 // slot has its own photo. Outputs stay capped at STEP_WIDTHS / CARD_STEP_SIZES.
+// E.7: the previous deployment's stock photos were removed with the redesign; the console login
+// background (locations-hero, phase I) and TanEx's own photos remain.
 const PHOTOS = [
-  { name: 'hero-home', src: 'free-stock/hero-home.jpg', kind: 'hero', aspect: 16 / 9 },
-  // Phones only (below 768px): 1290 px covers a 430 px-wide screen at 3x, so larger portrait files are never needed.
-  { name: 'hero-home-mobile', src: 'free-stock/hero-home-mobile.jpg', kind: 'hero', aspect: 9 / 16, maxWidth: 1290 },
-  { name: 'track-hero', src: 'free-stock/track-hero.jpg', kind: 'hero', aspect: 2 / 1 },
+  // Console sign-in background (AdminLogin.css), until the console reskin (I.1).
   { name: 'locations-hero', src: 'free-stock/locations-hero.jpg', kind: 'hero', aspect: 2 / 1 },
-  // Wide strip behind the Home callback banner.
-  { name: 'callback-banner', src: 'free-stock/callback-banner.jpg', kind: 'hero', aspect: 3 / 1 },
-  { name: 'services-hero', src: 'free-stock/services-hero.jpg', kind: 'hero', aspect: 12 / 5 },
-  { name: 'about-hero', src: 'free-stock/about-hero.jpg', kind: 'hero', aspect: 12 / 5 },
-  // About has its own photos so nothing on that page repeats another page's image.
-  { name: 'about-compliance', src: 'free-stock/about-compliance.jpg', kind: 'hero', aspect: 3 / 1 },
-  // CSS background heroes (ShipPage.css, PublicQuoteResultPage.css) reference the 1024 and 1600 widths.
-  // Rippled sea compresses poorly; it sits under a dark overlay, so lower quality keeps 1600w under 250 KB.
-  { name: 'ship-hero', src: 'free-stock/ship-hero.jpg', kind: 'hero', aspect: 16 / 9, quality: { webp: 66, jpeg: 70 }, maxWidth: 1600, widths: [1024, 1600] },
-  { name: 'quote-result-hero', src: 'free-stock/quote-result-hero.jpg', kind: 'hero', aspect: 16 / 9, maxWidth: 1600, widths: [1024, 1600] },
-  { name: 'service-priority-express', src: 'free-stock/service-priority-express.jpg', kind: 'card' },
-  { name: 'service-freight-linehaul', src: 'free-stock/service-freight-linehaul.jpg', kind: 'card' },
-  { name: 'service-vehicle-transport', src: 'free-cc0/service-vehicle-transport.webp', kind: 'card' },
-  { name: 'service-secure-vault', src: 'free-cc0/service-secure-vault.webp', kind: 'card' },
-  { name: 'industry-healthcare', src: 'free-stock/industry-healthcare.jpg', kind: 'card' },
-  { name: 'industry-technology', src: 'free-cc0/industry-technology.webp', kind: 'card' },
-  { name: 'industry-automotive', src: 'free-stock/industry-automotive.jpg', kind: 'card' },
-  { name: 'industry-ecommerce', src: 'free-stock/industry-ecommerce.jpg', kind: 'card' },
-  { name: 'track-result-vehicle', src: 'free-stock/track-result-vehicle.jpg', kind: 'card' },
-  { name: 'about-operations', src: 'free-pexels/about-operations.jpg', kind: 'card' },
-  { name: 'about-story', src: 'free-stock/about-story.jpg', kind: 'card' },
-  // Shown as a 72 px thumbnail: crop tight on the face.
-  { name: 'about-team', src: 'free-pexels/about-team.jpg', kind: 'card', crop: { left: 950, top: 80, width: 900, height: 900 } },
   // TanEx owner photos (images/tanex files/, committed). About page leadership slot, 4:5 portrait
   // kept from the top so the face and the TanEx wall sign stay in frame (CONTENT §4, §12).
   { name: 'about-md', src: 'tanex files/Managing Director.png', kind: 'hero', aspect: 4 / 5, position: 'top', quality: { webp: 80, jpeg: 82 }, widths: [400, 640, 810] },

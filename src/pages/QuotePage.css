@@ -28,8 +28,6 @@
 .ngf-quote-hero {
   position: relative;
   /* Self-hosted copy of the Unsplash photo: 1600 here, 1024 on phones. */
-  background-image: url('/images/site/quote-hero-1600.jpg');
-  background-image: image-set(url('/images/site/quote-hero-1600.webp') type('image/webp'), url('/images/site/quote-hero-1600.jpg') type('image/jpeg'));
   background-size: cover;
   background-position: center 30%;
   color: var(--ngf-white);
@@ -39,8 +37,6 @@
 
 @media (max-width: 767px) {
   .ngf-quote-hero {
-    background-image: url('/images/site/quote-hero-1024.jpg');
-    background-image: image-set(url('/images/site/quote-hero-1024.webp') type('image/webp'), url('/images/site/quote-hero-1024.jpg') type('image/jpeg'));
   }
 }
 

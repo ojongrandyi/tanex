@@ -11,10 +11,11 @@ export interface PageMetaText {
 }
 
 /**
- * French pages render in English until the i18n layer (D.3), so they stay `noindex` until then
- * (Decisions log, D.1). D.3 sets this to true; the server, the sitemap and App.tsx all read it.
+ * French pages are indexable since E.8, when every public page body had its French version
+ * (#133; they were `noindex` while they still showed English, Decisions log D.1). The server,
+ * the sitemap and App.tsx all read it.
  */
-export const FRENCH_PAGES_INDEXABLE = false;
+export const FRENCH_PAGES_INDEXABLE = true;
 
 const DEFAULT: Record<Lang, PageMetaText> = {
   en: {
