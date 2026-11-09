@@ -65,8 +65,12 @@ unless the owner confirms them. Items marked **[confirm]** are best-knowledge dr
 - **Buttons:** `Back to Home` · `Track a Shipment` · **Help line:** `Need help?` → `Contact us`
 
 ### 1.2 Header
-- Nav: **Track** · **Services** (menu: Air · Maritime · Rail · Road · Warehousing · Local delivery) · **Ship** (menu: Book a shipment · Book a bike delivery) · **Network** · **About** · **Blog** · **Contact**
-- Primary button: **Get a Quote** · Language switch: `EN | FR`
+- Nav (**owner's menu, 2026-11-09**): **Home** · **About Us** · **Track Shipment** · **Our Services** (menu: Air transport ·
+  Road transport · Warehousing · Maritime transport · Rail transport · Local delivery · All services) · **Blog** · **Contact Us**.
+  Ship (`Book a shipment`) and Network moved to the footer. The owner's note lists "Road Transport" twice; the second is read
+  as **Rail transport** (owner to confirm).
+- Primary button: **Get a Quote** · Language switch: `EN | FR`. A **Marketplace** button joins the header once the owner
+  supplies its link (tracker #140).
 - Utility bar (desktop): `{{PHONE}}` · `{{EMAIL}}` · `Open {{HOURS}}` · `Buea · Douala`
 - Mobile drawer footer: `Need help? {{EMAIL}}`
 - Interface strings added with C.3 (**owner to confirm**): drawer `Home` (first entry) · last item of the Services
@@ -86,9 +90,9 @@ unless the owner confirms them. Items marked **[confirm]** are best-knowledge dr
 4. **English & French.** Our team serves you in both.
 
 **Columns**
-- *Services:* Air freight · Maritime freight · Rail freight · Road freight · Warehousing · Local delivery
+- *Services:* Air transport · Road transport · Warehousing · Maritime transport · Rail transport · Local delivery
 - *Company:* About TanEx · Our network · Blog · Contact
-- *Support:* Track a shipment · Book a bike delivery · Help centre · Get a Quote
+- *Support:* Track a shipment · Book a shipment · Book a bike delivery · Help centre · Get a Quote
 - *Legal:* Privacy Policy · Terms of Service · Shipping Terms · Cookie Policy · Accessibility
 
 **Offices block:** `Buea (head office)`: `{{HQ_ADDRESS}}` · `Douala`: `{{DOUALA_OFFICE}}` · `Call {{PHONE}} · {{PHONE_2}}` · `Open {{HOURS}}`
@@ -839,5 +843,6 @@ Plain text, short, signed `— TanEx`. `{link}` = the public tracking URL in the
 ---
 
 ## 15. Blog pages (BLOG_SPEC §6)
+- **Until F.3 ("coming soon" page at /blog, noindex; added 2026-11-09, owner to confirm):** eyebrow `Blog` · H1 `Articles coming soon` · sub `We're preparing news, guides and shipping tips from the {{COMPANY}} team. Check back soon.` · buttons `Track a shipment` · `Contact us`
 - **Index:** eyebrow `TANEX BLOG` · H1 `News, guides and shipping tips` · sub `Practical advice on sending parcels in Cameroon and abroad, and news from the TanEx team.` · category chip `All` · empty state `Our first articles are on their way.` · `Read more` · `{n} min read` · pagination `Newer` · `Older`
 - **Article:** `By {author}` · `{date}` · `{n} min read` · `Share` (`WhatsApp` · `Facebook` · `LinkedIn` · `X` · `Copy link` → `Link copied`) · `Related articles` · `Read in French` / `Lire en anglais` (only when a translation exists) · end CTA `Need to send something? Get a Quote`

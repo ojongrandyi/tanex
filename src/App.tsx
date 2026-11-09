@@ -53,6 +53,7 @@ const ContactPage = lazy(() => import('./pages/ContactPage').then((m) => ({ defa
 const HelpPage = lazy(() => import('./pages/HelpPage').then((m) => ({ default: m.HelpPage })));
 const LegalPage = lazy(() => import('./pages/LegalPage').then((m) => ({ default: m.LegalPage })));
 const LocationsPage = lazy(() => import('./pages/LocationsPage').then((m) => ({ default: m.LocationsPage })));
+const BlogPage = lazy(() => import('./pages/BlogPage').then((m) => ({ default: m.BlogPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 // Admin lives at ADMIN_PATH (/private-user/, src/config/brand.ts) on the same host, app and API
@@ -178,7 +179,8 @@ function MainAppContent() {
     setPageMeta(meta);
     // French paths stay out of the index until their page bodies are translated (phase E sets
     // FRENCH_PAGES_INDEXABLE); since D.3 only the header, footer and 404 page are French.
-    setRobotsNoIndex(currentPage === 'admin' || currentPage === 'not-found' || isAdminPath() || (lang === 'fr' && !FRENCH_PAGES_INDEXABLE));
+    const hidden = ROUTES.find((r) => r.id === currentPage)?.noindex === true;
+    setRobotsNoIndex(hidden || currentPage === 'admin' || currentPage === 'not-found' || isAdminPath() || (lang === 'fr' && !FRENCH_PAGES_INDEXABLE));
   }, [currentPage, liveShipment, currentQuote, route?.lang]);
 
   // Page from the address: first load, every navigate(), back/forward (src/router/navigation.ts).
@@ -481,6 +483,10 @@ function MainAppContent() {
 
         {currentPage === 'locations' && (
           <LocationsPage onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'blog' && (
+          <BlogPage onNavigate={handleNavigate} />
         )}
 
         {currentPage === 'not-found' && (

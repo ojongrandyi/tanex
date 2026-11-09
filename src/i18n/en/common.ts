@@ -33,13 +33,11 @@ const common = {
   header: {
     navLabel: 'Main',
     home: 'Home',
-    track: 'Track',
-    services: 'Services',
-    ship: 'Ship',
-    network: 'Network',
-    about: 'About',
+    track: 'Track Shipment',
+    services: 'Our Services',
+    about: 'About Us',
     blog: 'Blog',
-    contact: 'Contact',
+    contact: 'Contact Us',
     quote: 'Get a Quote',
     allServices: 'All services',
     openMenu: 'Open menu',
@@ -53,11 +51,11 @@ const common = {
   },
   // CONTENT §1.2 Services menu, also the footer's Services column.
   services: {
-    air: 'Air freight',
-    maritime: 'Maritime freight',
-    rail: 'Rail freight',
-    road: 'Road freight',
+    air: 'Air transport',
+    road: 'Road transport',
     warehousing: 'Warehousing',
+    maritime: 'Maritime transport',
+    rail: 'Rail transport',
     localDelivery: 'Local delivery',
   },
   ship: {
@@ -95,6 +93,7 @@ const common = {
     links: {
       about: 'About TanEx',
       network: 'Our network',
+      blog: 'Blog',
       contact: 'Contact',
       track: 'Track a shipment',
       help: 'Help centre',

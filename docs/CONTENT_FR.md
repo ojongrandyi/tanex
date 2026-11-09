@@ -46,7 +46,8 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 - **Boutons :** `Retour à l'accueil` · `Suivre un envoi` · **Aide :** `Besoin d'aide ?` → `Contactez-nous`
 
 ### 1.2 En-tête
-- Navigation : **Suivi** · **Services** (Aérien · Maritime · Ferroviaire · Routier · Entreposage · Livraison locale) · **Expédier** (Réserver un envoi · Réserver une livraison à moto) · **Réseau** · **À propos** · **Blog** · **Contact**
+- Navigation (menu du propriétaire, 2026-11-09, **à confirmer**) : **Accueil** · **À propos** · **Suivre un envoi** · **Nos services** (Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale · Tous les services) · **Blog** · **Contactez-nous**. « Réserver un envoi » et « Notre réseau » passent dans le pied de page.
+- Page Blog en attendant F.3 (**à confirmer**) : `Blog` · `Articles bientôt disponibles` · `Nous préparons des actualités, des guides et des conseils d'expédition de l'équipe {{COMPANY}}. Revenez bientôt.` · `Suivre un envoi` · `Nous contacter`
 - Bouton principal : **Demander un devis** · Langue : `EN | FR`
 - Bandeau mobile : `Besoin d'aide ? {{EMAIL}}`
 - Libellés d'interface ajoutés avec C.3 (**à confirmer**, relecture native #108) : `Accueil` · `Tous les services` ·
@@ -63,7 +64,7 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 3. **Preuve en photo.** Chaque livraison est enregistrée avec une photo et un nom.
 4. **Anglais et français.** Notre équipe vous répond dans les deux langues.
 
-**Colonnes :** *Services* Fret aérien · Fret maritime · Fret ferroviaire · Fret routier · Entreposage · Livraison locale — *Entreprise* À propos de TanEx · Notre réseau · Blog · Contact — *Assistance* Suivre un envoi · Réserver une livraison à moto · Centre d'aide · Demander un devis — *Mentions légales* Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Politique de cookies · Accessibilité
+**Colonnes :** *Services* Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale — *Entreprise* À propos de TanEx · Notre réseau · Blog · Contact — *Assistance* Suivre un envoi · Réserver un envoi · Réserver une livraison à moto · Centre d'aide · Demander un devis — *Mentions légales* Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Politique de cookies · Accessibilité
 
 **Bureaux :** `Buea (siège)` : `{{HQ_ADDRESS}}` · `Douala` : `{{DOUALA_OFFICE}}` · `Appelez le {{PHONE}} · {{PHONE_2}}` · `Ouvert de {{HOURS}}`
 

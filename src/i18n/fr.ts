@@ -22,4 +22,5 @@ export const AREA_LOADERS_FR: { [A in AreaName]: () => Promise<Translation<AreaM
   quote: () => import('./fr/quote').then((m) => m.default),
   ship: () => import('./fr/ship').then((m) => m.default),
   payment: () => import('./fr/payment').then((m) => m.default),
+  blog: () => import('./fr/blog').then((m) => m.default),
 };

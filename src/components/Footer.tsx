@@ -35,11 +35,11 @@ function footerColumns(t: TFunction): { title: string; links: SiteLink[] }[] {
   return [
     { title: t('footer.columns.services'), links: servicesLinks(t) },
     {
-      // 'Blog' joins with the public blog (F.3).
       title: t('footer.columns.company'),
       links: [
         { label: t('footer.links.about'), page: 'about' },
         { label: t('footer.links.network'), page: 'locations' },
+        { label: t('footer.links.blog'), page: 'blog' },
         { label: t('footer.links.contact'), page: 'contact' },
       ],
     },
@@ -48,6 +48,7 @@ function footerColumns(t: TFunction): { title: string; links: SiteLink[] }[] {
       title: t('footer.columns.support'),
       links: [
         { label: t('footer.links.track'), page: 'track' },
+        { label: t('ship.bookShipment'), page: 'ship' },
         { label: t('footer.links.help'), page: 'help' },
         { label: t('footer.links.quote'), page: 'quote' },
       ],

@@ -94,6 +94,14 @@ test('shipment and quote results are noindex, without alternates, and never show
   assert.doesNotMatch(headBlock(html), /hreflang/);
 });
 
+test('the blog "coming soon" page is served but noindex, in both languages', () => {
+  for (const path of ['/blog', '/fr/blog']) {
+    const head = pageHead({ kind: 'page', match: matchPath(path)! });
+    assert.equal(head.robots, 'noindex', path);
+  }
+  assert.equal(matchPath('/blog/some-post'), null, 'no article paths before F.3');
+});
+
 test('404 and console heads are noindex with no canonical, hreflang or OG', () => {
   const nf = renderIndexHtml(TEMPLATE, { kind: 'not-found', lang: 'fr' });
   assert.match(nf, /<html lang="fr"/);
@@ -139,7 +147,7 @@ test('sitemap: every live page in both languages with xhtml:link alternates; no 
     assert.match(block, /hreflang="x-default"/);
   }
   assert.ok(!xml.includes(ADMIN_PATH.replace(/\/+$/, '')), 'console never listed');
-  assert.doesNotMatch(xml, /\/blog|\/local-delivery|livraison-locale/, 'pages not live yet are not listed');
+  assert.doesNotMatch(xml, /\/blog|\/local-delivery|livraison-locale/, 'pages not live yet, or noindex (the blog until F.3), are not listed');
   assert.doesNotMatch(xml, /\/track\/|\/quote\/|\/services\//, 'no results or tiers');
   // Every listed path is a page the server answers with 200 at its canonical spelling.
   for (const loc of locs) {

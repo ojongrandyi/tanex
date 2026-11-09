@@ -128,7 +128,8 @@ export function pageHead(ctx: PageContext): PageHead {
   const param = canonicalParam(match);
   const canonical = absolute(buildPath(match.id, param, match.lang));
   const result = isResultPage(match);
-  const indexable = !result && (match.lang === 'en' || FRENCH_PAGES_INDEXABLE);
+  const hidden = ROUTES.find((r) => r.id === match.id)?.noindex === true;
+  const indexable = !result && !hidden && (match.lang === 'en' || FRENCH_PAGES_INDEXABLE);
   const head: PageHead = {
     lang: match.lang,
     title,
@@ -217,12 +218,12 @@ export function createIndexRenderer(indexHtmlPath: string): (ctx: PageContext) =
 
 /**
  * Every public page in both languages, each with its alternates. Blog posts join with F.3
- * (the blog route is not live yet). Result pages, service tiers and the console never appear.
+ * (until then /blog is a noindex "coming soon" page). Result pages, service tiers and the console never appear.
  */
 export function sitemapPaths(): { en: string; fr: string }[] {
   const out: { en: string; fr: string }[] = [];
   for (const route of ROUTES) {
-    if (route.live === false) continue;
+    if (route.live === false || route.noindex) continue;
     out.push({ en: buildPath(route.id, undefined, 'en'), fr: buildPath(route.id, undefined, 'fr') });
     if (route.id === 'legal') {
       for (const tab of LEGAL_TABS) {

@@ -29,9 +29,14 @@ export interface RouteDef {
   param?: boolean;
   /**
    * false while the page doesn't exist yet: the paths are reserved (for the language switch
-   * and the server) but answer 404. Local delivery booking goes live with G.6, the blog with F.3.
+   * and the server) but answer 404. Local delivery booking goes live with G.6.
    */
   live?: boolean;
+  /**
+   * true for a page that is served but kept out of search: `noindex` and left out of the
+   * sitemap (the blog's "coming soon" page until F.3 publishes articles).
+   */
+  noindex?: boolean;
 }
 
 export const ROUTES: readonly RouteDef[] = [
@@ -46,7 +51,8 @@ export const ROUTES: readonly RouteDef[] = [
   { id: 'help', en: '/help', fr: '/fr/aide' },
   { id: 'locations', en: '/locations', fr: '/fr/reseau' },
   { id: 'legal', en: '/legal', fr: '/fr/mentions-legales', param: true },
-  { id: 'blog', en: '/blog', fr: '/fr/blog', param: true, live: false },
+  // "Coming soon" page until F.3: no article paths yet (param joins with F.3), not indexed.
+  { id: 'blog', en: '/blog', fr: '/fr/blog', noindex: true },
 ];
 
 export interface RouteMatch {

@@ -53,28 +53,27 @@ interface NavItem {
   allLabel?: string;
 }
 
-/** CONTENT §1.2 Services menu (also the footer's Services column). */
+/** CONTENT §1.2 Services menu, in the owner's order (also the footer's Services column). */
 export function servicesLinks(t: TFunction): SiteLink[] {
   return [
     { label: t('services.air'), page: 'services', param: 'air' },
-    { label: t('services.maritime'), page: 'services', param: 'maritime' },
-    { label: t('services.rail'), page: 'services', param: 'rail' },
     { label: t('services.road'), page: 'services', param: 'road' },
     { label: t('services.warehousing'), page: 'services', param: 'warehousing' },
+    { label: t('services.maritime'), page: 'services', param: 'maritime' },
+    { label: t('services.rail'), page: 'services', param: 'rail' },
     { label: t('services.localDelivery'), page: 'services', param: 'local-delivery' },
   ];
 }
 
-// Blog (F.3) joins the list when the public blog exists. A menu with a single entry is shown as a
-// plain link (Ship, until the bike-delivery booking page arrives with G.6).
+// The owner's menu (2026-11-09): Home, About Us, Track Shipment, Our Services, Blog, Contact Us.
+// Ship and Network moved to the footer. A Marketplace button joins once the owner supplies its URL.
 function navItems(t: TFunction): NavItem[] {
   return [
+    { key: 'home', label: t('header.home'), page: 'home', pages: ['home'] },
+    { key: 'about', label: t('header.about'), page: 'about', pages: ['about'] },
     { key: 'track', label: t('header.track'), page: 'track', pages: ['track', 'track-result'] },
     { key: 'services', label: t('header.services'), page: 'services', pages: ['services'], menu: servicesLinks(t), allLabel: t('header.allServices') },
-    // 'Book a bike delivery' joins with the local-delivery booking page (G.6).
-    { key: 'ship', label: t('header.ship'), page: 'ship', pages: ['ship'], menu: [{ label: t('ship.bookShipment'), page: 'ship' }] },
-    { key: 'network', label: t('header.network'), page: 'locations', pages: ['locations'] },
-    { key: 'about', label: t('header.about'), page: 'about', pages: ['about'] },
+    { key: 'blog', label: t('header.blog'), page: 'blog', pages: ['blog'] },
     { key: 'contact', label: t('header.contact'), page: 'contact', pages: ['contact'] },
   ];
 }
@@ -424,11 +423,6 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
 
             <nav className="tx-drawer__nav" aria-label={t('header.navLabel')}>
               <ul className="tx-drawer__list">
-                <li>
-                  <a href={hrefFor('home')} className="tx-drawer__link" aria-current={activePage === 'home' ? 'page' : undefined} onClick={go('home')}>
-                    {t('header.home')}
-                  </a>
-                </li>
                 {NAV.map((item) => {
                   const current = isCurrent(item);
                   if (!hasMenu(item)) {
