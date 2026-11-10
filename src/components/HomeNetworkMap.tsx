@@ -157,7 +157,7 @@ export const HomeNetworkMap: React.FC<HomeNetworkMapProps> = ({ activeCode, onSe
 
   return (
     <div ref={wrapperRef} className="tx-netmap" role="region" aria-label={label}>
-      <div ref={mapContainerRef} className="tx-netmap__canvas" />
+      <div ref={mapContainerRef} className="tx-netmap__canvas" data-lenis-prevent />
     </div>
   );
 };

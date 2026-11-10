@@ -555,7 +555,7 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
 
       {/* 2. Map Canvas Viewport Area */}
       <div className="map-viewport-wrapper">
-        <div ref={mapContainerRef} className="leaflet-map-canvas" />
+        <div ref={mapContainerRef} className="leaflet-map-canvas" data-lenis-prevent />
 
         {/* Floating Controls */}
         <div className="map-floating-controls">

@@ -30,11 +30,7 @@
 .tx-home__lane-cap { position: absolute; left: 0; bottom: -6px; }
 .tx-link svg { width: 16px; height: 16px; }
 
-/* Light reveals: hidden only once JS has confirmed the element is below the fold. */
-@media screen and (prefers-reduced-motion: no-preference) {
-  .tx-home .tx-reveal { opacity: 0; transform: translateY(16px); transition: opacity var(--tx-dur-reveal, .5s) var(--tx-ease-out, ease), transform var(--tx-dur-reveal, .5s) var(--tx-ease-out, ease); }
-  .tx-home .tx-reveal.is-in { opacity: 1; transform: none; }
-}
+/* Reveals: src/motion/useReveal.ts + motion.css (H.1). */
 
 /* ---------- 0 · Hero ---------- */
 .tx-ch--hero { background: var(--tx-choc-950); padding: clamp(56px, 7vw, 88px) 0 clamp(120px, 12vw, 160px); overflow: hidden; }
@@ -65,6 +61,7 @@
 .tx-home__facts svg { width: 16px; height: 16px; color: var(--tx-cream-300); }
 .tx-home__mount { position: absolute !important; left: 0; right: 0; bottom: 0; top: auto !important; height: 150px; width: 100%; --mount: #241712; --mount2: #2A1B16; pointer-events: none; }
 .tx-home__hero-cap { position: absolute; right: var(--tx-gutter, 40px); bottom: 36px; z-index: 1; }
+.tx-home__pause { position: absolute; left: var(--tx-gutter, 40px); bottom: 26px; z-index: 2; color: var(--tx-cream-100); }
 .tx-scene--globe { --globe: #2A1B16; --globe-grid: rgb(217 194 181 / .12); --globe-rim: rgb(217 194 181 / .25); --land: #9C7360; --hub: #EDDFC4; }
 
 /* ---------- 1 · Services ---------- */
@@ -209,7 +206,8 @@
 /* The footer follows directly: no seam between the arrival and the footer's dark band. */
 
 /* ---------- Route rail (desktop) and progress bar (mobile) ---------- */
-.tx-rail { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 40; }
+.tx-rail { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 40; display: grid; justify-items: center; gap: 18px; }
+.tx-rail__track { position: relative; }
 .tx-rail__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; position: relative; }
 .tx-rail__list::before { content: ""; position: absolute; left: 50%; top: 6px; bottom: 6px; border-left: 2px dashed rgb(156 115 96 / .55); transform: translateX(-1px); }
 /* Each link is a 34 x 24 px target (WCAG 2.5.8); the visible dot is drawn inside it. */
@@ -232,6 +230,16 @@
   .tx-rail__dot.is-current .tx-rail__label { opacity: 1; }
 }
 .tx-rail__dot:focus-visible { outline: 2px solid var(--tx-orange-600); outline-offset: 3px; }
+/* Travelling mode (H.1): the bike rides the line with the scroll; the current dot stays a small orange dot. */
+.tx-rail__traveller {
+  position: absolute; left: 50%; top: 0; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--tx-orange-500); color: var(--tx-choc-950); box-shadow: 0 0 0 4px rgb(244 136 0 / .2);
+  transform: translate(-50%, -50%); pointer-events: none; will-change: transform;
+}
+.tx-rail__traveller svg { width: 17px; height: 17px; }
+.tx-rail--travel .tx-rail__dot.is-current { width: 14px; height: 14px; background: var(--tx-orange-500); border: 2px solid var(--tx-orange-500); box-shadow: none; }
+.tx-rail__pause { background: var(--tx-cream-100); color: var(--tx-choc-950); border-color: var(--tx-choc-400); }
+.tx-rail__pause:hover { background: var(--tx-cream-200, #EDE1D2); }
 .tx-rail-progress { display: none; }
 
 /* The rail needs the margin beside the content column; narrower screens get the progress bar. */
@@ -286,4 +294,23 @@
 
 @media (prefers-reduced-motion: reduce) {
   .tx-home__faq summary svg, .tx-rail__label { transition: none; }
+}
+
+/* ---------- Journey beats (MOTION_3D_SPEC §6), set while a chapter is pinned (H.1) ---------- */
+/* Services: the card the bike is passing lights up. */
+.tx-ch--services[data-beat] .tx-svc-card { transition: box-shadow .3s var(--tx-ease, ease), transform .3s var(--tx-ease, ease); }
+.tx-ch--services[data-beat="1"] .tx-home__svc-item:nth-child(1) .tx-svc-card,
+.tx-ch--services[data-beat="2"] .tx-home__svc-item:nth-child(2) .tx-svc-card,
+.tx-ch--services[data-beat="3"] .tx-home__svc-item:nth-child(3) .tx-svc-card,
+.tx-ch--services[data-beat="4"] .tx-home__svc-item:nth-child(4) .tx-svc-card,
+.tx-ch--services[data-beat="5"] .tx-home__svc-item:nth-child(5) .tx-svc-card,
+.tx-ch--services[data-beat="6"] .tx-home__svc-item:nth-child(6) .tx-svc-card {
+  transform: translateY(-4px); box-shadow: 0 0 0 3px var(--tx-orange-500), var(--tx-shadow-lift);
+}
+/* In town: Picked up · On the way · Delivered follow the story. */
+.tx-ch--bike[data-beat] .tx-home__steps li { background: transparent; border-color: var(--tx-border-strong); color: var(--tx-text); transition: background-color .25s, border-color .25s, color .25s; }
+.tx-ch--bike[data-beat="1"] .tx-home__steps li:nth-child(1),
+.tx-ch--bike[data-beat="2"] .tx-home__steps li:nth-child(2),
+.tx-ch--bike[data-beat="3"] .tx-home__steps li:nth-child(3) {
+  background: var(--tx-orange-500); border-color: var(--tx-orange-500); color: var(--tx-on-accent);
 }

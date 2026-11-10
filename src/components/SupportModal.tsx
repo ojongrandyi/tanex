@@ -77,7 +77,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({
   };
 
   return (
-    <div className="ngf-support-overlay" onClick={onClose}>
+    <div className="ngf-support-overlay" onClick={onClose} data-lenis-prevent>
       <div
         className="ngf-support-card"
         role="dialog"

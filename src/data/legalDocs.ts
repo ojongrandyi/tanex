@@ -30,7 +30,7 @@ export interface LegalDoc {
 }
 
 /** Date of the current text (ISO); pages format it per language. Update with every change. */
-export const LEGAL_LAST_UPDATED = '2026-11-08';
+export const LEGAL_LAST_UPDATED = '2026-11-10';
 
 interface LegalContact {
   email: string;
@@ -142,6 +142,7 @@ function legalDocsEn({ email, address }: LegalContact): LegalDoc[] {
             'ngf_recent_tracking: tracking IDs you looked up recently, so you can open them again.',
             'ngf_units: whether you prefer metric or imperial units.',
             'ngf_live_shipment_stream: the latest update for a shipment you are viewing, so other open tabs stay in step.',
+            'tx_motion_paused: that you paused the motion on our home page, so it stays paused.',
           ],
           'You can clear these at any time in your browser settings.',
         ] },
@@ -270,6 +271,7 @@ function legalDocsFr({ email, address }: LegalContact): LegalDoc[] {
             'ngf_recent_tracking : les numéros de suivi consultés récemment, pour les rouvrir facilement.',
             "ngf_units : votre préférence entre unités métriques et impériales.",
             "ngf_live_shipment_stream : la dernière mise à jour d'un envoi que vous consultez, pour que vos autres onglets restent à jour.",
+            "tx_motion_paused : que vous avez mis en pause l'animation de notre page d'accueil, pour qu'elle le reste.",
           ],
           'Vous pouvez les effacer à tout moment dans les réglages de votre navigateur.',
         ] },

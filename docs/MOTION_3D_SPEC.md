@@ -84,7 +84,7 @@ Materials: `MeshStandardMaterial`, one hemisphere light + one directional light 
 | `stage/chapters/*.ts` | One file per chapter (§6): `enter()`, `update(progress)`, `leave()`; pure functions of progress (reversible) |
 | `stage/camera.ts` | Camera rails: each chapter defines keyframes (position, target, FOV) interpolated with CatmullRom curves |
 | `JourneyController.tsx` | Builds the ScrollTriggers from section refs, maps scroll → chapter + progress, drives Stage and DOM timelines, owns the route rail |
-| `RouteRail.tsx` | The vertical route line with the small bike icon (§7), also the chapter navigation |
+| `RouteRail.tsx` | The vertical route line with the small bike icon (§7), also the chapter navigation. Lives in `src/pages/home/RouteRail.tsx` (built in E.1); reads the JourneyController store |
 | `posters/` | Static WebP/AVIF frame per chapter (rendered from the Stage with a script) for fallback and pre-load |
 | `SmoothScroll.tsx`, `useReveal.ts`, `motion.css` | Lenis provider, batch reveals for inner pages, reduced-motion overrides |
 

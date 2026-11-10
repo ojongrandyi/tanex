@@ -724,7 +724,7 @@ Tabs: **Privacy Policy · Terms of Service · Shipping Terms · Cookie Policy ·
 - **Accessibility:** commitment to WCAG 2.2 AA · reduced-motion support · how to report a barrier ({{EMAIL}}).
 
 ### 13.1 Draft text (added 2026-09-29 with 3.11, **lawyer review required**)
-The text below is rendered from `src/data/legalDocs.ts` (English and French, CONTENT_FR §13); change them together. Page H1: `Legal`. Each tab shows `Last updated: 8 November 2026` (updated with E.4). The Head-office sentence is left out while {{HQ_ADDRESS}} is empty. Governing law names the Republic of Cameroon (lawyer to confirm, #112). Differences from the outline above: no analytics are installed, so Privacy and Cookies say so; Cookies lists the real cookie and browser-storage keys of the public pages (audited in E.4) and the third-party services the pages load. Live chat is off (#109), so the Smartsupp sentence was removed; add it back if chat is switched on.
+The text below is rendered from `src/data/legalDocs.ts` (English and French, CONTENT_FR §13); change them together. Page H1: `Legal`. Each tab shows `Last updated: 10 November 2026` (E.4; Cookies storage list extended in H.1). The Head-office sentence is left out while {{HQ_ADDRESS}} is empty. Governing law names the Republic of Cameroon (lawyer to confirm, #112). Differences from the outline above: no analytics are installed, so Privacy and Cookies say so; Cookies lists the real cookie and browser-storage keys of the public pages (audited in E.4) and the third-party services the pages load. Live chat is off (#109), so the Smartsupp sentence was removed; add it back if chat is switched on.
 - *E.4 interface (owner to confirm):* menu name (screen readers) `Legal pages` · French H1 `Mentions légales`.
 
 **Privacy Policy**
@@ -802,6 +802,7 @@ The text below is rendered from `src/data/legalDocs.ts` (English and French, CON
    - ngf_recent_tracking: tracking IDs you looked up recently, so you can open them again.
    - ngf_units: whether you prefer metric or imperial units.
    - ngf_live_shipment_stream: the latest update for a shipment you are viewing, so other open tabs stay in step.
+   - tx_motion_paused: that you paused the motion on our home page, so it stays paused. **[added H.1, owner to confirm wording]**
    You can clear these at any time in your browser settings.
 3. *Other services our pages use.*
    Our pages load map tiles from Esri (ArcGIS) and use OpenStreetMap Nominatim and OSRM to look up addresses and routes. Fonts and photos are served from our own site. These services receive your IP address when your browser contacts them.

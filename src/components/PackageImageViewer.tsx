@@ -65,7 +65,7 @@ export const PackageImageViewer: React.FC<PackageImageViewerProps> = ({ images, 
   if (!image) return null;
 
   return (
-    <div className="ngf-viewer-backdrop" onClick={onClose}>
+    <div className="ngf-viewer-backdrop" onClick={onClose} data-lenis-prevent>
       <div
         ref={dialogRef}
         className="ngf-viewer"

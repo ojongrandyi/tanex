@@ -1,0 +1,40 @@
+/* Motion foundation (MOTION_3D_SPEC §5, §10): reveal fallback, headline line masks, Lenis,
+   the Pause motion control and reduced-motion overrides. Transform and opacity only. */
+
+/* CSS reveal fallback (used when the motion chunk can't load): hidden only once JS has confirmed
+   the element is below the fold. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .tx-reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity var(--tx-dur-reveal, .5s) var(--tx-ease-out, ease), transform var(--tx-dur-reveal, .5s) var(--tx-ease-out, ease);
+  }
+  .tx-reveal.is-in { opacity: 1; transform: none; }
+}
+
+/* SplitText line masks: room for italic overhang and descenders, cancelled by negative margins
+   so the heading's layout doesn't move. */
+.tx-split-line-mask { padding: 0 .14em .12em 0; margin: 0 -.14em -.12em 0; }
+
+/* Lenis (desktop smooth scroll). The page's CSS smooth scrolling would fight it. */
+html.lenis, html.lenis body { height: auto; }
+html.lenis { scroll-behavior: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* Pause motion / Play motion (§10). Inherits colours from its context; 44 px target. */
+.tx-motion-toggle {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px;
+  border: 1.5px solid currentColor; border-radius: var(--tx-radius-pill, 999px); background: transparent;
+  color: inherit; font: 600 .78rem/1 var(--tx-font-body); letter-spacing: .01em; cursor: pointer;
+}
+.tx-motion-toggle svg { width: 15px; height: 15px; flex: none; }
+.tx-motion-toggle--compact { width: 34px; min-height: 34px; height: 34px; padding: 0; justify-content: center; }
+.tx-motion-toggle--compact svg { width: 14px; height: 14px; }
+.tx-motion-toggle:hover { background: rgb(244 136 0 / .14); }
+.tx-motion-toggle:focus-visible { outline: 2px solid var(--tx-focus, #F48800); outline-offset: 2px; box-shadow: 0 0 0 2px var(--tx-focus-offset, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tx-reveal, .tx-reveal.is-in { opacity: 1; transform: none; transition: none; }
+}

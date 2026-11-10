@@ -20,6 +20,9 @@ import { formatMoney, formatOpeningHoursIn } from '../i18n/format';
 import homeEn from '../i18n/en/home';
 import { ArrivalDoor, BikeHero, HeroGlobe, JourneySprite, Mountain, ParcelLabel, ParkedBike, ServicesRoad, TruckRoute, WorldGlobe } from './home/JourneyArt';
 import { RouteRail, type RailChapter } from './home/RouteRail';
+import { JourneyController } from '../motion/JourneyController';
+import { PauseMotionButton } from '../motion/PauseMotion';
+import { useReveal } from '../motion/useReveal';
 import './HomePage.css';
 
 // Homepage (CONTENT §2.1–§2.10, the owner's order), laid out for the Journey (MOTION_3D_SPEC
@@ -79,29 +82,6 @@ const Headline: React.FC<{ start: string; em: string }> = ({ start, em }) => (
     {em && <em className="tx-em">{em}</em>}
   </>
 );
-
-/** Light reveals (no motion library): sections below the fold fade up once as they enter. */
-function useReveal(root: React.RefObject<HTMLElement>) {
-  useEffect(() => {
-    const el = root.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    const targets = Array.from(el.querySelectorAll<HTMLElement>('[data-reveal]'));
-    // Only hide what is still below the fold, so nothing already on screen blinks.
-    const fold = window.innerHeight;
-    const pending = targets.filter((t) => t.getBoundingClientRect().top > fold);
-    pending.forEach((t) => t.classList.add('tx-reveal'));
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-in');
-        io.unobserve(entry.target);
-      });
-    }, { rootMargin: '0px 0px -10% 0px' });
-    pending.forEach((t) => io.observe(t));
-    return () => io.disconnect();
-  }, [root]);
-}
 
 export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
   const t = useAreaT('home');
@@ -167,9 +147,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
   };
 
   const railChapters: RailChapter[] = CHAPTER_IDS.map((id, i) => ({ id, label: t(`rail.chapters.${RAIL_KEYS[i]}`) }));
+  const motionLabels = { pause: t('motion.pause'), play: t('motion.play') };
 
   return (
     <div className="tx-home" ref={rootRef}>
+      <JourneyController rootRef={rootRef}>
       <JourneySprite />
 
       {/* 0 · Hero: your door (CONTENT §2.1) */}
@@ -218,11 +200,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
         </div>
         <Mountain className="tx-home__mount" />
         <p className="tx-home__caption tx-home__hero-cap" aria-hidden="true">{t('hero.caption')}</p>
+        <PauseMotionButton labels={motionLabels} className="tx-home__pause" />
       </section>
 
       {/* 1 · Services (CONTENT §2.2): lane on the left, the road */}
       <section className="tx-ch tx-ch--lane-left tx-ch--wide-lane tx-ch--services" id="services" data-chapter="1" aria-labelledby="home-services" tabIndex={-1}>
-        <div className="tx-ch__wrap tx-ch__grid">
+        <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('services.eyebrow')}</p>
             <h2 className="tx-h1 tx-home__chap-h" id="home-services"><Headline start={t('services.titleStart')} em={t('services.titleEm')} /></h2>
@@ -270,7 +253,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
 
       {/* 2 · Bike delivery (CONTENT §2.3): dark, lane on the right */}
       <section className="tx-ch tx-ch--bike tx-dark" id="in-town" data-chapter="2" aria-labelledby="home-bike" tabIndex={-1}>
-        <div className="tx-ch__wrap tx-ch__grid">
+        <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('bike.eyebrow')}</p>
             <h2 className="tx-display tx-home__bike-h" id="home-bike"><Headline start={t('bike.titleStart')} em={t('bike.titleEm')} /></h2>
@@ -306,7 +289,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
 
       {/* 3 · Truck delivery (CONTENT §2.4): cream, lane on the left */}
       <section className="tx-ch tx-ch--lane-left tx-ch--truck" id="city-to-city" data-chapter="3" aria-labelledby="home-truck" tabIndex={-1}>
-        <div className="tx-ch__wrap tx-ch__grid">
+        <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('truck.eyebrow')}</p>
             <h2 className="tx-h1 tx-home__chap-h" id="home-truck"><Headline start={t('truck.titleStart')} em={t('truck.titleEm')} /></h2>
@@ -329,7 +312,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
 
       {/* 4 · Global network (CONTENT §2.5): dark, lane on the right, then the real map */}
       <section className="tx-ch tx-ch--world tx-dark" id="world" data-chapter="4" aria-labelledby="home-world" tabIndex={-1}>
-        <div className="tx-ch__wrap tx-ch__grid">
+        {/* Only the story part is pinned (data-pin); the real map below it scrolls normally (MOTION §6). */}
+        <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('network.eyebrow')}</p>
             <h2 className="tx-h1 tx-home__chap-h" id="home-world"><Headline start={t('network.titleStart')} em={t('network.titleEm')} /></h2>
@@ -364,7 +348,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
 
       {/* 5 · Smart labels (CONTENT §2.6): cream, lane on the left */}
       <section className="tx-ch tx-ch--lane-left tx-ch--labels" id="label" data-chapter="5" aria-labelledby="home-labels" tabIndex={-1}>
-        <div className="tx-ch__wrap tx-ch__grid">
+        <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('labels.eyebrow')}</p>
             <h2 className="tx-h1 tx-home__chap-h" id="home-labels"><Headline start={t('labels.titleStart')} em={t('labels.titleEm')} /></h2>
@@ -527,7 +511,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
         </div>
       </section>
       {/* Fixed on screen; last in the DOM so keyboard users reach the page content first. */}
-      <RouteRail chapters={railChapters} label={t('rail.label')} />
+      <RouteRail chapters={railChapters} label={t('rail.label')} motionLabels={motionLabels} />
+      </JourneyController>
     </div>
   );
 };

@@ -348,7 +348,7 @@ test('legal pages: the same policies and sections in English and French, no plac
   assert.ok(!/\{\{|TODO|Nigeria/.test(all), 'no template placeholders or previous-deployment law references');
   assert.match(all, /2024\/017/);
   // The cookie policy names the real cookie and the public storage keys.
-  for (const key of ['tx.sid', 'tx_locale', 'ngf_recent_tracking', 'ngf_units', 'ngf_live_shipment_stream']) assert.ok(all.includes(key), key);
+  for (const key of ['tx.sid', 'tx_locale', 'ngf_recent_tracking', 'ngf_units', 'ngf_live_shipment_stream', 'tx_motion_paused']) assert.ok(all.includes(key), key);
 });
 
 test('help: every article has a question and an answer in both languages', () => {

@@ -174,6 +174,11 @@ const home = {
       delivered: 'Livré',
     },
   },
+  // Pause motion control, hero and route rail (CONTENT §2.10).
+  motion: {
+    pause: "Mettre l'animation en pause",
+    play: "Reprendre l'animation",
+  },
 } satisfies Translation<HomeMessages>;
 
 export default home;

@@ -174,6 +174,11 @@ const home = {
       delivered: 'Delivered',
     },
   },
+  // Pause motion control, hero and route rail (CONTENT §2.10).
+  motion: {
+    pause: 'Pause motion',
+    play: 'Play motion',
+  },
 };
 
 export default home;

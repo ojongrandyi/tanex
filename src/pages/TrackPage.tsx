@@ -266,7 +266,7 @@ export const TrackPage: React.FC<TrackPageProps> = ({ onTrack, onNavigate, notFo
 
       {/* Several shipments: results */}
       {batchModalOpen && (
-        <div className="batch-modal-backdrop" onClick={() => setBatchModalOpen(false)}>
+        <div className="batch-modal-backdrop" onClick={() => setBatchModalOpen(false)} data-lenis-prevent>
           <div className="batch-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="batch-modal-title" onClick={(e) => e.stopPropagation()}>
             <div className="batch-modal-header">
               <div className="batch-header-title">

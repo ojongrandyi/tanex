@@ -402,7 +402,7 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
 
       {/* Drawer (below 1100 px) */}
       {drawerOpen && (
-        <div className="tx-drawer-backdrop" onClick={() => setDrawerOpen(false)}>
+        <div className="tx-drawer-backdrop" onClick={() => setDrawerOpen(false)} data-lenis-prevent>
           <div
             ref={drawerRef}
             id={`tx-drawer-${uid}`}

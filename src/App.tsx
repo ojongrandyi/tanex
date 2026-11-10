@@ -4,6 +4,7 @@ import { Footer } from './components/Footer';
 import { LanguageSuggestion } from './components/LanguageSuggestion';
 import { I18nProvider } from './i18n/I18nProvider';
 import { HomePage } from './pages/HomePage';
+import { SmoothScroll } from './motion/SmoothScroll';
 // Every other public page is its own chunk, fetched when it opens, so the landing page only
 // downloads its own code. Their stylesheets stay in the main bundle, in the original order.
 import './pages/pageStyles';
@@ -414,6 +415,7 @@ function MainAppContent() {
   return (
     <div className="ngf-app-shell">
       <LanguageSuggestion />
+      <SmoothScroll routeKey={`${currentPage}|${route?.canonical ?? ''}`} />
       <Header
         activePage={currentPage}
         onNavigate={handleNavigate}
