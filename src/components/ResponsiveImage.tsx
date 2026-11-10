@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { SITE_IMAGES, SiteImageName } from '../data/siteImages';
 import './ResponsiveImage.css';
 
@@ -41,6 +41,19 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   imgClassName = '',
 }) => {
   const info = SITE_IMAGES[name];
+  const imgRef = useRef<HTMLImageElement>(null);
+  // Chrome keeps a viewport listener for every responsive <img> and does not drop it when a whole
+  // ancestor subtree is removed (as React does when a page unmounts): the detached image, and with
+  // it the entire old page and its React tree, stays in memory after each visit (measured in H.2:
+  // ≈ 0.36 MB per Home visit, never released). Taking the <img> out of its <picture> while it is
+  // still in the document unregisters it. Layout-effect cleanups run before React removes the
+  // page's DOM, in the same commit, so nothing visible changes.
+  useLayoutEffect(() => {
+    const img = imgRef.current;
+    return () => {
+      if (img?.isConnected) img.remove();
+    };
+  }, []);
   // React 18 doesn't know the fetchPriority prop yet, so pass the raw attribute.
   const priority = eager ? { fetchpriority: 'high' } : {};
 
@@ -54,6 +67,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
       )}
       <source type="image/webp" srcSet={srcSet(name, 'webp')} sizes={sizes} />
       <img
+        ref={imgRef}
         className={`ngf-responsive-image ${imgClassName}`.trim()}
         src={`/images/site/${name}-${largest(name)}.jpg`}
         srcSet={srcSet(name, 'jpg')}
