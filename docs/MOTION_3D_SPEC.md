@@ -63,7 +63,7 @@ Do not trade away LCP or INP.
 
 | Model | Look | Source |
 |---|---|---|
-| **TanEx bike + rider** | Clean low-poly, matte materials: a commuter motorbike as used for in-town delivery in Cameroon; rider in the **brown TanEx vest** with helmet; **orange top box** with the paper-plane mark; rounded, friendly, not cartoonish | **Commissioned 3D asset** (recommended, see tracker #117): Blender → glTF, ≤ 8k triangles, 1 material atlas, pivots: wheels, handlebar, rider torso, box lid. **Fallback until delivered:** a stylised bike assembled from Three.js primitives (tori, capsules, boxes) in the same palette so the Journey ships on time |
+| **TanEx bike + rider** | **Realistic** (owner, 2026-11-10; replaces the earlier low-poly direction): a commuter motorbike as used for in-town delivery in Cameroon with real mechanical detail, PBR materials (clear-coated paint, chrome, rubber), working emissive lights; rider in the **brown TanEx vest** with full-face helmet; **orange top box** with the paper-plane mark | **Now:** in-house model built by `scripts/blender/build_tanex_bike.py` (Blender 4.5 LTS) → `Public/3d/tanex-bike.glb` (meshopt, ≈ 218 KB, ≈ 39.5k triangles). **Later:** the commissioned model (#117) replaces the file, same node names (brief §5.3, ≤ 40k triangles). **Fallback** if the file fails to load: the primitives bike in `stage/bike.ts` |
 | **Truck** | Same style, light box truck with orange stripe and wordmark | Commissioned with the bike, or primitives |
 | **Paper plane** | The logo mark in 3D, folded geometry | Built in code (≈ 10 triangles) |
 | **Parcel box** | Cardboard with a TanEx label (barcode texture `TX7K2M9P`) | Built in code + one texture |
@@ -82,7 +82,7 @@ Materials: `MeshStandardMaterial`, one hemisphere light + one directional light 
 | `stage/Stage.ts` | One renderer + scene + camera; `load()`, `setTravel(travel)`, `requestRender()`, `dispose()`; renders on demand, pauses while the tab is hidden, posters back on context loss (H.2) |
 | `stage/StageHost.tsx` | Mounts the canvas layer on Home, loads the 3D chunk after load + idle when `canUseStage()`, feeds it the Journey travel, disposes on leaving (H.2) |
 | `stage/lanes.ts` | Where the bike sits on screen: the visible part of the chapter lanes, weighted; fades out where no lane is visible (H.2) |
-| `stage/bike.ts` | Primitive bike + rider with the brief's node names (temporary until the commissioned model, H.6) |
+| `stage/bike.ts` | Primitive bike + rider with the brief's node names: the fallback if the glTF model can't load |
 | `stage/assets.ts` | Loads models/textures by chapter with priorities; bike first; shows the poster until a chapter's assets are ready |
 | `stage/chapters/*.ts` | One file per chapter (§6): `enter()`, `update(progress)`, `leave()`; pure functions of progress (reversible) |
 | `stage/camera.ts` | Camera rails: each chapter defines keyframes (position, target, FOV) interpolated with CatmullRom curves |

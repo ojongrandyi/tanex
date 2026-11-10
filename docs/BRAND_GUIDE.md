@@ -169,7 +169,7 @@ intercity deliveries use the same tracking IDs.
 - Until real photos arrive: free-licence photos (Unsplash/Pexels/CC0, credits in `images/*/SOURCES.md`) showing
   African and especially Central/West African settings (ports, airports, markets, motorbike couriers, warehouses).
   No other company's branding visible.
-- **3D models** for the homepage Journey (MOTION_3D_SPEC §4): low-poly, matte, warm, in the brand palette only; the rider wears the brown TanEx vest; the top box is orange with the paper-plane mark. Commissioned (tracker #117).
+- **3D models** for the homepage Journey (MOTION_3D_SPEC §4): realistic (owner, 2026-11-10), physically based materials in the brand palette; the rider wears the brown TanEx vest; the top box is orange with the paper-plane mark. Commissioned (tracker #117).
 - **Illustration** for 2D fallbacks and posters (bike, truck, city, Mount Cameroon silhouette): flat vector style in the
   brand palette, drawn in-house as SVG (MOTION_3D_SPEC §5).
 - Pipeline unchanged: `scripts/optimize-images.mjs` → WebP + JPG per width in `Public/images/site/`, manifest

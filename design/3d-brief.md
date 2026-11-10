@@ -31,10 +31,10 @@ Both are displayed in a web browser (Three.js, WebGL), frequently on mid-range A
 
 | | Bike + rider + top box | Truck |
 |---|---|---|
-| Style | Low-poly, matte, flat brand colours | Same |
-| Triangle budget | ≤ 8,000 (all three together) | ≤ 6,000 |
-| Materials | 1 material, 1 texture atlas (+ 1 phone-screen material) | 1 material, 1 texture atlas |
-| Texture | Base colour only, ≤ 1024 × 1024 px | Same (may share the bike atlas) |
+| Style | **Realistic** real-time PBR, brand colours (owner decision 2026-11-10) | Same |
+| Triangle budget | ≤ 40,000 (all three together) | ≤ 30,000 |
+| Materials | ≤ 16 PBR materials (+ 1 phone-screen material) | ≤ 12 PBR materials |
+| Textures | Base colour, ORM (occlusion/roughness/metalness), normal; ≤ 2048 × 2048 px each | Same (may share the bike's maps) |
 | Moving parts (pivots) | Front wheel, rear wheel, handlebar, rider torso, top-box lid | Four wheels, cargo door |
 | Units / orientation | Metres, real-world scale, facing +Z in glTF | Same |
 | Delivery | `.blend` source + glTF 2.0 `.glb` | Same |
@@ -57,13 +57,18 @@ distort the logo.** The plane mark may be recoloured as a single flat colour whe
 
 ## 3. Art direction
 
-- **Low-poly, matte, warm.** Rounded, friendly forms that are not cartoonish and not photorealistic. The tone is
-  premium product illustration in 3D, in the manner of Apple and Nike product pages: few parts, clean silhouettes,
-  soft bevels on large forms, no detail that disappears at 300 px.
-- **Flat colour only**, from the palette in §4. No gloss, chrome, metallic surfaces, photo textures, dirt, wear or
-  normal-map detail.
+- **Realistic, clean and premium** (owner decision 2026-11-10, replacing the earlier low-poly direction). A real
+  commuter motorbike of the kind used for in-town delivery in Cameroon, modelled as a product shot in the manner of
+  Apple and Nike product pages: correct proportions and mechanical detail (raked telescopic fork, finned air-cooled
+  engine, exhaust and muffler, coil-spring rear shocks, spoked wheels with drum hubs, real tyre profiles, mirrors,
+  speedometer, rack, footpegs), smooth surfaces, crisp edges with small bevels. Not cartoonish, not stylised.
+- **Physically based materials** in the brand colours of §4: glossy clear-coated paint, satin and polished metal
+  (chrome exhaust, mirrors, fork tubes, spokes), rubber, leather-look seat, fabric for the rider's clothes. **Working
+  lights**: headlight, tail light and indicators as emissive surfaces. Clean and new: no dirt, rust, scratches or wear.
 - **Readable on two backgrounds:** dark chocolate (`#1C120E`, `#2A1B16`) and cream (`#FBF6EC`, `#F5ECDB`). The scene
-  uses one soft hemisphere light, one directional light and a blurred contact shadow.
+  uses a soft studio environment for reflections, a key light, a rim light and a blurred contact shadow.
+- **Reference blockout:** `scripts/blender/build_tanex_bike.py` builds TanEx's in-house version of this model (exact
+  node names, pivots, scale and colours). Use it to check proportions and pivots; your model replaces it.
 - **Generic vehicles.** No manufacturer badges, logos or recognisable commercial models.
 - **The rider is a generic courier**, not a portrait of a real person. The visor is down; no face is modelled.
 - **About the flyer:** use it for posture and proportions only. Its tan jacket, tan helmet and cardboard-coloured box
@@ -106,7 +111,7 @@ the helmet speed lines, the indicators and inside the logo decals.
 | Engine | Chocolate 700 | `#4A3128` |
 | Seat, grips, mirrors, phone holder | Chocolate 950 | `#1C120E` |
 | Tyres | Chocolate 950 | `#1C120E` |
-| Rims and hubs (matte, not metal) | Chocolate 300 | `#BF9C8A` |
+| Rims and hubs (satin alloy, tinted) | Chocolate 300 | `#BF9C8A` |
 | Headlight | Cream 50 | `#FFFCF7` |
 | Indicators | Orange 300 | `#FFB55C` |
 
@@ -120,7 +125,7 @@ the brand scales.
 | Cargo box | Cream 50 | `#FFFCF7` |
 | Cargo box edges and panel lines | Chocolate 200 | `#D9C2B5` |
 | Cab | Chocolate 900 | `#2A1B16` |
-| Glass (matte, not reflective) | Chocolate 200 | `#D9C2B5` |
+| Glass (light tint, reflective) | Chocolate 200 | `#D9C2B5` |
 | Stripe along box and cab | Orange 500 | `#F48800` |
 | Wordmark, both sides of the box | Decal: `logo-wordmark.png` | dark + orange |
 | Tyres / rims | Chocolate 950 / Chocolate 300 | `#1C120E` / `#BF9C8A` |
@@ -142,15 +147,15 @@ the brand scales.
 
 | Item | Requirement |
 |---|---|
-| Triangles (bike + rider + top box) | **≤ 8,000** |
-| Materials | **One** material using one texture atlas, plus the phone-screen material (§5.4) |
-| Atlas | One base-colour PNG, sRGB, ≤ 1024 × 1024 px (512 × 512 if everything stays sharp) |
-| Other texture maps | None: no normal, roughness, metalness, AO or emissive maps |
-| Material values | Metallic 0, roughness 0.85 |
+| Triangles (bike + rider + top box) | **≤ 40,000** |
+| Materials | **≤ 16** PBR (metallic-roughness) materials, plus the phone-screen material (§5.4) |
+| Textures | Base colour (sRGB), ORM and normal maps (linear), ≤ 2048 × 2048 px each; shared atlases preferred |
+| Emissive | Headlight, tail light and indicators as emissive surfaces (emission strength set in the material) |
+| Material values | Physically plausible: paint with clear coat, real metal values for metal parts, rubber rough |
 | Topology | Clean, closed where visible; no hidden interior faces; no n-gons in the export (triangulated on export is fine) |
 
-The atlas holds flat palette swatches (UV islands scaled into the relevant swatch) and the logo decals. Decals must
-be legible when the model fills 600 px on screen.
+Logo decals (the plane mark on the top box) live in the base-colour map or as separate decal geometry. Decals must
+be legible when the model fills 600 px on screen. TanEx compresses the delivered files for the web (meshopt, KTX2).
 
 ### 5.3 Hierarchy and pivots (exact names required)
 
@@ -199,8 +204,8 @@ wordmark on both sides of the box. Generic, with no manufacturer badges.
 
 | Item | Requirement |
 |---|---|
-| Triangles | **≤ 6,000** (seen at mid distance; keeps the page's total 3D download within budget) |
-| Material | One material, one atlas; may share the bike's atlas and swatches |
+| Triangles | **≤ 30,000** (seen at mid distance; keeps the page's total 3D download within budget) |
+| Materials | ≤ 12 PBR materials; may share the bike's maps |
 | Scale | Metres; guide size ≈ 6.0 m long × 2.1 m wide × 3.1 m high |
 | Orientation and origin | As the bike: facing +Z in glTF; origin on the ground at the centre of the wheelbase |
 
@@ -236,7 +241,7 @@ holder**. The underside, engine internals and the far side of the rider can stay
 |---|---|---|
 | 1 | `tanex-bike.blend`, `tanex-truck.blend`: clean source files, names as in §5.3 and §6, scale applied, unused data purged, textures packed. Each includes one **test action** (not exported) that spins the wheels, steers ±25°, turns the torso and opens the lid or door. | Blender 4.2 LTS or later |
 | 2 | `tanex-bike.glb`, `tanex-truck.glb`: no animations, cameras or lights; Y up. Uncompressed: TanEx applies meshopt/Draco compression and texture conversion. | glTF 2.0 binary |
-| 3 | `tanex-atlas.png` (plus `tanex-truck-atlas.png` if separate) | PNG, sRGB, ≤ 1024 px |
+| 3 | Texture maps (base colour, ORM, normal) for each model | PNG, ≤ 2048 px |
 | 4 | Preview renders, one per storyboard row in §7, on the stated background with a soft contact shadow | PNG, 1600 px wide |
 | 5 | Delivery note: triangle count per model, node list, any deviation from this brief and why, any third-party assets used | PDF or text |
 
@@ -282,7 +287,7 @@ Two rounds of revisions are included at each milestone. TanEx replies to each mi
 
 1. Fixed price and currency, and your earliest start date.
 2. Confirmation of the timeline in §9, or your alternative.
-3. Two or three examples of low-poly, real-time (glTF / game / web) models you have made, ideally vehicles or
+3. Two or three examples of realistic real-time (glTF / game / web) models you have made, ideally vehicles or
    characters.
 4. Any questions about this brief.
 
