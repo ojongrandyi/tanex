@@ -18,7 +18,7 @@ import { useApiErrorText, useAreaT, useLocale } from '../i18n/I18nProvider';
 import { primeArea } from '../i18n/runtime';
 import { formatMoney, formatOpeningHoursIn } from '../i18n/format';
 import homeEn from '../i18n/en/home';
-import { ArrivalDoor, BikeHero, HeroGlobe, JourneySprite, Mountain, ParcelLabel, ParkedBike, ServicesRoad, TruckRoute, WorldGlobe } from './home/JourneyArt';
+import { ArrivalDoor, BikeHero, HeroGlobe, JourneySprite, Mountain, ParcelLabel, ParkedBike, ServicesBand, ServicesRoad, TruckRoute, WorldGlobe } from './home/JourneyArt';
 import { RouteRail, type RailChapter } from './home/RouteRail';
 import { JourneyController } from '../motion/JourneyController';
 import { PauseMotionButton } from '../motion/PauseMotion';
@@ -249,6 +249,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
                   </li>
                 );
               })}
+              {/* The road between the card rows: the bike's lane while the chapter is pinned (H.3). */}
+              <li className="tx-ch__lane tx-lane--road tx-home__svc-road" data-lane="band" aria-hidden="true">
+                <ServicesBand />
+              </li>
             </ul>
           </div>
         </div>

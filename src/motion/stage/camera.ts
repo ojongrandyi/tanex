@@ -2,7 +2,7 @@
 // numbers, e.g. 2.5 = halfway through In town), interpolated with centripetal Catmull-Rom curves.
 // The camera orbits the bike: azimuth/elevation in degrees, zoom as a size factor, FOV in degrees.
 // Azimuth 0 = side view of the bike's left side (camera on +X, the bike faces screen-left);
-// 90 = front; −90 = rear.
+// 90 = front; 180 = right side (the bike faces screen-right); −90 = rear.
 // Angles are not wrapped, so the curve never jumps. Views follow the 3D brief's camera table.
 import { CatmullRomCurve3, Vector3 } from 'three';
 
@@ -23,15 +23,19 @@ export interface CameraView {
 }
 
 /**
- * Placeholder rail for H.2 (pacing only); H.3–H.5 refine each chapter's moves. Never more than one
+ * Chapters 0–1 set in H.3; the rest is the H.2 pacing rail until H.4–H.5 refine those moves. Never more than one
  * camera move at a time (§6): each key holds or moves, nothing overlaps.
  */
 export const CAMERA_KEYS: readonly CameraKey[] = [
-  { at: 0, az: 0, el: 4, zoom: 1, fov: 30 }, // 0 · Your door: side view, eye level, slightly low
-  { at: 0.7, az: 0, el: 6, zoom: 1, fov: 30 },
-  { at: 1.15, az: 38, el: 44, zoom: 0.95, fov: 30 }, // 1 · Services: high three-quarter, looking down
-  { at: 1.6, az: 55, el: 36, zoom: 0.95, fov: 30 },
-  { at: 1.9, az: 85, el: 16, zoom: 1, fov: 30 }, // ends turning to a front view
+  // 0 · Your door (H.3): side view of the bike's right side, so it pulls up left to right; a
+  // little wider than the lane so the door and the roll-in stay inside it.
+  { at: 0, az: 180, el: 5, zoom: 0.8, fov: 30 },
+  { at: 0.8, az: 180, el: 6, zoom: 0.82, fov: 30 },
+  // 1 · Services (H.3): high three-quarter over the road beside the intro; on the band the Stage
+  // blends to a low side view (Stage BAND_VIEW); ends turning to a front view.
+  { at: 1.15, az: 152, el: 34, zoom: 0.95, fov: 30 },
+  { at: 1.6, az: 165, el: 26, zoom: 0.95, fov: 30 },
+  { at: 1.9, az: 95, el: 16, zoom: 1, fov: 30 },
   { at: 2.15, az: 0, el: 8, zoom: 1.05, fov: 28 }, // 2 · In town: orbit side → three-quarter front → rear
   { at: 2.45, az: 45, el: 12, zoom: 1.05, fov: 28 },
   { at: 2.8, az: -105, el: 26, zoom: 1.1, fov: 28 }, // ends on the top box

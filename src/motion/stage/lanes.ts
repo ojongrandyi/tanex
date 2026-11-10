@@ -25,6 +25,8 @@ export interface LaneAnchor {
   size: number;
   /** 0 = no lane on screen (hide the bike), 1 = a lane fully visible. */
   weight: number;
+  /** Each lane's share of the anchor (input order; they sum to 1 when any lane is visible). */
+  shares: number[];
 }
 
 /** Aspect allowance: a lane wider than it is tall is sized by its height. */
@@ -38,12 +40,13 @@ export function laneAnchor(lanes: readonly LaneRect[], view: LaneView): LaneAnch
   let y = 0;
   let size = 0;
   let weight = 0;
-  for (const lane of lanes) {
-    if (lane.width <= 0 || lane.height <= 0) continue;
+  const shares = lanes.map(() => 0);
+  lanes.forEach((lane, i) => {
+    if (lane.width <= 0 || lane.height <= 0) return;
     const top = Math.max(lane.top, view.top);
     const bottom = Math.min(lane.top + lane.height, view.bottom);
     const visible = bottom - top;
-    if (visible <= 0) continue;
+    if (visible <= 0) return;
     const seen = Math.min(1, visible / Math.min(lane.height, viewHeight));
     const cy = (top + bottom) / 2;
     const centred = Math.max(0, 1 - Math.abs(cy - middle) / viewHeight);
@@ -53,7 +56,8 @@ export function laneAnchor(lanes: readonly LaneRect[], view: LaneView): LaneAnch
     y += w * cy;
     size += w * Math.min(lane.width, lane.height * SIZE_BY_HEIGHT);
     weight = Math.max(weight, seen);
-  }
-  if (sum <= 0) return { x: 0, y: 0, size: 0, weight: 0 };
-  return { x: x / sum, y: y / sum, size: size / sum, weight };
+    shares[i] = w;
+  });
+  if (sum <= 0) return { x: 0, y: 0, size: 0, weight: 0, shares };
+  return { x: x / sum, y: y / sum, size: size / sum, weight, shares: shares.map((w) => w / sum) };
 }

@@ -40,6 +40,15 @@ export const ServicesRoad: React.FC<SceneProps> = ({ className }) => (
   </Svg>
 );
 
+/** Chapter 1: the road band between the service cards (H.3), where the bike rides while pinned. */
+export const ServicesBand: React.FC<SceneProps> = ({ className }) => (
+  <Svg viewBox="0 0 1200 180" preserveAspectRatio="xMinYMid slice" className={className}>
+    <rect x="0" y="122" width="1200" height="40" rx="20" fill="var(--tx-scene-road, #EDE1DA)" />
+    <path d="M0 142H1200" stroke="#F48800" strokeWidth="2.5" strokeDasharray="10 12" />
+    <use href="#bike-side" x="48" y="20" width="200" height="130" />
+  </Svg>
+);
+
 /** Chapter 2: the bike centre stage, three-quarter view. */
 export const BikeHero: React.FC<SceneProps> = ({ className }) => (
   <Svg viewBox="0 0 360 300" preserveAspectRatio="xMidYMax meet" className={`tx-scene--bike ${className ?? ''}`}>

@@ -114,8 +114,22 @@
   .tx-svc-card:hover, .tx-svc-card:focus-visible { transform: none; }
   .tx-svc-card:hover .tx-svc-card__img { transform: none; }
 }
+/* The road band (H.3, #144): a full-width row between the card rows, placed where it stays on
+   screen while the chapter is pinned (after the first row of three; after card 4 on two columns;
+   before the last card on one). `order` only moves it visually: it is decorative (aria-hidden)
+   and the cards keep their reading and tab order. */
+.tx-home__svc-road.tx-ch__lane { grid-area: auto; grid-column: 1 / -1; order: 1; min-height: 0; height: 180px; align-self: auto; }
+.tx-home__svc-item:nth-child(n+4) { order: 2; }
 @media (max-width: 1180px) {
   .tx-home__svc { grid-template-columns: repeat(2, 1fr); }
+  .tx-home__svc-road.tx-ch__lane { height: 150px; }
+  .tx-home__svc-item:nth-child(n+4) { order: 0; }
+  .tx-home__svc-item:nth-child(n+5) { order: 2; }
+}
+@media (max-width: 760px) {
+  .tx-home__svc-road.tx-ch__lane { height: 140px; }
+  .tx-home__svc-item:nth-child(n+5) { order: 0; }
+  .tx-home__svc-item:nth-child(n+6) { order: 2; }
 }
 
 /* ---------- 2 · Bike ---------- */
@@ -309,15 +323,40 @@
 }
 
 /* ---------- Journey beats (MOTION_3D_SPEC §6), set while a chapter is pinned (H.1) ---------- */
-/* Services: the card the bike is passing lights up. */
+/* Services: the card the bike is passing lights up. The bike crosses the road band left to right
+   (H.3), so the beats follow its column: on three columns the card above the road, then the one
+   below (1, 4, 2, 5, 3, 6); on two columns the left column, then the right (1, 3, 5, 2, 4, 6);
+   on one column in order. */
 .tx-ch--services[data-beat] .tx-svc-card { transition: box-shadow .3s var(--tx-ease, ease), transform .3s var(--tx-ease, ease); }
-.tx-ch--services[data-beat="1"] .tx-home__svc-item:nth-child(1) .tx-svc-card,
-.tx-ch--services[data-beat="2"] .tx-home__svc-item:nth-child(2) .tx-svc-card,
-.tx-ch--services[data-beat="3"] .tx-home__svc-item:nth-child(3) .tx-svc-card,
-.tx-ch--services[data-beat="4"] .tx-home__svc-item:nth-child(4) .tx-svc-card,
-.tx-ch--services[data-beat="5"] .tx-home__svc-item:nth-child(5) .tx-svc-card,
-.tx-ch--services[data-beat="6"] .tx-home__svc-item:nth-child(6) .tx-svc-card {
-  transform: translateY(-4px); box-shadow: 0 0 0 3px var(--tx-orange-500), var(--tx-shadow-lift);
+@media (min-width: 1181px) {
+  .tx-ch--services[data-beat="1"] .tx-home__svc-item:nth-child(1) .tx-svc-card,
+  .tx-ch--services[data-beat="2"] .tx-home__svc-item:nth-child(4) .tx-svc-card,
+  .tx-ch--services[data-beat="3"] .tx-home__svc-item:nth-child(2) .tx-svc-card,
+  .tx-ch--services[data-beat="4"] .tx-home__svc-item:nth-child(5) .tx-svc-card,
+  .tx-ch--services[data-beat="5"] .tx-home__svc-item:nth-child(3) .tx-svc-card,
+  .tx-ch--services[data-beat="6"] .tx-home__svc-item:nth-child(6) .tx-svc-card {
+    transform: translateY(-4px); box-shadow: 0 0 0 3px var(--tx-orange-500), var(--tx-shadow-lift);
+  }
+}
+@media (min-width: 761px) and (max-width: 1180px) {
+  .tx-ch--services[data-beat="1"] .tx-home__svc-item:nth-child(1) .tx-svc-card,
+  .tx-ch--services[data-beat="2"] .tx-home__svc-item:nth-child(3) .tx-svc-card,
+  .tx-ch--services[data-beat="3"] .tx-home__svc-item:nth-child(5) .tx-svc-card,
+  .tx-ch--services[data-beat="4"] .tx-home__svc-item:nth-child(2) .tx-svc-card,
+  .tx-ch--services[data-beat="5"] .tx-home__svc-item:nth-child(4) .tx-svc-card,
+  .tx-ch--services[data-beat="6"] .tx-home__svc-item:nth-child(6) .tx-svc-card {
+    transform: translateY(-4px); box-shadow: 0 0 0 3px var(--tx-orange-500), var(--tx-shadow-lift);
+  }
+}
+@media (max-width: 760px) {
+  .tx-ch--services[data-beat="1"] .tx-home__svc-item:nth-child(1) .tx-svc-card,
+  .tx-ch--services[data-beat="2"] .tx-home__svc-item:nth-child(2) .tx-svc-card,
+  .tx-ch--services[data-beat="3"] .tx-home__svc-item:nth-child(3) .tx-svc-card,
+  .tx-ch--services[data-beat="4"] .tx-home__svc-item:nth-child(4) .tx-svc-card,
+  .tx-ch--services[data-beat="5"] .tx-home__svc-item:nth-child(5) .tx-svc-card,
+  .tx-ch--services[data-beat="6"] .tx-home__svc-item:nth-child(6) .tx-svc-card {
+    transform: translateY(-4px); box-shadow: 0 0 0 3px var(--tx-orange-500), var(--tx-shadow-lift);
+  }
 }
 /* In town: Picked up · On the way · Delivered follow the story. */
 .tx-ch--bike[data-beat] .tx-home__steps li { background: transparent; border-color: var(--tx-border-strong); color: var(--tx-text); transition: background-color .25s, border-color .25s, color .25s; }

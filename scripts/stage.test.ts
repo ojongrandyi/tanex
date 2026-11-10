@@ -1,4 +1,4 @@
-// The 3D Stage's pure parts (MOTION_3D_SPEC §4–§5, H.2): the bike model file and the primitive fallback match the 3D brief's
+// The 3D Stage's pure parts (MOTION_3D_SPEC §4–§6, H.2–H.3): the bike model file and the primitive fallback match the 3D brief's
 // node names and triangle budget, the lane anchor and camera rail are continuous functions of
 // scroll (reversible), and assets load in priority order.
 import { test } from 'node:test';
@@ -11,6 +11,11 @@ import { CAMERA_KEYS, CameraRail } from '../src/motion/stage/camera.ts';
 import { laneAnchor } from '../src/motion/stage/lanes.ts';
 import { BIKE_MODEL_URL, loadAssets, readyChapters, type StageAsset } from '../src/motion/stage/assets.ts';
 import { distanceAt } from '../src/motion/stage/Stage.ts';
+import { journeyEase } from '../src/motion/stage/ease.ts';
+import { HERO_TIMELINE, heroDistance, heroPhase, ROLL_METRES } from '../src/motion/stage/chapters/hero.ts';
+import { bandFrame, rideProgress } from '../src/motion/stage/chapters/services.ts';
+import { ARC_HUBS, BUEA, buildGlobe, landIndices, latLonDir, latticePoint } from '../src/motion/stage/globe.ts';
+import { CAMEROON_DOTS, DOT_COUNT } from '../src/motion/stage/globeDots.ts';
 
 test('primitive bike: brief node names, hierarchy, scale, orientation and budget', () => {
   const bike = buildPrimitiveBike();
@@ -127,4 +132,116 @@ test('bike model file: brief node names, screen material, web budget, meshopt on
   const tris = (json.meshes as { primitives: Prim[] }[]).flatMap((m) => m.primitives)
     .reduce((n, p) => n + (p.indices === undefined ? 0 : json.accessors[p.indices].count / 3), 0);
   assert.ok(tris <= 40000, `${tris} triangles`);
+});
+
+// ---- H.3: chapters 0–1 ----
+
+test('lane anchor: shares say how much each lane is the bike\'s place', () => {
+  const view = { top: 72, bottom: 900 };
+  const a = laneAnchor([
+    { left: 800, top: 200, width: 500, height: 420 },
+    { left: 100, top: 2000, width: 500, height: 420 },
+    { left: 100, top: 700, width: 1200, height: 180 },
+  ], view);
+  assert.equal(a.shares.length, 3);
+  assert.equal(a.shares[1], 0, 'off-screen lane has no share');
+  assert.ok(Math.abs(a.shares.reduce((s, v) => s + v, 0) - 1) < 1e-9, 'shares sum to 1');
+  assert.ok(a.shares[0] > a.shares[2], 'the more visible, more central lane leads');
+  assert.deepEqual(laneAnchor([], view).shares, []);
+});
+
+test('journey ease: CSS cubic-bezier(0.65, 0, 0.35, 1), monotonic and symmetric', () => {
+  assert.equal(journeyEase(0), 0);
+  assert.equal(journeyEase(1), 1);
+  assert.ok(Math.abs(journeyEase(0.5) - 0.5) < 1e-4);
+  let prev = 0;
+  for (let t = 0.01; t <= 1.0001; t += 0.01) {
+    const v = journeyEase(t);
+    assert.ok(v >= prev - 1e-9, `monotonic at ${t}`);
+    assert.ok(Math.abs(v + journeyEase(1 - t) - 1) < 1e-4, `symmetric at ${t}`);
+    prev = v;
+  }
+});
+
+test('hero: dive, opening and arrival are continuous and in order', () => {
+  const T = HERO_TIMELINE;
+  const at0 = heroPhase(0);
+  assert.equal(at0.dive, 0);
+  assert.equal(at0.hole, 0);
+  assert.equal(at0.globe, 1);
+  assert.equal(at0.door, 0);
+  assert.equal(at0.bikeShown, false, 'the bike waits behind the globe');
+  assert.equal(at0.clip, 1);
+  const parked = heroPhase((T.roll[1] + T.depart[0]) / 2);
+  assert.equal(parked.dive, 1);
+  assert.equal(parked.globe, 0, 'globe gone once the bike is at the door');
+  assert.ok(Math.abs(parked.bikeZ) < 1e-12, 'stopped at the door');
+  assert.equal(parked.door, 1);
+  assert.equal(heroPhase(1).door, 0, 'door left behind by Services');
+  assert.ok(T.hole[0] < T.dive[1] && T.globeOut[1] <= T.clip[1], 'the opening starts during the dive; the clip opens after the globe');
+  let prev = heroPhase(0);
+  for (let t = 0.001; t <= 1.0001; t += 0.001) {
+    const p = heroPhase(t);
+    for (const key of ['dive', 'hole', 'globe', 'arcs', 'door', 'clip'] as const) {
+      assert.ok(Math.abs(p[key] - prev[key]) < 0.02, `${key} jumps at ${t.toFixed(3)}`);
+    }
+    assert.ok(Math.abs(p.bikeZ - prev.bikeZ) < 0.02, `bike jumps at ${t.toFixed(3)}`);
+    assert.ok(p.dive >= prev.dive && p.hole >= prev.hole, 'dive and opening only move forward with scroll');
+    prev = p;
+  }
+  // The wheels turn exactly as far as the bike rolls in.
+  assert.ok(Math.abs(heroDistance(T.roll[1]) - ROLL_METRES) < 1e-9);
+  assert.equal(distanceAt((T.roll[1] + T.depart[0]) / 2), distanceAt(T.depart[0]), 'parked at the door');
+});
+
+test('services: the ride across the band follows the pinned story', () => {
+  assert.equal(rideProgress(0, 0.9), 0);
+  assert.equal(rideProgress(1, 0.1), 0, 'waits at the left during the arrive part');
+  assert.equal(rideProgress(1, 0.5), 0.5);
+  assert.equal(rideProgress(1, 0.9), 1);
+  assert.equal(rideProgress(2, 0), 1);
+  const band = { left: 40, top: 500, width: 1200, height: 180 };
+  let prevLeft = -Infinity;
+  for (let p = 0; p <= 1.0001; p += 0.01) {
+    const f = bandFrame(band, Math.min(1, p));
+    assert.ok(f.left >= band.left - 1e-9 && f.left + f.width <= band.left + band.width + 1e-9, 'inside the band');
+    assert.equal(f.top, band.top);
+    assert.ok(f.left >= prevLeft, 'left to right');
+    prevLeft = f.left;
+  }
+  assert.equal(bandFrame({ ...band, width: 200 }, 0.7).width, 200, 'a narrow band is used whole');
+});
+
+test('globe dots: generated lattice, land share and Cameroon', () => {
+  const file = fs.readFileSync(path.join('src', 'motion', 'stage', 'globeDots.ts'));
+  assert.ok(file.length <= 25 * 1024, `${Math.round(file.length / 1024)} KB`);
+  const land = landIndices();
+  const share = land.length / DOT_COUNT;
+  assert.ok(share > 0.25 && share < 0.33, `land share ${share.toFixed(3)}`);
+  const isLand = new Set(land);
+  assert.ok(CAMEROON_DOTS.length >= 12, `${CAMEROON_DOTS.length} Cameroon dots`);
+  const v = new Vector3();
+  for (const i of CAMEROON_DOTS) {
+    assert.ok(isLand.has(i), `Cameroon dot ${i} is land`);
+    latticePoint(i, v);
+    const lat = (Math.asin(v.y) * 180) / Math.PI;
+    const lon = (Math.atan2(v.x, v.z) * 180) / Math.PI;
+    assert.ok(lat > 1.5 && lat < 13.2 && lon > 8.4 && lon < 16.3, `dot ${i} at ${lat.toFixed(1)}, ${lon.toFixed(1)} is in Cameroon's box`);
+  }
+  // Buea is on land, inside Cameroon's dots' reach.
+  const buea = latLonDir(BUEA.lat, BUEA.lon);
+  const nearest = Math.min(...CAMEROON_DOTS.map((i) => latticePoint(i, v).angleTo(buea)));
+  assert.ok(nearest < 0.05, 'a Cameroon dot near Buea');
+});
+
+test('globe: arcs go to listed gateways, the plane is a few triangles', () => {
+  const rig = buildGlobe();
+  assert.equal(rig.arcs.length, ARC_HUBS.length, 'every arc hub is a listed gateway');
+  assert.ok(rig.plane.geometry.attributes.position.count / 3 <= 10, 'paper plane ≤ 10 triangles');
+  // Arcs stay below the globe camera's near-plane allowance (radius ≤ 1.2).
+  for (const { mesh } of rig.arcs) {
+    mesh.geometry.computeBoundingSphere();
+    const pos = mesh.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i += 7) assert.ok(new Vector3().fromBufferAttribute(pos, i).length() < 1.2);
+  }
 });

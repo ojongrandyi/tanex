@@ -63,7 +63,7 @@ export const StageHost: React.FC<StageHostProps> = ({ rootRef }) => {
           }
           const push = () => {
             const s = store.get();
-            if (s.live) stage?.setTravel(s.travel);
+            if (s.live) stage?.setJourney(s);
           };
           unsubscribe = store.subscribe(push);
           push();
