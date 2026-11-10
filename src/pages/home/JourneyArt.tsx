@@ -89,7 +89,7 @@ export const ParkedBike: React.FC<SceneProps> = ({ className }) => (
 /** Chapter 8: the bike stops at a front door with the parcel. */
 export const ArrivalDoor: React.FC<SceneProps> = ({ className }) => (
   <Svg viewBox="0 0 440 300" className={`tx-scene--door ${className ?? ''}`}>
-    <use href="#door" x="250" y="20" width="190" height="280" />
+    <use href="#door-art" x="250" y="20" width="190" height="280" />
     <use href="#bike-side" x="0" y="118" width="280" height="182" />
     <use href="#parcel" x="292" y="246" width="56" height="45" />
   </Svg>

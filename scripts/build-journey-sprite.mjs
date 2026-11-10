@@ -16,6 +16,8 @@ new Function('document', fs.readFileSync('design/sprite.js', 'utf8'))(doc);
 
 html = html
   .replace(/<symbol id="i-[^"]+"[\s\S]*?<\/symbol>/g, '')
+  // The homepage's first chapter is #door: the drawing gets its own id so links find the section.
+  .replace('<symbol id="door"', '<symbol id="door-art"')
   .replace('<svg xmlns="http://www.w3.org/2000/svg">', '')
   .replace(/<\/svg>$/, '')
   .replace('../Public/brand/logo-wordmark.png', '__LOGO__');
