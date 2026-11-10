@@ -32,6 +32,18 @@
 
 /* Reveals: src/motion/useReveal.ts + motion.css (H.1). */
 
+/* ---------- The 3D Stage (H.2, MOTION_3D_SPEC §5) ----------
+   Layers: section backgrounds < the Stage canvas (z 1) < each chapter's content (z 2), so text
+   is always above the 3D and the canvas is never hidden by the opaque chapter colours. The canvas
+   sticks to the viewport while the homepage scrolls and ends with it (never over the footer).
+   Posters of the chapters the Stage draws fade out once its first frame is on screen. */
+.tx-home .tx-ch__wrap { position: relative; z-index: 2; }
+.tx-stage { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .6s var(--tx-ease-out, ease); }
+.tx-stage.is-ready { opacity: 1; }
+.tx-stage__canvas { position: sticky; top: 0; display: block; width: 100%; height: 100vh; }
+.tx-ch__lane > * { transition: opacity .6s var(--tx-ease-out, ease); }
+.tx-ch[data-stage="on"] .tx-ch__lane > :not(.tx-home__caption) { opacity: 0; }
+
 /* ---------- 0 · Hero ---------- */
 .tx-ch--hero { background: var(--tx-choc-950); padding: clamp(56px, 7vw, 88px) 0 clamp(120px, 12vw, 160px); overflow: hidden; }
 .tx-ch--hero .tx-ch__grid { align-items: center; }

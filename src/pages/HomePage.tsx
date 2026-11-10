@@ -22,6 +22,7 @@ import { ArrivalDoor, BikeHero, HeroGlobe, JourneySprite, Mountain, ParcelLabel,
 import { RouteRail, type RailChapter } from './home/RouteRail';
 import { JourneyController } from '../motion/JourneyController';
 import { PauseMotionButton } from '../motion/PauseMotion';
+import { StageHost } from '../motion/stage/StageHost';
 import { useReveal } from '../motion/useReveal';
 import './HomePage.css';
 
@@ -152,6 +153,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
   return (
     <div className="tx-home" ref={rootRef}>
       <JourneyController rootRef={rootRef}>
+      {/* The 3D Stage: one canvas behind every chapter's content (MOTION §5, H.2). */}
+      <StageHost rootRef={rootRef} />
       <JourneySprite />
 
       {/* 0 · Hero: your door (CONTENT §2.1) */}

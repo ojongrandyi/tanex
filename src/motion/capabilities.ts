@@ -92,6 +92,25 @@ export function subscribeMotionPaused(listener: () => void): () => void {
   };
 }
 
+/**
+ * Runs `callback` once the page has finished loading (so after LCP) and the browser is idle:
+ * for the heavy 3D chunk, which must never compete with the first paint (MOTION §2).
+ */
+export function afterLoadIdle(callback: () => void, timeout = 3000): () => void {
+  let cancelIdle: () => void = () => {};
+  let cancelled = false;
+  const go = () => {
+    if (!cancelled) cancelIdle = whenIdle(callback, timeout);
+  };
+  if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go, { once: true });
+  return () => {
+    cancelled = true;
+    window.removeEventListener('load', go);
+    cancelIdle();
+  };
+}
+
 /** Runs `callback` when the browser is idle (after first paint), at the latest after `timeout` ms. */
 export function whenIdle(callback: () => void, timeout = 1500): () => void {
   if (typeof window.requestIdleCallback === 'function') {

@@ -39,7 +39,7 @@ expensive: few elements, exact timing, generous space, bold type, nothing that s
 | Lighthouse Performance (Home) | ≥ 85 |
 | Lighthouse Accessibility | ≥ 95 |
 | LCP | ≤ 2.5 s. The LCP element is the hero headline or the hero poster, **never the canvas** |
-| CLS | ≤ 0.05 (Stage is `position: fixed`, posters have fixed boxes) |
+| CLS | ≤ 0.05 (Stage canvas is `position: sticky` inside an absolutely positioned layer: no layout effect; posters have fixed boxes) |
 | INP | ≤ 200 ms (no long tasks during scroll; scene setup chunked with `requestIdleCallback`) |
 | Main public JS (gzip, excluding motion, 3D, console, courier, editor chunks) | ≤ 250 KB |
 | Motion chunk: GSAP core + ScrollTrigger + used plugins + DOM choreography (gzip) | ≤ 70 KB, after first paint |
@@ -79,7 +79,10 @@ Materials: `MeshStandardMaterial`, one hemisphere light + one directional light 
 | `capabilities.ts` | `canAnimate()` (no reduced motion / Save-Data) and `canUseStage()` (WebGL2, `deviceMemory ≥ 4` when reported, `hardwareConcurrency ≥ 4`, not a known low-power GPU, viewport ≥ 360 px) |
 | `gsap.ts` | Lazy loader; registers plugins once |
 | `useGsapContext.ts` | `gsap.context()` scoped to a ref; reverted on unmount |
-| `stage/Stage.ts` | One renderer + scene + camera; `mount(canvas)`, `setChapter(id, progress)`, `resize()`, `pause()`, `dispose()`; renders on demand |
+| `stage/Stage.ts` | One renderer + scene + camera; `load()`, `setTravel(travel)`, `requestRender()`, `dispose()`; renders on demand, pauses while the tab is hidden, posters back on context loss (H.2) |
+| `stage/StageHost.tsx` | Mounts the canvas layer on Home, loads the 3D chunk after load + idle when `canUseStage()`, feeds it the Journey travel, disposes on leaving (H.2) |
+| `stage/lanes.ts` | Where the bike sits on screen: the visible part of the chapter lanes, weighted; fades out where no lane is visible (H.2) |
+| `stage/bike.ts` | Primitive bike + rider with the brief's node names (temporary until the commissioned model, H.6) |
 | `stage/assets.ts` | Loads models/textures by chapter with priorities; bike first; shows the poster until a chapter's assets are ready |
 | `stage/chapters/*.ts` | One file per chapter (§6): `enter()`, `update(progress)`, `leave()`; pure functions of progress (reversible) |
 | `stage/camera.ts` | Camera rails: each chapter defines keyframes (position, target, FOV) interpolated with CatmullRom curves |
