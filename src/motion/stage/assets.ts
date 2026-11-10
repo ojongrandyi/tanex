@@ -5,6 +5,9 @@
 import type { Object3D } from 'three';
 import { buildPrimitiveBike } from './bike';
 
+/** The bike model (glTF, meshopt-compressed by gltfpack). */
+export const BIKE_MODEL_URL = '/3d/tanex-bike.glb';
+
 export interface StageAsset {
   id: string;
   /** Chapters (MOTION §6 numbers) that need this asset. */
@@ -19,9 +22,9 @@ export const ASSETS: readonly StageAsset[] = [
     id: 'bike',
     chapters: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     priority: 0,
-    // Primitives until the commissioned model (#117, H.6). The swap is this one line:
-    //   load: () => loadGltf('/3d/tanex-bike.glb'),
-    load: async () => buildPrimitiveBike(),
+    // Realistic in-house model (scripts/blender/build_tanex_bike.py) until the commissioned one
+    // (#117, H.6) replaces the file. If it can't load, the primitive stand-in keeps the Journey going.
+    load: () => loadGltf(BIKE_MODEL_URL).catch(() => buildPrimitiveBike()),
   },
 ];
 

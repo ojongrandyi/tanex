@@ -1,13 +1,15 @@
-// The 3D Stage's pure parts (MOTION_3D_SPEC §4–§5, H.2): the primitive bike matches the 3D brief's
+// The 3D Stage's pure parts (MOTION_3D_SPEC §4–§5, H.2): the bike model file and the primitive fallback match the 3D brief's
 // node names and triangle budget, the lane anchor and camera rail are continuous functions of
 // scroll (reversible), and assets load in priority order.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Box3, Object3D, Vector3 } from 'three';
 import { BIKE_NODES, buildPrimitiveBike, triangleCount } from '../src/motion/stage/bike.ts';
 import { CAMERA_KEYS, CameraRail } from '../src/motion/stage/camera.ts';
 import { laneAnchor } from '../src/motion/stage/lanes.ts';
-import { loadAssets, readyChapters, type StageAsset } from '../src/motion/stage/assets.ts';
+import { BIKE_MODEL_URL, loadAssets, readyChapters, type StageAsset } from '../src/motion/stage/assets.ts';
 import { distanceAt } from '../src/motion/stage/Stage.ts';
 
 test('primitive bike: brief node names, hierarchy, scale, orientation and budget', () => {
@@ -108,4 +110,21 @@ test('assets load by priority; a chapter is ready only when all its assets are',
   const none: string[] = [];
   await loadAssets((a) => none.push(a.id), controller.signal, list);
   assert.deepEqual(none, []);
+});
+
+test('bike model file: brief node names, screen material, web budget, meshopt only', () => {
+  const file = fs.readFileSync(path.join('Public', BIKE_MODEL_URL));
+  assert.ok(file.length <= 450 * 1024, `${Math.round(file.length / 1024)} KB`);
+  assert.equal(file.readUInt32LE(0), 0x46546c67, 'binary glTF');
+  const json = JSON.parse(file.subarray(20, 20 + file.readUInt32LE(12)).toString('utf8'));
+  const names = (json.nodes as { name?: string }[]).map((n) => n.name);
+  for (const name of BIKE_NODES) assert.ok(names.includes(name), name);
+  assert.ok((json.materials as { name?: string }[]).some((m) => m.name === 'screen'), 'screen material');
+  const supported = ['EXT_meshopt_compression', 'KHR_mesh_quantization'];
+  for (const ext of json.extensionsRequired ?? []) assert.ok(supported.includes(ext), `required ${ext}`);
+  assert.ok(!(json.extensionsUsed ?? []).includes('KHR_draco_mesh_compression'), 'no Draco');
+  type Prim = { indices?: number };
+  const tris = (json.meshes as { primitives: Prim[] }[]).flatMap((m) => m.primitives)
+    .reduce((n, p) => n + (p.indices === undefined ? 0 : json.accessors[p.indices].count / 3), 0);
+  assert.ok(tris <= 40000, `${tris} triangles`);
 });

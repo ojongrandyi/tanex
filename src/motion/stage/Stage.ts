@@ -4,9 +4,10 @@
 // everything it draws is a pure function of the Journey travel and the lane positions, so
 // scrolling back up gives exactly the frames scrolling down gave.
 import {
-  CanvasTexture, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry,
-  Scene, SRGBColorSpace, WebGLRenderer, type Material, type Object3D, type Texture,
+  CanvasTexture, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, NeutralToneMapping, PerspectiveCamera,
+  PlaneGeometry, PMREMGenerator, Scene, SRGBColorSpace, WebGLRenderer, type Material, type Object3D, type Texture,
 } from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { loadAssets, readyChapters } from './assets';
 import { WHEEL_RADIUS } from './bike';
 import { CameraRail, type CameraView } from './camera';
@@ -80,6 +81,7 @@ export class Stage {
   private opacity = -1;
   private shown = false;
   private disposed = false;
+  private readonly environment: Texture;
 
   constructor(opts: StageOptions) {
     this.opts = opts;
@@ -87,10 +89,20 @@ export class Stage {
       canvas: opts.canvas, alpha: true, antialias: !opts.phone, stencil: false, powerPreference: 'default',
     });
     this.renderer.setClearColor(0x000000, 0);
+    // Realistic materials (paint, chrome, glass) need reflections: a soft studio environment,
+    // generated once in code (no image download). Neutral tone mapping keeps brand colours true.
+    this.renderer.toneMapping = NeutralToneMapping;
+    const pmrem = new PMREMGenerator(this.renderer);
+    const room = new RoomEnvironment();
+    this.environment = pmrem.fromScene(room, 0.04).texture;
+    this.scene.environment = this.environment;
+    this.scene.environmentIntensity = 0.55;
+    room.dispose();
+    pmrem.dispose();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, opts.phone ? DPR_CAP.phone : DPR_CAP.desktop));
 
-    this.scene.add(new HemisphereLight('#FFF6EB', '#4A3128', 1.9));
-    const sun = new DirectionalLight('#FFFCF7', 2.4);
+    this.scene.add(new HemisphereLight('#FFF6EB', '#4A3128', 1.1));
+    const sun = new DirectionalLight('#FFFCF7', 2.2);
     sun.position.set(3, 6, 4);
     this.scene.add(sun);
     this.scene.add(this.rim);
@@ -121,6 +133,8 @@ export class Stage {
       }
       this.ready = readyChapters(loaded);
       this.collectLanes();
+      // Compile the materials' shaders now, not inside the first scroll frame.
+      this.renderer.compile(this.scene, this.camera);
       this.requestRender();
     }, this.abort.signal);
   }
@@ -160,6 +174,7 @@ export class Stage {
       m.dispose();
     });
     textures.forEach((t) => t.dispose());
+    this.environment.dispose();
     this.scene.clear();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
