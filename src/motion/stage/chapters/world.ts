@@ -28,7 +28,7 @@ export const WORLD_HUB = 'CDG';
 export const WORLD_HUBS: readonly string[] = TRADE_LANES.filter(([from]) => from === HUB_CODE).map(([, to]) => to);
 
 /** Camera distance from the globe centre (radius 1): close over Douala, then orbit. */
-const DIST_LOW = 1.32;
+const DIST_LOW = 1.7;
 const DIST_ORBIT = 3.6;
 /** Distance at which the globe fills GLOBE_FILL of the lane (the lens is fixed from it). */
 const DIST_FRAME = 4;

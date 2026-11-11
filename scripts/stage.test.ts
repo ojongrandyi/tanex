@@ -436,6 +436,9 @@ test('label: the parcel turns, the bars draw, the beam scans, the ID types, then
   assert.ok(face.dot(toCam) > 0.999, 'label faces the camera');
   assert.ok(text.dot(right) > 0.999, 'text reads left to right');
   assert.ok(pose.focus.length < 0.5, 'the camera closes in');
+  // A short lane (phone band): the close-up stops where the whole top face still fits.
+  const short = new LabelRig().update(at(1), LABEL_VIEW, 1, 0.39);
+  assert.ok(Math.abs(short.focus.length - 0.39) < 1e-9, 'never tighter than the lane allows');
 });
 
 test('label barcode: Code 128 of the tracking ID, the same as the DOM label (JsBarcode)', () => {

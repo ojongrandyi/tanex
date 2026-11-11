@@ -83,7 +83,12 @@ export class LabelRig {
   private readonly left = new Vector3();
   private readonly v = new Vector3();
 
-  update(phase: LabelPhase, view: CameraView, s: number): LabelPose {
+  /**
+   * `minLength` is the shortest framed length (m) at which the parcel's top face still fits the
+   * lane's height (Stage: short lane bands on phones); the close-up never goes tighter, and when
+   * it is held back it centres the whole face instead of the label.
+   */
+  update(phase: LabelPhase, view: CameraView, s: number, minLength = 0): LabelPose {
     const az = (view.az * Math.PI) / 180;
     const el = (view.el * Math.PI) / 180;
     // Camera axes for this view (as the Stage's camera, looking at the target from az/el).
@@ -101,13 +106,19 @@ export class LabelRig {
     const p = this.pose.position.set(0, PARCEL_SIZE.h / 2, 0).applyQuaternion(q);
     p.set(CENTRE.x - p.x, CENTRE.y - p.y, CENTRE.z - p.z);
 
-    // Frame the parcel, then close in on the label.
-    const label = this.v.set(LABEL_CENTRE.x, LABEL_CENTRE.y, LABEL_CENTRE.z).applyQuaternion(q).add(p);
+    // Frame the parcel, then close in on the label (on the whole top face where the lane is short).
+    const close = Math.max(FRAME_LABEL, minLength);
+    const onFace = clamp01((minLength - FRAME_LABEL) / 0.06);
+    const target = this.v
+      .set(lerp(LABEL_CENTRE.x, 0, onFace), LABEL_CENTRE.y, LABEL_CENTRE.z)
+      .applyQuaternion(q)
+      .add(p);
     const f = this.pose.focus;
-    f.x = lerp(CENTRE.x, label.x, phase.zoom);
-    f.y = lerp(CENTRE.y, label.y, phase.zoom);
-    f.z = lerp(CENTRE.z, label.z, phase.zoom);
-    f.length = FRAME_PARCEL * (FRAME_LABEL / FRAME_PARCEL) ** phase.zoom;
+    f.x = lerp(CENTRE.x, target.x, phase.zoom);
+    f.y = lerp(CENTRE.y, target.y, phase.zoom);
+    f.z = lerp(CENTRE.z, target.z, phase.zoom);
+    const open = Math.max(FRAME_PARCEL, minLength);
+    f.length = open * (close / open) ** phase.zoom;
     return this.pose;
   }
 }

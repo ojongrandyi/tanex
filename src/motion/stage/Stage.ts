@@ -74,6 +74,8 @@ const DPR_CAP = { desktop: 1.5, phone: 1.25 } as const;
 const BIKE_LENGTH = 2;
 const FILL = 0.8;
 const LOOK_HEIGHT = 0.78;
+/** The label close-up keeps this much (m) of the parcel's top face in the lane's height. */
+const LABEL_FACE_FIT = 0.36;
 /**
  * Riding speed per chapter from Services on (0 = parked), in metres per unit of travel × METRES.
  * Chapters 2 and 3 have their own profiles (inTownDistance, cityDistance); the ride-ins of
@@ -499,7 +501,13 @@ export class Stage {
       const label = labelPhase(clamp01(story - 5), this.parcel.label.length);
       const labelOpacity = story >= 4.5 ? gate(share[5]) * label.opacity : 0;
       const v = this.viewAt(story, bandShare, story >= 5 ? late.view : null);
-      const labelPose = this.labelRig.update(label, v, clamp01(story - 5));
+      // On short lanes (phone bands) the close-up stops where the parcel's top face (0.3 m, with a
+      // margin) still fits the lane's height.
+      const labelRect = rectOf(5);
+      const labelFit = labelRect && labelRect.height > 0
+        ? (LABEL_FACE_FIT * FILL * Math.min(labelRect.width, labelRect.height * 1.35)) / labelRect.height
+        : 0;
+      const labelPose = this.labelRig.update(label, v, clamp01(story - 5), labelFit);
       const focus = this.framing(town, city, cityShare, labelPose.focus, story >= 4.5 ? smooth(share[5]) : 0);
       const pxPerMetre = this.aim(ax, ay, anchor.size, w, h, v, focus);
 
