@@ -6,6 +6,7 @@ import { NETWORK_POINTS, TRADE_LANES, getGateway, type Gateway } from '../data/g
 import 'leaflet/dist/leaflet.css';
 import './HomeNetworkMap.css';
 import { BRAND_COLORS } from '../config/brand';
+import { canAnimate, isMotionPaused } from '../motion/capabilities';
 
 // Homepage network map (CONTENT §2.5, §9): TanEx locations (orange, ringed) and the gateways
 // served from Douala (cream), joined by dashed trade lanes. Dark basemap to sit in the chocolate
@@ -18,6 +19,53 @@ interface HomeNetworkMapProps {
   label: string;
   /** Marker title (tooltip and screen-reader name), in the page language. */
   pointTitle: (g: Gateway) => string;
+  /** Draw the lanes once, when the map is first revealed (homepage, MOTION §6 chapter 4). */
+  drawLanes?: boolean;
+}
+
+/** Lane drawing on reveal: duration per lane and the stagger between lanes (s). */
+const DRAW_SECONDS = 1.1;
+const DRAW_STAGGER = 0.06;
+
+/**
+ * Hides the lanes, then draws each one along its path the first time the map is mostly in view;
+ * afterwards the paths get their dashed style back. Skipped with reduced motion or Pause motion.
+ * Returns a cleanup.
+ */
+function drawLanesOnReveal(target: HTMLElement, lines: L.Polyline[]): () => void {
+  if (!canAnimate() || isMotionPaused() || !('IntersectionObserver' in window)) return () => {};
+  const paths = lines
+    .map((line) => line.getElement() as SVGPathElement | undefined)
+    .filter((p): p is SVGPathElement => !!p && typeof p.getTotalLength === 'function');
+  const reset = () => paths.forEach((p) => {
+    p.style.transition = '';
+    p.style.strokeDasharray = '';
+    p.style.strokeDashoffset = '';
+  });
+  paths.forEach((p) => (p.style.strokeDasharray = '0 100000'));
+  let timer = 0;
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    observer.disconnect();
+    // Lengths now, at the zoom the visitor sees.
+    paths.forEach((p) => {
+      const length = p.getTotalLength();
+      p.style.strokeDasharray = `${length} ${length}`;
+      p.style.strokeDashoffset = `${length}`;
+    });
+    void target.getBoundingClientRect();
+    paths.forEach((p, i) => {
+      p.style.transition = `stroke-dashoffset ${DRAW_SECONDS}s cubic-bezier(0.65, 0, 0.35, 1) ${(i * DRAW_STAGGER).toFixed(2)}s`;
+      p.style.strokeDashoffset = '0';
+    });
+    timer = window.setTimeout(reset, (DRAW_SECONDS + paths.length * DRAW_STAGGER) * 1000 + 100);
+  }, { threshold: 0.4 });
+  observer.observe(target);
+  return () => {
+    observer.disconnect();
+    window.clearTimeout(timer);
+    reset();
+  };
 }
 
 // Below this zoom only the selected point keeps its code label (labels overlap in Europe).
@@ -32,7 +80,8 @@ const markerIcon = (leaflet: Leaflet, g: Gateway, isSelected: boolean) =>
     iconAnchor: [22, 22],
   });
 
-export const HomeNetworkMap: React.FC<HomeNetworkMapProps> = ({ activeCode, onSelectGateway, label, pointTitle }) => {
+export const HomeNetworkMap: React.FC<HomeNetworkMapProps> = ({ activeCode, onSelectGateway, label, pointTitle, drawLanes = false }) => {
+  const drawLanesRef = useRef(drawLanes);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -70,17 +119,19 @@ export const HomeNetworkMap: React.FC<HomeNetworkMapProps> = ({ activeCode, onSe
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+    const lines: L.Polyline[] = [];
     TRADE_LANES.forEach(([from, to]) => {
       const a = getGateway(from);
       const b = getGateway(to);
       if (!a || !b) return;
-      L.polyline(greatCircleSegments([a.lat, a.lng], [b.lat, b.lng]), {
+      const line = L.polyline(greatCircleSegments([a.lat, a.lng], [b.lat, b.lng]), {
         color: BRAND_COLORS.orange,
         weight: 1.8,
         opacity: 0.8,
         dashArray: '5, 6',
         interactive: false,
       }).addTo(map);
+      lines.push(line);
     });
 
     NETWORK_POINTS.forEach((g) => {
@@ -116,11 +167,13 @@ export const HomeNetworkMap: React.FC<HomeNetworkMapProps> = ({ activeCode, onSe
 
     fitWorldView(map, L.latLngBounds(NETWORK_POINTS.map((g) => [g.lat, g.lng] as [number, number])));
     syncLabelMode();
+    const stopDrawing = drawLanesRef.current && wrapperRef.current ? drawLanesOnReveal(wrapperRef.current, lines) : () => {};
 
     mapInstanceRef.current = map;
     lastCodeRef.current = activeCode;
 
     return () => {
+      stopDrawing();
       destroyMap(map);
       mapInstanceRef.current = null;
       markersRef.current = {};

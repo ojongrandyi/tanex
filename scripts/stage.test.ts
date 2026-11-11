@@ -1,4 +1,4 @@
-// The 3D Stage's pure parts (MOTION_3D_SPEC §4–§6, H.2–H.4): the bike model file and the primitive fallback match the 3D brief's
+// The 3D Stage's pure parts (MOTION_3D_SPEC §4–§6, H.2–H.5): the bike model file and the primitive fallback match the 3D brief's
 // node names and triangle budget, the lane anchor and camera rail are continuous functions of
 // scroll (reversible), and assets load in priority order.
 import { test } from 'node:test';
@@ -21,6 +21,16 @@ import { HERO_TIMELINE, heroDistance, heroPhase, ROLL_METRES } from '../src/moti
 import { bandFrame, rideProgress } from '../src/motion/stage/chapters/services.ts';
 import { ARC_HUBS, BUEA, buildGlobe, landIndices, latLonDir, latticePoint } from '../src/motion/stage/globe.ts';
 import { CAMEROON_DOTS, DOT_COUNT } from '../src/motion/stage/globeDots.ts';
+import CODE128B from 'jsbarcode/bin/barcodes/CODE128/CODE128B.js';
+import { code128B } from '../src/motion/stage/code128.ts';
+import { laneDrawn, WORLD_HUB, WORLD_HUBS, WORLD_TIMELINE, worldPhase } from '../src/motion/stage/chapters/world.ts';
+import { LABEL_TIMELINE, LABEL_VIEW, LabelRig, labelPhase } from '../src/motion/stage/chapters/label.ts';
+import {
+  DOOR_METRES, DOOR_VIEW, gate, IDLE_SECONDS, IdleClock, idleGlow, latePhase, PARK_METRES, PARK_VIEW, riseIn, STILL_DIM,
+} from '../src/motion/stage/chapters/arrival.ts';
+import { TILE_STEPS } from '../src/motion/journey.ts';
+import { TRADE_LANES } from '../src/data/gateways.ts';
+import { TRACKING_ID_EXAMPLE } from '../src/config/brand.ts';
 
 test('primitive bike: brief node names, hierarchy, scale, orientation and budget', () => {
   const bike = buildPrimitiveBike();
@@ -253,13 +263,15 @@ test('globe: arcs go to listed gateways, the plane is a few triangles', () => {
 
 // ---- H.4: chapters 2–3 ----
 
-test('story travel: pinned chapters 2–3 run on their pin progress, continuously', () => {
+test('story travel: pinned chapters 2–5 run on their pin progress, continuously', () => {
   assert.equal(storyTravel({ travel: 1.97, chapter: 1, progress: 0.9 }), 1.97);
   assert.equal(storyTravel({ travel: 2.3, chapter: 2, progress: 0 }), 2, 'holds while the chapter glides in');
   assert.equal(storyTravel({ travel: 2.6, chapter: 2, progress: 0.5 }), 2.5);
   assert.equal(storyTravel({ travel: 2.99, chapter: 2, progress: 1 }), 3, 'ends where chapter 3 starts');
   assert.equal(storyTravel({ travel: 3, chapter: 3, progress: 0 }), 3);
-  assert.equal(storyTravel({ travel: 4.2, chapter: 4, progress: 0.3 }), 4.2);
+  assert.equal(storyTravel({ travel: 4.2, chapter: 4, progress: 0.3 }), 4.3);
+  assert.equal(storyTravel({ travel: 5.4, chapter: 5, progress: 1 }), 6, 'Label ends where Contact starts');
+  assert.equal(storyTravel({ travel: 6.4, chapter: 6, progress: 0.4 }), 6.4, 'Contact onwards follows the travel');
 });
 
 test('in town: beats in order, the bike rides away and fades as the chapter leaves', () => {
@@ -369,4 +381,116 @@ test('fade: opaque at full opacity, dithered (alpha hash) only while partly fade
   fade.setTransparent(true);
   fade.restore();
   assert.equal(a.alphaHash, false, 'restore follows the current opacity');
+});
+
+test('world: the globe returns, the parcel boards, then the plane flies while the other lanes draw', () => {
+  const T = WORLD_TIMELINE;
+  const at = (s: number) => worldPhase(s);
+  assert.equal(at(0).globe, 0, 'the globe returns as the chapter starts');
+  assert.equal(at(T.fadeIn[1]).globe, 1);
+  assert.equal(at(0).rise, 0);
+  assert.equal(at(T.rise[1]).rise, 1, 'risen to orbit');
+  assert.ok(T.board[1] <= T.flight[0], 'the parcel is on board before the plane leaves');
+  assert.equal(at(T.board[1]).flight, 0);
+  assert.ok(T.flight[1] <= 0.85 && T.lanes[1] <= 0.85, 'flight and lanes end within the story (70%)');
+  assert.equal(at(1).flight, 1);
+  assert.deepEqual(
+    [...WORLD_HUBS].sort(),
+    TRADE_LANES.map(([, to]) => to).sort(),
+    'the lanes are the network map\'s lanes',
+  );
+  assert.ok(WORLD_HUBS.includes(WORLD_HUB), 'the plane flies one of them');
+  const n = WORLD_HUBS.length - 1;
+  for (let i = 0; i < n; i++) {
+    assert.equal(laneDrawn(0, i, n), 0);
+    assert.equal(laneDrawn(1, i, n), 1);
+    if (i > 0) assert.ok(laneDrawn(0.5, i, n) <= laneDrawn(0.5, i - 1, n), 'lanes draw one after another');
+  }
+  const rig = buildGlobe({ hubs: WORLD_HUBS, planeHub: WORLD_HUB });
+  assert.deepEqual(rig.arcs.map((a) => a.code), [...WORLD_HUBS]);
+});
+
+test('label: the parcel turns, the bars draw, the beam scans, the ID types, then the tiles', () => {
+  const T = LABEL_TIMELINE;
+  const n = TRACKING_ID_EXAMPLE.length;
+  const at = (s: number) => labelPhase(s, n);
+  assert.ok(T.turn[1] <= T.bars[0] && T.bars[1] <= T.scan[0] && T.scan[1] <= T.type[0], 'one beat at a time');
+  assert.equal(at(0).typed, 0);
+  assert.equal(at(T.type[1]).typed, n);
+  assert.equal(at(T.bars[0]).bars, 0);
+  assert.equal(at(T.bars[1]).bars, 1);
+  assert.equal(at(T.scan[0]).beam, 0, 'the beam is off before and after its pass');
+  assert.equal(at(T.scan[1]).beam, 0);
+  assert.ok(at((T.scan[0] + T.scan[1]) / 2).beam > 0.99);
+  assert.ok(TILE_STEPS.every((s, i) => s >= T.type[1] && (i === 0 || s > TILE_STEPS[i - 1]) && s <= 0.9), 'tiles after the ID, in order');
+
+  // At the end of the turn the label faces the camera, its text level and reading left to right.
+  const rig = new LabelRig();
+  const pose = rig.update(at(T.turn[1]), LABEL_VIEW, T.turn[1]);
+  const az = (LABEL_VIEW.az * Math.PI) / 180;
+  const el = (LABEL_VIEW.el * Math.PI) / 180;
+  const toCam = new Vector3(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az));
+  const right = new Vector3(0, 1, 0).cross(toCam).normalize();
+  const face = new Vector3(0, 1, 0).applyQuaternion(pose.quaternion);
+  const text = new Vector3(0, 0, -1).applyQuaternion(pose.quaternion);
+  assert.ok(face.dot(toCam) > 0.999, 'label faces the camera');
+  assert.ok(text.dot(right) > 0.999, 'text reads left to right');
+  assert.ok(pose.focus.length < 0.5, 'the camera closes in');
+});
+
+test('label barcode: Code 128 of the tracking ID, the same as the DOM label (JsBarcode)', () => {
+  const Ctor = ((CODE128B as unknown as { default?: unknown }).default ?? CODE128B) as new (d: string, o: object) => { encode(): { data: string } };
+  assert.equal(code128B(TRACKING_ID_EXAMPLE), new Ctor(TRACKING_ID_EXAMPLE, {}).encode().data);
+  assert.throws(() => code128B('é'));
+});
+
+test('contact, FAQ, door: one state at a time, ride-ins in order, the still frame dimmed', () => {
+  const view = { top: 72, bottom: 900 };
+  assert.equal(riseIn(null, view, 0.4), 1, 'a hidden lane counts as risen');
+  assert.equal(riseIn({ left: 0, top: 900, width: 300, height: 260 }, view, 0.4), 0, 'below the fold');
+  assert.equal(riseIn({ left: 0, top: 300, width: 300, height: 260 }, view, 0.4), 1);
+  assert.equal(gate(0.5), 0);
+  assert.equal(gate(0.75), 1);
+  const zero = { label: 0, park: 0, still: 0, door: 0 };
+
+  // Parking beside the form.
+  const arriving = latePhase({ ...zero, park: 1 }, 0, 0);
+  assert.equal(arriving.bikeZ, -PARK_METRES);
+  assert.equal(arriving.bikeOpacity, 0, 'rides in from out of view');
+  const parked = latePhase({ ...zero, park: 1 }, 1, 0);
+  assert.equal(parked.bikeZ, 0);
+  assert.equal(parked.bikeOpacity, 1);
+  assert.ok(parked.parked && parked.view === 'park' && parked.lid === 0);
+  assert.ok(Math.abs(latePhase({ ...zero, still: 1 }, 1, 0).dim - STILL_DIM) < 1e-9, 'still frame dimmed');
+  assert.equal(latePhase({ ...zero, still: 1 }, 1, 0).parked, false, 'no idle beside the FAQ');
+
+  // At the door: rides in, stops, then the box opens.
+  const door = (p: number) => latePhase({ ...zero, door: 1 }, 1, p);
+  assert.equal(door(0).bikeZ, -DOOR_METRES);
+  assert.equal(door(0.7).bikeZ, 0);
+  assert.equal(door(0.7).lid, 0);
+  assert.equal(door(1).lid, 1);
+  assert.equal(door(1).view, 'door');
+
+  // The view switches only where neither state is drawn.
+  for (let x = 0; x <= 1.0001; x += 0.05) {
+    const p = latePhase({ ...zero, still: 1 - x, door: x }, 1, 1);
+    assert.equal(p.view === 'door' ? gate(1 - x) : gate(x), 0, 'the state out of view is not drawn');
+  }
+  assert.ok(PARK_VIEW.az !== DOOR_VIEW.az, 'park and door are seen from different sides');
+});
+
+test('parked idle: at most 5 s, only while running, frame gaps capped', () => {
+  const clock = new IdleClock();
+  assert.equal(clock.tick(0, true), 0);
+  assert.equal(clock.tick(16, true), 0.016);
+  assert.equal(clock.tick(10_000, false), 0.016, 'holds while a field has focus');
+  assert.equal(clock.tick(20_000, true), 0.016, 'resumes without counting the pause');
+  assert.ok(Math.abs(clock.tick(20_016, true) - 0.032) < 1e-9);
+  for (let t = 20_032; t < 40_000; t += 16) clock.tick(t, true);
+  assert.equal(clock.done, true);
+  assert.equal(clock.tick(50_000, true), IDLE_SECONDS, 'stops for good');
+  assert.equal(idleGlow(0), 0);
+  assert.equal(idleGlow(IDLE_SECONDS), 0);
+  assert.ok(idleGlow(1.25) > 0.9);
 });

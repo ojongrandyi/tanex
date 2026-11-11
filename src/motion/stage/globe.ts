@@ -8,7 +8,7 @@
 // Globe space: radius 1, centred on the origin, latitude/longitude with longitude 0 facing +Z.
 import {
   BufferGeometry, CatmullRomCurve3, Color, DoubleSide, Float32BufferAttribute, Group, Mesh, Points,
-  ShaderMaterial, SphereGeometry, TubeGeometry, Vector2, Vector3,
+  ShaderMaterial, SphereGeometry, TubeGeometry, Vector2, Vector3, type Side,
 } from 'three';
 import { GATEWAYS, HUB_CODE, TANEX_LOCATIONS } from '../../data/gateways';
 import { CAMEROON_DOTS, DOT_COUNT, LAND_BITS } from './globeDots';
@@ -71,8 +71,8 @@ export interface GlobeUniforms {
 export interface GlobeRig {
   group: Group;
   uniforms: GlobeUniforms;
-  /** Arc meshes with their tube segment counts (drawn progressively in the intro). */
-  arcs: { mesh: Mesh; segments: number; radial: number }[];
+  /** Arc meshes with their hub and tube segment counts (drawn progressively). */
+  arcs: { code: string; mesh: Mesh; segments: number; radial: number }[];
   plane: Mesh;
   /** The plane's route (the arc to PLANE_HUB, slightly higher). */
   planePath: CatmullRomCurve3;
@@ -231,7 +231,28 @@ function arcCurve(a: Vector3, b: Vector3, lift: number): CatmullRomCurve3 {
   return new CatmullRomCurve3(points, false, 'centripetal');
 }
 
-export function buildGlobe(): GlobeRig {
+export interface GlobeOptions {
+  /** Hubs the arcs from Douala go to (default: ARC_HUBS, the hero intro). */
+  hubs?: readonly string[];
+  /** The hub the plane's route goes to (default: PLANE_HUB). */
+  planeHub?: string;
+}
+
+/** An unlit-looking flat colour that obeys the globe's porthole, opening and opacity (arcs, plane, parcel). */
+export function flatMaterial(
+  uniforms: GlobeUniforms, color: string, lit: number, extra: { side?: Side; arcOpacity?: { value: number } } = {},
+): ShaderMaterial {
+  const shared = uniforms as unknown as Record<string, { value: unknown }>;
+  return new ShaderMaterial({
+    uniforms: { ...shared, uColor: { value: new Color(color) }, uLit: { value: lit }, ...(extra.arcOpacity ? { uArcOpacity: extra.arcOpacity } : {}) },
+    vertexShader: FLAT_VERT,
+    fragmentShader: FLAT_FRAG,
+    transparent: true,
+    ...(extra.side !== undefined ? { side: extra.side } : {}),
+  });
+}
+
+export function buildGlobe({ hubs = ARC_HUBS, planeHub = PLANE_HUB }: GlobeOptions = {}): GlobeRig {
   const uniforms = createUniforms();
   const group = new Group();
   group.name = 'tanex_globe';
@@ -287,16 +308,11 @@ export function buildGlobe(): GlobeRig {
   // Arcs from the Douala gateway, drawn as thin tubes.
   const hub = [...TANEX_LOCATIONS, ...GATEWAYS].find((g) => g.code === HUB_CODE);
   const from = latLonDir(hub?.lat ?? 4.0061, hub?.lng ?? 9.7195);
-  const arcMaterial = new ShaderMaterial({
-    uniforms: { ...shared, uColor: { value: new Color(COLORS.lit) }, uLit: { value: 0 } },
-    vertexShader: FLAT_VERT,
-    fragmentShader: FLAT_FRAG,
-    transparent: true,
-    depthWrite: false,
-  });
+  const arcMaterial = flatMaterial(uniforms, COLORS.lit, 0);
+  arcMaterial.depthWrite = false;
   const arcs: GlobeRig['arcs'] = [];
   let planePath: CatmullRomCurve3 | null = null;
-  for (const code of ARC_HUBS) {
+  for (const code of hubs) {
     const g = GATEWAYS.find((x) => x.code === code);
     if (!g) continue;
     const to = latLonDir(g.lat, g.lng);
@@ -306,20 +322,11 @@ export function buildGlobe(): GlobeRig {
     mesh.renderOrder = 1;
     mesh.name = `arc_${code}`;
     group.add(mesh);
-    arcs.push({ mesh, segments, radial });
-    if (code === PLANE_HUB) planePath = arcCurve(from, to, 0.035);
+    arcs.push({ code, mesh, segments, radial });
+    if (code === planeHub) planePath = arcCurve(from, to, 0.035);
   }
 
-  const plane = new Mesh(
-    paperPlaneGeometry(),
-    new ShaderMaterial({
-      uniforms: { ...shared, uColor: { value: new Color(COLORS.plane) }, uLit: { value: 1 } },
-      vertexShader: FLAT_VERT,
-      fragmentShader: FLAT_FRAG,
-      transparent: true,
-      side: DoubleSide,
-    }),
-  );
+  const plane = new Mesh(paperPlaneGeometry(), flatMaterial(uniforms, COLORS.plane, 1, { side: DoubleSide }));
   plane.name = 'paper_plane';
   plane.scale.setScalar(0.075);
   plane.renderOrder = 3;

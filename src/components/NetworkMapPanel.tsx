@@ -26,6 +26,8 @@ interface NetworkMapPanelProps {
   activeCode?: string;
   onSelect?: (code: string) => void;
   className?: string;
+  /** Draw the lanes once when the map is revealed (homepage World chapter, MOTION §6). */
+  drawLanes?: boolean;
 }
 
 /** Country name in the page language, from the ISO code (falls back to the English name). */
@@ -40,7 +42,7 @@ export function useCountryName(locale: Locale): (iso: string, fallback: string) 
   }, [locale]);
 }
 
-export const NetworkMapPanel: React.FC<NetworkMapPanelProps> = ({ locale, labels, onNavigate, activeCode, onSelect, className = '' }) => {
+export const NetworkMapPanel: React.FC<NetworkMapPanelProps> = ({ locale, labels, onNavigate, activeCode, onSelect, className = '', drawLanes = false }) => {
   const [ownCode, setOwnCode] = useState(HUB_CODE);
   const code = activeCode ?? ownCode;
   const select = onSelect ?? setOwnCode;
@@ -52,7 +54,7 @@ export const NetworkMapPanel: React.FC<NetworkMapPanelProps> = ({ locale, labels
 
   return (
     <div className={`tx-netpanel ${className}`.trim()}>
-      <HomeNetworkMap activeCode={code} onSelectGateway={select} label={labels.mapLabel} pointTitle={pointTitle} />
+      <HomeNetworkMap activeCode={code} onSelectGateway={select} label={labels.mapLabel} pointTitle={pointTitle} drawLanes={drawLanes} />
       <div className="tx-netpanel__card">
         <label className="tx-netpanel__pick">
           <span>{labels.choose}</span>

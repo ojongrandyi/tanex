@@ -8,11 +8,11 @@
 // the opening reveals what is behind it. Every scroll-driven value here is a pure function of the
 // Journey travel; the intro is the only time-based part and settles for good after 5 s.
 import {
-  BoxGeometry, CanvasTexture, Color, Group, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera,
-  PlaneGeometry, Scene, ShaderMaterial, SphereGeometry, SRGBColorSpace, Vector3, AdditiveBlending, CustomBlending,
-  OneMinusSrcAlphaFactor, ZeroFactor, type Material,
+  Matrix4, Mesh, PerspectiveCamera, PlaneGeometry, Scene, ShaderMaterial, Vector3, CustomBlending, OneMinusSrcAlphaFactor,
+  ZeroFactor, type Group,
 } from 'three';
 import { buildGlobe, BUEA, latLonDir, type GlobeRig } from '../globe';
+import { buildDoor, setDoorOpacity, type Door } from '../door';
 import { clamp01, journeyEase, lerp, smooth, span } from '../ease';
 
 /** Scroll timeline of the chapter, in Journey travel (0 = top of the page, 1 = Services). */
@@ -44,15 +44,8 @@ const DIST_DIVE = 1.16;
 const GLOBE_FILL = 0.86;
 const DEG = Math.PI / 180;
 
-const DOOR_Z = 0.25;
-const WALL_X = 1.25;
-const COLORS = {
-  wall: '#38241D', // Chocolate 800
-  frame: '#4A3128', // Chocolate 700
-  door: '#5F4034', // Chocolate 600
-  knob: '#EDDFC4', // Cream 300
-  lamp: '#FFE9CC', // Orange 100
-} as const;
+/** The door's place along the bike's heading (m): just ahead of the bike's centre when it stops. */
+export const DOOR_Z = 0.25;
 
 export interface HeroPhase {
   /** 0 → 1: the dive (journey ease). */
@@ -108,10 +101,10 @@ export interface HeroFrame {
 export class HeroScene {
   readonly globeScene = new Scene();
   readonly globeCamera = new PerspectiveCamera(20, 1, 0.01, 10);
+  private readonly door: Door = buildDoor();
   /** The street at the door: added to the main scene by the Stage. */
-  readonly street = new Group();
+  readonly street: Group = this.door.group;
   private readonly rig: GlobeRig;
-  private readonly streetMaterials: Material[] = [];
   private readonly holeDir = new Vector3();
   private readonly basis = new Matrix4();
   private readonly axes = { x: new Vector3(), y: new Vector3(), z: new Vector3() };
@@ -132,7 +125,7 @@ export class HeroScene {
   constructor() {
     this.rig = buildGlobe();
     this.globeScene.add(this.rig.group);
-    this.buildStreet();
+    this.street.position.z = DOOR_Z;
     const clip = new Mesh(
       new PlaneGeometry(2, 2),
       new ShaderMaterial({
@@ -189,12 +182,8 @@ export class HeroScene {
     }
     // The street: fades in behind the opening, slides back as the bike pulls away, and goes with
     // the hero lane.
-    const opacity = phase.door * smooth(presence * 1.4);
-    this.street.visible = opacity > 0.002;
+    setDoorOpacity(this.door, phase.door * smooth(presence * 1.4));
     this.street.position.z = DOOR_Z - departed;
-    this.streetMaterials.forEach((m) => {
-      m.opacity = opacity * ((m.userData.baseOpacity as number | undefined) ?? 1);
-    });
     return phase;
   }
 
@@ -268,106 +257,4 @@ export class HeroScene {
     plane.quaternion.setFromRotationMatrix(this.basis);
     plane.position.copy(p);
   }
-
-  /** A front door in Buea: a soft-edged wall, frame, panelled door, step and a warm lamp. */
-  private buildStreet(): void {
-    const s = this.street;
-    s.name = 'tanex_door';
-    const standard = (hex: string, extra: Partial<MeshStandardMaterial> = {}) => {
-      const m = new MeshStandardMaterial({ color: new Color(hex), roughness: 0.9, metalness: 0, transparent: true, ...extra });
-      this.streetMaterials.push(m);
-      return m;
-    };
-    const box = (w: number, h: number, d: number, hex: string, x: number, y: number, z: number, extra?: Partial<MeshStandardMaterial>) => {
-      const mesh = new Mesh(new BoxGeometry(w, h, d), standard(hex, extra));
-      mesh.position.set(x, y, z);
-      s.add(mesh);
-      return mesh;
-    };
-
-    // Wall: faces the camera side (−X), edges fade into the page.
-    const wallMap = fadeTexture(COLORS.wall);
-    const wall = new Mesh(new PlaneGeometry(5.4, 3.1).rotateY(-Math.PI / 2), standard('#FFFFFF', { map: wallMap, depthWrite: false, roughness: 1 }));
-    (wall.material as Material).userData.baseOpacity = 0.85;
-    wall.position.set(WALL_X, 1.55, 0);
-    wall.renderOrder = -3;
-    s.add(wall);
-
-    // Frame, door, panels, knob, step (sizes in metres, the wall runs along Z).
-    box(0.1, 2.3, 1.16, COLORS.frame, WALL_X - 0.04, 1.15, 0);
-    box(0.06, 2.12, 0.96, COLORS.door, WALL_X - 0.1, 1.08, 0);
-    box(0.02, 0.62, 0.7, COLORS.frame, WALL_X - 0.135, 1.62, 0);
-    box(0.02, 0.84, 0.7, COLORS.frame, WALL_X - 0.135, 0.66, 0);
-    const knob = new Mesh(new SphereGeometry(0.035, 12, 8), standard(COLORS.knob, { roughness: 0.4, metalness: 0.3 }));
-    knob.position.set(WALL_X - 0.16, 1.05, -0.36);
-    s.add(knob);
-    box(0.5, 0.14, 1.5, COLORS.frame, WALL_X - 0.3, 0.07, 0);
-
-    // Lamp beside the door, with a soft warm glow.
-    box(0.08, 0.26, 0.16, COLORS.frame, WALL_X - 0.05, 2.42, 0.78);
-    box(0.02, 0.18, 0.1, COLORS.lamp, WALL_X - 0.1, 2.42, 0.78, { emissive: new Color(COLORS.lamp), emissiveIntensity: 1.6 });
-    const glow = new Mesh(
-      new PlaneGeometry(1.1, 1.1).rotateY(-Math.PI / 2),
-      new MeshBasicMaterial({ map: glowTexture(), transparent: true, depthWrite: false, blending: AdditiveBlending, toneMapped: false }),
-    );
-    glow.material.userData.baseOpacity = 0.55;
-    this.streetMaterials.push(glow.material);
-    glow.position.set(WALL_X - 0.12, 2.42, 0.78);
-    glow.renderOrder = 1;
-    s.add(glow);
-    s.position.z = DOOR_Z;
-    s.visible = false;
-  }
-}
-
-/** A flat colour whose alpha fades towards the sides and the top (the wall melts into the page). */
-function fadeTexture(hex: string): CanvasTexture {
-  const c = document.createElement('canvas');
-  c.width = 128;
-  c.height = 64;
-  const g = c.getContext('2d');
-  if (g) {
-    const img = g.createImageData(c.width, c.height);
-    const col = new Color(hex);
-    const [r, gg, b] = [col.r, col.g, col.b].map((v) => Math.round(linearToSrgb(v) * 255));
-    for (let y = 0; y < c.height; y++) {
-      for (let x = 0; x < c.width; x++) {
-        const u = x / (c.width - 1);
-        const v = y / (c.height - 1); // 0 = top
-        const side = smooth(Math.min(u, 1 - u) / 0.42);
-        const top = smooth(v / 0.5);
-        const i = (y * c.width + x) * 4;
-        img.data[i] = r;
-        img.data[i + 1] = gg;
-        img.data[i + 2] = b;
-        img.data[i + 3] = Math.round(255 * side * top);
-      }
-    }
-    g.putImageData(img, 0, 0);
-  }
-  const t = new CanvasTexture(c);
-  t.colorSpace = SRGBColorSpace;
-  return t;
-}
-
-function glowTexture(): CanvasTexture {
-  const c = document.createElement('canvas');
-  c.width = 64;
-  c.height = 64;
-  const g = c.getContext('2d');
-  if (g) {
-    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    grad.addColorStop(0, 'rgba(255, 233, 204, 0.9)');
-    grad.addColorStop(0.35, 'rgba(255, 213, 160, 0.3)');
-    grad.addColorStop(1, 'rgba(255, 213, 160, 0)');
-    g.fillStyle = grad;
-    g.fillRect(0, 0, 64, 64);
-  }
-  const t = new CanvasTexture(c);
-  t.colorSpace = SRGBColorSpace;
-  return t;
-}
-
-function linearToSrgb(v: number): number {
-  return v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055;
 }

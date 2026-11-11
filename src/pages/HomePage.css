@@ -218,6 +218,10 @@
 .tx-home__faq summary svg { width: 22px; height: 22px; flex: none; transition: transform .25s var(--tx-ease, ease); }
 .tx-home__faq[open] summary svg { transform: rotate(45deg); }
 .tx-home__faq p { margin: -6px 0 22px; color: var(--tx-choc-600); max-width: 60ch; }
+/* The Stage's dimmed still frame beside the questions (H.5): only while the Stage draws (the
+   chapter is marked data-stage="on"), never on phones (MOTION §6 row 7). */
+.tx-lane--still { display: none; }
+.tx-ch--faq[data-stage="on"] .tx-lane--still { display: block; grid-area: auto; min-height: 0; height: clamp(200px, 20vw, 260px); margin-top: 40px; }
 .tx-ch--blog { background: var(--tx-cream-100); padding-top: 0; }
 .tx-home__blog-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; padding-top: 96px; border-top: 1px solid var(--tx-choc-100); margin-bottom: 36px; }
 .tx-home__posts { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -309,6 +313,7 @@
   .tx-home__map { margin-top: 40px; }
   .tx-home__faq-grid { gap: 24px; }
   .tx-home__faq-intro { position: static; }
+  .tx-ch--faq[data-stage="on"] .tx-lane--still { display: none; }
   .tx-home__blog-head { padding-top: 56px; flex-direction: column; align-items: start; }
   .tx-home__arrive { grid-template-columns: 1fr; gap: 24px; }
   .tx-lane--door { height: 220px; order: 2; }
@@ -358,6 +363,12 @@
     transform: translateY(-4px); box-shadow: 0 0 0 3px var(--tx-orange-500), var(--tx-shadow-lift);
   }
 }
+/* Label: the capability tiles reveal one by one once the 3D label has its tracking ID (data-step
+   1–3, set only while the chapter is pinned for the Stage, so without it they simply show). */
+.tx-ch--labels[data-step] .tx-home__tile { opacity: 0; transform: translateY(14px); transition: opacity .35s var(--tx-ease-out, ease), transform .35s var(--tx-ease-out, ease); }
+.tx-ch--labels[data-step="1"] .tx-home__tile:nth-child(-n+1),
+.tx-ch--labels[data-step="2"] .tx-home__tile:nth-child(-n+2),
+.tx-ch--labels[data-step="3"] .tx-home__tile { opacity: 1; transform: none; }
 /* In town: Picked up · On the way · Delivered follow the story. */
 .tx-ch--bike[data-beat] .tx-home__steps li { background: transparent; border-color: var(--tx-border-strong); color: var(--tx-text); transition: background-color .25s, border-color .25s, color .25s; }
 .tx-ch--bike[data-beat="1"] .tx-home__steps li:nth-child(1),

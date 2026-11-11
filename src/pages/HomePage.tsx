@@ -342,6 +342,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
           <NetworkMapPanel
             locale={locale}
             onNavigate={onNavigate}
+            drawLanes
             labels={{
               mapLabel: t('network.mapLabel'),
               choose: t('network.choose'),
@@ -471,6 +472,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
           <div className="tx-home__faq-intro">
             <p className="tx-eyebrow">{t('faq.eyebrow')}</p>
             <h2 className="tx-h1 tx-home__chap-h" id="home-faq">{t('faq.title')}</h2>
+            {/* The Stage's still frame (H.5): shown only while the Stage draws, never on phones. */}
+            <div className="tx-ch__lane tx-lane--still" aria-hidden="true" />
           </div>
           <div className="tx-home__faq-list" data-reveal>
             {FAQ_KEYS.map((k, i) => (

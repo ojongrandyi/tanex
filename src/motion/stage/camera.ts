@@ -5,6 +5,7 @@
 // 90 = front; 180 = right side (the bike faces screen-right); −90 = rear.
 // Angles are not wrapped, so the curve never jumps. Views follow the 3D brief's camera table.
 import { CatmullRomCurve3, Vector3 } from 'three';
+import { LABEL_VIEW } from './chapters/label';
 
 export interface CameraKey {
   /** Journey travel where this view is reached. */
@@ -23,7 +24,7 @@ export interface CameraView {
 }
 
 /**
- * Chapters 0–1 set in H.3, 2–3 in H.4; the rest is the H.2 pacing rail until H.5 refines those moves. Never more
+ * Chapters 0–1 set in H.3, 2–3 in H.4, 4–5 in H.5 (6–8 take their views from their lanes). Never more
  * than one camera move at a time (§6): each key holds or moves, nothing overlaps.
  *
  * In the pinned story chapters 2 and 3 the rail is sampled at the chapter's pin progress
@@ -54,11 +55,14 @@ export const CAMERA_KEYS: readonly CameraKey[] = [
   { at: 3.48, az: -128, el: 12, zoom: 1, fov: 30 },
   { at: 3.62, az: -92, el: 50, zoom: 0.94, fov: 30 },
   { at: 4, az: -92, el: 50, zoom: 0.94, fov: 30 },
-  { at: 4.3, az: -150, el: 24, zoom: 0.8, fov: 30 }, // 4 · World (placeholder until the globe, H.5)
-  { at: 5.3, az: -60, el: 32, zoom: 0.95, fov: 30 }, // 5 · Label: towards the top box
-  { at: 6.2, az: 0, el: 5, zoom: 1, fov: 30 }, // 6 · Contact: parked, side view
-  { at: 7.3, az: 0, el: 5, zoom: 1, fov: 30 }, // 7 · FAQ: still
-  { at: 8, az: 0, el: 4, zoom: 1.05, fov: 30 }, // 8 · Delivered: side view at the door
+  // 4 · World (H.5): the globe has its own pass and camera, and the main scene is empty, so the
+  // camera holds over the route while it fades, then turns to the label view out of sight.
+  { at: 4.3, az: -92, el: 50, zoom: 0.94, fov: 30 },
+  { at: 4.75, ...LABEL_VIEW },
+  // 5 · Label (H.5): the camera holds; the parcel turns (chapters/label.ts).
+  { at: 6, ...LABEL_VIEW },
+  // 6–8 (H.5): the views follow the lanes, not the rail (Stage: chapters/arrival.ts PARK_VIEW, DOOR_VIEW).
+  { at: 8, ...LABEL_VIEW },
 ];
 
 export class CameraRail {

@@ -24,6 +24,14 @@ const BEATS: Readonly<Record<number, { count: number; hold: boolean }>> = {
   2: { count: 3, hold: true },
 };
 
+/**
+ * Steps at fixed pin progress, written as `data-step` (the number passed, kept before and after
+ * the pin): Label reveals its three capability tiles once the 3D label has typed its tracking ID
+ * (stage/chapters/label.ts LABEL_TIMELINE.type ends at 0.8).
+ */
+export const TILE_STEPS: readonly number[] = [0.8, 0.84, 0.88];
+const STEPS: Readonly<Record<number, readonly number[]>> = { 5: TILE_STEPS };
+
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
 function headerOffset(): number {
@@ -38,11 +46,11 @@ function beatOf(progress: number, { count, hold }: { count: number; hold: boolea
   return String(Math.min(count, Math.floor(story * count) + 1));
 }
 
-function setBeat(section: HTMLElement, value: string | null): void {
+function setBeat(section: HTMLElement, value: string | null, key: 'beat' | 'step' = 'beat'): void {
   if (value === null) {
-    if (section.dataset.beat !== undefined) delete section.dataset.beat;
-  } else if (section.dataset.beat !== value) {
-    section.dataset.beat = value;
+    if (section.dataset[key] !== undefined) delete section.dataset[key];
+  } else if (section.dataset[key] !== value) {
+    section.dataset[key] = value;
   }
 }
 
@@ -112,6 +120,11 @@ export function setupJourney(
     pins.forEach((p, k) => {
       const beats = BEATS[chapters[k]];
       if (p && beats) setBeat(sections[k], beatOf(progressAt(p, y), beats));
+      const steps = STEPS[chapters[k]];
+      if (p && steps) {
+        const at = progressAt(p, y);
+        setBeat(sections[k], String(steps.filter((s) => at >= s).length), 'step');
+      }
     });
   };
 
@@ -122,7 +135,10 @@ export function setupJourney(
   update();
 
   return () => {
-    sections.forEach((s) => setBeat(s, null));
+    sections.forEach((s) => {
+      setBeat(s, null);
+      setBeat(s, null, 'step');
+    });
     store.reset();
   };
 }

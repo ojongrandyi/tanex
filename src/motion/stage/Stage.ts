@@ -4,30 +4,40 @@
 // endless loop, and everything scroll-driven is a pure function of the Journey state and the lane
 // positions, so scrolling back up gives exactly the frames scrolling down gave.
 //
-// Two passes: the main scene (bike, the door of chapter 0, the road of chapter 1, the truck and
-// route of chapter 3) with a camera that orbits a framing target (the bike, the phone, the bike
-// and truck, the route) and frames it in the current lane; then, in chapter 0, the globe in its
-// own scene on top, so the opening it dives through reveals the street behind (chapters/hero.ts).
+// Passes: the main scene (bike, the doors of chapters 0 and 8, the road of chapter 1, the truck
+// and route of chapter 3, the parcel of chapter 5) with a camera that orbits a framing target
+// (the bike, the phone, the bike and truck, the route, the parcel and its label) and frames it in
+// the current lane; then, in chapter 0, the globe in its own scene on top, so the opening it dives
+// through reveals the street behind (chapters/hero.ts); and in chapter 4 the world globe
+// (chapters/world.ts).
 //
-// The pinned story chapters 2 and 3 run on their pin progress (storyTravel), so the 3D beats
-// line up with the DOM beats; elsewhere the Journey's travel drives everything.
+// The pinned story chapters 2–5 run on their pin progress (storyTravel), so the 3D beats line up
+// with the DOM beats; chapters 6–8 follow their own lanes (chapters/arrival.ts); elsewhere the
+// Journey's travel drives everything.
 import {
   CanvasTexture, DirectionalLight, HemisphereLight, Mesh, MeshBasicMaterial, NeutralToneMapping, PerspectiveCamera,
   PlaneGeometry, PMREMGenerator, Scene, SRGBColorSpace, Vector3, WebGLRenderer, type BufferGeometry, type Material,
-  type Object3D, type Texture,
+  type MeshStandardMaterial, type Object3D, type Texture,
 } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { isMotionPaused, subscribeMotionPaused } from '../capabilities';
-import { LOGO_WORDMARK_WEB, LOGO_WORDMARK_WEB_HEIGHT, LOGO_WORDMARK_WEB_WIDTH } from '../../config/brand';
+import {
+  COMPANY, LOGO_MARK, LOGO_MARK_SIZE, LOGO_WORDMARK_WEB, LOGO_WORDMARK_WEB_HEIGHT, LOGO_WORDMARK_WEB_WIDTH, TRACKING_ID_EXAMPLE,
+} from '../../config/brand';
 import { loadAssets, readyChapters } from './assets';
 import { WHEEL_RADIUS } from './bike';
 import { CameraRail, type CameraView } from './camera';
 import { bump, clamp01, lerp, smooth } from './ease';
-import { laneAnchor, type LaneRect } from './lanes';
+import { laneAnchor, type LaneRect, type LaneView } from './lanes';
 import { HeroScene, heroDistance, INTRO_SECONDS, ROLL_METRES } from './chapters/hero';
 import { bandFrame, rideProgress, ServicesScene } from './chapters/services';
 import { inTownDistance, inTownPhase, PHONE_FOCUS, PhoneMap, type InTownPhase } from './chapters/inTown';
 import { cityDistance, cityFocus, cityPhase, CityScene, type CityPhase, type Focus } from './chapters/cityToCity';
+import { WorldScene } from './chapters/world';
+import { LabelRig, labelPhase } from './chapters/label';
+import {
+  ArrivalScene, DOOR_REACH, DOOR_VIEW, gate, IdleClock, idleGlow, latePhase, PARK_REACH, PARK_VIEW, riseIn, type LateView,
+} from './chapters/arrival';
 import { buildParcel } from './parcel';
 import { Fade } from './fade';
 
@@ -66,11 +76,14 @@ const FILL = 0.8;
 const LOOK_HEIGHT = 0.78;
 /**
  * Riding speed per chapter from Services on (0 = parked), in metres per unit of travel × METRES.
- * Chapters 2 and 3 have their own profiles (inTownDistance, cityDistance).
+ * Chapters 2 and 3 have their own profiles (inTownDistance, cityDistance); the ride-ins of
+ * chapters 6 and 8 turn the wheels by their own distance (chapters/arrival.ts).
  */
-const SPEED = [0, 1.2, 0, 0, 1, 0.6, 0, 0, 0.5];
+const SPEED = [0, 1.2, 0, 0, 0, 0, 0, 0, 0];
 /** Pinned chapters whose 3D story runs on the pin progress. */
-const STORY_CHAPTERS: ReadonlySet<number> = new Set([2, 3]);
+const STORY_CHAPTERS: ReadonlySet<number> = new Set([2, 3, 4, 5]);
+/** Bike materials that breathe during the parked idle. */
+const IDLE_LIGHTS = ['headlight', 'tail_light'];
 /** Bike space: the parcel socket when the model has none (top box floor). */
 const SOCKET_FALLBACK = { x: 0, y: 0.905, z: -0.7 } as const;
 /** Height the parcel is lifted above the straight line from box to truck (m, at mid-flight). */
@@ -91,7 +104,7 @@ const SUN = { x: 3, y: 6, z: 4 };
 const BAND_VIEW: CameraView = { az: 180, el: 12, zoom: 1.08, fov: 30 };
 
 /**
- * The Journey position the 3D story uses: in chapters 2 and 3 the chapter number plus its pin
+ * The Journey position the 3D story uses: in chapters 2–5 the chapter number plus its pin
  * progress (the story holds while the chapter glides in and out, and runs while it is pinned);
  * elsewhere the travel. Continuous: a pinned chapter's progress is 0 when it starts and 1 when
  * the next one starts.
@@ -136,7 +149,20 @@ export class Stage {
   private readonly hero = new HeroScene();
   private readonly services = new ServicesScene();
   private readonly city: CityScene;
-  private readonly parcel = buildParcel();
+  private readonly world = new WorldScene();
+  private readonly labelRig = new LabelRig();
+  private readonly arrival = new ArrivalScene();
+  private readonly idle = new IdleClock();
+  private idleLights: { material: MeshStandardMaterial; base: number }[] = [];
+  private idleLevel = -1;
+  /** Inputs of the last still frame drawn (chapter 7): the same inputs need no new frame. */
+  private stillKey = '';
+  private readonly parcel = buildParcel({
+    id: TRACKING_ID_EXAMPLE,
+    brand: COMPANY,
+    mark: { url: LOGO_MARK, size: LOGO_MARK_SIZE },
+    onChange: () => this.requestRender(),
+  });
   private readonly parcelFade = new Fade(this.parcel.materials);
   private phoneMap: PhoneMap | null = null;
   private bikeFade: Fade | null = null;
@@ -194,12 +220,15 @@ export class Stage {
       () => this.requestRender(),
     );
     this.scene.add(this.city.group);
+    this.scene.add(this.arrival.group);
     this.parcel.group.visible = false;
     this.scene.add(this.parcel.group);
 
     opts.canvas.addEventListener('webglcontextlost', this.onContextLost);
     window.addEventListener('resize', this.onResize);
     document.addEventListener('visibilitychange', this.onVisibility);
+    // Leaving a form field lets the parked idle carry on (it holds while a field has focus).
+    document.addEventListener('focusout', this.onFocusOut);
     this.unsubscribePause = subscribeMotionPaused(() => this.requestRender());
   }
 
@@ -230,6 +259,9 @@ export class Stage {
           (Array.isArray(m) ? m : m ? [m] : []).forEach((x) => materials.add(x));
         });
         this.bikeFade = new Fade(materials);
+        this.idleLights = [...materials]
+          .filter((m): m is MeshStandardMaterial => IDLE_LIGHTS.includes(m.name) && 'emissiveIntensity' in m)
+          .map((material) => ({ material, base: material.emissiveIntensity }));
       }
       this.ready = readyChapters(loaded);
       this.collectLanes();
@@ -264,6 +296,7 @@ export class Stage {
     if (this.frame) window.cancelAnimationFrame(this.frame);
     window.removeEventListener('resize', this.onResize);
     document.removeEventListener('visibilitychange', this.onVisibility);
+    document.removeEventListener('focusout', this.onFocusOut);
     this.opts.canvas.removeEventListener('webglcontextlost', this.onContextLost);
     this.markPosters(false);
     const materials = new Set<Material>();
@@ -279,6 +312,7 @@ export class Stage {
     this.city.textures.forEach((t) => textures.add(t));
     this.hero.globeScene.traverse(free);
     this.hero.clipScene.traverse(free);
+    this.world.scene.traverse(free);
     materials.forEach((m) => {
       Object.values(m).forEach((v) => {
         if (v && typeof v === 'object' && (v as Texture).isTexture) textures.add(v as Texture);
@@ -290,6 +324,7 @@ export class Stage {
     this.scene.clear();
     this.hero.globeScene.clear();
     this.hero.clipScene.clear();
+    this.world.scene.clear();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
   }
@@ -301,7 +336,9 @@ export class Stage {
    * has linked them, so no scroll frame ever stalls on a shader. Drawing starts after this.
    */
   private async compileShaders(): Promise<void> {
-    const hidden = [this.hero.street, this.services.group, this.city.group, this.parcel.group, this.phoneMap?.object]
+    const hidden = [
+      this.hero.street, this.services.group, this.city.group, this.parcel.group, this.arrival.group, this.world.root, this.phoneMap?.object,
+    ]
       .filter((o): o is Object3D => !!o && !o.visible);
     hidden.forEach((o) => (o.visible = true));
     // compileAsync compiles synchronously (visibility and material modes matter only now), then
@@ -312,13 +349,14 @@ export class Stage {
       this.renderer.compileAsync(this.scene, this.camera),
       this.renderer.compileAsync(this.hero.globeScene, this.hero.globeCamera),
       this.renderer.compileAsync(this.hero.clipScene, this.hero.globeCamera),
+      this.renderer.compileAsync(this.world.scene, this.world.camera),
     ];
     fades.forEach((f) => f.setTransparent(false));
     jobs.push(this.renderer.compileAsync(this.scene, this.camera));
     fades.forEach((f) => f.restore());
     hidden.forEach((o) => (o.visible = false));
     // Upload the chapter textures now too (a first upload inside a scroll frame is a stall).
-    [this.scene, this.hero.globeScene].forEach((scene) =>
+    [this.scene, this.hero.globeScene, this.world.scene].forEach((scene) =>
       scene.traverse((o) => {
         const material = (o as Mesh).material as Material | undefined;
         if (!material || Array.isArray(material)) return;
@@ -352,10 +390,12 @@ export class Stage {
       });
     reveal(this.scene);
     reveal(this.hero.globeScene);
+    reveal(this.world.scene);
     r.setScissorTest(true);
     r.setScissor(0, 0, 1, 1);
     r.render(this.scene, this.camera);
     r.render(this.hero.globeScene, this.hero.globeCamera);
+    r.render(this.world.scene, this.world.camera);
     r.setScissorTest(false);
     r.clear();
     restore.forEach((undo) => undo());
@@ -400,37 +440,68 @@ export class Stage {
     const ride = rideProgress(chapter, progress);
     const raw = this.lanes.map((lane) => lane.el.getBoundingClientRect());
     const rects: LaneRect[] = raw.map((r, i) => (this.lanes[i].band ? bandFrame(r, ride) : r));
-    const view = { top: headerOffset(), bottom: window.innerHeight };
+    const view: LaneView = { top: headerOffset(), bottom: window.innerHeight };
     const anchor = laneAnchor(rects, view);
-    let heroShare = 0;
-    let servicesShare = 0;
+    // Each chapter's share of the anchor (its lanes summed), the Services band's share and rect.
+    const share = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     let bandShare = 0;
-    let cityShare = 0;
     let band: DOMRect | null = null;
-    anchor.shares.forEach((share, i) => {
+    anchor.shares.forEach((value, i) => {
       const lane = this.lanes[i];
-      if (lane.chapter === 0) heroShare += share;
-      if (lane.chapter === 1) servicesShare += share;
-      if (lane.chapter === 3) cityShare += share;
+      if (lane.chapter >= 0 && lane.chapter < share.length) share[lane.chapter] += value;
       if (lane.band) {
-        bandShare += share;
+        bandShare += value;
         band = raw[i];
       }
     });
-    const opacity = Math.round(smooth(anchor.weight * 1.6) * 100) / 100;
+    const heroShare = share[0];
+    const servicesShare = share[1];
+    const cityShare = share[3];
+    // Chapters 6–8: which state shows, from the lane shares and how far the park and door lanes have risen.
+    const rectOf = (chapter: number) => {
+      const i = this.lanes.findIndex((lane) => lane.chapter === chapter);
+      return i >= 0 ? raw[i] : null;
+    };
+    const late = latePhase(
+      { label: share[5], park: share[6], still: share[7], door: share[8] },
+      riseIn(rectOf(6), view, PARK_REACH),
+      riseIn(rectOf(8), view, DOOR_REACH),
+    );
+    const opacity = Math.round(smooth(anchor.weight * 1.6) * late.dim * 100) / 100;
     if (opacity !== this.opacity) {
       canvas.style.opacity = String(opacity);
       this.opacity = opacity;
     }
 
+    // The parked idle (chapter 6, ≤ 5 s): holds while a form field has focus or motion is paused.
+    const idleRunning = late.parked && story >= 5 && !isMotionPaused() && !isTyping() && !this.idle.done;
+    const idleTime = this.idle.tick(performance.now(), idleRunning);
+
+    // Chapter 7: a still frame. Nothing in it moves, so the same lane position and canvas size
+    // need no new frame (the canvas keeps the last one).
+    let still = false;
+    if (share[7] > 0.999 && !idleRunning) {
+      const key = `${w}x${h}:${Math.round(anchor.x)},${Math.round(anchor.y)},${Math.round(anchor.size)}`;
+      still = key === this.stillKey;
+      this.stillKey = key;
+    } else {
+      this.stillKey = '';
+    }
+
     let animating = false;
-    if (opacity > 0) {
+    if (opacity > 0 && !still) {
       const ax = anchor.x - rect.left;
       const ay = anchor.y - rect.top;
       // Chapters 2–3: the product moment and the hand-off (pure functions of the pin progress).
       const town = inTownPhase(clamp01(story - 2));
       const city = cityPhase(clamp01(story - 3));
-      const pxPerMetre = this.aim(ax, ay, anchor.size, w, h, bandShare, this.framing(town, city, cityShare), story);
+      // Chapter 5: the parcel and its label (shown while the label lane holds the anchor).
+      const label = labelPhase(clamp01(story - 5), this.parcel.label.length);
+      const labelOpacity = story >= 4.5 ? gate(share[5]) * label.opacity : 0;
+      const v = this.viewAt(story, bandShare, story >= 5 ? late.view : null);
+      const labelPose = this.labelRig.update(label, v, clamp01(story - 5));
+      const focus = this.framing(town, city, cityShare, labelPose.focus, story >= 4.5 ? smooth(share[5]) : 0);
+      const pxPerMetre = this.aim(ax, ay, anchor.size, w, h, v, focus);
 
       // Chapter 1: the road, kept on the band while the bike crosses it.
       const bandRect = band as DOMRect | null;
@@ -452,10 +523,14 @@ export class Stage {
         travel < 1.5 ? Math.max(heroShare, travel < 0.6 ? 1 : 0) : 0,
         Math.max(0, distance - ROLL_METRES),
       );
-      animating = this.hero.drawsGlobe && this.introStart !== null && intro < INTRO_SECONDS;
+      animating = (this.hero.drawsGlobe && this.introStart !== null && intro < INTRO_SECONDS) || idleRunning;
 
+      // The truck and route show only once chapter 3 is clearly the lane, so they never hang over
+      // the neighbouring chapters while the framing moves between the bike and the route.
+      const cityShown = smooth((cityShare - 0.62) / 0.3);
       let bikeZ = 0;
       let bikeOpacity = 1;
+      let rideIn = 0;
       if (travel < 1) {
         bikeZ = phase.bikeZ;
         bikeOpacity = phase.bikeShown ? 1 : 0;
@@ -465,23 +540,49 @@ export class Stage {
       } else if (story >= 3 && story < 4) {
         bikeZ = city.bikeZ;
         bikeOpacity = city.bikeOpacity;
+      } else if (story >= 4 && cityShown > 0.002) {
+        // The route is still leaving: the bike stays where it handed over the parcel.
+        bikeOpacity = cityShown;
+      } else if (story >= 4) {
+        // Chapters 4–8: gone in World and Label; rides in to park at Contact, still beside the
+        // FAQ, rides the last metres to the door.
+        bikeZ = late.bikeZ;
+        bikeOpacity = late.bikeOpacity;
+        rideIn = late.bikeZ;
       }
-      // Box: open in In town, for the hand-off, and on arrival (stays open at the very end).
-      const lid = Math.max(town.lid, city.lid, smooth((travel - 7.7) / 0.25));
-      this.pose(travel, story, bikeZ, bikeOpacity, yaw, bandShare, lid, town.glance);
+      // Box: open in In town, for the hand-off, and at the door (stays open at the very end).
+      const lid = Math.max(town.lid, city.lid, story >= 4 ? late.lid : 0);
+      this.pose(travel, story, bikeZ, bikeOpacity, yaw, bandShare, lid, town.glance, rideIn);
+      this.setIdleLights(late.parked ? idleGlow(idleTime) : 0);
       this.phoneMap?.update(town.map * bikeOpacity, town.dot);
-      // The truck and route show only once chapter 3 is clearly the lane, so they never hang over
-      // the neighbouring chapters while the framing moves between the bike and the route.
-      const cityShown = smooth((cityShare - 0.62) / 0.3);
       this.city.update({ shown: cityShown, pxPerMetre }, city);
-      this.placeParcel(story, city, cityShown, bikeOpacity, lid);
+      this.arrival.update(story >= 4 ? late.door : 0);
+      this.placeParcel(story, city, cityShown, bikeOpacity, lid, labelOpacity);
+      if (labelOpacity > 0.002) this.parcel.label.set(label.bars, label.typed, label.scan, label.beam);
+      else this.parcel.label.full();
+
+      // Chapter 4: the world globe in the World lane (its own pass, like the hero's).
+      const worldLane = this.lanes.findIndex((lane) => lane.chapter === 4);
+      const worldAnchor = worldLane >= 0 && story >= 4 && story < 5.5 ? laneAnchor([rects[worldLane]], view) : null;
+      this.world.update(
+        clamp01(story - 4),
+        worldAnchor
+          ? { x: worldAnchor.x - rect.left, y: worldAnchor.y - rect.top, size: Math.min(rects[worldLane].width, rects[worldLane].height), width: w, height: h, dpr: this.renderer.getPixelRatio() }
+          : { x: 0, y: 0, size: 0, width: w, height: h, dpr: 1 },
+        gate(share[4]),
+      );
+
       this.renderer.render(this.scene, this.camera);
-      if (this.hero.drawsClip || this.hero.drawsGlobe) {
+      if (this.hero.drawsClip || this.hero.drawsGlobe || this.world.drawsGlobe) {
         this.renderer.autoClear = false;
         if (this.hero.drawsClip) this.renderer.render(this.hero.clipScene, this.hero.globeCamera);
         if (this.hero.drawsGlobe) {
           this.renderer.clearDepth();
           this.renderer.render(this.hero.globeScene, this.hero.globeCamera);
+        }
+        if (this.world.drawsGlobe) {
+          this.renderer.clearDepth();
+          this.renderer.render(this.world.scene, this.world.camera);
         }
         this.renderer.autoClear = true;
       }
@@ -513,6 +614,7 @@ export class Stage {
   /** Moving parts as pure functions of the Journey (travel, and the story position). */
   private pose(
     travel: number, story: number, bikeZ: number, opacity: number, yaw: number, band: number, lidOpen: number, glance: number,
+    rideIn: number,
   ): void {
     const { bike, front, rear, bars, torso, lid } = this.nodes;
     const shown = opacity > 0.002;
@@ -529,7 +631,7 @@ export class Stage {
     this.shadow.visible = shown;
     this.shadow.position.z = bikeZ;
     this.shadow.rotation.y = yaw;
-    const spin = distanceAt(story) / WHEEL_RADIUS;
+    const spin = (distanceAt(story) + rideIn) / WHEEL_RADIUS;
     if (front) front.rotation.x = spin;
     if (rear) rear.rotation.x = spin;
     // Services, beside the intro: a gentle weave down the road (straight across the band).
@@ -539,11 +641,19 @@ export class Stage {
     if (lid) lid.rotation.x = -LID_OPEN * lidOpen;
   }
 
+  /** The parked idle's lights (0 = at rest): headlight and tail light breathe a little brighter. */
+  private setIdleLights(level: number): void {
+    if (level === this.idleLevel) return;
+    this.idleLevel = level;
+    this.idleLights.forEach(({ material, base }) => (material.emissiveIntensity = base * (1 + 1.4 * level)));
+  }
+
   /**
    * What the camera frames: the bike; leaning in to the phone in In town; the bike and truck,
-   * then the whole route in City to city (blended by how much chapter 3's lane is the lane).
+   * then the whole route in City to city (blended by how much chapter 3's lane is the lane); the
+   * parcel, then its label, in Label (blended by `labelWeight`).
    */
-  private framing(town: InTownPhase, city: CityPhase, cityShare: number): Focus {
+  private framing(town: InTownPhase, city: CityPhase, cityShare: number, label: Focus, labelWeight: number): Focus {
     const f = this.focus;
     const lean = town.lean;
     f.x = 0;
@@ -558,18 +668,31 @@ export class Stage {
       f.z = lerp(f.z, c.z, w);
       f.length *= (c.length / f.length) ** w;
     }
+    if (labelWeight > 0) {
+      f.x = lerp(f.x, label.x, labelWeight);
+      f.y = lerp(f.y, label.y, labelWeight);
+      f.z = lerp(f.z, label.z, labelWeight);
+      f.length *= (label.length / f.length) ** labelWeight;
+    }
     return f;
   }
 
   /**
    * The parcel: in the bike's top box (drawn only while the lid is open), lifted across to the
-   * truck in an arc, then inside the truck (drawn while its door is open).
+   * truck in an arc, then inside the truck (drawn while its door is open); on its own, filling
+   * the frame, in Label.
    */
-  private placeParcel(story: number, city: CityPhase, cityShown: number, bikeOpacity: number, lid: number): void {
+  private placeParcel(story: number, city: CityPhase, cityShown: number, bikeOpacity: number, lid: number, labelOpacity: number): void {
     const p = this.parcel.group;
     const inCity = story >= 3 && story < 4 && city.parcel !== 'bike';
     let opacity = bikeOpacity;
-    if (inCity && city.parcel === 'arc') {
+    if (labelOpacity > 0.002) {
+      const pose = this.labelRig.pose;
+      p.position.copy(pose.position);
+      p.quaternion.copy(pose.quaternion);
+      opacity = labelOpacity;
+      p.visible = true;
+    } else if (inCity && city.parcel === 'arc') {
       this.socketWorld(this.from);
       this.from.y += PARCEL_REST + PARCEL_RISE * lid;
       this.city.cargoWorld(this.to);
@@ -602,10 +725,11 @@ export class Stage {
   }
 
   /**
-   * Camera on the rail (blended to the band view while the band is the lane), framed so the bike
-   * fills the lane and sits on the anchor point. Returns the scale at the bike, px per metre.
+   * The camera view: on the rail (blended to the band view while the band is the lane), or the
+   * view of the late chapters' state (chapters/arrival.ts: park or door).
    */
-  private aim(ax: number, ay: number, frame: number, w: number, h: number, band: number, focus: Focus, story: number): number {
+  private viewAt(story: number, band: number, late: LateView | null): CameraView {
+    if (late === 'park' || late === 'door') return Object.assign(this.view, late === 'park' ? PARK_VIEW : DOOR_VIEW);
     const v = this.rail.sample(story, this.view);
     if (band > 0) {
       const b = smooth(band);
@@ -614,6 +738,14 @@ export class Stage {
       v.zoom = lerp(v.zoom, BAND_VIEW.zoom, b);
       v.fov = lerp(v.fov, BAND_VIEW.fov, b);
     }
+    return v;
+  }
+
+  /**
+   * Camera at view `v`, framed so the target fills the lane and sits on the anchor point. Returns
+   * the scale at the target, px per metre.
+   */
+  private aim(ax: number, ay: number, frame: number, w: number, h: number, v: CameraView, focus: Focus): number {
     const cam = this.camera;
     const fov = (v.fov * Math.PI) / 180;
     const pxPerMetre = Math.max(1, (FILL * frame * v.zoom) / focus.length);
@@ -649,6 +781,10 @@ export class Stage {
     if (!document.hidden) this.requestRender();
   };
 
+  private readonly onFocusOut = () => {
+    if (!this.idle.done) this.requestRender();
+  };
+
   private readonly onContextLost = () => {
     // Posters come straight back; the owner disposes the Stage (no restore attempt, MOTION §8).
     this.markPosters(false);
@@ -657,6 +793,13 @@ export class Stage {
     this.frame = 0;
     this.opts.onLost();
   };
+}
+
+/** A form field has focus: the parked idle holds (MOTION §6: nothing moves while the visitor types). */
+function isTyping(): boolean {
+  const el = document.activeElement as HTMLElement | null;
+  if (!el || el === document.body) return false;
+  return el.isContentEditable || el.matches('input, textarea, select');
 }
 
 function headerOffset(): number {

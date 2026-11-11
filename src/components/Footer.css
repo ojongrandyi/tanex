@@ -58,6 +58,11 @@
   text-transform: uppercase;
   color: var(--tx-accent-text);
 }
+/* The speed lines draw in from the plane's side (right) when the footer comes into view (H.5). */
+.tx-footer__tagline .tx-speed[data-draw] i { transform-origin: 100% 50%; transition: transform .55s cubic-bezier(.65, 0, .35, 1); }
+.tx-footer__tagline .tx-speed[data-draw] i:nth-child(2) { transition-delay: .09s; }
+.tx-footer__tagline .tx-speed[data-draw] i:nth-child(3) { transition-delay: .18s; }
+.tx-footer__tagline .tx-speed[data-draw="wait"] i { transform: scaleX(0); }
 .tx-footer__desc { margin: 0; max-width: 40ch; font-size: 0.9375rem; line-height: var(--tx-lh-body); color: var(--tx-text-muted); }
 .tx-footer__social { display: flex; gap: var(--tx-space-2); margin: var(--tx-space-5) 0 0; padding: 0; list-style: none; }
 .tx-footer__social a {

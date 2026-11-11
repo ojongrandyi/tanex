@@ -10,8 +10,11 @@
   background: var(--tx-choc-900);
   isolation: isolate;
 }
-.tx-netmap__canvas { position: absolute; inset: 0; background: #262626; }
-.tx-netmap .leaflet-container { font-family: var(--tx-font-body); background: #262626; }
+.tx-netmap__canvas { position: absolute; inset: 0; background: var(--tx-choc-950); }
+.tx-netmap .leaflet-container { font-family: var(--tx-font-body); background: var(--tx-choc-950); }
+/* Restyled for the World chapter (H.5): the dark-grey basemap warmed to the chapter's chocolate,
+   so the map reads as part of the page; markers and lanes keep their brand colours. */
+.tx-netmap .leaflet-tile-pane { filter: sepia(1) hue-rotate(-14deg) saturate(1.35) brightness(.72) contrast(1.08); }
 .tx-netmap .leaflet-control-zoom a {
   width: 44px; height: 44px; line-height: 44px;
   background: var(--tx-choc-950); color: var(--tx-cream-100); border-color: rgb(217 194 181 / .2);

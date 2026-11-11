@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Camera, Facebook, Globe2, Instagram, Languages, Linkedin, MapPinned, Twitter, Youtube } from 'lucide-react';
 import {
   HQ_ADDRESS,
@@ -22,6 +22,7 @@ import { useLocale, useT, type TFunction } from '../i18n/I18nProvider';
 import { formatOpeningHoursIn } from '../i18n/format';
 import { servicesLinks, type SiteLink } from './Header';
 import { SpeedLines } from './ui';
+import { canAnimate, isMotionPaused } from '../motion/capabilities';
 import './Footer.css';
 
 // Public site footer (CONTENT §1.3, design/direction.html): trust strip, then the dark footer
@@ -98,6 +99,25 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate = () => {}, showTrust
 
   // Plain clicks route in-app; Ctrl/Cmd/Shift/middle-click keep the browser's open-in-new-tab
   // behaviour, since each link carries its real URL.
+  // The mark's speed lines draw in once, when the footer comes into view (MOTION §6 chapter 8):
+  // the journey's last beat. Nothing is hidden with reduced motion or Pause motion.
+  const taglineRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    const speed = taglineRef.current?.querySelector<HTMLElement>('.tx-speed');
+    if (!speed || !canAnimate() || isMotionPaused() || !('IntersectionObserver' in window)) return;
+    speed.dataset.draw = 'wait';
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      speed.dataset.draw = 'on';
+      observer.disconnect();
+    }, { threshold: 1, rootMargin: '0px 0px -8% 0px' });
+    observer.observe(speed);
+    return () => {
+      observer.disconnect();
+      delete speed.dataset.draw;
+    };
+  }, []);
+
   const go = (page: string, param?: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
@@ -137,7 +157,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate = () => {}, showTrust
                   alt={LOGO_ALT}
                 />
               </a>
-              <p className="tx-footer__tagline">
+              <p className="tx-footer__tagline" ref={taglineRef}>
                 <SpeedLines />
                 <span>{locale === 'fr' ? TAGLINE_FR : TAGLINE}</span>
               </p>
