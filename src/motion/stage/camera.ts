@@ -23,8 +23,11 @@ export interface CameraView {
 }
 
 /**
- * Chapters 0–1 set in H.3; the rest is the H.2 pacing rail until H.4–H.5 refine those moves. Never more than one
- * camera move at a time (§6): each key holds or moves, nothing overlaps.
+ * Chapters 0–1 set in H.3, 2–3 in H.4; the rest is the H.2 pacing rail until H.5 refines those moves. Never more
+ * than one camera move at a time (§6): each key holds or moves, nothing overlaps.
+ *
+ * In the pinned story chapters 2 and 3 the rail is sampled at the chapter's pin progress
+ * (Stage.storyTravel: 2.5 = halfway through In town's pin), so the keys line up with the DOM beats.
  */
 export const CAMERA_KEYS: readonly CameraKey[] = [
   // 0 · Your door (H.3): side view of the bike's right side, so it pulls up left to right; a
@@ -36,12 +39,22 @@ export const CAMERA_KEYS: readonly CameraKey[] = [
   { at: 1.15, az: 152, el: 34, zoom: 0.95, fov: 30 },
   { at: 1.6, az: 165, el: 26, zoom: 0.95, fov: 30 },
   { at: 1.9, az: 95, el: 16, zoom: 1, fov: 30 },
-  { at: 2.15, az: 0, el: 8, zoom: 1.05, fov: 28 }, // 2 · In town: orbit side → three-quarter front → rear
-  { at: 2.45, az: 45, el: 12, zoom: 1.05, fov: 28 },
-  { at: 2.8, az: -105, el: 26, zoom: 1.1, fov: 28 }, // ends on the top box
-  { at: 3.2, az: 0, el: 6, zoom: 0.9, fov: 30 }, // 3 · City to city: side view, then high and wide
-  { at: 3.7, az: 15, el: 32, zoom: 0.72, fov: 30 },
-  { at: 4.3, az: 25, el: 24, zoom: 0.8, fov: 30 }, // 4 · World (placeholder until the globe, H.5)
+  // 2 · In town (H.4): one slow orbit across the story, side → three-quarter rear (into the open
+  // box) → over the shoulder (the phone map; the Stage also leans in) → behind the top box; as the
+  // bike rides away, on round to the three-quarter view chapter 3 opens on.
+  { at: 2, az: 22, el: 8, zoom: 1, fov: 28 },
+  { at: 2.15, az: 0, el: 9, zoom: 1.02, fov: 28 },
+  { at: 2.32, az: -38, el: 28, zoom: 1.12, fov: 28 },
+  { at: 2.55, az: -58, el: 36, zoom: 1, fov: 28 },
+  { at: 2.8, az: -100, el: 15, zoom: 1.04, fov: 28 },
+  { at: 3, az: -124, el: 11, zoom: 1, fov: 30 },
+  // 3 · City to city (H.4): a rear three-quarter while the bike rides up behind the truck and
+  // hands the parcel over, then pulls back and up over the route (the Stage widens the framing).
+  { at: 3.14, az: -126, el: 11, zoom: 1, fov: 30 },
+  { at: 3.48, az: -128, el: 12, zoom: 1, fov: 30 },
+  { at: 3.62, az: -92, el: 50, zoom: 0.94, fov: 30 },
+  { at: 4, az: -92, el: 50, zoom: 0.94, fov: 30 },
+  { at: 4.3, az: -150, el: 24, zoom: 0.8, fov: 30 }, // 4 · World (placeholder until the globe, H.5)
   { at: 5.3, az: -60, el: 32, zoom: 0.95, fov: 30 }, // 5 · Label: towards the top box
   { at: 6.2, az: 0, el: 5, zoom: 1, fov: 30 }, // 6 · Contact: parked, side view
   { at: 7.3, az: 0, el: 5, zoom: 1, fov: 30 }, // 7 · FAQ: still

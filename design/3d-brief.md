@@ -68,7 +68,8 @@ distort the logo.** The plane mark may be recoloured as a single flat colour whe
 - **Readable on two backgrounds:** dark chocolate (`#1C120E`, `#2A1B16`) and cream (`#FBF6EC`, `#F5ECDB`). The scene
   uses a soft studio environment for reflections, a key light, a rim light and a blurred contact shadow.
 - **Reference blockout:** `scripts/blender/build_tanex_bike.py` builds TanEx's in-house version of this model (exact
-  node names, pivots, scale and colours). Use it to check proportions and pivots; your model replaces it.
+  node names, pivots, scale and colours), and `scripts/blender/build_tanex_truck.py` the truck. Use them to check
+  proportions and pivots; your models replace them.
 - **Generic vehicles.** No manufacturer badges, logos or recognisable commercial models.
 - **The rider is a generic courier**, not a portrait of a real person. The visor is down; no face is modelled.
 - **About the flyer:** use it for posture and proportions only. Its tan jacket, tan helmet and cardboard-coloured box

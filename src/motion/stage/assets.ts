@@ -7,6 +7,8 @@ import { buildPrimitiveBike } from './bike';
 
 /** The bike model (glTF, meshopt-compressed by gltfpack). */
 export const BIKE_MODEL_URL = '/3d/tanex-bike.glb';
+/** The truck model (glTF, meshopt-compressed by gltfpack). */
+export const TRUCK_MODEL_URL = '/3d/tanex-truck.glb';
 
 export interface StageAsset {
   id: string;
@@ -26,11 +28,20 @@ export const ASSETS: readonly StageAsset[] = [
     // (#117, H.6) replaces the file. If it can't load, the primitive stand-in keeps the Journey going.
     load: () => loadGltf(BIKE_MODEL_URL).catch(() => buildPrimitiveBike()),
   },
+  {
+    id: 'truck',
+    chapters: [3],
+    priority: 1,
+    // In-house model (scripts/blender/build_tanex_truck.py) until the commissioned one (#117). No
+    // stand-in: if it can't load, chapter 3 keeps its poster.
+    load: () => loadGltf(TRUCK_MODEL_URL),
+  },
 ];
 
 /**
  * Loads every asset in priority order, one at a time (no competition with the page for
- * bandwidth), reporting each as it arrives. Stops early if `signal` is aborted.
+ * bandwidth), reporting each as it arrives. Stops early if `signal` is aborted. An asset that
+ * fails is skipped: its chapters never become ready and keep their posters.
  */
 export async function loadAssets(
   onAsset: (asset: StageAsset, object: Object3D) => void,
@@ -40,7 +51,12 @@ export async function loadAssets(
   const queue = [...assets].sort((a, b) => a.priority - b.priority);
   for (const asset of queue) {
     if (signal?.aborted) return;
-    const object = await asset.load();
+    let object: Object3D;
+    try {
+      object = await asset.load();
+    } catch {
+      continue;
+    }
     if (signal?.aborted) return;
     onAsset(asset, object);
   }
