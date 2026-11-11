@@ -42,14 +42,19 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
 }) => {
   const info = SITE_IMAGES[name];
   const imgRef = useRef<HTMLImageElement>(null);
+  const pictureRef = useRef<HTMLPictureElement>(null);
   // Chrome keeps a viewport listener for every responsive <img> and does not drop it when a whole
   // ancestor subtree is removed (as React does when a page unmounts): the detached image, and with
   // it the entire old page and its React tree, stays in memory after each visit (measured in H.2:
   // ≈ 0.36 MB per Home visit, never released). Taking the <img> out of its <picture> while it is
   // still in the document unregisters it. Layout-effect cleanups run before React removes the
   // page's DOM, in the same commit, so nothing visible changes.
+  // React StrictMode (dev) runs cleanup + setup once on mount, and an image can be re-shown after
+  // being hidden: the setup puts the <img> back as the <picture>'s last child, where it belongs.
   useLayoutEffect(() => {
     const img = imgRef.current;
+    const picture = pictureRef.current;
+    if (img && picture && img.parentNode !== picture) picture.appendChild(img);
     return () => {
       if (img?.isConnected) img.remove();
     };
@@ -58,7 +63,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   const priority = eager ? { fetchpriority: 'high' } : {};
 
   return (
-    <picture className={`ngf-responsive-picture ${className}`.trim()}>
+    <picture ref={pictureRef} className={`ngf-responsive-picture ${className}`.trim()}>
       {mobileName && (
         <>
           <source media={MOBILE_QUERY} type="image/webp" srcSet={srcSet(mobileName, 'webp')} sizes={sizes} />
