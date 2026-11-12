@@ -15,6 +15,8 @@ export const SITE_IMAGES = {
   'svc-local': { width: 900, height: 990, widths: [400, 640, 900] },
   'svc-air': { width: 900, height: 990, widths: [400, 640, 900] },
   'svc-rail': { width: 900, height: 990, widths: [400, 640, 900] },
+  'home-hero': { width: 1080, height: 720, widths: [1080] },
+  'home-hero-m': { width: 810, height: 1440, widths: [810] },
 } satisfies Record<string, SiteImageInfo>;
 
 export type SiteImageName = keyof typeof SITE_IMAGES;

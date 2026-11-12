@@ -345,6 +345,13 @@ const PHOTOS = [
   // TanEx owner photos (images/tanex files/, committed). About page leadership slot, 4:5 portrait
   // kept from the top so the face and the TanEx wall sign stay in frame (CONTENT §4, §12).
   { name: 'about-md', src: 'tanex files/Managing Director.png', kind: 'hero', aspect: 4 / 5, position: 'top', quality: { webp: 80, jpeg: 82 }, widths: [400, 640, 810] },
+  // Homepage hero background (owner request, 2026-11-12): courier handing a TanEx parcel to a
+  // customer. Shown under a Chocolate 950 overlay (HomePage.css), so the 1080 px source is enough.
+  { name: 'home-hero', src: 'tanex files/home-hero.png', kind: 'hero', aspect: 3 / 2, widths: [1080], quality: { webp: 74, jpeg: 76 } },
+  // Phone art direction of the same photo: 9:16 portrait on the courier, the TanEx parcel and the
+  // customer's hand (source x 250–655). Phones size it to the screen width instead of stretching
+  // the landscape photo over the tall hero.
+  { name: 'home-hero-m', src: 'tanex files/home-hero.png', kind: 'hero', aspect: 9 / 16, crop: { left: 250, top: 0, width: 405, height: 720 }, upscale: 2, widths: [810], quality: { webp: 74, jpeg: 76 } },
   // Homepage service photo cards (owner's reference, 2026-11-09), 10:11 like the cards. Optional:
   // a missing source is skipped and that card keeps its brand panel. Drop the photos into
   // images/services/ (licence in images/services/SOURCES.md), then run:
@@ -355,6 +362,8 @@ const PHOTOS = [
 ];
 
 // `position` picks which part of the source a cover crop keeps (sharp: 'centre', 'top', 'bottom', ...).
+// `upscale` (e.g. 2) lets a small source be enlarged with Lanczos plus a light sharpen, which stays
+// crisper than the browser's own upscaling on high-density phone screens (no detail is added).
 // `quality` overrides the encoder quality for photos that would otherwise exceed the size budget.
 async function writeVariants(pipelineFactory, name, width, height, position = 'centre', quality = { webp: 78, jpeg: 80 }) {
   const base = path.join(PHOTO_OUT, `${name}-${width}`);
@@ -371,7 +380,12 @@ async function buildPhotos(only = null) {
       console.log(`Skipped ${p.name}: no ${p.src} yet.`);
       continue;
     }
-    const factory = () => (p.crop ? sharp(srcPath).extract(p.crop) : sharp(srcPath));
+    // sharp always applies extract → resize → sharpen in that order, whatever the call order.
+    const factory = () => {
+      let img = p.crop ? sharp(srcPath).extract(p.crop) : sharp(srcPath);
+      if (p.upscale) img = img.sharpen({ sigma: 0.6 });
+      return img;
+    };
     const meta = await factory().metadata();
     const srcW = p.crop ? p.crop.width : meta.width;
     const srcH = p.crop ? p.crop.height : meta.height;
@@ -392,7 +406,7 @@ async function buildPhotos(only = null) {
       // Largest crop of the requested aspect that fits the source, served at no more than the
       // largest step width (UHD originals are source files only), then the step widths below it.
       const cropW = Math.min(srcW, Math.floor(srcH * p.aspect));
-      const maxW = Math.min(cropW, p.maxWidth ?? STEP_WIDTHS[STEP_WIDTHS.length - 1]);
+      const maxW = Math.min(Math.round(cropW * (p.upscale ?? 1)), p.maxWidth ?? STEP_WIDTHS[STEP_WIDTHS.length - 1]);
       const widths = (p.widths ?? STEP_WIDTHS).filter(w => w <= maxW);
       if (!widths.includes(maxW) && (widths.length === 0 || maxW - widths[widths.length - 1] > 200)) widths.push(maxW);
       for (const w of widths) {

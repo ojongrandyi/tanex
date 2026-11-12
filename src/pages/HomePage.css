@@ -45,7 +45,29 @@
 .tx-ch[data-stage="on"] .tx-ch__lane > :not(.tx-home__caption) { opacity: 0; }
 
 /* ---------- 0 · Hero ---------- */
-.tx-ch--hero { background: var(--tx-choc-950); padding: clamp(56px, 7vw, 88px) 0 clamp(120px, 12vw, 160px); overflow: hidden; }
+/* Background (owner request, 2026-11-12): the courier hand-off photo under a Chocolate 950
+   overlay. Section backgrounds sit below the Stage canvas (transparent) and the content, so the
+   layering above is unchanged. The overlay is darkest behind the text column and lifts towards
+   the lane; it keeps cream/Chocolate 200 text above 4.5:1 over the photo's lightest areas.
+   Layers: overlay, photo, then the flat colour while the photo loads or if it fails. */
+.tx-ch--hero {
+  --tx-hero-photo: url('/images/site/home-hero-1080.jpg');
+  --tx-hero-overlay: linear-gradient(90deg,
+    rgb(var(--tx-choc-950-rgb) / .93) 0%,
+    rgb(var(--tx-choc-950-rgb) / .88) 48%,
+    rgb(var(--tx-choc-950-rgb) / .74) 100%);
+  background-color: var(--tx-choc-950);
+  background-image: var(--tx-hero-overlay), var(--tx-hero-photo);
+  background-size: cover, cover;
+  background-position: center, 50% 40%;
+  background-repeat: no-repeat;
+  padding: clamp(56px, 7vw, 88px) 0 clamp(120px, 12vw, 160px); overflow: hidden;
+}
+@supports (background-image: image-set(url('x.webp') type('image/webp'))) {
+  .tx-ch--hero {
+    --tx-hero-photo: image-set(url('/images/site/home-hero-1080.webp') type('image/webp'), url('/images/site/home-hero-1080.jpg') type('image/jpeg'));
+  }
+}
 .tx-ch--hero .tx-ch__grid { align-items: center; }
 .tx-lane--hero { min-height: 520px; }
 .tx-home__h1 { margin: 0 0 28px; font-size: var(--tx-fs-display); }
@@ -297,7 +319,26 @@
   }
   .tx-ch__lane, .tx-lane--hero { min-height: 0; height: 240px; }
   .tx-lane--road { height: 160px; }
-  .tx-ch--hero { padding: 48px 0 120px; }
+  .tx-ch--hero {
+    padding: 48px 0 120px;
+    /* Phones: the hero is about 1:3, so covering it would enlarge a thin strip of the landscape
+       photo. Instead a 9:16 portrait crop is sized to the screen width at the top (it fills the
+       first screen behind the headline and tracking field), and the overlay deepens into solid
+       Chocolate 950 where the photo ends, so there is no visible edge. */
+    --tx-hero-photo-h: calc(100vw * 16 / 9);
+    --tx-hero-photo: url('/images/site/home-hero-m-810.jpg');
+    --tx-hero-overlay: linear-gradient(180deg,
+      rgb(var(--tx-choc-950-rgb) / .84) 0,
+      rgb(var(--tx-choc-950-rgb) / .87) calc(var(--tx-hero-photo-h) * .6),
+      var(--tx-choc-950) calc(var(--tx-hero-photo-h) - 2px));
+    background-size: cover, 100% auto;
+    background-position: center, center top;
+  }
+  @supports (background-image: image-set(url('x.webp') type('image/webp'))) {
+    .tx-ch--hero {
+      --tx-hero-photo: image-set(url('/images/site/home-hero-m-810.webp') type('image/webp'), url('/images/site/home-hero-m-810.jpg') type('image/jpeg'));
+    }
+  }
   .tx-home__hero-btns .tx-btn { flex: 1 1 100%; justify-content: center; }
   .tx-home__hero-cap { display: none; }
   .tx-track { padding-left: 12px; }
