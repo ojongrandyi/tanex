@@ -353,6 +353,9 @@ for x in (-0.15, 0.15):
     tube(body, (x, 0.875, -0.48), (x, 0.875, -0.92), 0.011, CHROME, verts=10)
 for z in (-0.5, -0.64, -0.78, -0.92):
     tube(body, (-0.15, 0.875, z), (0.15, 0.875, z), 0.009, CHROME, verts=10)
+# Tail tidy: a painted bracket from the rack down past the fender that carries the tail light,
+# the plate and the indicator stalks (they would otherwise float behind the bike).
+box(body, (0, 0.745, -0.905), (0.13, 0.27, 0.012), PAINT, rot=(-15, 0, 0), bevel=0.004)
 box(body, (0, 0.80, -0.905), (0.11, 0.05, 0.045), TAIL, bevel=0.012, segments=3)
 box(body, (0, 0.67, -0.93), (0.17, 0.10, 0.006), PLATE, rot=(-15, 0, 0), bevel=0.002)
 for x in (-1, 1):
@@ -445,20 +448,21 @@ torso = empty('rider_torso', rider, (0, 0.95, -0.22))
 skin_body(torso,
           [(0, 0.99, -0.25), (0, 1.17, -0.22), (0, 1.33, -0.19), (-0.17, 1.355, -0.185), (0.17, 1.355, -0.185)],
           [(0, 1), (1, 2), (2, 3), (2, 4)],
-          [(0.165, 0.125), (0.195, 0.14), (0.175, 0.125), (0.068, 0.066), (0.068, 0.066)],
+          [(0.165, 0.125), (0.195, 0.14), (0.175, 0.125), (0.074, 0.07), (0.074, 0.07)],
           VEST)
 ring(torso, (0, 1.02, -0.248), 0.166, 0.015, BAND, axis='up', majseg=44, minseg=8, squash=1.0)
 for x in (-1, 1):
     # Short polo sleeve, bare forearm, glove on the grip; elbows slightly out and bent.
     skin_body(torso, [(x * 0.175, 1.355, -0.185), (x * 0.215, 1.30, -0.14), (x * 0.24, 1.235, -0.085)], [(0, 1), (1, 2)],
-              [0.064, 0.062, 0.056], POLO)
+              [0.06, 0.058, 0.053], POLO)
     skin_body(torso, [(x * 0.238, 1.24, -0.09), (x * 0.26, 1.18, 0.03), (x * 0.305, 1.11, 0.31)], [(0, 1), (1, 2)],
               [0.05, 0.047, 0.036], SKIN)
     ellipsoid(torso, (x * 0.325, 1.10, 0.355), (0.05, 0.045, 0.07), GLOVES, seg=18, rings=10)
 skin_body(torso, [(0, 1.38, -0.18), (0, 1.47, -0.15)], [(0, 1)], [0.058, 0.055], SKIN)
 # Full-face helmet: an egg shape longer front to back, a chin bar and a visor band.
 ellipsoid(torso, HEAD, (0.138, 0.15, 0.165), HELMET, seg=40, rings=20)
-ellipsoid(torso, (0, HEAD[1] - 0.085, HEAD[2] + 0.075), (0.105, 0.06, 0.085), HELMET, seg=28, rings=12)
+# Chin bar: mostly inside the shell so it reads as part of it, not a separate bump.
+ellipsoid(torso, (0, HEAD[1] - 0.075, HEAD[2] + 0.045), (0.122, 0.075, 0.12), HELMET, seg=32, rings=14)
 
 
 def visor(parent):
@@ -472,7 +476,8 @@ def visor(parent):
     bm = bmesh.new()
     bm.from_mesh(o.data)
     c = P(*HEAD)
-    keep = lambda v: (c.y - v.co.y) > 0.045 and -0.045 < (v.co.z - c.z) < 0.06 and abs(v.co.x - c.x) < 0.125
+    # A full-face visor opening: about 11 cm tall, wrapping round to the temples.
+    keep = lambda v: (c.y - v.co.y) > 0.02 and -0.05 < (v.co.z - c.z) < 0.06 and abs(v.co.x - c.x) < 0.132
     bmesh.ops.delete(bm, geom=[v for v in bm.verts if not keep(v)], context='VERTS')
     bm.to_mesh(o.data)
     bm.free()

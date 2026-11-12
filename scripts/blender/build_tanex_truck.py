@@ -60,7 +60,9 @@ def mat(name, hex_, rough=0.5, metal=0.0, coat=0.0, emit=0.0):
 
 
 CAB = mat('truck_cab', '#2A1B16', 0.3, 0.0, coat=0.7)          # Chocolate 900, glossy paint
-BODY = mat('truck_box', '#FFFCF7', 0.45, 0.0, coat=0.25)        # Cream 50, painted panels
+# Satin rather than glossy: a strong clear coat mirrored the neutral studio environment and
+# turned the cream box grey on the page.
+BODY = mat('truck_box', '#FFFCF7', 0.55, 0.0, coat=0.1)         # Cream 50, painted panels
 EDGE = mat('truck_edge', '#D9C2B5', 0.4, 0.35)                  # Chocolate 200, rails and panel lines
 GLASS = mat('truck_glass', '#D9C2B5', 0.04, 0.55, coat=1.0)     # Chocolate 200, light tint, reflective
 STRIPE = mat('truck_stripe', '#F48800', 0.35, 0.0, coat=0.35)   # Orange 500
@@ -276,9 +278,18 @@ for x in (-0.8, 0.8):
     box(body, (x, BOX_TOP + 0.015, BOX_FRONT - 0.08), (0.12, 0.03, 0.05), INDICATOR, bevel=0.008)
 
 # ---------------------------------------------------------------- cab
+# The cab's floor line is below the tyre tops, so a wheel-arch opening is cut into the profile
+# around the front axle (radius ARCH_R); extruding it gives the wheel well's roof as well.
+ARCH_R = 0.47
+CAB_FLOOR = 0.62
+_t0 = math.asin((CAB_FLOOR - AXLE_Y) / ARCH_R)
+_arch = [
+    (FRONT_AXLE - ARCH_R * math.cos(t), AXLE_Y + ARCH_R * math.sin(t))
+    for t in (_t0 + (math.pi - 2 * _t0) * i / 14 for i in range(15))
+]
 cab_profile = [
-    (CAB_REAR, 0.62), (CAB_FRONT - 0.04, 0.62), (CAB_FRONT, 0.8), (CAB_FRONT, 1.32), (CAB_FRONT - 0.1, 1.52),
-    (CAB_FRONT - 0.48, 2.42), (CAB_FRONT - 0.72, 2.58), (CAB_REAR, 2.58),
+    (CAB_REAR, CAB_FLOOR), *_arch, (CAB_FRONT - 0.04, CAB_FLOOR), (CAB_FRONT, 0.8), (CAB_FRONT, 1.32),
+    (CAB_FRONT - 0.1, 1.52), (CAB_FRONT - 0.48, 2.42), (CAB_FRONT - 0.72, 2.58), (CAB_REAR, 2.58),
 ]
 prism(body, cab_profile, -CAB_W / 2, CAB_W / 2, CAB, bevel=0.06, segments=4)
 # Windscreen: a glass panel just proud of the sloped front, with a dark seal
@@ -290,6 +301,13 @@ span_ = math.hypot(ws_top[0] - ws_bottom[0], ws_top[1] - ws_bottom[1])
 nx, nu = math.cos(math.radians(slope)), math.sin(math.radians(slope))
 box(body, (0, mid[1] + 0.012 * nu, mid[0] + 0.012 * nx), (1.86, span_ + 0.08, 0.02), TRIM, rot=(slope, 0, 0), bevel=0.01)
 box(body, (0, mid[1] + 0.022 * nu, mid[0] + 0.022 * nx), (1.78, span_, 0.012), GLASS, rot=(slope, 0, 0), bevel=0.004)
+# Wipers, parked along the bottom of the windscreen
+along = (ws_top[0] - ws_bottom[0]) / span_, (ws_top[1] - ws_bottom[1]) / span_
+for x in (-0.42, 0.42):
+    wf = ws_bottom[0] + 0.07 * along[0] + 0.036 * nx
+    wu = ws_bottom[1] + 0.07 * along[1] + 0.036 * nu
+    box(body, (x, wu, wf), (0.72, 0.018, 0.014), TRIM, rot=(slope, 0, 0), bevel=0.004)
+    tube(body, (x + 0.33, wu - 0.03 * along[1], wf - 0.03 * along[0]), (x + 0.33, wu, wf), 0.012, TRIM, verts=8)
 # Side windows on the doors, door seams, handles, steps
 for x in (-1, 1):
     sx = x * (CAB_W / 2 + 0.006)
@@ -317,8 +335,10 @@ for x in (-0.76, 0.76):
     box(body, (x * 1.14, 1.06, CAB_FRONT - 0.04), (0.06, 0.12, 0.1), INDICATOR, bevel=0.01)
 box(body, (0, 0.62, CAB_FRONT + 0.145), (0.52, 0.12, 0.012), BODY, bevel=0.003)
 # Wheel arches
-arch(body, (0, AXLE_Y, FRONT_AXLE), 0.46, 0.3, 0.05, TRIM, a0=-5, a1=185)
+_a0 = math.degrees(_t0) - 8
 for x in (-1, 1):
+    # Black flare around each front wheel opening, just proud of the cab side
+    arch(body, (x * (CAB_W / 2 - 0.08), AXLE_Y, FRONT_AXLE), ARCH_R, 0.2, 0.045, TRIM, a0=_a0, a1=180 - _a0)
     box(body, (x * 0.88, AXLE_Y + 0.46, REAR_AXLE), (0.36, 0.04, 1.0), TRIM, bevel=0.01)   # rear mudguards
     box(body, (x * 0.88, 0.48, REAR_AXLE - 0.52), (0.36, 0.42, 0.02), TRIM, bevel=0.004)   # mud flaps
 
