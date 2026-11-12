@@ -12,6 +12,13 @@
   .tx-reveal.is-in { opacity: 1; transform: none; }
 }
 
+/* Inner-page headline after an in-app navigation when GSAP isn't loaded (PageMotion.tsx): one
+   block with the line reveal's timing. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .tx-headline-in { animation: tx-headline-in .6s cubic-bezier(.215, .61, .355, 1) both; }
+}
+@keyframes tx-headline-in { from { opacity: 0; transform: translateY(.45em); } to { opacity: 1; transform: none; } }
+
 /* SplitText line masks: room for italic overhang and descenders, cancelled by negative margins
    so the heading's layout doesn't move. */
 .tx-split-line-mask { padding: 0 .14em .12em 0; margin: 0 -.14em -.12em 0; }

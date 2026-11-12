@@ -149,25 +149,39 @@ export function setupJourney(
  * on screen blinks; SplitText re-splits on resize and after fonts load, and keeps an aria-label
  * with the full text on the heading.
  */
-export function setupHeadlines({ gsap, ScrollTrigger, SplitText }: GsapKit, root: HTMLElement): void {
+export function setupHeadlines({ gsap, ScrollTrigger, SplitText }: GsapKit, root: HTMLElement): () => void {
   const fold = window.innerHeight;
+  // A re-split (after a resize or the fonts loading) lands after ScrollTrigger's own resize
+  // refresh, which measured the pins with the old line breaks (H.8: a pin stayed 50 px too tall
+  // after resizing 768 → 1440 px). Measure again once the new lines are in.
+  let refresh = 0;
+  const remeasure = () => {
+    if (!refresh) refresh = window.setTimeout(() => {
+      refresh = 0;
+      ScrollTrigger.refresh();
+    }, 50);
+  };
   root.querySelectorAll<HTMLElement>('[data-chapter] h2').forEach((heading) => {
     if (heading.getBoundingClientRect().top < fold) return;
+    let splits = 0;
     SplitText.create(heading, {
       type: 'lines',
       mask: 'lines',
       linesClass: 'tx-split-line',
       autoSplit: true,
-      onSplit: (self) =>
-        gsap.from(self.lines, {
+      onSplit: (self) => {
+        if (splits++ > 0) remeasure();
+        return gsap.from(self.lines, {
           yPercent: 110,
           duration: 0.6,
           stagger: 0.08,
           ease: 'power3.out',
           scrollTrigger: { trigger: heading, start: 'top 85%', toggleActions: 'play none none reverse' },
-        }),
+        });
+      },
     });
   });
   ScrollTrigger.sort();
   ScrollTrigger.refresh();
+  return () => window.clearTimeout(refresh);
 }

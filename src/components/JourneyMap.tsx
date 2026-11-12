@@ -7,6 +7,7 @@ import { calculateRouteGeometry, calculateEstimatedPosition, fetchLiveRoadRoute,
 import { ZoomIn, ZoomOut, Compass, ChevronDown, AlertTriangle, Pause, Truck } from 'lucide-react';
 import { shipmentStatusLabel } from '../shared/shipmentStatus';
 import { useAreaT, useLocale } from '../i18n/I18nProvider';
+import { glide } from '../motion/glide';
 import './JourneyMap.css';
 
 // 1x1 transparent pixel — used as the errorTileUrl so a tile that fails to load
@@ -46,6 +47,15 @@ interface JourneyMapProps {
 }
 
 type RoutePoint = [number, number];
+
+// The point `progress` % of the way along the route (by distance) and the segment it falls on.
+function positionAt(polyline: RoutePoint[], progress: number) {
+  const est = calculateEstimatedPosition(polyline, progress);
+  // Segment the estimate falls on (the point before it along the line)
+  const nearest = findNearestPointOnPolyline(polyline, est.lat, est.lng);
+  const index = nearest.progressPercent > progress ? Math.max(0, nearest.index - 1) : nearest.index;
+  return { lat: est.lat, lng: est.lng, index, splitProgress: progress };
+}
 
 // Splits the route line at the vehicle's point: solid behind it, dashed ahead. The split is at
 // the vehicle's own segment (not a share of the point count), so it stays right on routes whose
@@ -100,6 +110,9 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
   const fullPolylineRef = useRef<[number, number][]>([]);
   const isInitializedRef = useRef<boolean>(false);
   const lastFittedRouteRef = useRef<string>('');
+  // Where along the route (%) the vehicle marker is drawn now, and the glide moving it (MOTION §9).
+  const shownSplitRef = useRef<number | null>(null);
+  const cancelGlideRef = useRef<() => void>(() => {});
   const L = useLeaflet(mapContainerRef);
 
   const [activeLayer, setActiveLayer] = useState<'voyager' | 'satellite' | 'dark'>('voyager');
@@ -208,11 +221,7 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
       const nearest = findNearestPointOnPolyline(polyline, currentLat as number, currentLng as number);
       return { lat: nearest.lat, lng: nearest.lng, index: nearest.index, splitProgress: nearest.progressPercent };
     }
-    const est = calculateEstimatedPosition(polyline, progress);
-    // Segment the estimate falls on (the point before it along the line)
-    const nearest = findNearestPointOnPolyline(polyline, est.lat, est.lng);
-    const index = nearest.progressPercent > progress ? Math.max(0, nearest.index - 1) : nearest.index;
-    return { lat: est.lat, lng: est.lng, index, splitProgress: progress };
+    return positionAt(polyline, progress);
   };
 
   // 1. Separate Tile Layer Switcher (Preserves camera pan/zoom without resetting)
@@ -331,6 +340,8 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
 
       // Create or update Moving Vehicle Marker
       const estPos = vehiclePos;
+      cancelGlideRef.current();
+      shownSplitRef.current = splitProgress;
       const roleText = markerRoleText(shipmentStatus, clampedProgress, Boolean(delayNotice?.hasDelay), locale, t('map.estimated'));
 
       if (!vehicleMarkerRef.current) {
@@ -399,6 +410,8 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
       if (remainingLineRef.current) remainingLineRef.current.setLatLngs(remSeg);
 
       const newEst = roadVehiclePos;
+      cancelGlideRef.current();
+      shownSplitRef.current = roadSplitProgress;
       if (vehicleMarkerRef.current) {
         vehicleMarkerRef.current.setLatLng([newEst.lat, newEst.lng]);
       }
@@ -429,28 +442,36 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
     const clampedProgress = Math.max(0, Math.min(100, progressPercent ?? 0));
     const vehiclePos = resolveVehiclePosition(fullPolyline, clampedProgress);
     const splitProgress = Math.max(0, Math.min(100, vehiclePos.splitProgress));
-    const { completed: completedSegment, remaining: remainingSegment } = splitRouteAt(fullPolyline, vehiclePos, splitProgress);
 
-    // 1. Smoothly update completed path
-    if (completedLineRef.current) {
-      completedLineRef.current.setLatLngs(completedSegment);
-    }
+    // Draws the marker and the solid/dashed split at one point of the route.
+    const draw = (pos: { lat: number; lng: number; index: number }, split: number) => {
+      const { completed, remaining } = splitRouteAt(fullPolyline, pos, split);
+      completedLineRef.current?.setLatLngs(completed);
+      remainingLineRef.current?.setLatLngs(remaining);
+      vehicleMarkerRef.current?.setLatLng([pos.lat, pos.lng]);
+      shownSplitRef.current = split;
+    };
 
-    // 2. Smoothly update remaining path
-    if (remainingLineRef.current) {
-      remainingLineRef.current.setLatLngs(remainingSegment);
-    }
-
-    // 3. Smoothly glide vehicle marker position along the route coordinates
-    const estPos = vehiclePos;
     const roleText = markerRoleText(shipmentStatus, clampedProgress, Boolean(delayNotice?.hasDelay), locale, t('map.estimated'));
-
     if (vehicleMarkerRef.current) {
-      vehicleMarkerRef.current.setLatLng([estPos.lat, estPos.lng]);
       vehicleMarkerRef.current.setIcon(
         createCustomPin(L, 'pin-current', currentLocationText || t('map.inTransit'), roleText)
       );
     }
+
+    // A new poll moves the marker along the route over 1 s instead of jumping (MOTION §9); it
+    // lands exactly on the resolved point. Reduced motion or Pause motion: it jumps.
+    cancelGlideRef.current();
+    const from = shownSplitRef.current;
+    if (from === null || !vehicleMarkerRef.current) {
+      draw(vehiclePos, splitProgress);
+    } else {
+      cancelGlideRef.current = glide(from, splitProgress, (p) => {
+        if (p === splitProgress) draw(vehiclePos, splitProgress);
+        else draw(positionAt(fullPolyline, p), p);
+      });
+    }
+    return () => cancelGlideRef.current();
   }, [
     progressPercent,
     currentLocationText,

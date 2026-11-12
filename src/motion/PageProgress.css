@@ -1,0 +1,39 @@
+/* Progress bike on long inner pages (PageProgress.tsx, MOTION_3D_SPEC §9). Same look as the
+   homepage route rail (HomePage.css .tx-rail / .tx-rail-progress). Transform only while scrolling. */
+
+/* Narrow and medium screens: a 3 px bar under the sticky header. */
+.tx-progress {
+  position: fixed; left: 0; right: 0; top: var(--tx-header-h, 72px); height: 3px; z-index: 990;
+  background: rgb(217 194 181 / .3); pointer-events: none;
+}
+.tx-progress__fill {
+  position: absolute; inset: 0; background: var(--tx-orange-500);
+  transform: scaleX(0); transform-origin: 0 50%;
+}
+.tx-progress__bike {
+  position: absolute; left: 0; top: 50%; display: grid; place-items: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--tx-orange-500); color: var(--tx-choc-950);
+  box-shadow: 0 0 0 2px rgb(31 18 12 / .18);
+  transform: translate(0, -50%) translateX(-50%);
+}
+.tx-progress__bike svg { width: 12px; height: 12px; }
+
+/* Wide screens (the margin beside the content column, as the homepage rail): a short dashed
+   route on the right edge, the bike riding down it. */
+@media (min-width: 1360px) {
+  .tx-progress {
+    left: auto; right: 37px; top: 50%; width: 0; height: min(44vh, 360px);
+    margin-top: calc(min(44vh, 360px) / -2);
+    background: none; border-left: 2px dashed rgb(156 115 96 / .55);
+  }
+  .tx-progress__fill { left: -2px; right: auto; width: 2px; transform: scaleY(0); transform-origin: 50% 0; }
+  .tx-progress__bike {
+    left: -1px; top: 0; width: 26px; height: 26px;
+    box-shadow: 0 0 0 4px rgb(244 136 0 / .2);
+    transform: translate(-50%, 0) translateY(-50%);
+  }
+  .tx-progress__bike svg { width: 15px; height: 15px; }
+}
+
+@media print { .tx-progress { display: none; } }

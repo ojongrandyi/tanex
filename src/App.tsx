@@ -1,10 +1,12 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { LanguageSuggestion } from './components/LanguageSuggestion';
 import { I18nProvider } from './i18n/I18nProvider';
 import { HomePage } from './pages/HomePage';
 import { SmoothScroll } from './motion/SmoothScroll';
+import { PageMotion } from './motion/PageMotion';
+import { PageProgress } from './motion/PageProgress';
 // Every other public page is its own chunk, fetched when it opens, so the landing page only
 // downloads its own code. Their stylesheets stay in the main bundle, in the original order.
 import './pages/pageStyles';
@@ -120,6 +122,7 @@ function getInitialPage(): string {
 
 function MainAppContent() {
   const [currentPage, setCurrentPage] = useState<string>(getInitialPage);
+  const mainRef = useRef<HTMLElement>(null);
   const [currentShipment, setCurrentShipment] = useState<Shipment | null>(null);
   const [currentQuote, setCurrentQuote] = useState<QuoteRequest | null>(null);
   const [notFoundQuery, setNotFoundQuery] = useState<string | null>(null);
@@ -413,6 +416,7 @@ function MainAppContent() {
     );
   }
 
+  const pageMotionKey = `${currentPage}|${route?.canonical ?? ''}`;
   return (
     <div className="ngf-app-shell">
       <LanguageSuggestion />
@@ -422,7 +426,7 @@ function MainAppContent() {
         onNavigate={handleNavigate}
       />
 
-      <main className="ngf-main-view">
+      <main className="ngf-main-view" ref={mainRef}>
         {isTrackSearching ? (
           <TrackingLoadingScreen query={trackSearchQuery} />
         ) : (
@@ -507,10 +511,14 @@ function MainAppContent() {
         {currentPage === 'not-found' && (
           <NotFoundPage onNavigate={handleNavigate} />
         )}
+        {/* Inside the page's Suspense boundary: its effects run once the page has rendered (MOTION §9). */}
+        <PageMotion key={pageMotionKey} mainRef={mainRef} page={currentPage} routeKey={pageMotionKey} />
           </Suspense>
           </ErrorBoundary>
         )}
       </main>
+
+      <PageProgress key={pageMotionKey} page={currentPage} />
 
       <Footer
         onNavigate={handleNavigate}
