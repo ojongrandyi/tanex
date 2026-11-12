@@ -25,6 +25,7 @@ import { ADMIN_CONSOLE_NAME, ADMIN_PATH, COMPANY, COMPANY_SHORT, isAdminPathname
 import { ROUTES, matchPath, pagePath } from './router/routes';
 import { FRENCH_PAGES_INDEXABLE, NOT_FOUND_TITLE, pageMetaText, type PageMetaText } from './shared/pageMeta';
 import { hrefFor, isLocalAdminHash, navigate, subscribe, useRoute } from './router/navigation';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './styles/global.css';
 
 const loadAdminApp = () => import('./admin/AdminApp');
@@ -425,6 +426,8 @@ function MainAppContent() {
         {isTrackSearching ? (
           <TrackingLoadingScreen query={trackSearchQuery} />
         ) : (
+          // Keyed by route: a page that fails shows the fallback, and the next navigation starts clean.
+          <ErrorBoundary key={`${currentPage}|${route?.canonical ?? ''}`} label={`page:${currentPage}`} variant="page">
           <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
         {currentPage === 'home' && (
           <HomePage
@@ -505,6 +508,7 @@ function MainAppContent() {
           <NotFoundPage onNavigate={handleNavigate} />
         )}
           </Suspense>
+          </ErrorBoundary>
         )}
       </main>
 

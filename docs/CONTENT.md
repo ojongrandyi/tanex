@@ -129,6 +129,10 @@ pages exist). Hidden headings for screen readers (**owner to confirm**): `Office
 | `CONTACT_REQUIRED` | Please enter an email address or a phone number with its country code. |
 | `INVALID_EMAIL` | Please enter a valid email address. |
 
+- **Page failed to display** (added 2026-11-12, **owner to confirm**; shown instead of a page that crashed, never with technical text):
+  title `This page didn't load properly` · body `Reloading usually fixes it. Your shipments and requests are safe.` ·
+  help `Still not working? Call or WhatsApp {phone}, or email {email}.` · buttons `Reload the page` · `Go to the home page` ·
+  staff console only: `Try again` · `Technical details`.
 - No cookie or consent banner exists: the public site sets no cookies (Legal → Cookie Policy). If one is added, its text goes here first.
 
 ---

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState, useSync
 import { canAnimate, canUseStage, whenIdle } from './capabilities';
 import { useMotionPaused } from './PauseMotion';
 import { useGsapContext } from './useGsapContext';
+import { useLocale } from '../i18n/I18nProvider';
 
 // The Journey controller (MOTION_3D_SPEC §5–§6). It reads the homepage chapters
 // (`[data-chapter]`), builds their ScrollTriggers and pins once the motion chunk has loaded, and
@@ -82,6 +83,7 @@ interface JourneyControllerProps {
 export const JourneyController: React.FC<JourneyControllerProps> = ({ rootRef, children }) => {
   const store = useMemo(() => new JourneyStore(), []);
   const paused = useMotionPaused();
+  const locale = useLocale();
   const motion = canAnimate();
   const [journey, setJourney] = useState<JourneyModule | null>(null);
 
@@ -112,11 +114,12 @@ export const JourneyController: React.FC<JourneyControllerProps> = ({ rootRef, c
     { enabled: journey !== null },
   );
 
-  // Headline line reveals are time-based: Pause motion turns them off.
+  // Headline line reveals are time-based: Pause motion turns them off. A language switch replaces
+  // the chapter headings (HomePage ChapterHeading), so the split is redone for the new ones.
   useGsapContext(
     rootRef,
     (kit, scope) => journey?.setupHeadlines(kit, scope),
-    [journey],
+    [journey, locale],
     { enabled: journey !== null && !paused },
   );
 

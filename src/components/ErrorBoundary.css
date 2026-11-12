@@ -1,0 +1,82 @@
+/* Fallback shown when a page or console section fails to display (ErrorBoundary.tsx). */
+.tx-crash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  min-height: 60vh;
+  padding: 4rem 16px;
+  text-align: center;
+  color: var(--tx-text);
+  background: var(--tx-bg);
+}
+
+.tx-crash--site { min-height: 100vh; }
+.tx-crash--console { min-height: 320px; background: transparent; }
+.tx-crash--blank { min-height: 100vh; }
+
+.tx-crash__brand {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--tx-text);
+}
+
+.tx-crash__icon { color: var(--tx-accent); }
+
+.tx-crash__title {
+  margin: 0;
+  max-width: 28ch;
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+  line-height: 1.2;
+  color: var(--tx-text);
+}
+
+.tx-crash__body,
+.tx-crash__help {
+  margin: 0;
+  max-width: 46ch;
+  line-height: 1.55;
+  color: var(--tx-text-muted);
+}
+
+.tx-crash__help { font-size: 0.92rem; }
+
+.tx-crash__link {
+  color: var(--tx-text);
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tx-crash__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.tx-crash__details {
+  max-width: min(640px, 100%);
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--tx-text-muted);
+  text-align: left;
+}
+
+.tx-crash__details summary { cursor: pointer; }
+
+.tx-crash__details pre {
+  margin: 0.5rem 0 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid var(--tx-border);
+  border-radius: 8px;
+  background: var(--tx-surface);
+}

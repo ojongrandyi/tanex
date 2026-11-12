@@ -119,6 +119,16 @@ const common = {
     scans: 'Checking the latest scans…',
     route: 'Plotting the route…',
   },
+  // CONTENT §1.4: shown instead of a page that failed to display. No technical text for visitors.
+  crash: {
+    title: "This page didn't load properly",
+    body: 'Reloading usually fixes it. Your shipments and requests are safe.',
+    help: 'Still not working? Call or WhatsApp {phone}, or email {email}.',
+    reload: 'Reload the page',
+    retry: 'Try again',
+    home: 'Go to the home page',
+    details: 'Technical details',
+  },
   errors,
 };
 

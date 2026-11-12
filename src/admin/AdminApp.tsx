@@ -258,7 +258,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPubl
       )}
 
       {/* Keyed by currentView so a crash in one view can't stay stuck once the admin navigates away */}
-      <ErrorBoundary key={currentView} label="This section">
+      <ErrorBoundary key={currentView} label="This section" variant="console">
         {/* OPERATIONS CENTER OVERVIEW */}
         {currentView === 'operations-center' && (
           <OperationsCenter

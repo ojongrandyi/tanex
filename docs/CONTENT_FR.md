@@ -95,6 +95,10 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
   `MISSING_FIELDS` Le nom et le message sont obligatoires. ·
   `CONTACT_REQUIRED` Veuillez saisir une adresse e-mail ou un numéro de téléphone avec son indicatif pays. ·
   `INVALID_EMAIL` Veuillez saisir une adresse e-mail valide.
+- **Page non affichée** (ajouté le 2026-11-12, **à confirmer**) : titre `Cette page ne s'est pas affichée correctement` ·
+  texte `Actualiser la page règle généralement le problème. Vos envois et vos demandes ne sont pas affectés.` ·
+  aide `Toujours bloqué ? Appelez-nous ou écrivez-nous sur WhatsApp au {phone}, ou par e-mail à {email}.` ·
+  boutons `Actualiser la page` · `Aller à l'accueil` · console seulement : `Réessayer` · `Détails techniques`.
 - **Heures :** format `9 h 00 – 16 h 00`.
 
 ---

@@ -7,6 +7,10 @@ import { COMPANY, isAdminPathname } from './config/brand';
 import { loadLiveChat } from './services/liveChat';
 import { currentLang, startRouter } from './router/navigation';
 import { loadLocale } from './i18n/runtime';
+import { installDomGuard } from './utils/domGuard';
+
+// Page translators and extensions must not be able to crash React (see domGuard.ts).
+installDomGuard();
 
 // Path routing: rewrites a legacy /#/… link to its path before the first render.
 startRouter();
@@ -14,7 +18,7 @@ startRouter();
 function render() {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <ErrorBoundary label={COMPANY}>
+      <ErrorBoundary label={COMPANY} variant="site">
         <App />
       </ErrorBoundary>
     </React.StrictMode>

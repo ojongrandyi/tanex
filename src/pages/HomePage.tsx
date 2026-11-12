@@ -84,6 +84,19 @@ const Headline: React.FC<{ start: string; em: string }> = ({ start, em }) => (
   </>
 );
 
+/**
+ * A chapter <h2>. The Journey splits these headings into masked lines (GSAP SplitText), which
+ * moves the text nodes React rendered into GSAP's own wrappers. React must then never edit inside
+ * the heading, or it calls removeChild on a node that has moved and the page crashes. Keying the
+ * heading by its text makes React replace the whole element when the text changes (language
+ * switch) instead; the Journey re-splits the new headings.
+ */
+const ChapterHeading: React.FC<{ id: string; className: string; start: string; em: string }> = ({ id, className, start, em }) => (
+  <h2 key={`${start}|${em}`} className={className} id={id}>
+    <Headline start={start} em={em} />
+  </h2>
+);
+
 export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
   const t = useAreaT('home');
   const locale = useLocale();
@@ -211,7 +224,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
         <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('services.eyebrow')}</p>
-            <h2 className="tx-h1 tx-home__chap-h" id="home-services"><Headline start={t('services.titleStart')} em={t('services.titleEm')} /></h2>
+            <ChapterHeading className="tx-h1 tx-home__chap-h" id="home-services" start={t('services.titleStart')} em={t('services.titleEm')} />
             <p className="tx-lead">{t('services.intro')}</p>
           </div>
           <div className="tx-ch__lane tx-lane--road" aria-hidden="true">
@@ -263,7 +276,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
         <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('bike.eyebrow')}</p>
-            <h2 className="tx-display tx-home__bike-h" id="home-bike"><Headline start={t('bike.titleStart')} em={t('bike.titleEm')} /></h2>
+            <ChapterHeading className="tx-display tx-home__bike-h" id="home-bike" start={t('bike.titleStart')} em={t('bike.titleEm')} />
             <p className="tx-lead">{t('bike.body')}</p>
           </div>
           <div className="tx-ch__lane tx-lane--bike" aria-hidden="true">
@@ -299,7 +312,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
         <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('truck.eyebrow')}</p>
-            <h2 className="tx-h1 tx-home__chap-h" id="home-truck"><Headline start={t('truck.titleStart')} em={t('truck.titleEm')} /></h2>
+            <ChapterHeading className="tx-h1 tx-home__chap-h" id="home-truck" start={t('truck.titleStart')} em={t('truck.titleEm')} />
             <p className="tx-lead">{t('truck.body')}</p>
           </div>
           <div className="tx-ch__lane tx-lane--truck" aria-hidden="true">
@@ -323,7 +336,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
         <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('network.eyebrow')}</p>
-            <h2 className="tx-h1 tx-home__chap-h" id="home-world"><Headline start={t('network.titleStart')} em={t('network.titleEm')} /></h2>
+            <ChapterHeading className="tx-h1 tx-home__chap-h" id="home-world" start={t('network.titleStart')} em={t('network.titleEm')} />
             <p className="tx-lead">{t('network.intro')}</p>
           </div>
           <div className="tx-ch__lane tx-lane--world" aria-hidden="true">
@@ -359,7 +372,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
         <div className="tx-ch__wrap tx-ch__grid" data-pin>
           <div className="tx-ch__intro" data-reveal>
             <p className="tx-eyebrow">{t('labels.eyebrow')}</p>
-            <h2 className="tx-h1 tx-home__chap-h" id="home-labels"><Headline start={t('labels.titleStart')} em={t('labels.titleEm')} /></h2>
+            <ChapterHeading className="tx-h1 tx-home__chap-h" id="home-labels" start={t('labels.titleStart')} em={t('labels.titleEm')} />
             <p className="tx-lead">{t('labels.body')}</p>
           </div>
           <div className="tx-ch__lane tx-lane--parcel" aria-hidden="true">
@@ -400,7 +413,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
       <section className="tx-ch tx-ch--contact" id="contact" data-chapter="6" aria-labelledby="home-contact" tabIndex={-1}>
         <div className="tx-ch__wrap tx-ch__grid">
           <div className="tx-ch__intro" data-reveal>
-            <h2 className="tx-h1 tx-home__chap-h" id="home-contact"><Headline start={t('contact.titleStart')} em={t('contact.titleEm')} /></h2>
+            <ChapterHeading className="tx-h1 tx-home__chap-h" id="home-contact" start={t('contact.titleStart')} em={t('contact.titleEm')} />
             <p className="tx-lead">{t('contact.body')}</p>
           </div>
           <div className="tx-ch__lane tx-lane--park" aria-hidden="true">

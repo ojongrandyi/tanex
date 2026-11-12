@@ -115,6 +115,15 @@ const common = {
     scans: 'Vérification des derniers scans…',
     route: "Tracé de l'itinéraire…",
   },
+  crash: {
+    title: "Cette page ne s'est pas affichée correctement",
+    body: "Actualiser la page règle généralement le problème. Vos envois et vos demandes ne sont pas affectés.",
+    help: 'Toujours bloqué ? Appelez-nous ou écrivez-nous sur WhatsApp au {phone}, ou par e-mail à {email}.',
+    reload: 'Actualiser la page',
+    retry: 'Réessayer',
+    home: "Aller à l'accueil",
+    details: 'Détails techniques',
+  },
 } satisfies Translation<CommonMessages>;
 
 export default common;
