@@ -146,7 +146,8 @@ export const CategoriesManager: React.FC = () => {
                           ) : <span className="tx-blog-tr is-missing">{other.toUpperCase()} —</span>}
                         </td>
                         {manage && (
-                          <td className="tx-iam-row-actions">
+                          <td>
+                            <div className="tx-iam-row-actions">
                             <button type="button" className="tx-iam-btn small" aria-label={`${T.edit}: ${c.name}`}
                               onClick={() => setDraft({ id: c.id, locale: c.locale, name: c.name, slug: c.slug, description: c.description, sortOrder: c.sortOrder })}>
                               <Pencil size={14} aria-hidden="true" />
@@ -154,6 +155,7 @@ export const CategoriesManager: React.FC = () => {
                             <button type="button" className="tx-iam-btn small danger" aria-label={`${T.delete}: ${c.name}`} onClick={() => remove(c)}>
                               <Trash2 size={14} aria-hidden="true" />
                             </button>
+                            </div>
                           </td>
                         )}
                       </tr>

@@ -40,6 +40,10 @@
 
 .tx-blog-prose ul,
 .tx-blog-prose ol { padding-left: 1.4em; margin: 0; }
+/* The site's base styles remove list markers; articles need them back. */
+.tx-blog-prose ul { list-style: disc; }
+.tx-blog-prose ol { list-style: decimal; }
+.tx-blog-prose ul ul { list-style: circle; }
 .tx-blog-prose li + li { margin-top: 0.35em; }
 .tx-blog-prose li > p { margin: 0; }
 .tx-blog-prose ul li::marker { color: var(--tx-orange-600); }
