@@ -1,6 +1,6 @@
 // Console stylesheets first, in their original order (see ./styles.ts).
 import './styles';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { AdminLayout, AdminViewType } from './AdminLayout';
 import { OperationsCenter } from './pages/OperationsCenter';
 import { QuoteRequestsView } from './pages/QuoteRequestsView';
@@ -15,6 +15,16 @@ import { AccountView } from './pages/AccountView';
 import { UsersView } from './pages/UsersView';
 import { RolesView } from './pages/RolesView';
 import { AuditLogView } from './pages/AuditLogView';
+// Blog studio and its editor (TipTap) are their own chunk, loaded when the view is opened.
+const BlogStudio = lazy(() => import('./blog/BlogStudio').then((m) => ({ default: m.BlogStudio })));
+const BlogPreview = lazy(() => import('./blog/BlogPreview').then((m) => ({ default: m.BlogPreview })));
+
+/** #blog-preview=<token> from the studio's Preview button (BLOG_SPEC §4). Same shape check as BlogPreview. */
+function blogPreviewToken(): string | null {
+  const m = /^#blog-preview=([A-Za-z0-9_.%-]{20,200})$/.exec(window.location.hash);
+  if (!m) return null;
+  try { return decodeURIComponent(m[1]); } catch { return null; }
+}
 import { useAuth } from '../auth/AuthContext';
 import { canOpenView, firstAllowedView } from './views';
 import { api } from '../services/api';
@@ -55,7 +65,20 @@ interface AdminAppProps {
   onViewPublicTracking: (trackingNumber: string) => void;
 }
 
-export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicTracking }) => {
+// A preview link opens the post on its own page instead of the console.
+export const AdminApp: React.FC<AdminAppProps> = (props) => {
+  const [previewToken] = useState(blogPreviewToken);
+  if (previewToken) {
+    return (
+      <Suspense fallback={<div className="admin-login-shell" />}>
+        <BlogPreview token={previewToken} />
+      </Suspense>
+    );
+  }
+  return <AdminConsole {...props} />;
+};
+
+const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicTracking }) => {
   const { shipments, updateShipmentStatus, updateShipmentDirect } = useAdminData();
   const { can } = useAuth();
   // Land on the first view this user may open; a user with no work views gets My account.
@@ -312,6 +335,13 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPubl
             onOpenShipmentDetail={handleOpenShipmentDetail}
             onSelectView={setCurrentView}
           />
+        )}
+
+        {/* BLOG STUDIO (BLOG_SPEC §4) */}
+        {currentView === 'blog' && (
+          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+            <BlogStudio />
+          </Suspense>
         )}
 
         {/* SETTINGS */}

@@ -552,6 +552,11 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 | `payment.proof_received` (ajouté après B.6, à confirmer) | Objet `Preuve de paiement reçue pour {id}` · `Un client a envoyé une preuve de paiement pour {id}. Vérifiez-la dans la console, rubrique Paiements : {url}` |
 | `mail.test` (ajouté avec B.6, à confirmer) | Objet `E-mail de test TanEx` · `Ceci est un e-mail de test envoyé depuis la console TanEx. Si vous pouvez le lire, l'envoi d'e-mails fonctionne.` |
 
+## 15. Pages du blog (ajouté le 2026-11-12 avec F.2, **à confirmer, relecture native en attente**)
+Traduction de CONTENT §15, dans `src/i18n/fr/blog.ts` (`index`, `article`).
+- **Index :** sur-titre `Blog {{COMPANY}}` · H1 `Actualités, guides et conseils d'expédition` · sous-titre `Des conseils pratiques pour envoyer des colis au Cameroun et à l'étranger, et les actualités de l'équipe {{COMPANY}}.` · puce `Tous` · état vide `Nos premiers articles arrivent bientôt.` · `Lire la suite` · `{n} min de lecture` · pagination `Plus récents` · `Plus anciens`
+- **Article :** `Par {author}` · `{date}` · `{n} min de lecture` · `Partager` (`WhatsApp` · `Facebook` · `LinkedIn` · `X` · `Copier le lien` → `Lien copié`) · `Articles similaires` · `Lire en anglais` (seulement si la traduction existe) · fin `Besoin d'envoyer quelque chose ?` `Demander un devis`
+
 ## 16. Carrières et Politique RSE (pied de page ; ajouté le 2026-11-09, **approuvé par le propriétaire le 2026-11-10**)
 Texte complet dans `src/i18n/fr/company.ts` (traduction de CONTENT §16). Pied de page *Entreprise* : `Carrières` · `Politique RSE`.
 Chemins : `/fr/carrieres`, `/fr/politique-rse`. Titres : `Travaillez avec {{COMPANY}}` · `Notre responsabilité`.

@@ -17,6 +17,8 @@ import { consumeResetToken, createResetToken, findResetUser, findValidToken } fr
 import { mailEnabled } from '../mail/mailer.js';
 import { queueEmail } from '../mail/outbox.js';
 import { passwordResetUrl } from '../mail/urls.js';
+import { deleteUpload, writeImageUpload } from '../uploads.js';
+import { BIO_MAX, JOB_TITLE_MAX, avatarUrl, checkAvatar, profileBio, profileLine } from '../blog/authorProfile.js';
 
 export const MAX_FAILED_LOGINS = 5;
 export const LOCKOUT_MS = 15 * 60 * 1000;
@@ -48,6 +50,9 @@ interface LoginRow {
 }
 
 function sessionUser(auth: RequestAuth) {
+  // Author profile (tracker F.2), read here so the permission cache stays as it is.
+  const profile = db.prepare('SELECT job_title, bio, avatar_file FROM users WHERE id = ?').get(auth.user.id) as
+    { job_title: string | null; bio: string | null; avatar_file: string | null } | undefined;
   return {
     id: auth.user.id,
     displayName: auth.user.displayName,
@@ -56,7 +61,10 @@ function sessionUser(auth: RequestAuth) {
     locale: auth.user.locale,
     roles: auth.roles,
     permissions: auth.permissions,
-    mustChangePassword: auth.user.mustChangePassword
+    mustChangePassword: auth.user.mustChangePassword,
+    jobTitle: profile?.job_title ?? '',
+    bio: profile?.bio ?? '',
+    avatarUrl: avatarUrl(profile?.avatar_file)
   };
 }
 
@@ -196,8 +204,8 @@ export function createAuthRouter(): Router {
     const auth = getRequestAuth(req);
     if (!auth) return res.status(401).json({ success: false, error: 'Authentication required' });
 
-    const { displayName, locale } = req.body || {};
-    const changes: { display_name?: string; locale?: string } = {};
+    const { displayName, locale, jobTitle, bio } = req.body || {};
+    const changes: { display_name?: string; locale?: string; job_title?: string | null; bio?: string | null } = {};
     if (displayName !== undefined) {
       const name = typeof displayName === 'string' ? displayName.trim().replace(/\s+/g, ' ') : '';
       if (!name || name.length > DISPLAY_NAME_MAX) {
@@ -211,14 +219,62 @@ export function createAuthRouter(): Router {
       }
       if (locale !== auth.user.locale) changes.locale = locale;
     }
+    // Author profile (tracker F.2): one line of job title, a short bio; empty clears them.
+    const current = db.prepare('SELECT job_title, bio FROM users WHERE id = ?').get(auth.user.id) as
+      { job_title: string | null; bio: string | null };
+    if (jobTitle !== undefined) {
+      const t = profileLine(jobTitle, JOB_TITLE_MAX);
+      if (t === undefined) {
+        return res.status(400).json({ success: false, code: 'INVALID_JOB_TITLE', error: `The job title can be up to ${JOB_TITLE_MAX} characters.` });
+      }
+      if (t !== current.job_title) changes.job_title = t;
+    }
+    if (bio !== undefined) {
+      const b = profileBio(bio);
+      if (b === undefined) {
+        return res.status(400).json({ success: false, code: 'INVALID_BIO', error: `The bio can be up to ${BIO_MAX} characters.` });
+      }
+      if (b !== current.bio) changes.bio = b;
+    }
 
     const fields = Object.keys(changes) as (keyof typeof changes)[];
     if (fields.length > 0) {
       const sets = fields.map((f) => `${f} = ?`).join(', ');
       db.prepare(`UPDATE users SET ${sets}, updated_at_ts = ? WHERE id = ?`)
-        .run(...fields.map((f) => changes[f] as string), Date.now(), auth.user.id);
+        .run(...fields.map((f) => changes[f] ?? null), Date.now(), auth.user.id);
       audit(req, 'user.update_self', 'user', auth.user.id, `Own account updated: ${fields.join(', ')}`);
       resetRequestAuth(req);
+    }
+    const fresh = loadAuth(db, auth.user.id);
+    res.json({ success: true, user: fresh ? sessionUser(fresh) : null });
+  });
+
+  // POST /api/auth/me/avatar: { image } the signed-in user's own profile photo (tracker F.2),
+  // compressed in the browser; replaces the previous photo.
+  router.post('/me/avatar', (req: Request, res: Response) => {
+    const auth = getRequestAuth(req);
+    if (!auth) return res.status(401).json({ success: false, error: 'Authentication required' });
+    const checked = checkAvatar(req.body?.image);
+    if (!checked.ok) return res.status(400).json({ success: false, code: 'INVALID_IMAGE', error: checked.error });
+    const before = db.prepare('SELECT avatar_file FROM users WHERE id = ?').get(auth.user.id) as { avatar_file: string | null };
+    const saved = writeImageUpload('avatars', checked.buffer, checked.type);
+    db.prepare('UPDATE users SET avatar_file = ?, updated_at_ts = ? WHERE id = ?').run(saved.fileName, Date.now(), auth.user.id);
+    if (before.avatar_file) deleteUpload('avatars', before.avatar_file);
+    audit(req, 'user.update_self', 'user', auth.user.id, 'Own account updated: avatar', undefined, { sizeBytes: saved.sizeBytes });
+    resetRequestAuth(req);
+    const fresh = loadAuth(db, auth.user.id);
+    res.json({ success: true, user: fresh ? sessionUser(fresh) : null });
+  });
+
+  // DELETE /api/auth/me/avatar: removes the signed-in user's own profile photo.
+  router.delete('/me/avatar', (req: Request, res: Response) => {
+    const auth = getRequestAuth(req);
+    if (!auth) return res.status(401).json({ success: false, error: 'Authentication required' });
+    const before = db.prepare('SELECT avatar_file FROM users WHERE id = ?').get(auth.user.id) as { avatar_file: string | null };
+    if (before.avatar_file) {
+      db.prepare('UPDATE users SET avatar_file = NULL, updated_at_ts = ? WHERE id = ?').run(Date.now(), auth.user.id);
+      deleteUpload('avatars', before.avatar_file);
+      audit(req, 'user.update_self', 'user', auth.user.id, 'Own account updated: avatar removed');
     }
     const fresh = loadAuth(db, auth.user.id);
     res.json({ success: true, user: fresh ? sessionUser(fresh) : null });

@@ -18,6 +18,14 @@
     "create-super-admin": "node dist-server/scripts/create-super-admin.js"
   },
   "dependencies": {
+    "@tiptap/core": "^3.33.1",
+    "@tiptap/extension-image": "^3.33.1",
+    "@tiptap/extension-link": "^3.33.1",
+    "@tiptap/extension-table": "^3.33.1",
+    "@tiptap/extensions": "^3.33.1",
+    "@tiptap/pm": "^3.33.1",
+    "@tiptap/react": "^3.33.1",
+    "@tiptap/starter-kit": "^3.33.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",

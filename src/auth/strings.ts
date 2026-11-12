@@ -69,6 +69,20 @@ export const AUTH_TEXT = {
     next: 'New password',
     confirm: 'Confirm new password',
     passwordChanged: 'Password changed. Your other devices have been signed out.',
+    // Blog author profile (tracker F.2; CONTENT §10.4, owner to confirm).
+    author: {
+      title: 'Author profile',
+      intro: 'Shown with your name on blog articles you write.',
+      photo: 'Photo',
+      photoHint: 'A square photo works best. It is resized in your browser before upload.',
+      upload: 'Upload photo',
+      replace: 'Replace photo',
+      remove: 'Remove photo',
+      uploading: 'Uploading…',
+      jobTitle: 'Job title',
+      bio: 'Short bio',
+      bioHint: 'Up to 500 characters.'
+    },
     sessions: {
       title: 'Where you are signed in',
       thisDevice: 'This device',

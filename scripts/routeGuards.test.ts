@@ -108,11 +108,17 @@ const PUBLIC = new Set([
   'GET /api/blog/latest',
   'GET /api/blog/categories',
   'GET /api/blog/:locale/:slug',
-  'GET /media/blog/:file'
+  'GET /media/blog/:file',
+  // A signed, short-lived preview link from the studio (the token is the credential; F.2).
+  'GET /api/blog/preview/:token',
+  // Staff profile photos (blog authors; F.2).
+  'GET /media/avatars/:file'
 ]);
 // Signed-in only (no permission key): the user's own account.
 const SESSION_ONLY = new Set([
   'PATCH /api/auth/me',
+  'POST /api/auth/me/avatar',
+  'DELETE /api/auth/me/avatar',
   'GET /api/auth/sessions',
   'DELETE /api/auth/sessions',
   'POST /api/auth/change-password'

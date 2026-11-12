@@ -1,0 +1,102 @@
+/* Blog article body (BLOG_SPEC §6): brand typography for the HTML the server renders
+   (server/blog/render.ts). Used by the studio editor and the preview so writers see the
+   article as it will read; the public article page (F.3) can take these rules over. */
+
+.tx-blog-prose {
+  font-family: var(--tx-font-body);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--tx-choc-900);
+  max-width: 70ch;
+  overflow-wrap: anywhere;
+}
+
+.tx-blog-prose > * + * { margin-top: 1.1em; }
+.tx-blog-prose p { margin: 0; }
+.tx-blog-prose p + p { margin-top: 1em; }
+
+.tx-blog-prose h2,
+.tx-blog-prose h3,
+.tx-blog-prose h4 {
+  font-family: var(--tx-font-display);
+  color: var(--tx-choc-950);
+  line-height: 1.25;
+  margin: 1.8em 0 0.5em;
+  letter-spacing: -0.01em;
+}
+.tx-blog-prose h2 { font-size: 1.6rem; font-weight: 800; }
+.tx-blog-prose h3 { font-size: 1.3rem; font-weight: 700; }
+.tx-blog-prose h4 { font-size: 1.1rem; font-weight: 700; }
+.tx-blog-prose > :first-child { margin-top: 0; }
+
+.tx-blog-prose a {
+  color: var(--tx-choc-800);
+  text-decoration: underline;
+  text-decoration-color: var(--tx-orange-500);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.tx-blog-prose a:hover { color: var(--tx-choc-950); }
+
+.tx-blog-prose ul,
+.tx-blog-prose ol { padding-left: 1.4em; margin: 0; }
+.tx-blog-prose li + li { margin-top: 0.35em; }
+.tx-blog-prose li > p { margin: 0; }
+.tx-blog-prose ul li::marker { color: var(--tx-orange-600); }
+
+.tx-blog-prose blockquote {
+  margin: 1.4em 0;
+  padding: 0.2em 0 0.2em 1.1em;
+  border-left: 4px solid var(--tx-orange-500);
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--tx-choc-800);
+}
+
+.tx-blog-prose hr {
+  border: 0;
+  height: 2px;
+  margin: 2.2em auto;
+  width: 30%;
+  background: var(--tx-choc-200);
+}
+
+.tx-blog-prose .tx-blog-figure { margin: 1.6em 0; }
+.tx-blog-prose .tx-blog-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  background: var(--tx-cream-200);
+}
+.tx-blog-prose figcaption {
+  margin-top: 0.5em;
+  font-size: 0.875rem;
+  color: var(--tx-choc-600);
+  text-align: center;
+}
+
+.tx-blog-prose .tx-blog-table { overflow-x: auto; margin: 1.4em 0; }
+.tx-blog-prose table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+.tx-blog-prose th,
+.tx-blog-prose td {
+  border: 1px solid var(--tx-choc-200);
+  padding: 0.5em 0.7em;
+  text-align: left;
+  vertical-align: top;
+  min-width: 4em;
+}
+.tx-blog-prose th { background: var(--tx-cream-200); font-weight: 700; }
+.tx-blog-prose td > p,
+.tx-blog-prose th > p { margin: 0; }
+
+.tx-blog-prose .tx-callout {
+  margin: 1.4em 0;
+  padding: 1em 1.2em;
+  border-radius: 0.75rem;
+  border-left: 4px solid var(--tx-info-600);
+  background: var(--tx-info-50);
+}
+.tx-blog-prose .tx-callout--tip { border-left-color: var(--tx-success-600); background: var(--tx-success-50); }
+.tx-blog-prose .tx-callout--warning { border-left-color: var(--tx-warning-600); background: var(--tx-warning-50); }
+.tx-blog-prose .tx-callout > * + * { margin-top: 0.6em; }

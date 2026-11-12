@@ -28,6 +28,23 @@ mediaRouter.get('/media/blog/:file', (req: Request, res: Response) => {
   });
 });
 
+// GET /media/avatars/<id>.<ext> (public): a staff member's profile photo (blog author; tracker
+// F.2), only while it is some user's current photo. A new photo gets a new name, so it can be
+// cached for a day without going stale.
+mediaRouter.get('/media/avatars/:file', (req: Request, res: Response) => {
+  const file = req.params.file as string;
+  const filePath = resolveUploadPath('avatars', file);
+  if (!filePath) return notFound(res);
+  if (!db.prepare('SELECT 1 FROM users WHERE avatar_file = ?').get(file)) return notFound(res);
+
+  res.setHeader('Content-Type', IMAGE_CONTENT_TYPES[path.extname(file).slice(1)]);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(filePath, { cacheControl: false }, (err) => {
+    if (err && !res.headersSent) notFound(res);
+  });
+});
+
 // GET /media/<id>.<ext> (public). Package images only, and only while marked visible on a shipment
 // that isn't in the trash. Payment proofs are never served here: they live in a separate folder
 // that this route can't reach (resolveUploadPath is always called with 'images').

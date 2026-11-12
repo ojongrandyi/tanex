@@ -11,14 +11,15 @@ export type AdminViewType =
   | 'messages'
   | 'payments'
   | 'document-center'
+  | 'blog'
   | 'settings'
   | 'users'
   | 'roles'
   | 'audit'
   | 'account';
 
-/** null = every signed-in user (My account). */
-export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | null> = {
+/** null = every signed-in user (My account); a list = any one of those permissions. */
+export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | readonly PermissionKey[] | null> = {
   'operations-center': 'dashboard.view',
   'all-shipments': 'shipments.view',
   'create-shipment': 'shipments.create',
@@ -27,6 +28,8 @@ export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | null> = {
   'messages': 'messages.view',
   'payments': 'payments.view',
   'document-center': 'documents.view',
+  // Blog studio (BLOG_SPEC §2): a writer, an editor, a publisher or a category manager.
+  'blog': ['blog.view', 'blog.write', 'blog.edit_any', 'blog.publish', 'blog.categories'],
   'settings': 'settings.view',
   'users': 'users.view',
   'roles': 'roles.manage',
@@ -44,6 +47,7 @@ export const VIEW_ORDER: readonly AdminViewType[] = [
   'messages',
   'payments',
   'document-center',
+  'blog',
   'settings',
   'users',
   'roles',
@@ -52,7 +56,8 @@ export const VIEW_ORDER: readonly AdminViewType[] = [
 
 export function canOpenView(view: AdminViewType, can: (key: PermissionKey) => boolean): boolean {
   const key = VIEW_PERMISSION[view];
-  return key === null || can(key);
+  if (key === null) return true;
+  return typeof key === 'string' ? can(key) : key.some((k) => can(k));
 }
 
 /** The first work view the user may open, or null when they have none (My account only). */

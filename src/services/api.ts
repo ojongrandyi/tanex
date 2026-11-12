@@ -33,6 +33,10 @@ export interface SessionUser {
   roles: { id: string; name: string }[];
   permissions: string[];
   mustChangePassword: boolean;
+  /** Blog author profile (tracker F.2); edited on My account. */
+  jobTitle?: string;
+  bio?: string;
+  avatarUrl?: string | null;
 }
 
 /** One signed-in device (GET /api/auth/sessions, GET /api/users/:id/sessions). */
@@ -179,7 +183,8 @@ const requestMethods = new WeakMap<Response, string>();
 
 const isJsonResponse = (res: Response) => (res.headers.get('content-type') || '').includes('json');
 
-async function fetchApi(input: string, init: RequestInit = {}): Promise<Response> {
+/** Exported for console-only API modules (src/admin/blog/blogApi.ts), so they share the retries. */
+export async function fetchApi(input: string, init: RequestInit = {}): Promise<Response> {
   const method = (init.method || 'GET').toUpperCase();
   const retryable = method === 'GET' || method === 'HEAD';
   const attempts = retryable ? RETRY_DELAYS_MS.length + 1 : 1;
@@ -203,7 +208,7 @@ async function fetchApi(input: string, init: RequestInit = {}): Promise<Response
   throw err;
 }
 
-async function handleResponse<T>(res: Response): Promise<T> {
+export async function handleResponse<T>(res: Response): Promise<T> {
   let json: any;
   const text = await res.text();
   try {
@@ -297,7 +302,7 @@ export const api = {
   },
 
   /** The signed-in user's own name and language (PATCH /api/auth/me). */
-  async updateMyAccount(changes: { displayName?: string; locale?: 'en' | 'fr' }): Promise<SessionUser | null> {
+  async updateMyAccount(changes: { displayName?: string; locale?: 'en' | 'fr'; jobTitle?: string; bio?: string }): Promise<SessionUser | null> {
     const res = await fetchApi(`${API_BASE}/auth/me`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

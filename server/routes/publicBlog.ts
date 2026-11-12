@@ -6,9 +6,11 @@ import { db } from '../db.js';
 import { serverError } from '../errors.js';
 import {
   type BlogLocale, type CategoryRow, type PostRow,
-  PUBLIC_CONDITION, PUBLIC_PAGE_SIZE, coverOf, isBlogLocale, postCategories, postPath, publishDuePosts,
-  resolveSlugRedirect, splitTags
+  PUBLIC_CONDITION, PUBLIC_PAGE_SIZE, coverOf, getPost, isBlogLocale, isPublicRow, postCategories, postPath,
+  publishDuePosts, resolveSlugRedirect, splitTags
 } from '../blog/posts.js';
+import { readPreviewToken } from '../blog/preview.js';
+import { avatarUrl } from '../blog/authorProfile.js';
 
 export const publicBlogRouter = Router();
 
@@ -29,11 +31,11 @@ function localeOf(value: unknown): BlogLocale | null {
   return isBlogLocale(value) ? value : null;
 }
 
-interface AuthorRow { display_name: string; job_title: string | null }
+interface AuthorRow { display_name: string; job_title: string | null; avatar_file: string | null }
 
 function author(userId: string) {
-  const row = db.prepare('SELECT display_name, job_title FROM users WHERE id = ?').get(userId) as AuthorRow | undefined;
-  return { name: row?.display_name ?? '', jobTitle: row?.job_title ?? '' };
+  const row = db.prepare('SELECT display_name, job_title, avatar_file FROM users WHERE id = ?').get(userId) as AuthorRow | undefined;
+  return { name: row?.display_name ?? '', jobTitle: row?.job_title ?? '', avatarUrl: avatarUrl(row?.avatar_file ?? null) };
 }
 
 /** A card on the index, the homepage or a related list: excerpt and cover only. */
@@ -132,6 +134,36 @@ publicBlogRouter.get('/categories', (req: Request, res: Response) => {
   }
 });
 
+// GET /api/blog/preview/:token: the current version of one post, whatever its status, for a
+// signed preview link from the studio (server/blog/preview.ts). Never cached or indexed; an
+// invalid or expired token is a plain 404. Registered before /:locale/:slug.
+publicBlogRouter.get('/preview/:token', (req: Request, res: Response) => {
+  try {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    const postId = readPreviewToken(req.params.token);
+    const post = postId ? getPost(db, postId) : undefined;
+    if (!post) return notFound(res);
+    const a = author(post.author_user_id);
+    res.json({
+      success: true,
+      data: {
+        ...card(post),
+        status: post.status,
+        isPublic: isPublicRow(post),
+        contentHtml: post.content_html,
+        updatedAt: post.updated_at_ts,
+        author: { name: a.name, jobTitle: a.jobTitle, avatarUrl: a.avatarUrl },
+        tags: splitTags(post.tags),
+        seoTitle: post.seo_title || post.title,
+        seoDescription: post.seo_description || post.excerpt
+      }
+    });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
 // GET /api/blog/:locale/:slug: the full post, previous/next, up to 3 related by category and
 // the public translations (for the language switch and hreflang).
 publicBlogRouter.get('/:locale/:slug', (req: Request, res: Response) => {
@@ -183,7 +215,7 @@ publicBlogRouter.get('/:locale/:slug', (req: Request, res: Response) => {
         ...card(post),
         contentHtml: post.content_html,
         updatedAt: post.updated_at_ts,
-        author: { name: a.name, jobTitle: a.jobTitle },
+        author: { name: a.name, jobTitle: a.jobTitle, avatarUrl: a.avatarUrl },
         tags: splitTags(post.tags),
         seoTitle: post.seo_title || post.title,
         seoDescription: post.seo_description || post.excerpt,

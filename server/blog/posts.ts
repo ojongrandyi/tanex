@@ -4,6 +4,10 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { buildPath } from '../../src/router/routes.js';
 import { BLOG_MEDIA_PREFIX, type MediaLookup } from './render.js';
+import { MAX_SLUG_LENGTH, isValidSlug, slugify } from '../../src/shared/blogSlug.js';
+
+// Slug rules live in src/shared/blogSlug.ts (the studio uses the same ones).
+export { MAX_SLUG_LENGTH, isValidSlug, slugify };
 
 export const BLOG_LOCALES = ['en', 'fr'] as const;
 export type BlogLocale = (typeof BLOG_LOCALES)[number];
@@ -11,7 +15,6 @@ export const POST_STATUSES = ['DRAFT', 'IN_REVIEW', 'SCHEDULED', 'PUBLISHED', 'A
 export type PostStatus = (typeof POST_STATUSES)[number];
 
 export const PUBLIC_PAGE_SIZE = 12;
-export const MAX_SLUG_LENGTH = 80;
 export const SCHEDULER_INTERVAL_MS = 60_000;
 
 export function isBlogLocale(value: unknown): value is BlogLocale {
@@ -20,24 +23,6 @@ export function isBlogLocale(value: unknown): value is BlogLocale {
 
 export function isPostStatus(value: unknown): value is PostStatus {
   return (POST_STATUSES as readonly unknown[]).includes(value);
-}
-
-const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-/** Lower-case ASCII with hyphens, from any title ("Expédier à Douala" → "expedier-a-douala"). */
-export function slugify(text: string): string {
-  const slug = text
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[’']/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return slug.slice(0, MAX_SLUG_LENGTH).replace(/-+$/, '');
-}
-
-export function isValidSlug(value: unknown): value is string {
-  return typeof value === 'string' && value.length <= MAX_SLUG_LENGTH && SLUG_RE.test(value);
 }
 
 /** True when the slug is used by another post in the locale. */

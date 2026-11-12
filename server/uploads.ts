@@ -12,15 +12,17 @@ export const uploadsDir = path.resolve(
     || path.join(process.env.DB_PATH ? path.dirname(process.env.DB_PATH) : path.join(process.cwd(), 'data'), 'uploads')
 );
 
-export type UploadFolder = 'images' | 'proofs' | 'blog';
+export type UploadFolder = 'images' | 'proofs' | 'blog' | 'avatars';
 
 // images/: package photos, served publicly via /media when marked visible.
 // proofs/: payment screenshots, private, only ever served through an admin-only route.
 // blog/: blog images (BLOG_SPEC §4), served publicly via /media/blog/.
+// avatars/: staff profile photos (blog authors, IAM_RBAC_SPEC §9), served publicly via /media/avatars/.
 export const uploadFolders: Record<UploadFolder, string> = {
   images: path.join(uploadsDir, 'images'),
   proofs: path.join(uploadsDir, 'proofs'),
   blog: path.join(uploadsDir, 'blog'),
+  avatars: path.join(uploadsDir, 'avatars'),
 };
 
 export function ensureUploadDirs() {

@@ -694,6 +694,18 @@ facilities). Replaces the previous list in `src/data/gateways.ts` during E.6.
 - **Sync:** `Saved on phone, will sync` · `Synced` · `Offline` · **Location:** `Keep the app open while delivering so the customer can follow you.` · `Location is off. Turn it on to share your position during deliveries.`
 - **Cash:** `My cash` · `Balance` · `Record handover` · `Waiting for confirmation` · `Confirmed`
 
+### 10.4 Blog studio and author profile (added 2026-11-12 with F.2, owner to confirm)
+English only until phase I (console). Full text in `src/admin/blog/strings.ts` (`BLOG_TEXT`) and `src/auth/strings.ts` (`AUTH_TEXT.account.author`).
+- **Menu:** `Blog` · tabs `Posts` · `Categories` · `Media` · statuses `Draft` · `In review` · `Scheduled` · `Published` · `Archived`
+- **List:** `New post` · `Search titles` · `Only my posts` · columns `Title` · `Language` · `Author` · `Category` · `Status` · `Date` · translation `FR missing` / `EN missing` / `Linked` · `Goes live {date}` · `Edited {date}` · empty `No posts yet.`
+- **Editor:** `Article title` · `Write the article. Use H2 for sections.` · `{n} words` · `{n} min read` · `Saved {time}` · `Saving…` · `Unsaved changes` · conflict `Someone else saved this post. Reload it to see their version; your changes here are not saved.` · locked `This post is scheduled or published; an editor can change it.` · toolbar `Paragraph` · `Heading 2–4` · `Bold` · `Italic` · `Link` · `Bulleted list` · `Numbered list` · `Quote` · `Callout` (`Info` · `Tip` · `Warning`) · `Divider` · `Image` · `Table` · `Undo` · `Redo` · image `Alt text (required)` · `Describe the picture for people who cannot see it.` · `Caption (optional)`
+- **Side panel:** `Slug` · `Excerpt` (`Shown on cards and in search results. Aim for about 160 characters.`) · `Cover image` · `Cover alt text` · `Categories` · `Tags` · `Author` · `Search and sharing` · `SEO title` · `SEO description` · previews `Google` · `WhatsApp` · `Reading time` · `Language` · `Create French version` / `Open French version`
+- **Actions:** `Save draft` · `Preview` · `Submit for review` · `Publish now` · `Schedule` (`Go-live date and time (Africa/Douala)`) · `Unpublish` · `Archive` · `Delete`
+- **Preview page:** `Preview of an unpublished version. This link stops working at {time}.` · `This preview link is invalid or has expired. Open the post in the Blog studio and click Preview again.`
+- **Media:** `Upload image` · `Images are resized in your browser to 1600 px and 800 px wide WebP before upload.` · `No images yet.` · `A post still uses this image.`
+- **Categories:** `Add category` · `Name` · `Slug` · `Description` · `Order` · `Posts` · `Add French version` · `Delete "{name}"? Posts keep existing; they just lose this category.`
+- **My account → Author profile:** `Author profile` · `Shown with your name on blog articles you write.` · `Upload photo` / `Replace photo` · `Remove photo` · `A square photo works best. It is resized in your browser before upload.` · `Job title` · `Short bio` · `Up to 500 characters.`
+
 ---
 
 ## 11. Generated documents (waybill, BOL, invoice, POD, seal label)
@@ -856,6 +868,7 @@ Plain text, short, signed `— TanEx`. `{link}` = the public tracking URL in the
 
 ## 15. Blog pages (BLOG_SPEC §6)
 - **Until F.3 ("coming soon" page at /blog, noindex; added 2026-11-09, owner to confirm):** eyebrow `Blog` · H1 `Articles coming soon` · sub `We're preparing news, guides and shipping tips from the {{COMPANY}} team. Check back soon.` · buttons `Track a shipment` · `Contact us`
+- **In the dictionaries since F.2** (`src/i18n/en/blog.ts` `index`/`article`; French in CONTENT_FR §15). The eyebrow is `{{COMPANY}} Blog` (shown in capitals).
 - **Index:** eyebrow `TANEX BLOG` · H1 `News, guides and shipping tips` · sub `Practical advice on sending parcels in Cameroon and abroad, and news from the TanEx team.` · category chip `All` · empty state `Our first articles are on their way.` · `Read more` · `{n} min read` · pagination `Newer` · `Older`
 - **Article:** `By {author}` · `{date}` · `{n} min read` · `Share` (`WhatsApp` · `Facebook` · `LinkedIn` · `X` · `Copy link` → `Link copied`) · `Related articles` · `Read in French` / `Lire en anglais` (only when a translation exists) · end CTA `Need to send something? Get a Quote`
 

@@ -173,3 +173,30 @@
   background: var(--ngf-success-50);
   color: var(--ngf-success-700);
 }
+
+/* Author profile (F.2) */
+.tx-account-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.7rem;
+  border: 1.5px solid var(--ngf-slate-200);
+  border-radius: 0.5rem;
+  font: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  color: var(--ngf-ink-900);
+  background: var(--ngf-white);
+}
+.tx-account-field textarea:focus-visible { outline: 2px solid var(--tx-orange-500); outline-offset: 1px; }
+.tx-account-avatar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin: 0.75rem 0; }
+.tx-account-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
+.tx-account-avatar--initials {
+  display: grid;
+  place-items: center;
+  background: var(--tx-choc-900);
+  color: var(--tx-cream-100);
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+.tx-account-avatar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.tx-account-avatar-actions small { flex-basis: 100%; font-size: 0.75rem; color: var(--ngf-slate-500, var(--tx-choc-600)); }

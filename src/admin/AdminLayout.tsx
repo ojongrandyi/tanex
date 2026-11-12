@@ -21,11 +21,13 @@ import {
   UserCircle,
   Users,
   ShieldCheck,
-  History
+  History,
+  Newspaper
 } from 'lucide-react';
 import { useAdminData } from '../context/AdminDataContext';
 import { useAuth } from '../auth/AuthContext';
 import { AUTH_TEXT, IAM_TEXT } from '../auth/strings';
+import { BLOG_MENU } from './blog/menuText';
 import { LOGO_ALT, LOGO_WORDMARK_HEIGHT, LOGO_WORDMARK_WHITE, LOGO_WORDMARK_WIDTH, TAGLINE } from '../config/brand';
 import { canOpenView, firstAllowedView, type AdminViewType } from './views';
 import './AdminLayout.css';
@@ -91,6 +93,11 @@ const VIEW_METADATA: Record<AdminViewType, { title: string; category: string; de
     title: 'Documents',
     category: 'Compliance & Governance',
     description: 'Bills of Lading, Proof of Delivery, and shipping labels.'
+  },
+  'blog': {
+    title: BLOG_MENU.menu,
+    category: 'Content',
+    description: BLOG_MENU.description
   },
   'settings': {
     title: 'Settings',
@@ -324,6 +331,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   <FileText size={18} />
                 </div>
                 <span className="nav-title">Documents</span>
+              </button>
+            )}
+
+            {/* Blog studio (BLOG_SPEC §4) */}
+            {allowed('blog') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'blog' ? 'active' : ''}`}
+                onClick={() => { onSelectView('blog'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <Newspaper size={18} />
+                </div>
+                <span className="nav-title">{BLOG_MENU.menu}</span>
               </button>
             )}
 

@@ -462,3 +462,85 @@ test('autosave conflict: a stale expectedUpdatedAt is refused', async () => {
   assert.equal(stale.status, 409);
   assert.equal((await stale.json()).code, 'BLOG_POST_CHANGED');
 });
+
+test('preview links: signed, short-lived, any status, never for someone who cannot see the post', async () => {
+  const { createPreviewToken, readPreviewToken, PREVIEW_TTL_MS } = await import('../server/blog/preview.ts');
+  const post = await createPost('usr_writer', { title: 'Preview me', content: doc('Draft words.') });
+
+  // Another writer can't see the post, so can't get a link; signed out is 401.
+  assert.equal((await call('POST', `${ADMIN}/posts/${post.id}/preview`, await as('usr_writer2'))).status, 404);
+  assert.equal((await call('POST', `${ADMIN}/posts/${post.id}/preview`)).status, 401);
+
+  const res = await call('POST', `${ADMIN}/posts/${post.id}/preview`, await as('usr_writer'));
+  assert.equal(res.status, 200);
+  const { token, expiresAt } = (await res.json()).data;
+  assert.ok(expiresAt > Date.now() && expiresAt <= Date.now() + PREVIEW_TTL_MS);
+  assert.equal(auditCount('blog.post_preview', post.id), 1);
+
+  // The draft is readable with the token, without a session, and not cached or indexed.
+  const pv = await call('GET', `/api/blog/preview/${token}`);
+  assert.equal(pv.status, 200);
+  assert.equal(pv.headers.get('cache-control'), 'no-store');
+  assert.match(pv.headers.get('x-robots-tag') ?? '', /noindex/);
+  const body = (await pv.json()).data;
+  assert.equal(body.title, 'Preview me');
+  assert.equal(body.status, 'DRAFT');
+  assert.equal(body.isPublic, false);
+  assert.match(body.contentHtml, /Draft words\./);
+  assert.equal(body.author.name, 'Writer One');
+  // ...and still 404 on the public post route.
+  assert.equal((await call('GET', `/api/blog/en/${post.slug}`)).status, 404);
+
+  // Tampered, extended, malformed or traversal tokens are 404.
+  const [id, exp, mac] = token.split('.');
+  const flip = mac.slice(0, -1) + (mac.endsWith('A') ? 'B' : 'A');
+  for (const bad of [`${id}.${exp}.${flip}`, `${id}.${Number(exp) + 1}.${mac}`, 'post_x.1.y', '../../x']) {
+    assert.equal((await call('GET', `/api/blog/preview/${encodeURIComponent(bad)}`)).status, 404, bad);
+  }
+  const old = createPreviewToken(post.id, Date.now() - PREVIEW_TTL_MS - 1000).token;
+  assert.equal(readPreviewToken(old), null);
+  assert.equal((await call('GET', `/api/blog/preview/${old}`)).status, 404);
+  // A token can't claim more than the allowed lifetime.
+  assert.equal(readPreviewToken(createPreviewToken(post.id, Date.now() + 60_000).token), null);
+});
+
+test('author profile: own job title, bio and photo; the public post shows them', async () => {
+  const w = await as('usr_writer2');
+  const patch = await call('PATCH', '/api/auth/me', w, { jobTitle: '  Content   lead ', bio: 'Line one.\r\n\r\n\r\nLine   two.' });
+  assert.equal(patch.status, 200);
+  const user = (await patch.json()).user;
+  assert.equal(user.jobTitle, 'Content lead');
+  assert.equal(user.bio, 'Line one.\n\nLine two.');
+  assert.equal((await call('PATCH', '/api/auth/me', w, { jobTitle: 'x'.repeat(81) })).status, 400);
+  assert.equal((await call('PATCH', '/api/auth/me', w, { bio: 'x'.repeat(501) })).status, 400);
+  assert.equal((await call('PATCH', '/api/auth/me', undefined, { jobTitle: 'x' })).status, 401);
+
+  const photo = await sharp({ create: { width: 400, height: 400, channels: 3, background: '#3b2416' } }).webp().toBuffer();
+  const up = await call('POST', '/api/auth/me/avatar', w, { image: photo.toString('base64') });
+  assert.equal(up.status, 200);
+  const url1 = (await up.json()).user.avatarUrl as string;
+  assert.match(url1, /^\/media\/avatars\/[0-9a-f-]{36}\.webp$/);
+  const served = await call('GET', url1);
+  assert.equal(served.status, 200);
+  assert.equal(served.headers.get('content-type'), 'image/webp');
+  assert.equal(auditCount('user.update_self', 'usr_writer2') >= 2, true);
+
+  // Too big or not an image: refused. A new photo replaces (and deletes) the old one.
+  const big = await sharp({ create: { width: 1200, height: 300, channels: 3, background: '#000' } }).png().toBuffer();
+  assert.equal((await call('POST', '/api/auth/me/avatar', w, { image: big.toString('base64') })).status, 400);
+  assert.equal((await call('POST', '/api/auth/me/avatar', w, { image: Buffer.from('<svg/>').toString('base64') })).status, 400);
+  const url2 = (await (await call('POST', '/api/auth/me/avatar', w, { image: photo.toString('base64') })).json()).user.avatarUrl;
+  assert.notEqual(url2, url1);
+  assert.equal((await call('GET', url1)).status, 404);
+
+  // The public post carries the author's name, job title and photo.
+  const post = await createPost('usr_writer2', { title: 'Profile post' });
+  assert.equal((await call('POST', `${ADMIN}/posts/${post.id}/publish`, await as('usr_editor'), {})).status, 200);
+  const pub = (await (await call('GET', `/api/blog/en/${post.slug}`)).json()).data;
+  assert.deepEqual(pub.author, { name: 'Writer Two', jobTitle: 'Content lead', avatarUrl: url2 });
+
+  // Removing the photo stops serving it.
+  const del = await call('DELETE', '/api/auth/me/avatar', w);
+  assert.equal((await del.json()).user.avatarUrl, null);
+  assert.equal((await call('GET', url2)).status, 404);
+});

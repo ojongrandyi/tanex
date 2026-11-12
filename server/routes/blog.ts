@@ -12,6 +12,7 @@ import { serverError } from '../errors.js';
 import { decodeImageUpload, deleteUpload, writeImageUpload, type ImageType } from '../uploads.js';
 import { readImageSize } from '../imageSize.js';
 import { EMPTY_DOC, parseDoc, renderDoc, type PMNode } from '../blog/render.js';
+import { createPreviewToken } from '../blog/preview.js';
 import {
   type CategoryRow, type MediaRow, type PostRow, type PostStatus,
   cleanTags, coverOf, formatMedia, getPost, isBlogLocale, isPostStatus, isPublicRow, isValidSlug,
@@ -518,6 +519,21 @@ blogAdminRouter.post('/posts/:id/archive', requirePermission('blog.publish'), (r
     const keep = post.published_at_ts !== null && post.published_at_ts <= Date.now() ? post.published_at_ts : null;
     setStatus(req, post, 'ARCHIVED', keep, 'blog.post_archive', 'Blog post archived');
     res.json({ success: true, data: formatPost(getPost(db, post.id)!, true) });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// POST /api/admin/blog/posts/:id/preview: a signed link to the post's current version that
+// works without signing in for PREVIEW_TTL_MS (server/blog/preview.ts). Anyone who may see the
+// post may preview it; the link is audited because it shares an unpublished text.
+blogAdminRouter.post('/posts/:id/preview', requirePermission(...ANY_POST_ACCESS), (req: Request, res: Response) => {
+  try {
+    const post = getPost(db, req.params.id as string);
+    if (!post || !canViewPost(req, post)) return notFound(res);
+    const { token, expiresAt } = createPreviewToken(post.id);
+    audit(req, 'blog.post_preview', 'blog_post', post.id, `Blog post preview link created: ${post.title}`, undefined, { expiresAt });
+    res.json({ success: true, data: { token, expiresAt } });
   } catch (err) {
     serverError(res, err);
   }

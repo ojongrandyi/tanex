@@ -10,6 +10,7 @@ import { initDatabase, dataDir, dbPath, db } from './db.js';
 import { bootstrapSuperAdmin } from './auth/bootstrap.js';
 import { startOutboxWorker } from './mail/outbox.js';
 import { startBlogScheduler } from './blog/posts.js';
+import { setPreviewSecret } from './blog/preview.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { seoRouter } from './seo.js';
 import { publicPages, sendIndex } from './publicPages.js';
@@ -117,11 +118,11 @@ if (ADMIN_PROXY_TARGET) {
 
   // Sessions live in the SQLite `sessions` table (IAM_RBAC_SPEC §5.7), so a restart or
   // redeploy no longer signs everyone out. Cookie settings are in createSessionMiddleware.
-  app.use(createSessionMiddleware(
-    new SqliteSessionStore(db),
-    // SESSION_SECRET, or a random secret generated once and kept next to the database.
-    resolveSessionSecret(dataDir)
-  ));
+  // SESSION_SECRET, or a random secret generated once and kept next to the database.
+  const sessionSecret = resolveSessionSecret(dataDir);
+  app.use(createSessionMiddleware(new SqliteSessionStore(db), sessionSecret));
+  // Blog preview links are signed with a key derived from it (server/blog/preview.ts).
+  setPreviewSecret(sessionSecret);
 
   // State-changing /api requests must be JSON or multipart (IAM_RBAC_SPEC §5.8).
   app.use('/api', requireJsonOrMultipart);
