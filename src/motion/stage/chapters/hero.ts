@@ -1,12 +1,13 @@
-// Chapter 0 · Your door (MOTION_3D_SPEC §6): the cream globe turns once (a ≤ 5 s intro: arcs
-// draw from Douala to the hubs, the paper plane glides to Europe), then scrolling dives towards
+// Chapter 0 · Your door (MOTION_3D_SPEC §6): the cream globe turns continuously while the hero is
+// in view (a slow full turn every 20 s; each turn the arcs draw from Douala to the hubs and the paper
+// plane glides to Europe; held by Pause motion), then scrolling dives towards
 // Buea: the globe grows inside its lane's porthole, Buea comes to the front, an opening widens
 // from Buea until the globe is gone, and behind it is a street at a front door where the bike
 // pulls up. Scrolling on, the bike rides away and the door is left behind.
 //
 // The globe is drawn in its own scene with its own camera, over the main scene (bike + door), so
 // the opening reveals what is behind it. Every scroll-driven value here is a pure function of the
-// Journey travel; the intro is the only time-based part and settles for good after 5 s.
+// Journey travel; the spin is the only time-based part and stops once the dive starts.
 import {
   Matrix4, Mesh, PerspectiveCamera, PlaneGeometry, Scene, ShaderMaterial, Vector3, CustomBlending, OneMinusSrcAlphaFactor,
   ZeroFactor, type Group,
@@ -31,12 +32,20 @@ export const HERO_TIMELINE = {
 /** Metres the bike rolls in before stopping at the door, and rides before Services starts. */
 export const ROLL_METRES = 1;
 export const DEPART_METRES = 0.65;
-/** Length of the intro (MOTION §1.3: idle motion stops after 5 s). */
-export const INTRO_SECONDS = 5;
+/**
+ * One full turn of the globe, seconds. Each turn the arcs draw out from Douala as it comes round,
+ * the plane glides to Europe, and both fade as Douala turns away (owner request, 2026-11-12).
+ */
+export const SPIN_CYCLE_SECONDS = 20;
+/** Where the spin starts on load: Douala just behind the rim, so the arcs draw in within a second. */
+export const SPIN_START_SECONDS = 0.12 * SPIN_CYCLE_SECONDS;
+/** Cycle position (0–1) shown when motion is paused: Douala in front, arcs drawn, plane landed. */
+const SPIN_REST = 0.45;
+/** Cycle position at which the globe faces REST. */
+const SPIN_FRONT = 0.4;
 
 /** Where the globe faces at rest (Africa and Europe), degrees. */
 const REST = { lat: 16, lon: 14 };
-const INTRO_SPIN = 28;
 /** Camera distance from the globe centre (radius 1) at rest and at the end of the dive. */
 const DIST_REST = 4;
 const DIST_DIVE = 1.16;
@@ -164,12 +173,12 @@ export class HeroScene {
   }
 
   /**
-   * Poses the chapter for `travel`. `intro` is seconds since the intro started (≥ INTRO_SECONDS
-   * once settled), `presence` how much the hero lane is the bike's current lane (0–1).
+   * Poses the chapter for `travel`. `spin` is seconds of globe spin (null = still rest pose, for
+   * Pause motion), `presence` how much the hero lane is the bike's current lane (0–1).
    */
-  update(travel: number, intro: number, frame: HeroFrame, presence: number, departed: number): HeroPhase {
+  update(travel: number, spin: number | null, frame: HeroFrame, presence: number, departed: number): HeroPhase {
     const phase = heroPhase(travel);
-    this.updateGlobe(phase, intro, frame);
+    this.updateGlobe(phase, spin, frame);
     const c = this.clipUniforms;
     this.clipShown = phase.clip > 0.002 && phase.bikeShown && frame.size > 0;
     if (this.clipShown) {
@@ -187,30 +196,34 @@ export class HeroScene {
     return phase;
   }
 
-  private updateGlobe(phase: HeroPhase, intro: number, frame: HeroFrame): void {
+  private updateGlobe(phase: HeroPhase, spin: number | null, frame: HeroFrame): void {
     const { rig, globeCamera: cam } = this;
     const u = rig.uniforms;
     this.globeShown = phase.globe > 0.002 && frame.size > 0;
     rig.group.visible = this.globeShown;
     if (!this.globeShown) return;
 
-    // Intro: a slow turn that settles, arcs drawing one after another, the plane gliding.
-    const settle = clamp01(intro / INTRO_SECONDS);
-    const spin = INTRO_SPIN * (1 - (1 - settle) ** 3);
+    // The spin: a steady full turn per cycle. Each time Douala comes round the arcs draw out one
+    // after another and the plane glides to Europe; both fade as Douala turns away. The dive
+    // turns the shortest way from wherever the spin stopped to Buea.
+    const cycle = spin === null ? SPIN_REST : (spin / SPIN_CYCLE_SECONDS) % 1;
+    const spinLon = REST.lon + 360 * (cycle - SPIN_FRONT);
+    const fromLon = BUEA.lon + ((((spinLon - BUEA.lon + 180) % 360) + 360) % 360) - 180;
     const lat = lerp(REST.lat, BUEA.lat, phase.dive);
-    const lon = lerp(REST.lon - INTRO_SPIN + spin, BUEA.lon, phase.dive);
+    const lon = lerp(fromLon, BUEA.lon, phase.dive);
     rig.group.rotation.set(lat * DEG, -lon * DEG, 0, 'XYZ');
     rig.group.updateMatrixWorld(true);
     u.uHoleDir.value.copy(latLonDir(BUEA.lat, BUEA.lon, this.holeDir).transformDirection(rig.group.matrixWorld));
 
     rig.arcs.forEach((arc, i) => {
-      const drawn = smooth(clamp01((intro - 0.4 - 0.22 * i) / 1.4));
+      const drawn = smooth(clamp01((cycle - 0.18 - 0.025 * i) / 0.12));
       arc.mesh.visible = drawn > 0;
       arc.mesh.geometry.setDrawRange(0, Math.floor(drawn * arc.segments) * arc.radial * 6);
     });
-    const flight = smooth(clamp01((intro - 0.9) / 3.4));
-    rig.plane.visible = flight > 0;
-    if (flight > 0) this.placePlane(flight);
+    const flight = smooth(clamp01((cycle - 0.2) / 0.25));
+    const routes = 1 - smooth(clamp01((cycle - 0.6) / 0.12));
+    rig.plane.visible = flight > 0 && routes > 0;
+    if (rig.plane.visible) this.placePlane(flight);
 
     // The dive: a fixed lens, the camera closing in on the surface.
     const radius = (GLOBE_FILL * frame.size) / 2;
@@ -242,7 +255,7 @@ export class HeroScene {
     const soft = Math.max(0.002, cap * 0.18);
     u.uHole.value.set(lerp(-2 * soft, cap * 1.25 + soft, phase.hole), soft);
     u.uOpacity.value = phase.globe;
-    u.uArcOpacity.value = phase.arcs;
+    u.uArcOpacity.value = phase.arcs * routes;
   }
 
   private placePlane(t: number): void {

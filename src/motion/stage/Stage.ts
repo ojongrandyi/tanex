@@ -1,7 +1,7 @@
 // The Stage (MOTION_3D_SPEC §1–§2, §5, §8): one WebGL renderer for the whole homepage, drawn on
 // one canvas that stays on screen while the homepage scrolls. It renders on demand only (a
-// Journey update, a resize, the tab becoming visible, and the hero's ≤ 5 s intro), never in an
-// endless loop, and everything scroll-driven is a pure function of the Journey state and the lane
+// Journey update, a resize, the tab becoming visible, and the hero globe's spin, which runs only
+// while the globe is in view at the top and motion is not paused), and everything scroll-driven is a pure function of the Journey state and the lane
 // positions, so scrolling back up gives exactly the frames scrolling down gave.
 //
 // Passes: the main scene (bike, the doors of chapters 0 and 8, the road of chapter 1, the truck
@@ -29,7 +29,7 @@ import { WHEEL_RADIUS } from './bike';
 import { CameraRail, type CameraView } from './camera';
 import { bump, clamp01, lerp, smooth } from './ease';
 import { laneAnchor, type LaneRect, type LaneView } from './lanes';
-import { HeroScene, heroDistance, INTRO_SECONDS, ROLL_METRES } from './chapters/hero';
+import { HERO_TIMELINE, HeroScene, heroDistance, ROLL_METRES, SPIN_CYCLE_SECONDS, SPIN_START_SECONDS } from './chapters/hero';
 import { bandFrame, rideProgress, ServicesScene } from './chapters/services';
 import { inTownDistance, inTownPhase, PHONE_FOCUS, PhoneMap, type InTownPhase } from './chapters/inTown';
 import { cityDistance, cityFocus, cityPhase, CityScene, type CityPhase, type Focus } from './chapters/cityToCity';
@@ -186,8 +186,9 @@ export class Stage {
   private opacity = -1;
   private shown = false;
   private disposed = false;
-  /** When the hero intro started (ms), or null until the globe is first seen. */
-  private introStart: number | null = null;
+  /** Seconds the hero globe has spun (advances only while it runs) and the last tick (ms). */
+  private spin = SPIN_START_SECONDS;
+  private spinLast: number | null = null;
   private readonly unsubscribePause: () => void;
   private readonly environment: Texture;
 
@@ -521,17 +522,19 @@ export class Stage {
       const heroLane = this.lanes.findIndex((lane) => lane.chapter === 0);
       // The globe fits inside the hero lane (its smaller side), unlike the bike, which may overhang.
       const heroAnchor = heroLane >= 0 ? laneAnchor([rects[heroLane]], view) : null;
-      const intro = this.introSeconds(heroAnchor !== null && heroAnchor.weight > 0.25 && travel < 0.3);
+      // The globe spins while the hero is in view at the top; scrolling into the dive holds it.
+      const spinRunning = heroAnchor !== null && heroAnchor.weight > 0.25 && travel < HERO_TIMELINE.dive[0] && !isMotionPaused();
+      const spinTime = this.spinSeconds(spinRunning);
       const phase = this.hero.update(
         travel,
-        intro,
+        spinTime,
         heroAnchor
           ? { x: heroAnchor.x - rect.left, y: heroAnchor.y - rect.top, size: Math.min(rects[heroLane].width, rects[heroLane].height), width: w, height: h, dpr: this.renderer.getPixelRatio() }
           : { x: 0, y: 0, size: 0, width: w, height: h, dpr: 1 },
         travel < 1.5 ? Math.max(heroShare, travel < 0.6 ? 1 : 0) : 0,
         Math.max(0, distance - ROLL_METRES),
       );
-      animating = (this.hero.drawsGlobe && this.introStart !== null && intro < INTRO_SECONDS) || idleRunning;
+      animating = (this.hero.drawsGlobe && spinRunning) || idleRunning;
 
       // The truck and route show only once chapter 3 is clearly the lane, so they never hang over
       // the neighbouring chapters while the framing moves between the bike and the route.
@@ -607,16 +610,21 @@ export class Stage {
   };
 
   /**
-   * Seconds into the hero intro (MOTION §1.3: ≤ 5 s, then still). It starts the first time the
-   * globe is seen near the top of the page; Pause motion, or arriving lower down, skips it.
+   * Seconds of hero globe spin (owner request 2026-11-12: it turns continuously and the arcs
+   * redraw every turn). The clock advances only while `running` (frame gaps capped), so the
+   * globe resumes where it stopped; null with Pause motion, which shows the still rest pose.
    */
-  private introSeconds(visibleAtTop: boolean): number {
-    if (isMotionPaused()) return INTRO_SECONDS;
-    if (this.introStart === null) {
-      if (!visibleAtTop) return this.journey.travel >= 0.3 ? INTRO_SECONDS : 0;
-      this.introStart = performance.now();
+  private spinSeconds(running: boolean): number | null {
+    if (isMotionPaused()) {
+      this.spinLast = null;
+      return null;
     }
-    return Math.min(INTRO_SECONDS, (performance.now() - this.introStart) / 1000);
+    const now = performance.now();
+    if (running && this.spinLast !== null) {
+      this.spin = (this.spin + Math.min(0.05, (now - this.spinLast) / 1000)) % SPIN_CYCLE_SECONDS;
+    }
+    this.spinLast = running ? now : null;
+    return this.spin;
   }
 
   /** Moving parts as pure functions of the Journey (travel, and the story position). */
