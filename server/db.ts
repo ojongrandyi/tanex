@@ -4,6 +4,7 @@ import fs from 'fs';
 import { EMAIL, HQ_ADDRESS, LEGAL_NAME } from '../src/config/brand.js';
 import { initIamSchema } from './auth/schema.js';
 import { createMailTables } from './mail/outbox.js';
+import { createBlogTables } from './blog/schema.js';
 
 // DB_PATH lets a real deployment point the database file somewhere OUTSIDE the directory
 // git/the deploy process manages, e.g. a persistent storage path a host provides separately
@@ -307,6 +308,9 @@ export function initDatabase() {
 
   // 19. Email outbox (docs/NOTIFICATIONS_SPEC.md §3), sent by server/mail/outbox.ts.
   createMailTables(db);
+
+  // 20. Blog posts, categories, media and old-slug redirects (docs/BLOG_SPEC.md §3).
+  createBlogTables(db);
 
   // Safe dynamic migrations for existing databases. Must run after every CREATE TABLE above
   // (shipments through settings) — these ALTER statements target quote_requests, documents

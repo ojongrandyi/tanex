@@ -85,6 +85,14 @@ state until the first real post is published.
   `GET /api/blog/:locale/:slug` (full post + previous/next + up to 3 related by category),
   `GET /api/blog/latest?locale=&limit=3` (homepage).
 
+**As built (F.1).** Console API at `/api/admin/blog`: `posts` (list/get/create/update/delete) with
+`posts/:id/submit|publish|unpublish|archive` (`publish` takes an optional `publishAt` → SCHEDULED), `categories`,
+`media` (upload the 1600 px file, then `PUT media/:id/small` for the 800 px copy, each ≤ 3 MB, so neither request
+nears the JSON body limit), `authors`. `blog_media` has three extra columns for that copy (`small_file_name`,
+`small_width`, `small_height`). A writer with `blog.write` only edits own posts while DRAFT/IN_REVIEW. An old slug
+gets a redirect once the post has been live. The public API also has `GET /api/blog/categories?locale=` (categories
+with public posts) and answers an old slug with 301 to `/api/blog/:locale/<current>` (`path` in the body).
+
 ## 6. Public pages
 
 - `/blog`, `/fr/blog`: hero (eyebrow + title from CONTENT §15), category chips, featured latest post, grid of

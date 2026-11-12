@@ -12,13 +12,15 @@ export const uploadsDir = path.resolve(
     || path.join(process.env.DB_PATH ? path.dirname(process.env.DB_PATH) : path.join(process.cwd(), 'data'), 'uploads')
 );
 
-export type UploadFolder = 'images' | 'proofs';
+export type UploadFolder = 'images' | 'proofs' | 'blog';
 
 // images/: package photos, served publicly via /media when marked visible.
 // proofs/: payment screenshots, private, only ever served through an admin-only route.
+// blog/: blog images (BLOG_SPEC §4), served publicly via /media/blog/.
 export const uploadFolders: Record<UploadFolder, string> = {
   images: path.join(uploadsDir, 'images'),
   proofs: path.join(uploadsDir, 'proofs'),
+  blog: path.join(uploadsDir, 'blog'),
 };
 
 export function ensureUploadDirs() {
@@ -29,20 +31,23 @@ export function ensureUploadDirs() {
 
 // ---- Upload validation (base64-in-JSON, like the signature/stamp uploads in Settings) ----
 
-export type ImageType = 'webp' | 'jpeg' | 'png';
+export type ImageType = 'webp' | 'jpeg' | 'png' | 'avif';
 
-const EXTENSIONS: Record<ImageType, string> = { webp: 'webp', jpeg: 'jpg', png: 'png' };
+const EXTENSIONS: Record<ImageType, string> = { webp: 'webp', jpeg: 'jpg', png: 'png', avif: 'avif' };
 
 export const IMAGE_CONTENT_TYPES: Record<string, string> = {
-  webp: 'image/webp', jpg: 'image/jpeg', png: 'image/png',
+  webp: 'image/webp', jpg: 'image/jpeg', png: 'image/png', avif: 'image/avif',
 };
+
+/** Types accepted unless a caller allows more (package photos, payment proofs). */
+export const DEFAULT_IMAGE_TYPES: readonly ImageType[] = ['webp', 'jpeg', 'png'];
 
 // Images are compressed in the browser first (src/services/imageCompress.ts), so a real upload
 // is well under this; the cap only stops oversized or hand-crafted requests.
 export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 
 // Stored names are always `<uuid>.<ext>` generated here, never anything the client sent.
-const STORED_NAME = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(webp|jpg|png)$/;
+const STORED_NAME = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(webp|jpg|png|avif)$/;
 
 /** Identifies an image by its content (magic bytes), ignoring any declared type or file name. */
 export function detectImageType(buf: Uint8Array): ImageType | null {
@@ -57,13 +62,26 @@ export function detectImageType(buf: Uint8Array): ImageType | null {
     && buf[4] === 0x0d && buf[5] === 0x0a && buf[6] === 0x1a && buf[7] === 0x0a) {
     return 'png';
   }
+  // ISO BMFF: an "ftyp" box whose major brand is avif (still image) or avis (sequence).
+  if (buf.length >= 12
+    && buf[4] === 0x66 && buf[5] === 0x74 && buf[6] === 0x79 && buf[7] === 0x70) { // "ftyp"
+    const brand = String.fromCharCode(buf[8], buf[9], buf[10], buf[11]);
+    if (brand === 'avif' || brand === 'avis') return 'avif';
+  }
   return null;
 }
 
 export type DecodedImage = { ok: true; buffer: Buffer; type: ImageType } | { ok: false; error: string };
 
-/** Accepts plain base64 or a `data:` URL; returns the bytes only if they really are a WebP/JPEG/PNG. */
-export function decodeImageUpload(input: unknown, maxBytes = MAX_UPLOAD_BYTES): DecodedImage {
+/**
+ * Accepts plain base64 or a `data:` URL; returns the bytes only if they really are one of the
+ * allowed types (WebP/JPEG/PNG unless the caller also allows AVIF).
+ */
+export function decodeImageUpload(
+  input: unknown,
+  maxBytes = MAX_UPLOAD_BYTES,
+  allowed: readonly ImageType[] = DEFAULT_IMAGE_TYPES
+): DecodedImage {
   if (typeof input !== 'string' || !input) return { ok: false, error: 'An image is required.' };
   const comma = input.startsWith('data:') ? input.indexOf(',') : -1;
   const b64 = (comma >= 0 ? input.slice(comma + 1) : input).replace(/\s/g, '');
@@ -74,7 +92,12 @@ export function decodeImageUpload(input: unknown, maxBytes = MAX_UPLOAD_BYTES): 
   if (buffer.length === 0) return { ok: false, error: 'The image data is not valid.' };
   if (buffer.length > maxBytes) return { ok: false, error: 'The image is too large.' };
   const type = detectImageType(buffer);
-  if (!type) return { ok: false, error: 'Only JPG, PNG or WebP images are accepted.' };
+  if (!type || !allowed.includes(type)) {
+    return {
+      ok: false,
+      error: allowed.includes('avif') ? 'Only JPG, PNG, WebP or AVIF images are accepted.' : 'Only JPG, PNG or WebP images are accepted.'
+    };
+  }
   return { ok: true, buffer, type };
 }
 
@@ -84,17 +107,23 @@ export function resolveUploadPath(folder: UploadFolder, fileName: string): strin
   return path.join(uploadFolders[folder], fileName);
 }
 
+/** Writes already-validated bytes under a new random name. `id` is the name without extension. */
+export function writeImageUpload(folder: UploadFolder, buffer: Buffer, type: ImageType):
+  { id: string; fileName: string; sizeBytes: number; type: ImageType } {
+  const id = crypto.randomUUID();
+  const fileName = `${id}.${EXTENSIONS[type]}`;
+  fs.mkdirSync(uploadFolders[folder], { recursive: true });
+  // 'wx' never overwrites an existing file.
+  fs.writeFileSync(path.join(uploadFolders[folder], fileName), buffer, { flag: 'wx' });
+  return { id, fileName, sizeBytes: buffer.length, type };
+}
+
 /** Validates and writes an upload under a new random name. `id` is the name without extension. */
 export function saveImageUpload(folder: UploadFolder, input: unknown):
   { ok: true; id: string; fileName: string; sizeBytes: number; type: ImageType } | { ok: false; error: string } {
   const decoded = decodeImageUpload(input);
   if (!decoded.ok) return decoded;
-  const id = crypto.randomUUID();
-  const fileName = `${id}.${EXTENSIONS[decoded.type]}`;
-  fs.mkdirSync(uploadFolders[folder], { recursive: true });
-  // 'wx' never overwrites an existing file.
-  fs.writeFileSync(path.join(uploadFolders[folder], fileName), decoded.buffer, { flag: 'wx' });
-  return { ok: true, id, fileName, sizeBytes: decoded.buffer.length, type: decoded.type };
+  return { ok: true, ...writeImageUpload(folder, decoded.buffer, decoded.type) };
 }
 
 /** Removes a stored file; ignores names this module didn't generate and files already gone. */

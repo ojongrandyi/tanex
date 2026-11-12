@@ -10,6 +10,24 @@ function notFound(res: Response) {
   res.status(404).type('text/plain').send('Not found');
 }
 
+// GET /media/blog/<id>.<ext> (public): images in the blog media library (BLOG_SPEC §4), the
+// 1600 px file or its 800 px copy. Names are random UUIDs; only files with a blog_media row are
+// served, from uploads/blog only. Cached for 30 days.
+mediaRouter.get('/media/blog/:file', (req: Request, res: Response) => {
+  const file = req.params.file as string;
+  const filePath = resolveUploadPath('blog', file);
+  if (!filePath) return notFound(res);
+  const row = db.prepare('SELECT 1 FROM blog_media WHERE file_name = ? OR small_file_name = ?').get(file, file);
+  if (!row) return notFound(res);
+
+  res.setHeader('Content-Type', IMAGE_CONTENT_TYPES[path.extname(file).slice(1)]);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'public, max-age=2592000');
+  res.sendFile(filePath, { cacheControl: false }, (err) => {
+    if (err && !res.headersSent) notFound(res);
+  });
+});
+
 // GET /media/<id>.<ext> (public). Package images only, and only while marked visible on a shipment
 // that isn't in the trash. Payment proofs are never served here: they live in a separate folder
 // that this route can't reach (resolveUploadPath is always called with 'images').

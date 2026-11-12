@@ -82,7 +82,9 @@ const MOUNTS: Record<string, string> = {
   messagesRouter: '/api/messages',
   mediaRouter: '',
   statsRouter: '/api/stats',
-  paymentsRouter: '/api/payments'
+  paymentsRouter: '/api/payments',
+  blogAdminRouter: '/api/admin/blog',
+  publicBlogRouter: '/api/blog'
 };
 
 // Open to visitors on purpose (IAM_RBAC_SPEC §6–§7).
@@ -100,7 +102,13 @@ const PUBLIC = new Set([
   'GET /api/track/:trackingNumber',
   'POST /api/track/:trackingNumber/payment-proof',
   'POST /api/messages/',
-  'GET /media/:file'
+  'GET /media/:file',
+  // Blog (BLOG_SPEC §5): published posts and their images only.
+  'GET /api/blog/',
+  'GET /api/blog/latest',
+  'GET /api/blog/categories',
+  'GET /api/blog/:locale/:slug',
+  'GET /media/blog/:file'
 ]);
 // Signed-in only (no permission key): the user's own account.
 const SESSION_ONLY = new Set([

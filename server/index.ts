@@ -9,6 +9,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { initDatabase, dataDir, dbPath, db } from './db.js';
 import { bootstrapSuperAdmin } from './auth/bootstrap.js';
 import { startOutboxWorker } from './mail/outbox.js';
+import { startBlogScheduler } from './blog/posts.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { seoRouter } from './seo.js';
 import { publicPages, sendIndex } from './publicPages.js';
@@ -48,6 +49,8 @@ if (!ADMIN_PROXY_TARGET) {
   ensureUploadDirs();
   // Sends queued emails every 30 s; logs once whether email is on (NOTIFICATIONS_SPEC §3).
   startOutboxWorker(db);
+  // Publishes scheduled blog posts when their time comes (checked every minute; BLOG_SPEC §3).
+  startBlogScheduler(db);
 }
 
 // Middleware

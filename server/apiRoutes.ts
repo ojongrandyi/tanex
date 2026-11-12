@@ -18,6 +18,8 @@ import { usersRouter } from './routes/users.js';
 import { rolesRouter, permissionsRouter } from './routes/roles.js';
 import { auditRouter } from './routes/auditLog.js';
 import { mailRouter } from './routes/mail.js';
+import { blogAdminRouter } from './routes/blog.js';
+import { publicBlogRouter } from './routes/publicBlog.js';
 import { requirePermission } from './middleware/auth.js';
 import { addErrorCodes } from './middleware/errorCodes.js';
 
@@ -54,7 +56,12 @@ export function registerApiRoutes(app: Express): void {
   app.use('/api/track', trackRouter);
   // Contact form: POST is public (rate-limited); list and status changes are gated per route.
   app.use('/api/messages', messagesRouter);
-  // Public package images (/media/<id>.<ext>); outside /api so they can be cached.
+  // Blog (BLOG_SPEC §5): the studio API, each route gated with a blog.* permission, and the
+  // public API, which only ever returns published posts.
+  app.use('/api/admin/blog', blogAdminRouter);
+  app.use('/api/blog', publicBlogRouter);
+  // Public package and blog images (/media/<id>.<ext>, /media/blog/<id>.<ext>); outside /api
+  // so they can be cached.
   app.use(mediaRouter);
   app.use('/api/stats', requirePermission('dashboard.view'), statsRouter);
   // Admin Payments page: proofs of payment and their private screenshots (update F.5). Each
