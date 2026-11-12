@@ -86,6 +86,8 @@ const common = {
     open: 'Ouvert {hours}',
     social: 'Réseaux sociaux',
     copyright: '© {year} {legalName}. Tous droits réservés.',
+    moreLinks: 'Autres liens',
+    poweredBy: 'Propulsé par',
   },
   errors: {
     BAD_REQUEST: 'Certaines informations sont incorrectes. Vérifiez-les et réessayez.',

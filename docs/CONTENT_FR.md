@@ -68,7 +68,7 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 
 **Bureaux :** `Buea (siège)` : `{{HQ_ADDRESS}}` · `Douala` : `{{DOUALA_OFFICE}}` · `Appelez le {{PHONE}} · {{PHONE_2}}` · `Ouvert de {{HOURS}}`
 
-**Ligne du bas :** `© {année} Tanex SARL. Tous droits réservés.`
+**Ligne du bas :** `© {année} Tanex SARL. Tous droits réservés.` · liens au-delà de la 5e ligne d'une colonne (titre masqué `Autres liens`) · `Propulsé par Web Spectron` (**à confirmer**)
 
 ### 1.4 Langue, messages communs et erreurs (ajouté le 2026-11-08 avec D.3, **à confirmer**, relecture native #108)
 - **Sélecteur :** `EN | FR` · `English` · `Français` · libellé `Langue` · navigation `Navigation principale` · logo `Accueil {{COMPANY}}`.

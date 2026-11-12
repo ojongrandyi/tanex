@@ -97,7 +97,11 @@ unless the owner confirms them. Items marked **[confirm]** are best-knowledge dr
 
 **Offices block:** `Buea (head office)`: `{{HQ_ADDRESS}}` · `Douala`: `{{DOUALA_OFFICE}}` · `Call {{PHONE}} · {{PHONE_2}}` · `Open {{HOURS}}`
 
-**Bottom line:** `© {year} Tanex SARL. All rights reserved.` · social icons only with real URLs.
+**Bottom line:** `© {year} Tanex SARL. All rights reserved.` · links past row 5 of any column (hidden heading `More links`) · `Powered by Web Spectron` (links to https://webspectron.com/, owner request 2026-11-12) · social icons only with real URLs.
+
+**Equal rows (2026-11-12):** every link column shows exactly 5 rows; extra links move to the bottom line. Footer order:
+*Services* Local delivery first (Rail transport moves to the bottom line) · *Company* About TanEx · Our network · Blog ·
+Careers · CSR Policy · *Support* Track · Book a shipment · Help centre · Get a Quote · Contact.
 
 Built with C.3: *Company* shows **Blog** from F.3 and *Support* shows **Book a bike delivery** from G.6 (hidden until those
 pages exist). Hidden headings for screen readers (**owner to confirm**): `Offices`, `Social media`.

@@ -112,6 +112,8 @@ const common = {
     open: 'Open {hours}',
     social: 'Social media',
     copyright: '© {year} {legalName}. All rights reserved.',
+    moreLinks: 'More links',
+    poweredBy: 'Powered by',
   },
   // CONTENT §6.2: shown while a tracking lookup runs (outside any page, so it lives in common).
   trackingLoading: {

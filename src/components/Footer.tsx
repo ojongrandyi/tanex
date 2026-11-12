@@ -32,9 +32,17 @@ import './Footer.css';
 
 const TRUST_KEYS = ['world', 'live', 'photo', 'languages'] as const;
 
+// Every link column shows the same number of rows; links past that move to the bottom line.
+const FOOTER_ROWS = 5;
+
+const POWERED_BY = { name: 'Web Spectron', url: 'https://webspectron.com/' };
+
 function footerColumns(t: TFunction): { title: string; links: SiteLink[] }[] {
+  // Local delivery (TanEx's core service) leads the footer list, so the overflow is a freight mode.
+  const services = servicesLinks(t);
+  const local = services.filter((l) => l.param === 'local-delivery');
   return [
-    { title: t('footer.columns.services'), links: servicesLinks(t) },
+    { title: t('footer.columns.services'), links: [...local, ...services.filter((l) => !local.includes(l))] },
     {
       title: t('footer.columns.company'),
       links: [
@@ -43,7 +51,6 @@ function footerColumns(t: TFunction): { title: string; links: SiteLink[] }[] {
         { label: t('footer.links.blog'), page: 'blog' },
         { label: t('footer.links.careers'), page: 'careers' },
         { label: t('footer.links.csr'), page: 'csr' },
-        { label: t('footer.links.contact'), page: 'contact' },
       ],
     },
     {
@@ -54,6 +61,7 @@ function footerColumns(t: TFunction): { title: string; links: SiteLink[] }[] {
         { label: t('ship.bookShipment'), page: 'ship' },
         { label: t('footer.links.help'), page: 'help' },
         { label: t('footer.links.quote'), page: 'quote' },
+        { label: t('footer.links.contact'), page: 'contact' },
       ],
     },
     {
@@ -96,6 +104,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate = () => {}, showTrust
     .filter((p, i, all) => p && all.indexOf(p) === i);
   const telFor = (display: string) => (display === phone && phoneHref ? phoneHref : `tel:${display.replace(/[^0-9+]/g, '')}`);
   const social = SOCIAL_LINKS.filter((s) => SOCIAL[s.key]);
+  const columns = footerColumns(t);
+  const overflow = columns.flatMap((c) => c.links.slice(FOOTER_ROWS));
 
   // Plain clicks route in-app; Ctrl/Cmd/Shift/middle-click keep the browser's open-in-new-tab
   // behaviour, since each link carries its real URL.
@@ -175,11 +185,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate = () => {}, showTrust
               )}
             </div>
 
-            {footerColumns(t).map(({ title, links }) => (
+            {columns.map(({ title, links }) => (
               <nav key={title} className="tx-footer__col" aria-label={title}>
                 <h2 className="tx-footer__col-title">{title}</h2>
                 <ul>
-                  {links.map(({ label, page, param }) => (
+                  {links.slice(0, FOOTER_ROWS).map(({ label, page, param }) => (
                     <li key={label}>
                       <a href={hrefFor(page, param)} onClick={go(page, param)}>{label}</a>
                     </li>
@@ -215,6 +225,21 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate = () => {}, showTrust
 
           <div className="tx-footer__bottom">
             <p>{t('footer.copyright', { year: new Date().getFullYear(), legalName: LEGAL_NAME })}</p>
+            {overflow.length > 0 && (
+              <nav className="tx-footer__more" aria-label={t('footer.moreLinks')}>
+                <ul>
+                  {overflow.map(({ label, page, param }) => (
+                    <li key={label}>
+                      <a href={hrefFor(page, param)} onClick={go(page, param)}>{label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+            <p className="tx-footer__credit">
+              {t('footer.poweredBy')}{' '}
+              <a href={POWERED_BY.url} target="_blank" rel="noopener">{POWERED_BY.name}</a>
+            </p>
           </div>
         </div>
       </div>
