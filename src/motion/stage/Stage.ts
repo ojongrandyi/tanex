@@ -29,7 +29,7 @@ import { WHEEL_RADIUS } from './bike';
 import { CameraRail, type CameraView } from './camera';
 import { bump, clamp01, lerp, smooth } from './ease';
 import { laneAnchor, type LaneRect, type LaneView } from './lanes';
-import { HERO_TIMELINE, HeroScene, heroDistance, ROLL_METRES, SPIN_CYCLE_SECONDS, SPIN_START_SECONDS } from './chapters/hero';
+import { HERO_TIMELINE, HeroScene, heroDistance, ROLL_METRES, SPIN_START_SECONDS } from './chapters/hero';
 import { bandFrame, rideProgress, ServicesScene } from './chapters/services';
 import { inTownDistance, inTownPhase, PHONE_FOCUS, PhoneMap, type InTownPhase } from './chapters/inTown';
 import { cityDistance, cityFocus, cityPhase, CityScene, type CityPhase, type Focus } from './chapters/cityToCity';
@@ -148,7 +148,10 @@ export class Stage {
   /** Cream rim light kept behind the bike as seen from the camera: separates it from dark chapters. */
   private readonly rim = new DirectionalLight('#FFE9CC', 2.2);
   private readonly shadow: Mesh;
-  private readonly hero = new HeroScene();
+  private readonly hero = new HeroScene(
+    { url: LOGO_WORDMARK_WEB, width: LOGO_WORDMARK_WEB_WIDTH, height: LOGO_WORDMARK_WEB_HEIGHT },
+    () => this.requestRender(),
+  );
   private readonly services = new ServicesScene();
   private readonly city: CityScene;
   private readonly world = new WorldScene();
@@ -522,9 +525,11 @@ export class Stage {
       const heroLane = this.lanes.findIndex((lane) => lane.chapter === 0);
       // The globe fits inside the hero lane (its smaller side), unlike the bike, which may overhang.
       const heroAnchor = heroLane >= 0 ? laneAnchor([rects[heroLane]], view) : null;
-      // The globe spins while the hero is in view at the top; scrolling into the dive holds it.
-      const spinRunning = heroAnchor !== null && heroAnchor.weight > 0.25 && travel < HERO_TIMELINE.dive[0] && !isMotionPaused();
-      const spinTime = this.spinSeconds(spinRunning);
+      // The globe spins while the hero is in view and keeps turning into the dive, slowing as it
+      // closes in on Buea (the hero sets the rate), so a slightly scrolled page still turns.
+      const spinRunning = heroAnchor !== null && heroAnchor.weight > 0.25 && travel < HERO_TIMELINE.dive[1]
+        && this.hero.spinRate > 0 && !isMotionPaused();
+      const spinTime = this.spinSeconds(spinRunning, this.hero.spinRate);
       const phase = this.hero.update(
         travel,
         spinTime,
@@ -614,14 +619,15 @@ export class Stage {
    * redraw every turn). The clock advances only while `running` (frame gaps capped), so the
    * globe resumes where it stopped; null with Pause motion, which shows the still rest pose.
    */
-  private spinSeconds(running: boolean): number | null {
+  private spinSeconds(running: boolean, rate: number): number | null {
     if (isMotionPaused()) {
       this.spinLast = null;
       return null;
     }
     const now = performance.now();
     if (running && this.spinLast !== null) {
-      this.spin = (this.spin + Math.min(0.05, (now - this.spinLast) / 1000)) % SPIN_CYCLE_SECONDS;
+      // Not wrapped: the hero needs a continuous longitude to blend into the dive without a jump.
+      this.spin += Math.min(0.05, (now - this.spinLast) / 1000) * rate;
     }
     this.spinLast = running ? now : null;
     return this.spin;

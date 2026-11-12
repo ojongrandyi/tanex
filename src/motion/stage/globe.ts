@@ -8,7 +8,7 @@
 // Globe space: radius 1, centred on the origin, latitude/longitude with longitude 0 facing +Z.
 import {
   BufferGeometry, CatmullRomCurve3, Color, DoubleSide, Float32BufferAttribute, Group, Mesh, Points,
-  ShaderMaterial, SphereGeometry, TubeGeometry, Vector2, Vector3, type Side,
+  ShaderMaterial, SphereGeometry, TubeGeometry, Vector2, Vector3, type Side, type Texture,
 } from 'three';
 import { GATEWAYS, HUB_CODE, TANEX_LOCATIONS } from '../../data/gateways';
 import { CAMEROON_DOTS, DOT_COUNT, LAND_BITS } from './globeDots';
@@ -76,6 +76,8 @@ export interface GlobeRig {
   plane: Mesh;
   /** The plane's route (the arc to PLANE_HUB, slightly higher). */
   planePath: CatmullRomCurve3;
+  /** Strength of the logo on the sea (0 = hidden; stays 0 without a `logo` option). */
+  logoOpacity: { value: number };
 }
 
 // Shared GLSL: the porthole and the opening. `dir` is the fragment's direction from the globe
@@ -98,13 +100,19 @@ float cutout(vec3 dir) {
 }
 `;
 
+// The sea also carries the logo (hero globe only), printed on the surface like a country on a
+// school globe: an orthographic projection from a fixed latitude/longitude, in globe space, so it
+// turns with the Earth, curves with the sphere and slides round the rim each turn. It is drawn
+// under the dots in its own colours (BRAND_GUIDE §6: never recoloured or given effects).
 const SPHERE_VERT = /* glsl */ `
 varying vec3 vWorld;
 varying vec3 vNormalV;
 varying vec3 vViewPos;
+varying vec3 vLocal;
 void main() {
   vec4 world = modelMatrix * vec4(position, 1.0);
   vWorld = world.xyz;
+  vLocal = position;
   vNormalV = normalize(normalMatrix * normal);
   vec4 mv = viewMatrix * world;
   vViewPos = mv.xyz;
@@ -115,9 +123,18 @@ void main() {
 const SPHERE_FRAG = /* glsl */ `
 uniform vec3 uSea;
 uniform vec3 uShade;
+uniform sampler2D uLogo;
+uniform float uLogoOpacity;
+/** Each print's centre on the globe and its east/north axes there (globe space, unit). */
+uniform vec3 uLogoCentre[LOGO_PRINTS];
+uniform vec3 uLogoEast[LOGO_PRINTS];
+uniform vec3 uLogoNorth[LOGO_PRINTS];
+/** Half width and half height of the logo in globe radii. */
+uniform vec2 uLogoHalf;
 varying vec3 vWorld;
 varying vec3 vNormalV;
 varying vec3 vViewPos;
+varying vec3 vLocal;
 ${CUTOUT}
 void main() {
   float a = cutout(vWorld);
@@ -127,6 +144,17 @@ void main() {
   float facing = max(dot(n, normalize(-vViewPos)), 0.0);
   vec3 col = mix(uShade, uSea, 0.62 + 0.38 * light);
   col = mix(uShade, col, 0.7 + 0.3 * facing);
+  if (uLogoOpacity > 0.0) {
+    vec3 p = normalize(vLocal);
+    for (int i = 0; i < LOGO_PRINTS; i++) {
+      if (dot(p, uLogoCentre[i]) <= 0.0) continue;
+      vec2 uv = vec2(dot(p, uLogoEast[i]), dot(p, uLogoNorth[i])) / (2.0 * uLogoHalf) + 0.5;
+      if (uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0) {
+        vec4 logo = texture2D(uLogo, uv);
+        col = mix(col, logo.rgb, logo.a * uLogoOpacity);
+      }
+    }
+  }
   gl_FragColor = vec4(col, a);
   #include <colorspace_fragment>
 }
@@ -236,6 +264,11 @@ export interface GlobeOptions {
   hubs?: readonly string[];
   /** The hub the plane's route goes to (default: PLANE_HUB). */
   planeHub?: string;
+  /**
+   * The logo printed on the globe: its texture (may be filled in later), width ÷ height, its width
+   * as a share of the globe's diameter (seen face on), and where each print's centre sits (degrees).
+   */
+  logo?: { map: Texture; aspect: number; width: number; at: readonly { lat: number; lon: number }[] };
 }
 
 /** An unlit-looking flat colour that obeys the globe's porthole, opening and opacity (arcs, plane, parcel). */
@@ -252,16 +285,35 @@ export function flatMaterial(
   });
 }
 
-export function buildGlobe({ hubs = ARC_HUBS, planeHub = PLANE_HUB }: GlobeOptions = {}): GlobeRig {
+export function buildGlobe({ hubs = ARC_HUBS, planeHub = PLANE_HUB, logo }: GlobeOptions = {}): GlobeRig {
   const uniforms = createUniforms();
   const group = new Group();
   group.name = 'tanex_globe';
   const shared = uniforms as unknown as Record<string, { value: unknown }>;
 
+  const logoOpacity = { value: logo ? 1 : 0 };
+  const logoHalfWidth = logo?.width ?? 0.5;
+  // Local frame at each print's centre: east along the parallel, north = centre × east.
+  const prints = logo?.at.length ? logo.at : [{ lat: 0, lon: 0 }];
+  const logoCentre = prints.map(({ lat, lon }) => latLonDir(lat, lon));
+  const logoEast = prints.map(({ lon }) => new Vector3(Math.cos(lon * DEG), 0, -Math.sin(lon * DEG)));
+  const logoNorth = logoCentre.map((c, i) => new Vector3().crossVectors(c, logoEast[i]));
   const sphere = new Mesh(
     new SphereGeometry(1, 72, 48),
     new ShaderMaterial({
-      uniforms: { ...shared, uSea: { value: new Color(COLORS.sea) }, uShade: { value: new Color(COLORS.shade) } },
+      uniforms: {
+        ...shared,
+        uSea: { value: new Color(COLORS.sea) },
+        uShade: { value: new Color(COLORS.shade) },
+        uLogo: { value: logo?.map ?? null },
+        uLogoOpacity: logo ? logoOpacity : { value: 0 },
+        // Half width and half height in globe radii (the diameter is 2 radii).
+        uLogoHalf: { value: new Vector2(logoHalfWidth, logoHalfWidth / (logo?.aspect ?? 1)) },
+        uLogoCentre: { value: logoCentre },
+        uLogoEast: { value: logoEast },
+        uLogoNorth: { value: logoNorth },
+      },
+      defines: { LOGO_PRINTS: prints.length },
       vertexShader: SPHERE_VERT,
       fragmentShader: SPHERE_FRAG,
       transparent: true,
@@ -332,5 +384,5 @@ export function buildGlobe({ hubs = ARC_HUBS, planeHub = PLANE_HUB }: GlobeOptio
   plane.renderOrder = 3;
   group.add(plane);
 
-  return { group, uniforms, arcs, plane, planePath: planePath ?? arcCurve(from, latLonDir(49, 2.5), 0.035) };
+  return { group, uniforms, arcs, plane, planePath: planePath ?? arcCurve(from, latLonDir(49, 2.5), 0.035), logoOpacity };
 }

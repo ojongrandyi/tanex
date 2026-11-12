@@ -7,12 +7,13 @@
 //
 // The globe is drawn in its own scene with its own camera, over the main scene (bike + door), so
 // the opening reveals what is behind it. Every scroll-driven value here is a pure function of the
-// Journey travel; the spin is the only time-based part and stops once the dive starts.
+// Journey travel; the spin is the only time-based part and slows to a stop through the dive.
 import {
   Matrix4, Mesh, PerspectiveCamera, PlaneGeometry, Scene, ShaderMaterial, Vector3, CustomBlending, OneMinusSrcAlphaFactor,
-  ZeroFactor, type Group,
+  ZeroFactor, ImageLoader, SRGBColorSpace, Texture, Group, CatmullRomCurve3, DoubleSide, TubeGeometry,
 } from 'three';
-import { buildGlobe, BUEA, latLonDir, type GlobeRig } from '../globe';
+import { buildGlobe, BUEA, flatMaterial, latLonDir, type GlobeRig } from '../globe';
+import { paperPlaneGeometry } from '../paperPlane';
 import { buildDoor, setDoorOpacity, type Door } from '../door';
 import { clamp01, journeyEase, lerp, smooth, span } from '../ease';
 
@@ -51,6 +52,27 @@ const DIST_REST = 4;
 const DIST_DIVE = 1.16;
 /** Globe diameter as a share of the lane frame. */
 const GLOBE_FILL = 0.86;
+/** Logo width as a share of the globe's diameter, seen face on. */
+const LOGO_SHARE = 0.46;
+/**
+ * Where the logo is printed on the globe, on open sea so it never sits under the continents: the
+ * equatorial Atlantic between South America and the Gulf of Guinea, and the central Pacific, so a
+ * print is in view for most of each turn.
+ */
+const LOGO_AT = [{ lat: 2, lon: -24 }, { lat: 2, lon: -150 }] as const;
+/**
+ * The orbiting paper plane: a decorative loop round the globe (not a route), so something moves
+ * whichever side faces the reader. Radius in globe radii, seconds per loop, the orbit's tilt
+ * (radians about X, then Z) and the trail length (share of a loop).
+ */
+const ORBIT = { radius: 1.13, seconds: 9, tiltX: -0.42, tiltZ: 0.3, trail: 0.16 } as const;
+/** Tube segments per loop of the orbit trail; the tube holds two loops so the trail never wraps. */
+const ORBIT_SEGMENTS = 160;
+const ORBIT_RADIAL = 4;
+/** Orange 500 (BRAND_GUIDE §3), as on the globe's arcs and plane. */
+const ORANGE = '#F48800';
+/** Share of the dive over which the logo fades out. */
+const LOGO_OUT_DIVE = 0.3;
 const DEG = Math.PI / 180;
 
 /** The door's place along the bike's heading (m): just ahead of the bike's centre when it stops. */
@@ -117,7 +139,14 @@ export class HeroScene {
   private readonly holeDir = new Vector3();
   private readonly basis = new Matrix4();
   private readonly axes = { x: new Vector3(), y: new Vector3(), z: new Vector3() };
+  /** The orbiting plane and its trail (world space: it does not turn with the globe). */
+  private readonly orbit: { group: Group; plane: Mesh; trail: Mesh; opacity: { value: number } };
   private globeShown = true;
+  private logoLoaded = false;
+  /** Buea's longitude (unwrapped) the current dive turns to; re-chosen while the dive is at 0. */
+  private diveLon: number | null = null;
+  /** How fast the spin clock should run (0–1), from the last pose: full at the top, 0 at Buea. */
+  spinRate = 1;
   /**
    * The porthole clip for the main scene: a full-screen pass, drawn after the main scene, that
    * clears everything outside the globe's circle (premultiplied alpha: dst × (1 − a)), so the
@@ -131,9 +160,29 @@ export class HeroScene {
   };
   private clipShown = false;
 
-  constructor() {
-    this.rig = buildGlobe();
+  /**
+   * `logo` is the wordmark file shown on the globe's sea; `onChange` asks for a frame once it has
+   * loaded. Until then (or if it fails) the globe is drawn without it.
+   */
+  constructor(logo?: { url: string; width: number; height: number }, onChange: () => void = () => {}) {
+    let logoMap: Texture | undefined;
+    if (logo) {
+      // Empty until the file arrives: the shader skips it while uLogoOpacity is 0.
+      logoMap = new Texture();
+      logoMap.colorSpace = SRGBColorSpace;
+      const map = logoMap;
+      new ImageLoader().load(logo.url, (image) => {
+        map.image = image;
+        map.needsUpdate = true;
+        this.logoLoaded = true;
+        onChange();
+      });
+    }
+    this.rig = buildGlobe(logoMap && logo ? { logo: { map: logoMap, aspect: logo.width / logo.height, width: LOGO_SHARE, at: LOGO_AT } } : {});
+    this.rig.logoOpacity.value = 0;
     this.globeScene.add(this.rig.group);
+    this.orbit = this.buildOrbit();
+    this.globeScene.add(this.orbit.group);
     this.street.position.z = DOOR_Z;
     const clip = new Mesh(
       new PlaneGeometry(2, 2),
@@ -204,13 +253,20 @@ export class HeroScene {
     if (!this.globeShown) return;
 
     // The spin: a steady full turn per cycle. Each time Douala comes round the arcs draw out one
-    // after another and the plane glides to Europe; both fade as Douala turns away. The dive
-    // turns the shortest way from wherever the spin stopped to Buea.
-    const cycle = spin === null ? SPIN_REST : (spin / SPIN_CYCLE_SECONDS) % 1;
-    const spinLon = REST.lon + 360 * (cycle - SPIN_FRONT);
-    const fromLon = BUEA.lon + ((((spinLon - BUEA.lon + 180) % 360) + 360) % 360) - 180;
+    // after another and the plane glides to Europe; both fade as Douala turns away. `spin` is not
+    // wrapped, so the longitude is continuous. The globe keeps turning into the dive (the Stage
+    // slows it with `spinRate`) and blends towards the copy of Buea nearest to where the spin was
+    // when the dive began: that target is held for the whole dive, so the blend never jumps.
+    const turns = spin === null ? SPIN_REST : spin / SPIN_CYCLE_SECONDS;
+    const cycle = ((turns % 1) + 1) % 1;
+    const spinLon = REST.lon + 360 * (turns - SPIN_FRONT);
+    if (phase.dive <= 0 || this.diveLon === null) this.diveLon = BUEA.lon + 360 * Math.round((spinLon - BUEA.lon) / 360);
+    // Full speed at the top; slower as the dive deepens; held still after one extra turn while
+    // the reader lingers part-way, so the rest of the dive never whirls round several turns.
+    const drift = Math.abs(spinLon - this.diveLon);
+    this.spinRate = (1 - phase.dive) * clamp01((360 - drift) / 180);
     const lat = lerp(REST.lat, BUEA.lat, phase.dive);
-    const lon = lerp(fromLon, BUEA.lon, phase.dive);
+    const lon = lerp(spinLon, this.diveLon, phase.dive);
     rig.group.rotation.set(lat * DEG, -lon * DEG, 0, 'XYZ');
     rig.group.updateMatrixWorld(true);
     u.uHoleDir.value.copy(latLonDir(BUEA.lat, BUEA.lon, this.holeDir).transformDirection(rig.group.matrixWorld));
@@ -256,6 +312,58 @@ export class HeroScene {
     u.uHole.value.set(lerp(-2 * soft, cap * 1.25 + soft, phase.hole), soft);
     u.uOpacity.value = phase.globe;
     u.uArcOpacity.value = phase.arcs * routes;
+    this.placeOrbit(spin, phase.arcs);
+    // The logo leaves early in the dive, before the camera closes in and it would fill the lane.
+    rig.logoOpacity.value = this.logoLoaded ? 1 - smooth(phase.dive / LOGO_OUT_DIVE) : 0;
+  }
+
+  /** The orbit's plane and trail, sharing the globe's porthole, opening and fade. */
+  private buildOrbit(): HeroScene['orbit'] {
+    const group = new Group();
+    group.name = 'tanex_orbit';
+    group.rotation.set(ORBIT.tiltX, 0, ORBIT.tiltZ, 'XZY');
+    const opacity = { value: 1 };
+    const points: Vector3[] = [];
+    for (let i = 0; i <= 2 * ORBIT_SEGMENTS; i++) {
+      const a = (i / ORBIT_SEGMENTS) * Math.PI * 2;
+      points.push(new Vector3(Math.sin(a) * ORBIT.radius, 0, Math.cos(a) * ORBIT.radius));
+    }
+    const trailMaterial = flatMaterial(this.rig.uniforms, ORANGE, 0, { arcOpacity: opacity });
+    trailMaterial.depthWrite = false;
+    const trail = new Mesh(
+      new TubeGeometry(new CatmullRomCurve3(points), 2 * ORBIT_SEGMENTS, 0.0032, ORBIT_RADIAL, false),
+      trailMaterial,
+    );
+    trail.name = 'orbit_trail';
+    trail.renderOrder = 1;
+    const plane = new Mesh(paperPlaneGeometry(), flatMaterial(this.rig.uniforms, ORANGE, 1, { side: DoubleSide, arcOpacity: opacity }));
+    plane.name = 'orbit_plane';
+    plane.scale.setScalar(0.07);
+    plane.renderOrder = 3;
+    group.add(trail, plane);
+    return { group, plane, trail, opacity };
+  }
+
+  /** Loop position from the spin clock (a still pose with Pause motion), fading with the arcs. */
+  private placeOrbit(spin: number | null, fade: number): void {
+    const { plane, trail, opacity, group } = this.orbit;
+    opacity.value = fade;
+    group.visible = fade > 0.002;
+    if (!group.visible) return;
+    const loop = spin === null ? 0.3 : (((spin / ORBIT.seconds) % 1) + 1) % 1;
+    const a = loop * Math.PI * 2;
+    // Second loop of the tube, so the trail behind the plane never runs off the start.
+    const head = Math.floor((1 + loop) * ORBIT_SEGMENTS);
+    const length = Math.floor(ORBIT.trail * ORBIT_SEGMENTS);
+    trail.geometry.setDrawRange((head - length) * ORBIT_RADIAL * 6, length * ORBIT_RADIAL * 6);
+    const { x, y, z } = this.axes;
+    plane.position.set(Math.sin(a) * ORBIT.radius, 0, Math.cos(a) * ORBIT.radius);
+    z.set(Math.cos(a), 0, -Math.sin(a));
+    y.copy(plane.position).normalize();
+    x.crossVectors(y, z).normalize();
+    y.crossVectors(z, x).normalize();
+    this.basis.makeBasis(x, y, z);
+    plane.quaternion.setFromRotationMatrix(this.basis);
   }
 
   private placePlane(t: number): void {
