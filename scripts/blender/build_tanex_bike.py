@@ -190,10 +190,11 @@ def disc(parent, center, r, depth, material, verts=32, bevel=0.0, axis='x', tilt
     return finish(o, material, parent, bevel=bevel, angle=40)
 
 
-def ring(parent, center, major, minor, material, axis='x', majseg=48, minseg=12, squash=1.0):
+def ring(parent, center, major, minor, material, axis='x', majseg=48, minseg=12, squash=1.0, oval=1.0):
+    """Torus. squash scales Blender Z; oval scales the forward axis (for axis='up' rings round an oval body)."""
     bpy.ops.mesh.primitive_torus_add(major_radius=major, minor_radius=minor, major_segments=majseg, minor_segments=minseg)
     o = new_active()
-    o.scale = (1, 1, squash)
+    o.scale = (1, oval, squash)
     if axis == 'x':
         o.rotation_euler = (0, math.radians(90), 0)
     elif axis == 'fwd':
@@ -433,11 +434,13 @@ socket = empty('parcel_socket', top, (0, 0.905, -0.70))
 # ---------------------------------------------------------------- rider
 # Seated adult ≈ 1.75 m, upright commuter posture: hips on the seat, hands on the grips, feet on the pegs.
 rider = empty('rider', bike, (0, 0.90, -0.24))
+# Hips: the hip-to-thigh edges run sideways, so a skin radius there spans up/forward. A round
+# radius gives a capsule across the hips (an oval one made a flat card beside the rider).
 skin_body(rider,
-          [(0, 0.95, -0.27), (-0.11, 0.92, -0.23), (-0.175, 0.83, 0.12), (-0.18, 0.49, 0.05),
-           (0.11, 0.92, -0.23), (0.175, 0.83, 0.12), (0.18, 0.49, 0.05)],
+          [(0, 0.95, -0.27), (-0.11, 0.93, -0.25), (-0.175, 0.83, 0.12), (-0.18, 0.49, 0.05),
+           (0.11, 0.93, -0.25), (0.175, 0.83, 0.12), (0.18, 0.49, 0.05)],
           [(0, 1), (1, 2), (2, 3), (0, 4), (4, 5), (5, 6)],
-          [(0.17, 0.12), (0.095, 0.095), (0.068, 0.068), (0.05, 0.05), (0.095, 0.095), (0.068, 0.068), (0.05, 0.05)],
+          [0.11, 0.105, 0.07, 0.05, 0.105, 0.07, 0.05],
           TROUSERS)
 for x in (-0.18, 0.18):
     box(rider, (x, 0.43, 0.10), (0.105, 0.09, 0.27), SHOES, bevel=0.035, segments=3, subsurf=1)
@@ -450,7 +453,8 @@ skin_body(torso,
           [(0, 1), (1, 2), (2, 3), (2, 4)],
           [(0.165, 0.125), (0.195, 0.14), (0.175, 0.125), (0.074, 0.07), (0.074, 0.07)],
           VEST)
-ring(torso, (0, 1.02, -0.248), 0.166, 0.015, BAND, axis='up', majseg=44, minseg=8, squash=1.0)
+# Waist band hugs the vest's oval waist (the subdivided skin is smaller than its 0.165 x 0.125 radii).
+ring(torso, (0, 1.02, -0.248), 0.142, 0.015, BAND, axis='up', majseg=44, minseg=8, squash=1.0, oval=0.74)
 for x in (-1, 1):
     # Short polo sleeve, bare forearm, glove on the grip; elbows slightly out and bent.
     skin_body(torso, [(x * 0.175, 1.355, -0.185), (x * 0.215, 1.30, -0.14), (x * 0.24, 1.235, -0.085)], [(0, 1), (1, 2)],

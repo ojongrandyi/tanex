@@ -319,6 +319,8 @@ for x in (-1, 1):
     box(body, (sx, 1.55, CAB_FRONT - 0.12), (0.014, 1.75, 0.02), TRIM, bevel=0.0)
     box(body, (x * (CAB_W / 2 + 0.025), 1.45, CAB_REAR + 1.05), (0.03, 0.04, 0.2), CHROME, bevel=0.01)
     box(body, (x * (CAB_W / 2 - 0.1), 0.42, CAB_REAR + 1.3), (0.3, 0.04, 0.5), TRIM, bevel=0.01)
+    for f in (CAB_REAR + 1.1, CAB_REAR + 1.5):   # hangers from the cab floor (the step floated)
+        box(body, (x * (CAB_W / 2 - 0.16), (0.42 + CAB_FLOOR) / 2, f), (0.035, CAB_FLOOR - 0.42, 0.035), TRIM, bevel=0.005)
     # The stripe continues along the cab, at the box stripe's height line
     box(body, (x * (CAB_W / 2 + 0.008), 1.16, (CAB_REAR + CAB_FRONT) / 2 - 0.05), (0.012, 0.11, CAB_FRONT - CAB_REAR - 0.25), STRIPE, bevel=0.004)
     # Mirror: arm and housing
