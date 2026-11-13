@@ -1,0 +1,128 @@
+/* Blog post card (BlogCard.tsx): index, category pages, related articles, homepage section. */
+
+.tx-blog-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tx-surface);
+  color: var(--tx-text);
+  border: 1px solid var(--tx-border);
+  border-radius: var(--tx-radius-card);
+  box-shadow: var(--tx-shadow);
+  overflow: hidden;
+  transition: transform var(--tx-dur-fast) var(--tx-ease-out), box-shadow var(--tx-dur-fast) var(--tx-ease-out);
+}
+.tx-blog-card:hover { transform: translateY(-3px); box-shadow: var(--tx-shadow-lift); }
+.tx-blog-card:focus-within { box-shadow: var(--tx-shadow-lift); }
+
+.tx-blog-card__media {
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: var(--tx-cream-200);
+  overflow: hidden;
+}
+.tx-blog-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--tx-dur-slow) var(--tx-ease-out);
+}
+.tx-blog-card:hover .tx-blog-card__media img { transform: scale(1.03); }
+
+/* No cover: a chocolate panel with the brand's speed lines. */
+.tx-blog-card__ph {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--tx-choc-950);
+}
+.tx-blog-card__ph .tx-speed { transform: scale(2.2); }
+
+.tx-blog-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 10px;
+  padding: var(--tx-space-5);
+}
+
+.tx-blog-card__kicker {
+  margin: 0;
+  font-size: var(--tx-fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--tx-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--tx-text-muted);
+}
+
+.tx-blog-card__cats { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.tx-blog-card__cat {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--tx-radius-pill);
+  background: var(--tx-orange-100);
+  color: var(--tx-choc-900);
+  font-size: var(--tx-fs-xs);
+  font-weight: 700;
+  text-decoration: none;
+}
+.tx-blog-card__cat:hover { background: var(--tx-orange-200); }
+.tx-blog-card__cat:focus-visible { outline: 2px solid var(--tx-focus); outline-offset: 2px; }
+
+.tx-blog-card__title {
+  margin: 0;
+  font-family: var(--tx-font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.tx-blog-card__title a { color: var(--tx-choc-950); text-decoration: none; }
+/* The whole card opens the article; the category chips stay their own links above it. */
+.tx-blog-card__title a::after { content: ''; position: absolute; inset: 0; }
+.tx-blog-card__title a:focus-visible { outline: none; }
+.tx-blog-card:has(.tx-blog-card__title a:focus-visible) { outline: 2px solid var(--tx-focus); outline-offset: 2px; }
+.tx-blog-card__title a:hover { text-decoration: underline; text-decoration-color: var(--tx-orange-500); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+.tx-blog-card__excerpt {
+  margin: 0;
+  color: var(--tx-text-muted);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tx-blog-card__meta {
+  margin: auto 0 0;
+  padding-top: 6px;
+  font-size: var(--tx-fs-small);
+  color: var(--tx-text-muted);
+}
+
+/* Featured (latest post on the index): image beside the text from tablet width. */
+.tx-blog-card--featured { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+.tx-blog-card--featured .tx-blog-card__media { aspect-ratio: auto; min-height: 320px; }
+.tx-blog-card--featured .tx-blog-card__body { padding: clamp(24px, 3vw, 40px); justify-content: center; gap: 14px; }
+.tx-blog-card--featured .tx-blog-card__title { font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.1rem); }
+.tx-blog-card--featured .tx-blog-card__excerpt { -webkit-line-clamp: 4; line-clamp: 4; font-size: 1.05rem; }
+.tx-blog-card--featured .tx-blog-card__meta { margin-top: 4px; }
+
+@media (max-width: 760px) {
+  .tx-blog-card--featured { display: flex; }
+  .tx-blog-card--featured .tx-blog-card__media { aspect-ratio: 16 / 9; min-height: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tx-blog-card,
+  .tx-blog-card__media img { transition: none; }
+  .tx-blog-card:hover { transform: none; }
+  .tx-blog-card:hover .tx-blog-card__media img { transform: none; }
+}

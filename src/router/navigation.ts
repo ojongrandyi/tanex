@@ -1,6 +1,6 @@
 // Client-side navigation with the History API (I18N_SPEC §2). No router library (CLAUDE.md §3).
 import { useSyncExternalStore } from 'react';
-import { Lang, RouteMatch, langOfPath, legacyHashToPath, matchPath, pagePath } from './routes';
+import { Lang, RouteMatch, alternatePath, langOfPath, legacyHashToPath, matchPath, pagePath } from './routes';
 
 const listeners = new Set<() => void>();
 
@@ -100,4 +100,50 @@ function snapshot(): string {
 export function useRoute(): RouteMatch | null {
   useSyncExternalStore(subscribe, snapshot, snapshot);
   return currentRoute();
+}
+
+// ---- Language switch targets set by a page (blog posts and categories) ----
+//
+// The route table maps a page to the same sub-path in the other language, which is right for a
+// tracking ID or a policy tab but not for a blog post: its French version has its own slug, or
+// doesn't exist. A blog page that knows its translations registers them here for its path; the
+// language switch reads them (I18N_SPEC §2: a post without a translation switches to the other
+// language's blog index).
+
+type AlternateTargets = Partial<Record<Lang, string>>;
+let alternates: { path: string; targets: AlternateTargets } | null = null;
+const alternateListeners = new Set<() => void>();
+
+/** Sets (or, with null, clears) the language switch targets for the page at `path`. */
+export function setAlternateTargets(path: string, targets: AlternateTargets | null): void {
+  if (targets === null && alternates?.path !== path) return;
+  alternates = targets ? { path, targets } : null;
+  alternateListeners.forEach((fn) => fn());
+}
+
+/** The same page in `target`: the registered translation for this path, else the route table's mapping. */
+export function alternateFor(pathname: string, target: Lang): string {
+  const own = alternates && alternates.path === pathname ? alternates.targets[target] : undefined;
+  return own ?? alternatePath(pathname, target);
+}
+
+function subscribeAlternates(fn: () => void): () => void {
+  alternateListeners.add(fn);
+  return () => {
+    alternateListeners.delete(fn);
+  };
+}
+
+/** Re-renders when a page registers its language switch targets or the address changes. */
+export function useAlternateVersion(): number {
+  useSyncExternalStore(subscribe, snapshot, snapshot);
+  return useSyncExternalStore(subscribeAlternates, () => alternatesVersion(), () => 0);
+}
+
+let version = 0;
+subscribeAlternates(() => {
+  version++;
+});
+function alternatesVersion(): number {
+  return version;
 }

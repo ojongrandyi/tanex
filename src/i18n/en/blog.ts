@@ -1,12 +1,6 @@
-// English master, area "blog" (CONTENT §15). `eyebrow`…`contact` are the "coming soon" page shown
-// at /blog until the public blog (task F.3) publishes articles; `index` and `article` are the
-// public blog's labels, added with F.2 for F.3 to use. Loaded with the page.
+// English master, area "blog" (CONTENT §15): the public blog's index, category and article pages
+// (task F.3). Loaded with the page.
 const blog = {
-  eyebrow: 'Blog',
-  title: 'Articles coming soon',
-  sub: "We're preparing news, guides and shipping tips from the {company} team. Check back soon.",
-  track: 'Track a shipment',
-  contact: 'Contact us',
   index: {
     eyebrow: '{company} Blog',
     title: 'News, guides and shipping tips',
@@ -17,6 +11,18 @@ const blog = {
     minRead: '{n} min read',
     newer: 'Newer',
     older: 'Older',
+    // Added with F.3 (owner to confirm).
+    categories: 'Categories',
+    latest: 'Latest article',
+    pagination: 'Blog pages',
+    pageOf: 'Page {n} of {total}',
+    loadError: "We couldn't load the articles. Please try again.",
+    retry: 'Try again',
+    rss: 'RSS feed',
+    track: 'Track a shipment',
+  },
+  category: {
+    back: 'All articles',
   },
   article: {
     by: 'By {author}',
@@ -33,6 +39,16 @@ const blog = {
     readTranslation: 'Read in French',
     ctaText: 'Need to send something?',
     ctaButton: 'Get a Quote',
+    // Added with F.3 (owner to confirm).
+    shareOn: 'Share on {network}',
+    back: 'Back to the blog',
+    previous: 'Previous article',
+    next: 'Next article',
+    moreArticles: 'More articles',
+    tags: 'Tags',
+    notFoundTitle: 'Article not found',
+    notFoundBody: "This article doesn't exist or is no longer published.",
+    loadError: "We couldn't load this article. Please try again.",
   },
 };
 

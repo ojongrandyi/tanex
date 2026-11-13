@@ -1,6 +1,6 @@
 /* Blog article body (BLOG_SPEC §6): brand typography for the HTML the server renders
-   (server/blog/render.ts). Used by the studio editor and the preview so writers see the
-   article as it will read; the public article page (F.3) can take these rules over. */
+   (server/blog/render.ts). Shared by the public article page, the studio editor and the
+   preview, so writers see the article as it will read. */
 
 .tx-blog-prose {
   font-family: var(--tx-font-body);

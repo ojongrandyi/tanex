@@ -81,6 +81,11 @@ const PAGES: Record<InnerRoute, Record<Lang, PageMetaText>> = {
     en: { title: `Blog | ${COMPANY}`, description: `News, guides and shipping tips from the ${COMPANY} team.` },
     fr: { title: `Blog | ${COMPANY}`, description: `Actualités, guides et conseils d'expédition de l'équipe ${COMPANY}.` },
   },
+  // Fallback until the category loads; the server and the page use the category's own name.
+  'blog-category': {
+    en: { title: `Blog | ${COMPANY}`, description: `News, guides and shipping tips from the ${COMPANY} team.` },
+    fr: { title: `Blog | ${COMPANY}`, description: `Actualités, guides et conseils d'expédition de l'équipe ${COMPANY}.` },
+  },
   careers: {
     en: { title: `Careers | ${COMPANY}`, description: `Work with ${COMPANY} in Buea, Limbe and Douala: riders, drivers, operations and office. Send us your CV.` },
     fr: { title: `Carrières | ${COMPANY}`, description: `Travaillez avec ${COMPANY} à Buea, Limbe et Douala : livreurs, chauffeurs, opérations et bureau. Envoyez-nous votre CV.` },

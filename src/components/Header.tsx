@@ -9,8 +9,7 @@ import {
 } from '../config/brand';
 import { useCompanyContact } from '../utils/useCompanyContact';
 import { useEscapeKey } from '../utils/useEscapeKey';
-import { hrefFor, navigate } from '../router/navigation';
-import { alternatePath } from '../router/routes';
+import { alternateFor, hrefFor, navigate, useAlternateVersion } from '../router/navigation';
 import { isPlainClick } from '../router/Link';
 import { useLocale, useT, type TFunction } from '../i18n/I18nProvider';
 import { formatOpeningHoursIn } from '../i18n/format';
@@ -94,8 +93,10 @@ export const LanguageSwitch: React.FC<{ onSwitched?: () => void }> = ({ onSwitch
   const locale = useLocale();
   const names: Record<Locale, string> = { en: t('language.enName'), fr: t('language.frName') };
   const codes: Record<Locale, string> = { en: t('language.en'), fr: t('language.fr') };
+  // Blog posts register their translation's path (router/navigation.ts); re-render when they do.
+  useAlternateVersion();
   const hrefIn = (target: Locale) =>
-    typeof window === 'undefined' ? '/' : alternatePath(window.location.pathname, target) + window.location.search;
+    typeof window === 'undefined' ? '/' : alternateFor(window.location.pathname, target) + window.location.search;
 
   const choose = (target: Locale) => async (e: React.MouseEvent<HTMLAnchorElement>) => {
     storeLocale(target);

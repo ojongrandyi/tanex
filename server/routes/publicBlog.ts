@@ -11,6 +11,7 @@ import {
 } from '../blog/posts.js';
 import { readPreviewToken } from '../blog/preview.js';
 import { avatarUrl } from '../blog/authorProfile.js';
+import { buildPath } from '../../src/router/routes.js';
 
 export const publicBlogRouter = Router();
 
@@ -82,10 +83,20 @@ publicBlogRouter.get('/', (req: Request, res: Response) => {
       SELECT p.* FROM blog_posts p ${join} WHERE p.locale = ? AND ${PUBLIC_CONDITION}
       ORDER BY p.published_at_ts DESC, p.id LIMIT ? OFFSET ?
     `).all(...params, PUBLIC_PAGE_SIZE, (page - 1) * PUBLIC_PAGE_SIZE) as unknown as PostRow[];
+    // The category in the other language, when it has public posts there (language switch).
+    const translations = category
+      ? (db.prepare(`
+          SELECT DISTINCT c.locale, c.slug FROM blog_categories c
+          JOIN blog_post_categories pc ON pc.category_id = c.id
+          JOIN blog_posts p ON p.id = pc.post_id AND p.locale = c.locale AND ${PUBLIC_CONDITION}
+          WHERE c.translation_group_id = ? AND c.id <> ? ORDER BY c.locale
+        `).all(now, category.translation_group_id, category.id) as { locale: string; slug: string }[])
+          .map((t) => ({ locale: t.locale, slug: t.slug, path: buildPath('blog-category', t.slug, t.locale === 'fr' ? 'fr' : 'en') }))
+      : [];
     res.json({
       success: true,
       data: rows.map(card),
-      category: category ? { slug: category.slug, name: category.name, description: category.description ?? '' } : null,
+      category: category ? { slug: category.slug, name: category.name, description: category.description ?? '', translations } : null,
       page, pageSize: PUBLIC_PAGE_SIZE, total, totalPages
     });
   } catch (err) {

@@ -7,7 +7,7 @@ import { COMPANY } from '../../config/brand';
 import { blogApi, type PreviewPost } from './blogApi';
 import { BLOG_TEXT, fill } from './strings';
 import { when } from './studioUtil';
-import './blogProse.css';
+import '../../styles/blogProse.css';
 import './BlogPreview.css';
 
 const T = BLOG_TEXT.preview;

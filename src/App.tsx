@@ -60,6 +60,7 @@ const LocationsPage = lazy(() => import('./pages/LocationsPage').then((m) => ({ 
 const CareersPage = lazy(() => import('./pages/CompanyPages').then((m) => ({ default: m.CareersPage })));
 const CsrPage = lazy(() => import('./pages/CompanyPages').then((m) => ({ default: m.CsrPage })));
 const BlogPage = lazy(() => import('./pages/BlogPage').then((m) => ({ default: m.BlogPage })));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then((m) => ({ default: m.BlogPostPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 // Admin lives at ADMIN_PATH (/private-user/, src/config/brand.ts) on the same host, app and API
@@ -117,6 +118,7 @@ function getInitialPage(): string {
   const route = matchPath(window.location.pathname);
   if (!route) return 'not-found';
   if (route.param && (route.id === 'track' || route.id === 'quote')) return 'track';
+  if (route.id === 'blog' && route.param) return 'blog-post';
   return route.id;
 }
 
@@ -179,6 +181,10 @@ function MainAppContent() {
       meta = { title: ADMIN_CONSOLE_NAME, description: home.description };
     } else if (currentPage === 'not-found') {
       meta = { title: NOT_FOUND_TITLE[lang], description: home.description };
+    } else if (currentPage === 'blog-post' || currentPage === 'blog-category') {
+      // The article or category page sets its own title once it has loaded (the server already
+      // sent it on a first visit); until then the blog's.
+      meta = pageMetaText('blog', lang);
     } else {
       const known = ROUTES.find((r) => r.id === currentPage);
       meta = known ? pageMetaText(known.id, lang) : home;
@@ -243,7 +249,7 @@ function MainAppContent() {
           setServiceTier(prev => (prev.id === sub ? prev : { id: sub, n: prev.n + 1 }));
         }
         if (route.id === 'legal' && route.param) setLegalSection(route.param);
-        setCurrentPage(route.id);
+        setCurrentPage(route.id === 'blog' && route.param ? 'blog-post' : route.id);
       }
     };
 
@@ -272,7 +278,8 @@ function MainAppContent() {
       // A tier ID opens that tier; ServicesPage scrolls to it, so skip the scroll to top.
       setServiceTier(prev => ({ id: param || '', n: prev.n + 1 }));
     }
-    setCurrentPage(page);
+    // /blog/<slug> is the article page; the route table calls both 'blog'.
+    setCurrentPage(page === 'blog' && param ? 'blog-post' : page);
     if (!(page === 'services' && param)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -422,7 +429,8 @@ function MainAppContent() {
       <LanguageSuggestion />
       <SmoothScroll routeKey={`${currentPage}|${route?.canonical ?? ''}`} />
       <Header
-        activePage={currentPage}
+        // Articles and categories are part of the blog in the menu.
+        activePage={currentPage === 'blog-post' || currentPage === 'blog-category' ? 'blog' : currentPage}
         onNavigate={handleNavigate}
       />
 
@@ -497,7 +505,15 @@ function MainAppContent() {
         )}
 
         {currentPage === 'blog' && (
-          <BlogPage onNavigate={handleNavigate} />
+          <BlogPage key="index" onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'blog-category' && route?.param && (
+          <BlogPage key={`category:${route.param}`} category={route.param} onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'blog-post' && route?.id === 'blog' && route.param && (
+          <BlogPostPage key={route.canonical} slug={route.param} onNavigate={handleNavigate} />
         )}
 
         {currentPage === 'careers' && (

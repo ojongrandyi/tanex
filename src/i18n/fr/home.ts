@@ -156,6 +156,7 @@ const home = {
     eyebrow: 'Sur le blog',
     title: "Actualités et conseils d'expédition",
     all: 'Tous les articles',
+    minRead: '{n} min de lecture',
   },
   arrival: {
     title: 'Livré.',

@@ -212,7 +212,7 @@ Photos: `images/services/` (see its SOURCES.md); until then each card shows a br
 
 ### 2.9 From the blog
 - **Eyebrow:** `FROM THE BLOG` · **H2:** `News and shipping tips` · **Link:** `All articles →`
-- Shows the latest 3 published posts in the current language; the section is hidden when there are none.
+- Shows the latest 3 published posts in the current language; the section is hidden when there are none. Each card: cover, category, title, excerpt, date, `{n} min read` (F.3).
 
 ### 2.10 The Journey: chapter beats and route rail (MOTION_3D_SPEC §6–§7)
 - **Route rail label (screen readers):** `Page sections` · **Chapters:** `Your door` · `Services` · `In town` · `City to city` · `The world` · `Smart label` · `Contact` · `Delivered`
@@ -867,10 +867,13 @@ Plain text, short, signed `— TanEx`. `{link}` = the public tracking URL in the
 ---
 
 ## 15. Blog pages (BLOG_SPEC §6)
-- **Until F.3 ("coming soon" page at /blog, noindex; added 2026-11-09, owner to confirm):** eyebrow `Blog` · H1 `Articles coming soon` · sub `We're preparing news, guides and shipping tips from the {{COMPANY}} team. Check back soon.` · buttons `Track a shipment` · `Contact us`
+- **"Coming soon" page (2026-11-09 to F.3):** retired with F.3; /blog now shows the index, with the empty state below until the first post is published.
 - **In the dictionaries since F.2** (`src/i18n/en/blog.ts` `index`/`article`; French in CONTENT_FR §15). The eyebrow is `{{COMPANY}} Blog` (shown in capitals).
 - **Index:** eyebrow `TANEX BLOG` · H1 `News, guides and shipping tips` · sub `Practical advice on sending parcels in Cameroon and abroad, and news from the TanEx team.` · category chip `All` · empty state `Our first articles are on their way.` · `Read more` · `{n} min read` · pagination `Newer` · `Older`
 - **Article:** `By {author}` · `{date}` · `{n} min read` · `Share` (`WhatsApp` · `Facebook` · `LinkedIn` · `X` · `Copy link` → `Link copied`) · `Related articles` · `Read in French` / `Lire en anglais` (only when a translation exists) · end CTA `Need to send something? Get a Quote`
+- **Added with F.3 (owner to confirm):** category chips name (screen readers) `Categories` · featured card kicker `Latest article` · pagination name `Blog pages` · `Page {n} of {total}` · `We couldn't load the articles. Please try again.` · `Try again` · `RSS feed` · empty state button `Track a shipment` · category page back link `All articles` · article: `Share on {network}` (button names) · `Back to the blog` · `Previous article` · `Next article` · navigation name `More articles` · tag list name `Tags` · missing article `Article not found` / `This article doesn't exist or is no longer published.` · `We couldn't load this article. Please try again.`
+- **Category page:** eyebrow as the index, H1 = category name, sub = category description (written in the console).
+- **Homepage cards (§2.9):** date and `{n} min read`.
 
 ## 16. Careers and CSR Policy (footer only; added 2026-11-09, **approved by the owner 2026-11-10**)
 Owner's note: "Extra pages to be added only on footer: CSR Policy, Careers, Privacy Policy" (Privacy Policy = /legal).

@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { ADMIN_PATH, SITE_URL } from '../src/config/brand.js';
-import { sitemapXml } from './render/pageMeta.js';
+import { sitemapXml, type SitemapEntry } from './render/pageMeta.js';
 
 // robots.txt, sitemap.xml and crawler headers (tracker 6.4). The public site and the admin
 // console are the same Node app on the same host; the admin is the ADMIN_PATH (/private-user/).
@@ -18,6 +18,23 @@ function isAdminRequest(req: Request): boolean {
 
 export const seoRouter = Router();
 
+// Pages listed from the database (the blog: server/blog/pageData.ts), set by index.ts once the
+// database is open. Kept as a hook so this router stays free of database code.
+let sitemapExtras: () => SitemapEntry[] = () => [];
+export function setSitemapExtras(fn: () => SitemapEntry[]): void {
+  sitemapExtras = fn;
+}
+
+function extraEntries(): SitemapEntry[] {
+  try {
+    return sitemapExtras();
+  } catch (err) {
+    // The site's own pages are still listed when the blog can't be read.
+    console.error('[seo] sitemap blog entries failed:', err);
+    return [];
+  }
+}
+
 // Belt and braces for the admin path: a header works before any HTML or JS runs (App.tsx adds
 // the matching robots meta tag at runtime).
 seoRouter.use((req: Request, res: Response, next: NextFunction) => {
@@ -31,8 +48,9 @@ seoRouter.get('/robots.txt', (req: Request, res: Response) => {
 });
 
 // Every public page in English and French with xhtml:link alternates, built from the route table
-// (server/render/pageMeta.ts). The console path is never in it.
+// (server/render/pageMeta.ts), plus the blog's index, categories and posts from the database.
+// The console path is never in it.
 seoRouter.get('/sitemap.xml', (req: Request, res: Response) => {
   res.type('application/xml').setHeader('Cache-Control', 'public, max-age=3600');
-  res.send(sitemapXml());
+  res.send(sitemapXml(extraEntries()));
 });

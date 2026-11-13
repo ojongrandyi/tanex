@@ -16,13 +16,39 @@ import {
   FRENCH_PAGES_INDEXABLE, LEGAL_TABS, NOT_FOUND_TITLE, OG_TITLE, pageMetaText, pageName,
 } from '../../src/shared/pageMeta.js';
 
+/** A blog post's head data, read from the database by server/blog/pageData.ts. */
+export interface BlogPostMeta {
+  /** The article's own title (headline, breadcrumb). */
+  headline: string;
+  /** SEO title, or the headline (<title>, og:title). */
+  title: string;
+  description: string;
+  excerpt: string;
+  /** Root-relative cover URL with its size, or null (the brand image is used instead). */
+  image: { url: string; width: number | null; height: number | null; alt: string } | null;
+  publishedAt: number;
+  modifiedAt: number;
+  author: { name: string; jobTitle: string };
+  section: string | null;
+  tags: string[];
+  /** Root-relative path of every public language version, this one included. */
+  versions: Partial<Record<Lang, string>>;
+}
+
+/** What the database knows about a blog page (BLOG_SPEC §7). */
+export type BlogPageData =
+  | { type: 'index'; hasPosts: boolean; page: number }
+  | { type: 'category'; name: string; description: string; versions: Partial<Record<Lang, string>>; page: number }
+  | { type: 'post'; post: BlogPostMeta };
+
 export type PageContext =
-  | { kind: 'page'; match: RouteMatch }
+  | { kind: 'page'; match: RouteMatch; blog?: BlogPageData }
   | { kind: 'not-found'; lang: Lang }
   | { kind: 'admin' };
 
 const HEAD_START = '<!-- tx:head -->';
 const HEAD_END = '<!-- /tx:head -->';
+const ROOT_ELEMENT = '<div id="root"></div>';
 const OG_IMAGE = `${SITE_URL}/brand/og-image.jpg`;
 const OG_LOCALE: Record<Lang, string> = { en: 'en_GB', fr: 'fr_FR' };
 
@@ -72,10 +98,21 @@ export interface PageHead {
   description: string;
   canonical?: string;
   /** hreflang → absolute URL. */
-  alternates?: Record<'en' | 'fr' | 'x-default', string>;
+  alternates?: Partial<Record<'en' | 'fr' | 'x-default', string>>;
   robots?: string;
+  /** One JSON-LD object, or several (each gets its own script block). */
   jsonLd?: unknown;
   ogTitle?: string;
+  /** Default 'website'. */
+  ogType?: 'website' | 'article';
+  /** Default: the brand image (1200 × 630). Absolute URL. */
+  ogImage?: { url: string; width: number | null; height: number | null; alt: string };
+  /** Open Graph article:* tags. */
+  article?: { publishedTime: string; modifiedTime: string; section: string | null; tags: string[] };
+  /** RSS feed of the page's language (blog pages). Absolute URL. */
+  feed?: { title: string; href: string };
+  /** Shown to visitors and crawlers without JavaScript, after the app's root element. */
+  noscript?: { title: string; text: string };
 }
 
 function organization(lang: Lang, description: string) {
@@ -103,15 +140,131 @@ function organization(lang: Lang, description: string) {
   };
 }
 
-function breadcrumbs(match: RouteMatch, canonical: string) {
+function breadcrumbs(match: RouteMatch, canonical: string, last?: string) {
   const lang = match.lang;
+  const items = [{ name: pageName('home', lang), item: absolute(buildPath('home', undefined, lang)) }];
+  if (match.id === 'blog-category' || (match.id === 'blog' && match.param !== undefined)) {
+    // Home → Blog → category or article.
+    items.push({ name: pageName('blog', lang), item: absolute(buildPath('blog', undefined, lang)) });
+    items.push({ name: last ?? pageName(match.id, lang), item: canonical });
+  } else {
+    items.push({ name: pageName(match.id, lang), item: canonical });
+  }
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: pageName('home', lang), item: absolute(buildPath('home', undefined, lang)) },
-      { '@type': 'ListItem', position: 2, name: pageName(match.id, lang), item: canonical },
-    ],
+    itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, ...it })),
+  };
+}
+
+/** hreflang alternates for the language versions that exist; x-default is the English one when there is one. */
+function versionAlternates(versions: Partial<Record<Lang, string>>): PageHead['alternates'] {
+  const out: NonNullable<PageHead['alternates']> = {};
+  if (versions.en) out.en = absolute(versions.en);
+  if (versions.fr) out.fr = absolute(versions.fr);
+  const def = versions.en ?? versions.fr;
+  if (def) out['x-default'] = absolute(def);
+  return out;
+}
+
+/** "Blog | TanEx" → "Blog, page 2 | TanEx" for page 2 and later of a list. */
+function pagedTitle(title: string, page: number): string {
+  if (page <= 1) return title;
+  return title.replace(/(\s*\|[^|]*)$/, `, page ${page}$1`);
+}
+const pageQuery = (page: number) => (page > 1 ? `?page=${page}` : '');
+
+/** Blog RSS feed of a language (served by server/blog/feeds.ts). */
+export function blogFeedPath(lang: Lang): string {
+  return `${buildPath('blog', undefined, lang)}/rss.xml`;
+}
+
+const BLOG_NAME: Record<Lang, string> = { en: `${COMPANY} Blog`, fr: `Blog ${COMPANY}` };
+
+export function blogName(lang: Lang): string {
+  return BLOG_NAME[lang];
+}
+
+function feedOf(lang: Lang): PageHead['feed'] {
+  return { title: BLOG_NAME[lang], href: absolute(blogFeedPath(lang)) };
+}
+
+/** Head for the blog index, a category or an article, from the database's data (BLOG_SPEC §7). */
+function blogHead(match: RouteMatch, data: BlogPageData): PageHead {
+  const lang = match.lang;
+  const indexable = lang === 'en' || FRENCH_PAGES_INDEXABLE;
+  if (data.type === 'index') {
+    const base = pageMetaText('blog', lang);
+    const canonical = absolute(buildPath('blog', undefined, lang)) + pageQuery(data.page);
+    const en = absolute(buildPath('blog', undefined, 'en'));
+    return {
+      lang,
+      title: pagedTitle(base.title, data.page),
+      description: base.description,
+      canonical,
+      // An index without articles is an empty page: kept out of search until the first post.
+      robots: indexable && data.hasPosts ? undefined : 'noindex',
+      alternates: data.page > 1 ? undefined : { en, fr: absolute(buildPath('blog', undefined, 'fr')), 'x-default': en },
+      jsonLd: breadcrumbs(match, canonical),
+      feed: feedOf(lang),
+    };
+  }
+  if (data.type === 'category') {
+    const canonical = absolute(buildPath('blog-category', match.param, lang)) + pageQuery(data.page);
+    return {
+      lang,
+      title: pagedTitle(`${data.name} | ${BLOG_NAME[lang]}`, data.page),
+      description: data.description || pageMetaText('blog', lang).description,
+      canonical,
+      robots: indexable ? undefined : 'noindex',
+      alternates: data.page > 1 ? undefined : versionAlternates(data.versions),
+      jsonLd: breadcrumbs(match, canonical, data.name),
+      feed: feedOf(lang),
+    };
+  }
+  const post = data.post;
+  const canonical = absolute(buildPath('blog', match.param, lang));
+  const image = post.image
+    ? { url: absolute(post.image.url), width: post.image.width, height: post.image.height, alt: post.image.alt }
+    : undefined;
+  const published = new Date(post.publishedAt).toISOString();
+  const modified = new Date(Math.max(post.modifiedAt, post.publishedAt)).toISOString();
+  const posting = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': `${canonical}#article`,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+    url: canonical,
+    headline: post.headline.slice(0, 110),
+    description: post.description,
+    inLanguage: lang,
+    image: [image ? image.url : OG_IMAGE],
+    datePublished: published,
+    dateModified: modified,
+    author: { '@type': 'Person', name: post.author.name, ...(post.author.jobTitle ? { jobTitle: post.author.jobTitle } : {}) },
+    publisher: {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: LEGAL_NAME,
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/brand/mark.png` },
+    },
+    ...(post.section ? { articleSection: post.section } : {}),
+    ...(post.tags.length ? { keywords: post.tags.join(', ') } : {}),
+  };
+  return {
+    lang,
+    title: `${post.title} | ${COMPANY}`,
+    description: post.description,
+    canonical,
+    robots: indexable ? undefined : 'noindex',
+    alternates: versionAlternates(post.versions),
+    jsonLd: [posting, breadcrumbs(match, canonical, post.headline)],
+    ogTitle: post.title,
+    ogType: 'article',
+    ogImage: image,
+    article: { publishedTime: published, modifiedTime: modified, section: post.section, tags: post.tags },
+    feed: feedOf(lang),
+    noscript: { title: post.headline, text: post.excerpt },
   };
 }
 
@@ -124,6 +277,7 @@ export function pageHead(ctx: PageContext): PageHead {
     return { lang: ctx.lang, title: NOT_FOUND_TITLE[ctx.lang], description: pageMetaText('home', ctx.lang).description, robots: 'noindex' };
   }
   const { match } = ctx;
+  if (ctx.blog) return blogHead(match, ctx.blog);
   const { title, description } = pageMetaText(match.id, match.lang);
   const param = canonicalParam(match);
   const canonical = absolute(buildPath(match.id, param, match.lang));
@@ -160,29 +314,48 @@ export function renderHead(head: PageHead): string {
       lines.push(`<link rel="alternate" hreflang="${e(hreflang)}" href="${e(href)}" />`);
     }
   }
+  if (head.feed) {
+    lines.push(`<link rel="alternate" type="application/rss+xml" title="${e(head.feed.title)}" href="${e(head.feed.href)}" />`);
+  }
   if (head.canonical) {
     const ogTitle = head.ogTitle ?? head.title;
     const other: Lang = head.lang === 'en' ? 'fr' : 'en';
+    const image = head.ogImage ?? { url: OG_IMAGE, width: 1200, height: 630, alt: COMPANY };
+    const imageAlt = image.alt || ogTitle;
     lines.push(
-      `<meta property="og:type" content="website" />`,
+      `<meta property="og:type" content="${head.ogType ?? 'website'}" />`,
       `<meta property="og:site_name" content="${e(COMPANY)}" />`,
       `<meta property="og:locale" content="${OG_LOCALE[head.lang]}" />`,
       `<meta property="og:locale:alternate" content="${OG_LOCALE[other]}" />`,
       `<meta property="og:url" content="${e(head.canonical)}" />`,
       `<meta property="og:title" content="${e(ogTitle)}" />`,
       `<meta property="og:description" content="${e(head.description)}" />`,
-      `<meta property="og:image" content="${e(OG_IMAGE)}" />`,
-      `<meta property="og:image:width" content="1200" />`,
-      `<meta property="og:image:height" content="630" />`,
-      `<meta property="og:image:alt" content="${e(COMPANY)}" />`,
+      `<meta property="og:image" content="${e(image.url)}" />`,
+      ...(image.width ? [`<meta property="og:image:width" content="${image.width}" />`] : []),
+      ...(image.height ? [`<meta property="og:image:height" content="${image.height}" />`] : []),
+      `<meta property="og:image:alt" content="${e(imageAlt)}" />`,
+    );
+    if (head.article) {
+      lines.push(
+        `<meta property="article:published_time" content="${e(head.article.publishedTime)}" />`,
+        `<meta property="article:modified_time" content="${e(head.article.modifiedTime)}" />`,
+      );
+      if (head.article.section) lines.push(`<meta property="article:section" content="${e(head.article.section)}" />`);
+      for (const tag of head.article.tags) lines.push(`<meta property="article:tag" content="${e(tag)}" />`);
+    }
+    lines.push(
       `<meta name="twitter:card" content="summary_large_image" />`,
       `<meta name="twitter:title" content="${e(ogTitle)}" />`,
       `<meta name="twitter:description" content="${e(head.description)}" />`,
-      `<meta name="twitter:image" content="${e(OG_IMAGE)}" />`,
-      `<meta name="twitter:image:alt" content="${e(COMPANY)}" />`,
+      `<meta name="twitter:image" content="${e(image.url)}" />`,
+      `<meta name="twitter:image:alt" content="${e(imageAlt)}" />`,
     );
   }
-  if (head.jsonLd) lines.push(`<script type="application/ld+json">${jsonForScript(head.jsonLd)}</script>`);
+  if (head.jsonLd) {
+    for (const block of Array.isArray(head.jsonLd) ? head.jsonLd : [head.jsonLd]) {
+      lines.push(`<script type="application/ld+json">${jsonForScript(block)}</script>`);
+    }
+  }
   return lines.join('\n    ');
 }
 
@@ -194,6 +367,11 @@ export function renderIndexHtml(template: string, ctx: PageContext): string {
   const end = html.indexOf(HEAD_END);
   if (start !== -1 && end > start) {
     html = html.slice(0, start) + HEAD_START + '\n    ' + renderHead(head) + '\n    ' + html.slice(end);
+  }
+  if (head.noscript) {
+    // An article's title and excerpt for readers and crawlers without JavaScript (BLOG_SPEC §7).
+    const block = `<noscript><article><h1>${escapeHtml(head.noscript.title)}</h1><p>${escapeHtml(head.noscript.text)}</p></article></noscript>`;
+    html = html.replace(ROOT_ELEMENT, () => `${ROOT_ELEMENT}\n    ${block}`);
   }
   return html;
 }
@@ -216,14 +394,17 @@ export function createIndexRenderer(indexHtmlPath: string): (ctx: PageContext) =
   };
 }
 
+
 /**
- * Every public page in both languages, each with its alternates. Blog posts join with F.3
- * (until then /blog is a noindex "coming soon" page). Result pages, service tiers and the console never appear.
+ * Every public page in both languages, each with its alternates. The blog is listed from the
+ * database instead (server/blog/pageData.ts `blogSitemapEntries`): its index only for a language
+ * with a public post, then each category and post. Result pages, service tiers and the console
+ * never appear.
  */
 export function sitemapPaths(): { en: string; fr: string }[] {
   const out: { en: string; fr: string }[] = [];
   for (const route of ROUTES) {
-    if (route.live === false || route.noindex) continue;
+    if (route.live === false || route.noindex || route.id === 'blog' || route.id === 'blog-category') continue;
     out.push({ en: buildPath(route.id, undefined, 'en'), fr: buildPath(route.id, undefined, 'fr') });
     if (route.id === 'legal') {
       for (const tab of LEGAL_TABS) {
@@ -234,17 +415,26 @@ export function sitemapPaths(): { en: string; fr: string }[] {
   return out;
 }
 
-export function sitemapXml(): string {
+/** One sitemap page in the languages it exists in (root-relative paths), with its last change. */
+export interface SitemapEntry {
+  paths: Partial<Record<Lang, string>>;
+  lastmod?: number;
+}
+
+export function sitemapXml(extra: readonly SitemapEntry[] = []): string {
   const e = escapeHtml;
   const urls: string[] = [];
-  for (const pair of sitemapPaths()) {
-    const links = [
-      `    <xhtml:link rel="alternate" hreflang="en" href="${e(absolute(pair.en))}" />`,
-      `    <xhtml:link rel="alternate" hreflang="fr" href="${e(absolute(pair.fr))}" />`,
-      `    <xhtml:link rel="alternate" hreflang="x-default" href="${e(absolute(pair.en))}" />`,
-    ].join('\n');
+  const entries: SitemapEntry[] = [...sitemapPaths().map((paths) => ({ paths })), ...extra];
+  for (const entry of entries) {
+    const alternates = versionAlternates(entry.paths) ?? {};
+    const links = Object.entries(alternates)
+      .map(([hreflang, href]) => `    <xhtml:link rel="alternate" hreflang="${e(hreflang)}" href="${e(href)}" />`)
+      .join('\n');
+    const lastmod = entry.lastmod ? `\n    <lastmod>${new Date(entry.lastmod).toISOString()}</lastmod>` : '';
     for (const lang of ['en', 'fr'] as const) {
-      urls.push(`  <url>\n    <loc>${e(absolute(pair[lang]))}</loc>\n${links}\n  </url>`);
+      const path = entry.paths[lang];
+      if (!path) continue;
+      urls.push(`  <url>\n    <loc>${e(absolute(path))}</loc>${lastmod}\n${links}\n  </url>`);
     }
   }
   return (

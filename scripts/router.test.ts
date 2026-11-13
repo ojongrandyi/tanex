@@ -21,6 +21,12 @@ test('every live route round-trips through buildPath and matchPath, in both lang
         assert.equal(m, null, `${base} is reserved, not live`);
         continue;
       }
+      if (route.paramRequired) {
+        // The bare base path isn't this page (/blog/category is read as an article slug).
+        assert.notEqual(m?.id, route.id, base);
+        assert.equal(matchPath(buildPath(route.id, 'freight', lang))?.id, route.id);
+        continue;
+      }
       assert.deepEqual(m && { id: m.id, lang: m.lang, canonical: m.canonical }, { id: route.id, lang, canonical: base });
       if (route.param) {
         const withParam = buildPath(route.id, 'TX7K2M9P-01', lang);
@@ -55,9 +61,23 @@ test('matchPath: canonical forms, trailing slashes and unknown paths', () => {
   assert.equal(matchPath('/index.html')?.canonical, '/');
   assert.equal(matchPath('/track/TX7K2M9P/')?.canonical, '/track/TX7K2M9P');
   assert.equal(matchPath('/fr/suivi/TX7K2M9P')?.id, 'track');
-  for (const p of ['/nope', '/track/a/b', '/admin', '/private-user/', '/Services', '/track/%E0%A4%A', '/track/<x>', '/blog/post', '/local-delivery', '/fr/livraison-locale']) {
+  for (const p of ['/nope', '/track/a/b', '/admin', '/private-user/', '/Services', '/track/%E0%A4%A', '/track/<x>', '/blog/a/b', '/blog/category/a/b', '/local-delivery', '/fr/livraison-locale']) {
     assert.equal(matchPath(p), null, p);
   }
+});
+
+test('blog paths: index, article, category in both languages (BLOG_SPEC §6)', () => {
+  assert.deepEqual(matchPath('/blog/shipping-to-douala'), { id: 'blog', lang: 'en', param: 'shipping-to-douala', canonical: '/blog/shipping-to-douala' });
+  assert.deepEqual(matchPath('/fr/blog/envoyer-a-douala'), { id: 'blog', lang: 'fr', param: 'envoyer-a-douala', canonical: '/fr/blog/envoyer-a-douala' });
+  assert.deepEqual(matchPath('/blog/category/guides'), { id: 'blog-category', lang: 'en', param: 'guides', canonical: '/blog/category/guides' });
+  assert.deepEqual(matchPath('/fr/blog/categorie/guides'), { id: 'blog-category', lang: 'fr', param: 'guides', canonical: '/fr/blog/categorie/guides' });
+  // An article may be called "category": the bare category path is that article.
+  assert.equal(matchPath('/blog/category')?.id, 'blog');
+  assert.equal(matchPath('/blog/category')?.param, 'category');
+  assert.equal(pagePath('blog-post', 'hello'), '/blog/hello');
+  assert.equal(pagePath('blog-post', 'bonjour', 'fr'), '/fr/blog/bonjour');
+  assert.equal(pagePath('blog-category', 'guides', 'fr'), '/fr/blog/categorie/guides');
+  assert.equal(pagePath('blog'), '/blog');
 });
 
 test('legacy hash links convert to paths', () => {
@@ -119,7 +139,7 @@ test('server: non-canonical spellings redirect, query kept', async () => {
 });
 
 test('server: unknown and not-yet-live paths are 404; non-GET passes through', async () => {
-  for (const p of ['/nope', '/track/a/b', '/blog/hello', '/local-delivery', '/admin', '/Services']) {
+  for (const p of ['/nope', '/track/a/b', '/blog/hello/x', '/local-delivery', '/admin', '/Services']) {
     const res = await fetch(base + p, { redirect: 'manual' });
     assert.equal(res.status, 404, p);
   }

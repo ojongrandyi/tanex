@@ -12,8 +12,10 @@ import { startOutboxWorker } from './mail/outbox.js';
 import { startBlogScheduler } from './blog/posts.js';
 import { setPreviewSecret } from './blog/preview.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
-import { seoRouter } from './seo.js';
+import { seoRouter, setSitemapExtras } from './seo.js';
 import { publicPages, sendIndex } from './publicPages.js';
+import { blogSitemapEntries, resolveBlogPage } from './blog/pageData.js';
+import { blogFeedsRouter } from './blog/feeds.js';
 import { createIndexRenderer } from './render/pageMeta.js';
 import { registerApiRoutes } from './apiRoutes.js';
 import { generalErrorCode } from '../src/shared/apiErrors.js';
@@ -52,6 +54,8 @@ if (!ADMIN_PROXY_TARGET) {
   startOutboxWorker(db);
   // Publishes scheduled blog posts when their time comes (checked every minute; BLOG_SPEC §3).
   startBlogScheduler(db);
+  // Blog index, categories and posts in sitemap.xml (BLOG_SPEC §7).
+  setSitemapExtras(() => blogSitemapEntries(db));
 }
 
 // Middleware
@@ -226,7 +230,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Public pages by path, after the static files so a real file always wins.
-app.use(publicPages(renderIndex, indexHtmlPath));
+// The blog's RSS feeds first, so /blog/rss.xml is never read as an article (BLOG_SPEC §7).
+// Blog pages read their head from the database; an admin-only deployment has none.
+if (!ADMIN_PROXY_TARGET) app.use(blogFeedsRouter(db));
+app.use(publicPages(renderIndex, indexHtmlPath, ADMIN_PROXY_TARGET ? undefined : (match, query) => resolveBlogPage(db, match, query)));
 
 // Anything not matched above is a 404. Browsers get the app with status 404, which shows the
 // "Page not found" page (NotFoundPage, chosen from the path in App.tsx); other requests

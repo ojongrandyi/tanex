@@ -20,6 +20,7 @@ export type RouteId =
   | 'locations'
   | 'legal'
   | 'blog'
+  | 'blog-category'
   | 'careers'
   | 'csr';
 
@@ -29,6 +30,8 @@ export interface RouteDef {
   fr: string;
   /** Takes one optional sub-path segment: /track/TX7K2M9P, /services/air, /legal/privacy. */
   param?: boolean;
+  /** The segment is required: the bare base path is not a page (/blog/category alone). */
+  paramRequired?: boolean;
   /**
    * false while the page doesn't exist yet: the paths are reserved (for the language switch
    * and the server) but answer 404. Local delivery booking goes live with G.6.
@@ -36,7 +39,8 @@ export interface RouteDef {
   live?: boolean;
   /**
    * true for a page that is served but kept out of search: `noindex` and left out of the
-   * sitemap (the blog's "coming soon" page until F.3 publishes articles).
+   * sitemap. (The blog index is indexed only while its language has a public post; the server
+   * decides that from the database, server/blog/pageData.ts.)
    */
   noindex?: boolean;
 }
@@ -53,8 +57,10 @@ export const ROUTES: readonly RouteDef[] = [
   { id: 'help', en: '/help', fr: '/fr/aide' },
   { id: 'locations', en: '/locations', fr: '/fr/reseau' },
   { id: 'legal', en: '/legal', fr: '/fr/mentions-legales', param: true },
-  // "Coming soon" page until F.3: no article paths yet (param joins with F.3), not indexed.
-  { id: 'blog', en: '/blog', fr: '/fr/blog', noindex: true },
+  // Blog (BLOG_SPEC §6): the index, and an article at /blog/<slug>. Category pages are their own
+  // route, listed first so /blog/category/<slug> is never read as an article path.
+  { id: 'blog-category', en: '/blog/category', fr: '/fr/blog/categorie', param: true, paramRequired: true },
+  { id: 'blog', en: '/blog', fr: '/fr/blog', param: true },
   // Footer-only company pages (owner's note 2026-11-09).
   { id: 'careers', en: '/careers', fr: '/fr/carrieres' },
   { id: 'csr', en: '/csr-policy', fr: '/fr/politique-rse' },
@@ -100,7 +106,10 @@ export function pagePath(page: string, param?: string, lang: Lang = 'en'): strin
     case 'services':
     case 'legal':
     case 'blog':
+    case 'blog-category':
       return buildPath(page, param, lang);
+    case 'blog-post':
+      return buildPath('blog', param, lang);
     default: {
       const route = ROUTES.find((r) => r.id === page);
       return route ? routePath(route, lang) : buildPath('home', undefined, lang);
@@ -121,7 +130,10 @@ export function matchPath(pathname: string): RouteMatch | null {
     if (route.id === 'home' || route.live === false) continue;
     for (const lang of ['en', 'fr'] as const) {
       const base = routePath(route, lang);
-      if (trimmed === base) return { id: route.id, lang, canonical: base };
+      if (trimmed === base) {
+        if (route.paramRequired) continue;
+        return { id: route.id, lang, canonical: base };
+      }
       if (!route.param || !trimmed.startsWith(`${base}/`)) continue;
       const rest = trimmed.slice(base.length + 1);
       let param: string;

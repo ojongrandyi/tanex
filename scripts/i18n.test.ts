@@ -73,7 +73,6 @@ const SAME_IN_BOTH: Record<string, string> = {
   'common:header.blog': 'same word in French',
   'common:header.menu': 'same word in French',
   'common:footer.links.blog': 'same word in French',
-  'blog:eyebrow': 'same word in French',
   'blog:article.whatsapp': 'brand name',
   'blog:article.facebook': 'brand name',
   'blog:article.linkedin': 'brand name',

@@ -11,6 +11,10 @@ import { Button, Input, Textarea } from '../components/ui';
 import { Link } from '../router/Link';
 import { BIKE_BOOKING } from '../router/bookingLinks';
 import { api } from '../services/api';
+import { blogPublicApi, type PublicBlogCard } from '../services/blogPublic';
+import { BlogCard } from '../components/BlogCard';
+import { loadedGsap } from '../motion/gsap';
+import { whenIdle } from '../motion/capabilities';
 import {
   EMAIL, LOGO_MARK, LOGO_MARK_SIZE, OFFICES, PHONE, PHONE_2, TRACKING_ID_EXAMPLE, WHATSAPP, formatPhone,
 } from '../config/brand';
@@ -44,10 +48,9 @@ interface HomePageProps {
 const BUEA_FROM_PRICE = 500;
 
 
-// Blog section (CONTENT §2.9): the latest 3 posts in the page language. The public blog arrives
-// with F.3; until then there are none and the section stays hidden. No sample posts.
-interface HomePost { slug: string; title: string; excerpt: string }
-const LATEST_POSTS: HomePost[] = [];
+// Blog section (CONTENT §2.9): the latest 3 published posts in the page language, from the public
+// API after the page has rendered; hidden while there are none (no sample posts).
+const LATEST_POSTS = 3;
 
 // Chapters of the Journey, in page order (MOTION_3D_SPEC §6). Ids are stable anchors.
 const CHAPTER_IDS = ['door', 'services', 'in-town', 'city-to-city', 'world', 'label', 'contact', 'delivered'] as const;
@@ -97,9 +100,33 @@ const ChapterHeading: React.FC<{ id: string; className: string; start: string; e
   </h2>
 );
 
+/**
+ * The latest posts for the blog section. Fetched once the page is idle, so the homepage's first
+ * paint never waits for it; the motion's scroll positions are measured again when it appears.
+ */
+function useLatestPosts(locale: 'en' | 'fr'): PublicBlogCard[] {
+  const [posts, setPosts] = useState<PublicBlogCard[]>([]);
+  useEffect(() => {
+    let live = true;
+    const load = () => {
+      blogPublicApi.latest(locale, LATEST_POSTS).then((list) => live && setPosts(list)).catch(() => live && setPosts([]));
+    };
+    const cancel = whenIdle(load, 2000);
+    return () => {
+      live = false;
+      cancel();
+    };
+  }, [locale]);
+  useEffect(() => {
+    if (posts.length) loadedGsap()?.ScrollTrigger.refresh();
+  }, [posts.length]);
+  return posts;
+}
+
 export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
   const t = useAreaT('home');
   const locale = useLocale();
+  const posts = useLatestPosts(locale);
   const apiErrorText = useApiErrorText();
   const rootRef = useRef<HTMLDivElement>(null);
   useReveal(rootRef);
@@ -499,7 +526,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
         </div>
       </section>
 
-      {LATEST_POSTS.length > 0 && (
+      {posts.length > 0 && (
         <section className="tx-ch tx-ch--blog" id="blog" aria-labelledby="home-blog">
           <div className="tx-ch__wrap">
             <div className="tx-home__blog-head">
@@ -510,10 +537,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
               <Link page="blog" onNavigate={onNavigate} className="tx-link">{t('blog.all')}<ArrowRight aria-hidden="true" /></Link>
             </div>
             <ul className="tx-home__posts">
-              {LATEST_POSTS.slice(0, 3).map((p) => (
-                <li key={p.slug} className="tx-card">
-                  <h3 className="tx-card__title"><Link page="blog" param={p.slug} onNavigate={onNavigate}>{p.title}</Link></h3>
-                  <p className="tx-card__body">{p.excerpt}</p>
+              {posts.map((p) => (
+                <li key={p.slug}>
+                  <BlogCard post={p} locale={locale} minRead={t('blog.minRead', { n: p.readingMinutes })} onNavigate={onNavigate} />
                 </li>
               ))}
             </ul>

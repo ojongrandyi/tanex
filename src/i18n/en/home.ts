@@ -156,6 +156,8 @@ const home = {
     eyebrow: 'From the blog',
     title: 'News and shipping tips',
     all: 'All articles',
+    // Added with F.3 (CONTENT §15 `{n} min read`).
+    minRead: '{n} min read',
   },
   arrival: {
     title: 'Delivered.',

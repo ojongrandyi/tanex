@@ -12,7 +12,7 @@ import { MediaLibrary } from '../MediaLibrary';
 import type { BlogMedia, DocNode } from '../blogApi';
 import { BLOG_TEXT } from '../strings';
 import { CALLOUT_TONES, blogExtensions, safeHref, type CalloutTone } from './extensions';
-import '../blogProse.css';
+import '../../../styles/blogProse.css';
 
 const T = BLOG_TEXT.editor;
 

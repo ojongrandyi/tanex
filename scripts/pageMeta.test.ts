@@ -3,8 +3,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  escapeHtml, jsonForScript, pageHead, renderIndexHtml, sitemapPaths, sitemapXml,
+  escapeHtml, jsonForScript, pageHead, renderHead, renderIndexHtml, sitemapPaths, sitemapXml,
 } from '../server/render/pageMeta.ts';
+import type { BlogPageData } from '../server/render/pageMeta.ts';
 import { matchPath } from '../src/router/routes.ts';
 import { ADMIN_PATH, SITE_URL } from '../src/config/brand.ts';
 import { FRENCH_PAGES_INDEXABLE } from '../src/shared/pageMeta.ts';
@@ -94,12 +95,95 @@ test('shipment and quote results are noindex, without alternates, and never show
   assert.doesNotMatch(headBlock(html), /hreflang/);
 });
 
-test('the blog "coming soon" page is served but noindex, in both languages', () => {
+const POST_META = {
+  headline: 'Sending a parcel </script> to Douala',
+  title: 'Parcels to Douala',
+  description: 'How to send a parcel from Buea to Douala.',
+  excerpt: 'How to send a parcel from Buea to Douala, step by step.',
+  image: { url: '/media/blog/11111111-1111-4111-8111-111111111111.webp', width: 1600, height: 900, alt: 'A rider at the door' },
+  publishedAt: Date.UTC(2026, 10, 10, 8, 0),
+  modifiedAt: Date.UTC(2026, 10, 11, 9, 30),
+  author: { name: 'Staff Writer', jobTitle: 'Marketing' },
+  section: 'Guides',
+  tags: ['douala', 'parcels'],
+  versions: { en: '/blog/parcels-to-douala', fr: '/fr/blog/colis-vers-douala' },
+};
+
+const blogRender = (path: string, blog: BlogPageData) =>
+  renderIndexHtml(TEMPLATE, { kind: 'page', match: matchPath(path)!, blog });
+const ldBlocks = (html: string) =>
+  [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+
+test('blog index: noindex while its language has no public post, indexed once it has; RSS link', () => {
   for (const path of ['/blog', '/fr/blog']) {
-    const head = pageHead({ kind: 'page', match: matchPath(path)! });
-    assert.equal(head.robots, 'noindex', path);
+    const empty = pageHead({ kind: 'page', match: matchPath(path)!, blog: { type: 'index', hasPosts: false, page: 1 } });
+    assert.equal(empty.robots, 'noindex', path);
+    const full = pageHead({ kind: 'page', match: matchPath(path)!, blog: { type: 'index', hasPosts: true, page: 1 } });
+    assert.equal(full.robots, undefined, path);
   }
-  assert.equal(matchPath('/blog/some-post'), null, 'no article paths before F.3');
+  const html = blogRender('/fr/blog', { type: 'index', hasPosts: true, page: 1 });
+  assert.ok(html.includes(`<link rel="alternate" type="application/rss+xml" title="Blog TanEx" href="${SITE_URL}/fr/blog/rss.xml" />`));
+  assert.ok(html.includes(`hreflang="en" href="${SITE_URL}/blog"`));
+  // Page 2: self-canonical with ?page=2, own title, no alternates.
+  const p2 = pageHead({ kind: 'page', match: matchPath('/blog')!, blog: { type: 'index', hasPosts: true, page: 2 } });
+  assert.equal(p2.canonical, `${SITE_URL}/blog?page=2`);
+  assert.equal(p2.title, 'Blog, page 2 | TanEx');
+  assert.equal(p2.alternates, undefined);
+});
+
+test('blog article: title, canonical, hreflang of its translations, OG article, BlogPosting + breadcrumbs, noscript', () => {
+  const html = blogRender('/blog/parcels-to-douala', { type: 'post', post: POST_META });
+  const head = headBlock(html);
+  assert.match(head, /<title>Parcels to Douala \| TanEx<\/title>/);
+  assert.ok(head.includes(`<link rel="canonical" href="${SITE_URL}/blog/parcels-to-douala" />`));
+  assert.ok(head.includes(`hreflang="fr" href="${SITE_URL}/fr/blog/colis-vers-douala"`));
+  assert.ok(head.includes(`hreflang="x-default" href="${SITE_URL}/blog/parcels-to-douala"`));
+  assert.ok(head.includes('<meta property="og:type" content="article" />'));
+  assert.ok(head.includes(`<meta property="og:image" content="${SITE_URL}/media/blog/11111111-1111-4111-8111-111111111111.webp" />`));
+  assert.ok(head.includes('<meta property="og:image:width" content="1600" />'));
+  assert.ok(head.includes('<meta property="og:image:alt" content="A rider at the door" />'));
+  assert.ok(head.includes('<meta property="article:published_time" content="2026-11-10T08:00:00.000Z" />'));
+  assert.ok(head.includes('<meta property="article:tag" content="douala" />'));
+  assert.ok(head.includes('<meta name="twitter:card" content="summary_large_image" />'));
+  assert.doesNotMatch(head, /name="robots"/);
+
+  const [posting, crumbs] = ldBlocks(html);
+  assert.equal(posting['@type'], 'BlogPosting');
+  assert.equal(posting.headline, POST_META.headline);
+  assert.equal(posting.datePublished, '2026-11-10T08:00:00.000Z');
+  assert.equal(posting.dateModified, '2026-11-11T09:30:00.000Z');
+  assert.equal(posting.author.name, 'Staff Writer');
+  assert.equal(posting.publisher.name, 'Tanex SARL');
+  assert.equal(posting.publisher.logo.url, `${SITE_URL}/brand/mark.png`);
+  assert.deepEqual(posting.image, [`${SITE_URL}${POST_META.image.url}`]);
+  assert.equal(crumbs['@type'], 'BreadcrumbList');
+  assert.deepEqual(crumbs.itemListElement.map((i: { name: string }) => i.name), ['Home', 'Blog', POST_META.headline]);
+
+  // The headline's "</script>" can't break out of the JSON-LD or the noscript block.
+  assert.equal(count(html, '</script> to Douala'), 0);
+  assert.match(html, /<div id="root"><\/div>\s*<noscript><article><h1>Sending a parcel &lt;\/script&gt; to Douala<\/h1><p>How to send a parcel from Buea to Douala, step by step\.<\/p><\/article><\/noscript>/);
+});
+
+test('blog article without a translation or cover: only its own hreflang, the brand image', () => {
+  const post = { ...POST_META, image: null, versions: { fr: '/fr/blog/colis-vers-douala' } };
+  const head = pageHead({ kind: 'page', match: matchPath('/fr/blog/colis-vers-douala')!, blog: { type: 'post', post } });
+  assert.deepEqual(head.alternates, { fr: `${SITE_URL}/fr/blog/colis-vers-douala`, 'x-default': `${SITE_URL}/fr/blog/colis-vers-douala` });
+  const html = renderHead(head);
+  assert.ok(html.includes(`<meta property="og:image" content="${SITE_URL}/brand/og-image.jpg" />`));
+});
+
+test('blog category: own name in the title, breadcrumbs to it, alternates of its translations', () => {
+  const head = pageHead({
+    kind: 'page',
+    match: matchPath('/blog/category/guides')!,
+    blog: { type: 'category', name: 'Guides', description: 'Shipping guides.', versions: { en: '/blog/category/guides' }, page: 1 },
+  });
+  assert.equal(head.title, 'Guides | TanEx Blog');
+  assert.equal(head.description, 'Shipping guides.');
+  assert.equal(head.canonical, `${SITE_URL}/blog/category/guides`);
+  assert.deepEqual(Object.keys(head.alternates ?? {}), ['en', 'x-default']);
+  const crumbs = head.jsonLd as { itemListElement: { name: string }[] };
+  assert.deepEqual(crumbs.itemListElement.map((i) => i.name), ['Home', 'Blog', 'Guides']);
 });
 
 test('404 and console heads are noindex with no canonical, hreflang or OG', () => {
@@ -147,7 +231,7 @@ test('sitemap: every live page in both languages with xhtml:link alternates; no 
     assert.match(block, /hreflang="x-default"/);
   }
   assert.ok(!xml.includes(ADMIN_PATH.replace(/\/+$/, '')), 'console never listed');
-  assert.doesNotMatch(xml, /\/blog|\/local-delivery|livraison-locale/, 'pages not live yet, or noindex (the blog until F.3), are not listed');
+  assert.doesNotMatch(xml, /\/blog|\/local-delivery|livraison-locale/, 'pages not live yet are not listed; the blog comes from the database (extras)');
   assert.doesNotMatch(xml, /\/track\/|\/quote\/|\/services\//, 'no results or tiers');
   // Every listed path is a page the server answers with 200 at its canonical spelling.
   for (const loc of locs) {
