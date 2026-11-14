@@ -20,6 +20,7 @@ const { db, initDatabase } = await import('../server/db.ts');
 const { SqliteSessionStore, createSessionMiddleware } = await import('../server/auth/sessionStore.ts');
 const { requireJsonOrMultipart } = await import('../server/middleware/auth.ts');
 const { registerApiRoutes } = await import('../server/apiRoutes.ts');
+const { handoverDue } = await import('../src/shared/cashHandover.ts');
 const { viewStatus, pickupCollect, deliveryCollect, mapsLink, telLink, whatsAppLink, courierActions } = await import('../src/courier/jobLogic.ts');
 
 initDatabase();
@@ -142,7 +143,11 @@ test('cash: balance by currency = collected (not rejected) + confirmed adjustmen
   assert.equal(res.status, 200);
   const { balances, entries } = (await res.json()).data;
   const xaf = balances.find((b: any) => b.currency === 'XAF');
-  assert.deepEqual(xaf, { currency: 'XAF', collected: 8000, handedOver: 2000, pendingHandover: 1000, balance: 5500 });
+  // Deadline: 8000 collected, 3000 declared (pending + confirmed) → 5000 outstanding, due 7 days after the oldest.
+  assert.deepEqual(xaf, {
+    currency: 'XAF', collected: 8000, handedOver: 2000, pendingHandover: 1000, balance: 5500,
+    outstanding: 5000, dueBy: now0 + 7 * 86_400_000, overdue: false,
+  });
   assert.equal(balances.find((b: any) => b.currency === 'EUR').balance, 20);
   // Only the courier's own entries.
   assert.equal(entries.length, 7);
@@ -178,6 +183,39 @@ test('handover: pending entry, audited, idempotent by key, validated', async () 
   const reuse = await call('POST', '/api/courier/jobs/job_x/action', c2, { action: 'accept', idempotencyKey: key });
   assert.equal(reuse.status, 409);
   assert.equal((await reuse.json()).code, 'IDEMPOTENCY_KEY_REUSED');
+});
+
+test('handover by MTN MoMo / Orange Money needs the transaction ID; the method is stored', async () => {
+  let res = await call('POST', '/api/courier/cash/handover', c1, { amount: 2000, method: 'MTN_MOMO', idempotencyKey: 'handover-momo-0001' });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).code, 'MOMO_REFERENCE_REQUIRED');
+  res = await call('POST', '/api/courier/cash/handover', c1, { amount: 2000, method: 'BANK', idempotencyKey: 'handover-momo-0002' });
+  assert.equal(res.status, 400);
+  res = await call('POST', '/api/courier/cash/handover', c1, { amount: 2000, method: 'ORANGE_MONEY', momoReference: 'PP241114.1200.A1', idempotencyKey: 'handover-momo-0003' });
+  assert.equal(res.status, 200);
+  const e = (await res.json()).data;
+  assert.equal(e.method, 'ORANGE_MONEY');
+  assert.equal(e.momoReference, 'PP241114.1200.A1');
+  assert.equal(e.status, 'PENDING');
+  // A cash handover never keeps a reference.
+  res = await call('POST', '/api/courier/cash/handover', c1, { amount: 100, method: 'CASH', momoReference: 'X', idempotencyKey: 'handover-momo-0004' });
+  assert.equal((await res.json()).data.momoReference, null);
+});
+
+test('7-day deadline: oldest collections are covered first; rejected handovers do not count', () => {
+  const DAY = 86_400_000;
+  const t0 = 1_700_000_000_000;
+  const c = (amount: number, day: number, status = 'PENDING') => ({ type: 'COLLECTED', status, amount, createdAt: t0 + day * DAY });
+  const h = (amount: number, status = 'PENDING') => ({ type: 'HANDOVER', status, amount, createdAt: t0 });
+  assert.deepEqual(handoverDue([], t0), { outstanding: 0, dueBy: null, overdue: false });
+  // 1000 on day 0, 2000 on day 2; 1000 handed over covers day 0, so day 2 sets the deadline.
+  assert.deepEqual(handoverDue([c(1000, 0), c(2000, 2), h(1000)], t0 + 3 * DAY), { outstanding: 2000, dueBy: t0 + 9 * DAY, overdue: false });
+  // Partly covered oldest still sets the deadline; past it = overdue.
+  assert.deepEqual(handoverDue([c(1000, 0), c(2000, 2), h(500)], t0 + 8 * DAY), { outstanding: 2500, dueBy: t0 + 7 * DAY, overdue: true });
+  // Rejected handover and rejected collection are ignored.
+  assert.deepEqual(handoverDue([c(1000, 0), c(500, 1, 'REJECTED'), h(1000, 'REJECTED')], t0), { outstanding: 1000, dueBy: t0 + 7 * DAY, overdue: false });
+  // Everything covered: nothing due.
+  assert.deepEqual(handoverDue([c(1000, 0), h(600), h(400, 'CONFIRMED')], t0 + 30 * DAY), { outstanding: 0, dueBy: null, overdue: false });
 });
 
 // ---- Pure app rules (src/courier/jobLogic.ts) ----

@@ -10,7 +10,7 @@ import { api } from '../services/api';
 import { COMPANY, LOGO_WHITE } from '../config/brand';
 import type { DispatchStatus } from '../shared/dispatchStatus';
 import { CourierTextContext, useCourierText, useCourierTextValue, type CourierLang } from './context';
-import { courierApi, type CashState, type CourierJob, type CourierProfile } from './courierApi';
+import { courierApi, type CashMethod, type CashState, type CourierJob, type CourierProfile } from './courierApi';
 import { CourierSync, cacheGet, cachePut, newKey, type QueueItem, type SyncState } from './offlineQueue';
 import { isFinal, sharesLocation, viewStatus } from './jobLogic';
 import { useLocationSharing } from './useLocationSharing';
@@ -289,9 +289,12 @@ const CourierShell: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sync]);
 
-  const handover = (amount: number, currency: string, note: string) => {
+  const handover = (amount: number, currency: string, method: CashMethod, momoReference: string | null, note: string) => {
     const key = newKey();
-    sync.enqueue({ key, kind: 'handover', jobId: null, body: { amount, currency, ...(note ? { note } : {}), idempotencyKey: key, deviceTs: Date.now() } });
+    sync.enqueue({
+      key, kind: 'handover', jobId: null,
+      body: { amount, currency, method, ...(momoReference ? { momoReference } : {}), ...(note ? { note } : {}), idempotencyKey: key, deviceTs: Date.now() },
+    });
   };
 
   const setDuty = async (on: boolean) => {

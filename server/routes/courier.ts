@@ -23,6 +23,7 @@ import {
   readMoney, writeTransition, type Fail, type JobRow,
 } from '../dispatch/jobs.js';
 import { allocateCashRef } from '../dispatch/cashRef.js';
+import { handoverDue, isHandoverMethod } from '../../src/shared/cashHandover.js';
 import { MAX_POINTS_PER_REQUEST, insertLocations, readLocationPoint, type LocationPoint } from '../dispatch/locations.js';
 import { sendPodFile, transitionFail } from './dispatch.js';
 import {
@@ -395,23 +396,29 @@ interface CashRow {
 /**
  * A courier's money by currency (DISPATCH_SPEC §9): balance = collected (pending + confirmed)
  * + confirmed adjustments − confirmed handovers. Handovers waiting for Finance are shown apart.
+ * outstanding / dueBy / overdue: the 7-day handover deadline (src/shared/cashHandover.ts).
  */
-export function courierCashSummary(courierUserId: string) {
-  const sums = db.prepare(`
-    SELECT currency,
-      COALESCE(SUM(CASE WHEN entry_type = 'COLLECTED' AND status != 'REJECTED' THEN amount END), 0) AS collected,
-      COALESCE(SUM(CASE WHEN entry_type = 'HANDOVER' AND status = 'CONFIRMED' THEN amount END), 0) AS handed_over,
-      COALESCE(SUM(CASE WHEN entry_type = 'HANDOVER' AND status = 'PENDING' THEN amount END), 0) AS pending_handover,
-      COALESCE(SUM(CASE WHEN entry_type = 'ADJUSTMENT' AND status = 'CONFIRMED' THEN amount END), 0) AS adjustments
-    FROM cash_ledger WHERE courier_user_id = ? GROUP BY currency ORDER BY currency
-  `).all(courierUserId) as { currency: string; collected: number; handed_over: number; pending_handover: number; adjustments: number }[];
-  return sums.map((s) => ({
-    currency: s.currency,
-    collected: s.collected,
-    handedOver: s.handed_over,
-    pendingHandover: s.pending_handover,
-    balance: s.collected + s.adjustments - s.handed_over,
-  }));
+export function courierCashSummary(courierUserId: string, now = Date.now()) {
+  const rows = db.prepare('SELECT entry_type, status, amount, currency, created_at_ts FROM cash_ledger WHERE courier_user_id = ?')
+    .all(courierUserId) as { entry_type: string; status: string; amount: number; currency: string; created_at_ts: number }[];
+  const currencies = [...new Set(rows.map((r) => r.currency))].sort();
+  return currencies.map((currency) => {
+    const lines = rows.filter((r) => r.currency === currency);
+    const sum = (type: string, ok: (s: string) => boolean) => lines.filter((l) => l.entry_type === type && ok(l.status)).reduce((s, l) => s + l.amount, 0);
+    const collected = sum('COLLECTED', (s) => s !== 'REJECTED');
+    const handedOver = sum('HANDOVER', (s) => s === 'CONFIRMED');
+    const due = handoverDue(lines.map((l) => ({ type: l.entry_type, status: l.status, amount: l.amount, createdAt: l.created_at_ts })), now);
+    return {
+      currency,
+      collected,
+      handedOver,
+      pendingHandover: sum('HANDOVER', (s) => s === 'PENDING'),
+      balance: collected + sum('ADJUSTMENT', (s) => s === 'CONFIRMED') - handedOver,
+      outstanding: due.outstanding,
+      dueBy: due.dueBy,
+      overdue: due.overdue,
+    };
+  });
 }
 
 const cashOut = (r: CashRow) => ({
@@ -436,8 +443,9 @@ courierRouter.get('/cash', (req: Request, res: Response) => {
   }
 });
 
-// POST /api/courier/cash/handover { amount, currency?, note?, idempotencyKey, deviceTs? }
-// The courier declares cash handed to the office; it stays PENDING until Finance confirms it
+// POST /api/courier/cash/handover { amount, currency?, method?, momoReference?, note?, idempotencyKey, deviceTs? }
+// The courier declares money handed to the company: cash at the office, or an MTN MoMo / Orange
+// Money transfer to the company account (transaction ID required; owner 2026-11-14, #169); it stays PENDING until Finance confirms it
 // (cash.confirm, G.8). Queued offline like job actions: a repeated key returns the stored answer.
 // Keys share dispatch_action_keys with job actions (job_id '-', action 'cash_handover').
 courierRouter.post('/cash/handover', (req: Request, res: Response) => {
@@ -460,6 +468,10 @@ courierRouter.post('/cash/handover', (req: Request, res: Response) => {
     const amount = readMoney(b.amount, currency, 'INVALID_CASH', 'The amount handed over');
     if (isFail(amount)) return send(res, amount);
     if (amount <= 0) return send(res, fail(400, 'INVALID_CASH', 'The amount handed over must be more than 0.'));
+    const method = b.method === undefined ? 'CASH' : b.method;
+    if (!isHandoverMethod(method)) return send(res, fail(400, 'INVALID_CASH', 'Choose how it was handed over: cash, MTN MoMo or Orange Money.'));
+    const momoReference = method === 'CASH' ? null : text(b.momoReference, 60);
+    if (method !== 'CASH' && !momoReference) return send(res, fail(400, 'MOMO_REFERENCE_REQUIRED', 'Enter the mobile money transaction reference.'));
     const note = text(b.note, NOTE_MAX);
     const now = Date.now();
     const device = typeof b.deviceTs === 'number' && Number.isFinite(b.deviceTs) ? Math.round(b.deviceTs) : NaN;
@@ -470,10 +482,10 @@ courierRouter.post('/cash/handover', (req: Request, res: Response) => {
       db.prepare(`
         INSERT INTO cash_ledger (id, ref, courier_user_id, job_id, entry_type, method, amount, currency, momo_reference,
                                  status, recorded_by, note, created_at_ts)
-        VALUES (?, ?, ?, NULL, 'HANDOVER', 'CASH', ?, ?, NULL, 'PENDING', ?, ?, ?)
-      `).run(id, ref, user.id, amount, currency, user.id, note, at);
+        VALUES (?, ?, ?, NULL, 'HANDOVER', ?, ?, ?, ?, 'PENDING', ?, ?, ?)
+      `).run(id, ref, user.id, method, amount, currency, momoReference, user.id, note, at);
       audit(req, 'cash.handover', 'cash_ledger', id, `Cash handover declared (${amount} ${currency}): ${user.displayName}`,
-        undefined, { ref, amount, currency, idempotencyKey: key, ...(note ? { note } : {}) }, { conn: db });
+        undefined, { ref, amount, currency, method, ...(momoReference ? { momoReference } : {}), idempotencyKey: key, ...(note ? { note } : {}) }, { conn: db });
       const row = db.prepare('SELECT l.*, NULL AS tracking_number FROM cash_ledger l WHERE l.id = ?').get(id) as unknown as CashRow;
       const out = { success: true, data: cashOut(row) };
       db.prepare(`

@@ -187,7 +187,7 @@ in the background; the UI tells the courier to keep the app open during deliveri
 ## 9. Cash and payments
 
 - **COD & fees:** when the courier records `COLLECTED`, a `cash_ledger` row (PENDING) is created. The courier's
-  balance = confirmed+pending collected − confirmed handovers. Finance (`cash.confirm`) confirms handovers and can
+  balance = confirmed+pending collected − confirmed handovers. **Handovers** are made in cash at the office or by MTN MoMo / Orange Money transfer to the company account (transaction ID required), and money collected must be **handed over within 7 days** (owner 2026-11-14; rule in `src/shared/cashHandover.ts`: declared handovers cover the oldest collections first). Finance (`cash.confirm`) confirms handovers and can
   add adjustments (reason required). Daily per-courier report (screen + CSV export).
 - **Company MoMo:** customers can pay the delivery fee or COD to the company's MTN MoMo / Orange Money accounts.
   The courier (or customer, via the existing proof-of-payment flow) records the transaction reference; Finance
@@ -216,7 +216,7 @@ sent automatically when an email address is known.
 | `GET/POST/PATCH /api/couriers` | `couriers.view` / `couriers.manage` (creates user + courier profile in one step) |
 | `GET/PUT /api/tariffs/*` (cities, zones, rates, intercity) | `tariffs.manage` (GET of active cities/zones is public) |
 | `GET /api/courier/jobs`, `POST /api/courier/jobs/:id/action` (idempotency key), `POST /api/courier/location`, `POST /api/courier/pod/:id` (multipart) | `courier.app` + own job |
-| `GET/PATCH /api/courier/me` (own profile; `isOnDuty`; `showPhotoPublicly: false` only, consent is recorded by staff, #161), `GET /api/courier/me/photo`, `GET /api/courier/cash` (own balance by currency + last 30 days), `POST /api/courier/cash/handover` (idempotency key; PENDING until Finance confirms in G.8) | `courier.app`, own data only (added in G.4) |
+| `GET/PATCH /api/courier/me` (own profile; `isOnDuty`; `showPhotoPublicly: false` only, consent is recorded by staff, #161), `GET /api/courier/me/photo`, `GET /api/courier/cash` (own balance by currency + last 30 days), `POST /api/courier/cash/handover` (`method` CASH / MTN_MOMO / ORANGE_MONEY + `momoReference` for mobile money; idempotency key; PENDING until Finance confirms in G.8; the cash summary includes the 7-day `dueBy` / `overdue`) | `courier.app`, own data only (added in G.4) |
 
 Built in G.3 (`server/routes/dispatch.ts`, `server/routes/courier.ts`, `server/dispatch/jobs.ts`); request bodies are
 documented above each route. Error answers carry a `code` (e.g. `INVALID_TRANSITION`, `NOT_YOUR_JOB`,

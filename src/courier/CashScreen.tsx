@@ -3,30 +3,35 @@
 // synced like the job steps.
 import React, { useState } from 'react';
 import { useCourierText } from './context';
-import type { CashState } from './courierApi';
+import type { CashMethod, CashState } from './courierApi';
 import type { QueueItem } from './offlineQueue';
-import { Sheet, parseAmount } from './ui';
+import { CashFields, Sheet, parseAmount, type CashDraft } from './ui';
+import { HANDOVER_DEADLINE_DAYS } from '../shared/cashHandover';
+
+const EMPTY: CashDraft = { amount: '', method: 'CASH', reference: '' };
 
 export const CashScreen: React.FC<{
   cash: CashState | null;
   error: boolean;
   queued: QueueItem[];
-  onHandover: (amount: number, currency: string, note: string) => void;
+  onHandover: (amount: number, currency: string, method: CashMethod, momoReference: string | null, note: string) => void;
 }> = ({ cash, error, queued, onHandover }) => {
-  const { t, money, dateTime } = useCourierText();
+  const { t, money, dateTime, date } = useCourierText();
   const [open, setOpen] = useState(false);
-  const [amount, setAmount] = useState('');
+  const [draft, setDraft] = useState<CashDraft>(EMPTY);
   const [note, setNote] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-  const balances = cash?.balances.length ? cash.balances : [{ currency: 'XAF', collected: 0, handedOver: 0, pendingHandover: 0, balance: 0 }];
+  const balances = cash?.balances.length ? cash.balances
+    : [{ currency: 'XAF', collected: 0, handedOver: 0, pendingHandover: 0, balance: 0, outstanding: 0, dueBy: null, overdue: false }];
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const n = parseAmount(amount);
+    const n = parseAmount(draft.amount);
     if (!n || n <= 0) return setFormError(t('cash.needAmount'));
-    onHandover(n, 'XAF', note.trim());
+    if (draft.method !== 'CASH' && !draft.reference.trim()) return setFormError(t('pod.needReference'));
+    onHandover(n, 'XAF', draft.method, draft.method === 'CASH' ? null : draft.reference.trim(), note.trim());
     setOpen(false);
-    setAmount('');
+    setDraft(EMPTY);
     setNote('');
     setFormError(null);
   };
@@ -46,6 +51,13 @@ export const CashScreen: React.FC<{
             <div><dt>{t('cash.collected')}</dt><dd>{money(b.collected, b.currency)}</dd></div>
             <div><dt>{t('cash.handedOver')}</dt><dd>{money(b.handedOver, b.currency)}</dd></div>
           </dl>
+          {b.dueBy !== null && b.outstanding > 0 && (
+            <p className={b.overdue ? 'tx-cr-due tx-cr-due--late' : 'tx-cr-due'} role={b.overdue ? 'alert' : undefined}>
+              {b.overdue
+                ? t('cash.overdue', { amount: money(b.outstanding, b.currency), date: date(b.dueBy) })
+                : t('cash.dueBy', { amount: money(b.outstanding, b.currency), date: date(b.dueBy) })}
+            </p>
+          )}
           {b.pendingHandover > 0 && <p className="tx-cr-pending">{t('cash.pendingHandover', { amount: money(b.pendingHandover, b.currency) })}</p>}
         </div>
       ))}
@@ -64,7 +76,8 @@ export const CashScreen: React.FC<{
               {cash.entries.map((e) => (
                 <li key={e.id} className={`tx-cr-entry tx-cr-entry--${e.type.toLowerCase()}`}>
                   <div>
-                    <strong>{typeText(e.type)}{e.method !== 'CASH' ? ` · ${t(`methods.${e.method as 'CASH'}`)}` : ''}</strong>
+                    <strong>{typeText(e.type)}{e.method !== 'CASH' ? ` · ${t(`methods.${e.method as CashMethod}`)}` : ''}</strong>
+                    {e.momoReference && <span className="tx-cr-muted">{t('cash.referenceLine', { ref: e.momoReference })}</span>}
                     <span className="tx-cr-muted">{dateTime(e.createdAt)}{e.trackingNumber ? ` · ${e.trackingNumber}` : ''} · {e.ref}</span>
                   </div>
                   <div className="tx-cr-entry__right">
@@ -82,10 +95,8 @@ export const CashScreen: React.FC<{
         <Sheet title={t('cash.recordHandover')} onClose={() => setOpen(false)}>
           <form className="tx-cr-form" onSubmit={submit} noValidate>
             <p className="tx-cr-note">{t('cash.handoverIntro')}</p>
-            <label className="tx-cr-field" htmlFor="handover-amount">
-              <span>{t('cash.amount')} (XAF)</span>
-              <input id="handover-amount" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.,]/g, ''))} />
-            </label>
+            <p className="tx-cr-muted">{t('cash.deadlineRule', { n: HANDOVER_DEADLINE_DAYS })}</p>
+            <CashFields value={draft} onChange={setDraft} currency="XAF" idPrefix="handover" />
             <label className="tx-cr-field" htmlFor="handover-note">
               <span>{t('cash.note')}</span>
               <textarea id="handover-note" rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />

@@ -62,7 +62,11 @@ export interface CourierProfile {
   photoUrl: string | null;
 }
 
-export interface CashBalance { currency: string; collected: number; handedOver: number; pendingHandover: number; balance: number }
+export interface CashBalance {
+  currency: string; collected: number; handedOver: number; pendingHandover: number; balance: number;
+  /** 7-day handover deadline (src/shared/cashHandover.ts). */
+  outstanding: number; dueBy: number | null; overdue: boolean;
+}
 export interface CashEntry {
   id: string; ref: string; jobId: string | null; trackingNumber: string | null; type: 'COLLECTED' | 'HANDOVER' | 'ADJUSTMENT';
   method: string; amount: number; currency: string; momoReference: string | null; status: 'PENDING' | 'CONFIRMED' | 'REJECTED';

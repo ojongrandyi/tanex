@@ -266,3 +266,7 @@
 /* A panel that is a fieldset: its legend sits inside like a heading, not on the border. */
 fieldset.tx-cr-panel > legend { float: left; width: 100%; margin: 0 0 10px; }
 fieldset.tx-cr-panel > legend + * { clear: both; }
+
+/* 7-day handover deadline (src/shared/cashHandover.ts) */
+.tx-cr-due { margin: 4px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--tx-cream-200); color: var(--tx-choc-950); font-weight: 700; font-size: 0.95rem; }
+.tx-cr-due--late { background: var(--tx-danger-100); color: var(--tx-danger-700); }
