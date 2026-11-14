@@ -12,7 +12,7 @@ export const uploadsDir = path.resolve(
     || path.join(process.env.DB_PATH ? path.dirname(process.env.DB_PATH) : path.join(process.cwd(), 'data'), 'uploads')
 );
 
-export type UploadFolder = 'images' | 'proofs' | 'blog' | 'avatars' | 'couriers';
+export type UploadFolder = 'images' | 'proofs' | 'blog' | 'avatars' | 'couriers' | 'pod';
 
 // images/: package photos, served publicly via /media when marked visible.
 // proofs/: payment screenshots, private, only ever served through an admin-only route.
@@ -26,6 +26,10 @@ export const uploadFolders: Record<UploadFolder, string> = {
   // couriers/: courier profile photos (DISPATCH_SPEC §3), private: served only through the
   // console route GET /api/couriers/:id/photo (and to customers only with consent, G.7).
   couriers: path.join(uploadsDir, 'couriers'),
+  // pod/: proof-of-delivery photos and signatures (DISPATCH_SPEC §4), private: served only to
+  // dispatch, finance and the job's courier through GET /api/dispatch/jobs/:id/pod/:kind and
+  // GET /api/courier/jobs/:id/pod/:kind.
+  pod: path.join(uploadsDir, 'pod'),
 };
 
 export function ensureUploadDirs() {

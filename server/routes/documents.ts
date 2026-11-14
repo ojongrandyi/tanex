@@ -54,8 +54,18 @@ function formatDoc(row: any) {
     status: row.status,
     version: row.version,
     versionHistory: row.version_history_json ? JSON.parse(row.version_history_json) : [],
-    fileSize: row.file_size
+    fileSize: row.file_size,
+    // Type-specific details (Proof of Delivery: server/dispatch/podDocument.ts).
+    details: row.details_json ? safeJson(row.details_json) : undefined
   };
+}
+
+function safeJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
 }
 
 // GET /api/documents (List all documents with optional filter)

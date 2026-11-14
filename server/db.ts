@@ -387,6 +387,10 @@ export function initDatabase() {
   // INTERNATIONAL | LOCAL | INTERCITY (DISPATCH_SPEC §3); NULL = INTERNATIONAL for older rows.
   // LOCAL and INTERCITY shipments move only on courier updates (server/progress.ts skips them).
   try { db.exec(`ALTER TABLE shipments ADD COLUMN service_scope TEXT;`); } catch (e) {}
+  // Type-specific details of a generated document as JSON: for a Proof of Delivery (doc_type
+  // 'POD', written by the server when a delivery job is delivered) the job id, delivery time,
+  // receiver, courier and which proof files exist (server/dispatch/podDocument.ts).
+  try { db.exec(`ALTER TABLE documents ADD COLUMN details_json TEXT;`); } catch (e) {}
 
   // Backfill existing rows so they don't all collapse to "unknown, sort last": preserve
   // today's best-effort relative order (by rowid, which reflects insertion order) as a

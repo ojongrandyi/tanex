@@ -86,7 +86,9 @@ const MOUNTS: Record<string, string> = {
   blogAdminRouter: '/api/admin/blog',
   publicBlogRouter: '/api/blog',
   tariffsRouter: '/api/tariffs',
-  couriersRouter: '/api/couriers'
+  couriersRouter: '/api/couriers',
+  dispatchRouter: '/api/dispatch',
+  courierRouter: '/api/courier'
 };
 
 // Open to visitors on purpose (IAM_RBAC_SPEC §6–§7).

@@ -22,6 +22,8 @@ import { blogAdminRouter } from './routes/blog.js';
 import { publicBlogRouter } from './routes/publicBlog.js';
 import { tariffsRouter } from './routes/tariffs.js';
 import { couriersRouter } from './routes/couriers.js';
+import { dispatchRouter } from './routes/dispatch.js';
+import { courierRouter } from './routes/courier.js';
 import { requirePermission } from './middleware/auth.js';
 import { addErrorCodes } from './middleware/errorCodes.js';
 
@@ -66,6 +68,10 @@ export function registerApiRoutes(app: Express): void {
   // (couriers.view / couriers.manage), gated per route.
   app.use('/api/tariffs', tariffsRouter);
   app.use('/api/couriers', couriersRouter);
+  // Delivery jobs for the console (dispatch.view / dispatch.manage, per route) and the courier
+  // app's own-jobs API (courier.app, and the job must be the signed-in courier's).
+  app.use('/api/dispatch', dispatchRouter);
+  app.use('/api/courier', courierRouter);
   // Public package and blog images (/media/<id>.<ext>, /media/blog/<id>.<ext>); outside /api
   // so they can be cached.
   app.use(mediaRouter);

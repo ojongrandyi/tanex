@@ -210,11 +210,17 @@ sent automatically when an email address is known.
 |---|---|
 | `POST /api/local-delivery/quote` · `POST /api/local-delivery` | public (rate-limited) |
 | `GET /api/track/:id` | public; adds `localDelivery` block (stepper, courier first name, last position if fresh, ETA) |
-| `GET/POST/PATCH /api/dispatch/jobs`, `POST /api/dispatch/jobs/:id/assign`, `/cancel`, `/return` | `dispatch.view` / `dispatch.manage` |
+| `GET/POST/PATCH /api/dispatch/jobs`, `POST /api/dispatch/jobs/:id/assign` (assign or reassign), `/confirm`, `/price`, `/cancel`, `/return`, `/delivery-code-override` | `dispatch.view` / `dispatch.manage` |
+| `GET /api/dispatch/jobs/:id/pod/photo` · `/signature` (private POD files) | `dispatch.view`/`dispatch.manage`/`cash.view`/`cash.confirm` (the courier: `GET /api/courier/jobs/:id/pod/:kind`) |
 | `GET /api/dispatch/board` (jobs + courier positions, one call) | `dispatch.view` |
 | `GET/POST/PATCH /api/couriers` | `couriers.view` / `couriers.manage` (creates user + courier profile in one step) |
 | `GET/PUT /api/tariffs/*` (cities, zones, rates, intercity) | `tariffs.manage` (GET of active cities/zones is public) |
 | `GET /api/courier/jobs`, `POST /api/courier/jobs/:id/action` (idempotency key), `POST /api/courier/location`, `POST /api/courier/pod/:id` (multipart) | `courier.app` + own job |
+
+Built in G.3 (`server/routes/dispatch.ts`, `server/routes/courier.ts`, `server/dispatch/jobs.ts`); request bodies are
+documented above each route. Error answers carry a `code` (e.g. `INVALID_TRANSITION`, `NOT_YOUR_JOB`,
+`POD_REQUIRED`, `PRICE_REQUIRED`, `DELIVERY_CODE_WRONG` with `details.triesLeft`, `DELIVERY_CODE_LOCKED` (423),
+`IDEMPOTENCY_KEY_REUSED`, `NO_ACTIVE_JOB`) for the apps to show in the user's language.
 | `GET/POST /api/cash/*` | `cash.view` / `cash.confirm`; couriers see and record their own |
 
 ## 12. Tests

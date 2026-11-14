@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  PackageCheck,
   FileText,
   Tag,
   Receipt,
@@ -36,6 +37,7 @@ import { formatWeightBoth } from '../../shared/units';
 import { useCurrency } from '../../utils/useCurrency';
 import { getCountry } from '../../data/countries';
 import { MoneyInput } from '../../components/forms/UnitControls';
+import { PodPaper } from './PodPaper';
 import {
   DocumentHeaderBrand,
   DocumentIdLine,
@@ -163,7 +165,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
       receipts: documents.filter(d => d.docType === 'RECEIPT').length,
       invoices: documents.filter(d => d.docType === 'INVOICE').length,
       bols: documents.filter(d => d.docType === 'BOL').length,
-      insuranceCerts: documents.filter(d => d.docType === 'INSURANCE').length
+      insuranceCerts: documents.filter(d => d.docType === 'INSURANCE').length,
+      pods: documents.filter(d => d.docType === 'POD').length
     };
   }, [documents]);
 
@@ -232,6 +235,12 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           icon: <ShieldCheck size={16} className="text-purple" />,
           label: 'Insurance Certificate',
           badgeClass: 'badge-type-insurance'
+        };
+      case 'POD':
+        return {
+          icon: <PackageCheck size={16} className="text-emerald" />,
+          label: 'Proof of Delivery',
+          badgeClass: 'badge-type-receipt'
         };
       default:
         return {
@@ -661,6 +670,15 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           <ShieldCheck size={15} />
           <span>Insurance Certificates</span>
           <span className="tab-count-pill">{stats.insuranceCerts}</span>
+        </button>
+
+        <button
+          className={`doc-nav-tab ${typeFilter === 'POD' ? 'active' : ''}`}
+          onClick={() => setTypeFilter('POD')}
+        >
+          <PackageCheck size={15} />
+          <span>Proofs of Delivery</span>
+          <span className="tab-count-pill">{stats.pods}</span>
         </button>
       </div>
 
@@ -1549,6 +1567,9 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                   <DocumentLegalFooter />
                 </div>
               )}
+
+              {/* DOCUMENT TYPE 6: PROOF OF DELIVERY (written by the server, G.3) */}
+              {previewDoc.docType === 'POD' && <PodPaper ref={paperRef} doc={previewDoc} title={previewTitle} />}
 
               {/* =================================================================
                   DOCUMENT TYPE 5: CERTIFICATE OF CARGO INSURANCE

@@ -88,7 +88,9 @@ export interface AuditLogEntry {
   details: string;
 }
 
-export type DocumentType = 'SHIPPING_LABEL' | 'RECEIPT' | 'INVOICE' | 'BOL' | 'INSURANCE';
+// POD (Proof of Delivery) is written by the server when a delivery job is completed (G.3), never
+// from the generate form.
+export type DocumentType = 'SHIPPING_LABEL' | 'RECEIPT' | 'INVOICE' | 'BOL' | 'INSURANCE' | 'POD';
 export type DocumentStatus = 'GENERATED' | 'UPDATED' | 'CANCELLED';
 
 export interface DocumentVersion {
@@ -164,6 +166,8 @@ export interface AdminDocument {
   version: number;
   versionHistory?: DocumentVersion[];
   fileSize?: string;
+  /** Type-specific details stored by the server (Proof of Delivery: job, time, receiver, proof files). */
+  details?: unknown;
 }
 
 export interface AdminNotification {

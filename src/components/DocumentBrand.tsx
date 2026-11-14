@@ -22,6 +22,8 @@ export function documentTitle(docType: DocumentType, mode?: TransportMode): stri
       return 'Shipment Receipt';
     case 'INSURANCE':
       return 'Certificate of Cargo Insurance';
+    case 'POD':
+      return 'Proof of Delivery';
     default:
       return 'Shipment Document';
   }

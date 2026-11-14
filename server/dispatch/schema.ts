@@ -156,5 +156,26 @@ export function createDispatchTables(conn: DatabaseSync): void {
     CREATE INDEX IF NOT EXISTS idx_cash_ledger_courier ON cash_ledger (courier_user_id, created_at_ts);
     CREATE INDEX IF NOT EXISTS idx_cash_ledger_status ON cash_ledger (status, created_at_ts);
     CREATE INDEX IF NOT EXISTS idx_cash_ledger_job ON cash_ledger (job_id);
+
+    -- Courier actions already applied, by the client-generated idempotency key (DISPATCH_SPEC §6):
+    -- a retried action from the phone's offline queue gets the stored answer instead of being
+    -- applied twice. Keys are per courier.
+    CREATE TABLE IF NOT EXISTS dispatch_action_keys (
+      courier_user_id TEXT NOT NULL,
+      idem_key TEXT NOT NULL,
+      job_id TEXT NOT NULL,
+      action TEXT NOT NULL,
+      response_json TEXT NOT NULL,
+      created_at_ts INTEGER NOT NULL,
+      PRIMARY KEY (courier_user_id, idem_key)
+    );
+    CREATE INDEX IF NOT EXISTS idx_dispatch_action_keys_time ON dispatch_action_keys (created_at_ts);
   `);
+
+  // Wrong delivery-code entries for the current code (DISPATCH_SPEC §4: 5 tries, then a dispatch
+  // override). Reset when the code is changed or overridden.
+  try { conn.exec('ALTER TABLE dispatch_jobs ADD COLUMN delivery_code_attempts INTEGER NOT NULL DEFAULT 0;'); } catch { /* exists */ }
+  // The courier's note with a failed attempt (required for reason OTHER). Internal: never on the
+  // public tracking page, which shows only the reason's name.
+  try { conn.exec('ALTER TABLE dispatch_jobs ADD COLUMN failure_note TEXT;'); } catch { /* exists */ }
 }

@@ -10,6 +10,7 @@ import { initDatabase, dataDir, dbPath, db } from './db.js';
 import { bootstrapSuperAdmin } from './auth/bootstrap.js';
 import { startOutboxWorker } from './mail/outbox.js';
 import { startBlogScheduler } from './blog/posts.js';
+import { startLocationPurge } from './dispatch/locations.js';
 import { setPreviewSecret } from './blog/preview.js';
 import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { seoRouter, setSitemapExtras } from './seo.js';
@@ -54,6 +55,8 @@ if (!ADMIN_PROXY_TARGET) {
   startOutboxWorker(db);
   // Publishes scheduled blog posts when their time comes (checked every minute; BLOG_SPEC §3).
   startBlogScheduler(db);
+  // Removes courier positions older than 30 days, hourly (DISPATCH_SPEC §3).
+  startLocationPurge(db);
   // Blog index, categories and posts in sitemap.xml (BLOG_SPEC §7).
   setSitemapExtras(() => blogSitemapEntries(db));
 }
