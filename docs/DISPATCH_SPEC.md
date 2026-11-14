@@ -216,6 +216,7 @@ sent automatically when an email address is known.
 | `GET/POST/PATCH /api/couriers` | `couriers.view` / `couriers.manage` (creates user + courier profile in one step) |
 | `GET/PUT /api/tariffs/*` (cities, zones, rates, intercity) | `tariffs.manage` (GET of active cities/zones is public) |
 | `GET /api/courier/jobs`, `POST /api/courier/jobs/:id/action` (idempotency key), `POST /api/courier/location`, `POST /api/courier/pod/:id` (multipart) | `courier.app` + own job |
+| `GET/PATCH /api/courier/me` (own profile; `isOnDuty`; `showPhotoPublicly: false` only, consent is recorded by staff, #161), `GET /api/courier/me/photo`, `GET /api/courier/cash` (own balance by currency + last 30 days), `POST /api/courier/cash/handover` (idempotency key; PENDING until Finance confirms in G.8) | `courier.app`, own data only (added in G.4) |
 
 Built in G.3 (`server/routes/dispatch.ts`, `server/routes/courier.ts`, `server/dispatch/jobs.ts`); request bodies are
 documented above each route. Error answers carry a `code` (e.g. `INVALID_TRANSITION`, `NOT_YOUR_JOB`,

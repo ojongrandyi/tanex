@@ -97,10 +97,6 @@ export const AUTH_TEXT = {
       loading: 'Loading…'
     }
   },
-  courier: {
-    title: 'Courier app coming soon',
-    body: 'Your account is set up. The courier app will open here as soon as it is ready.'
-  },
   noAccess: {
     title: 'No access yet',
     body: 'Your account has no permissions yet. Ask an administrator to give you a role.'

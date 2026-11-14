@@ -222,7 +222,8 @@ const serveStatic = express.static(distDir, {
   setHeaders: (res, filePath) => {
     const rel = path.relative(distDir, filePath).split(path.sep).join('/');
     if (rel.startsWith('assets/')) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    else if (rel.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+    // The courier app's service worker and manifest are re-checked on every load so a deploy reaches phones at once.
+    else if (rel.endsWith('.html') || rel === 'courier-sw.js' || rel.endsWith('.webmanifest')) res.setHeader('Cache-Control', 'no-cache');
     else if (rel.startsWith('images/') || rel.startsWith('brand/')) res.setHeader('Cache-Control', 'public, max-age=2592000');
     else res.setHeader('Cache-Control', 'public, max-age=3600');
   },

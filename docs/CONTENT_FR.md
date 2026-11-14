@@ -538,6 +538,7 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 - Motifs : `Destinataire injoignable` · `Destinataire absent` · `Mauvaise adresse` · `Refusé` · `Livraison dangereuse` · `Problème de véhicule` · `Autre`
 - `Enregistré sur le téléphone, sera synchronisé` · `Synchronisé` · `Hors ligne` · `Gardez l'application ouverte pendant la livraison pour que le client puisse vous suivre.` · `La localisation est désactivée. Activez-la pour partager votre position pendant les livraisons.`
 - `Ma caisse` · `Solde` · `Déclarer un versement` · `En attente de confirmation` · `Confirmé`
+- *Ajouté le 14/11/2026 avec G.4 (**à confirmer**, suivi #167) :* texte complet dans `src/i18n/fr/courier.ts` (en-tête `Livreur`, menu `Aujourd'hui` · `Caisse` · `Historique` · `Profil`, paiement à l'enlèvement, preuve de livraison, localisation, caisse, profil, messages d'erreur). Relecture native nécessaire (#108).
 
 ## 14. Modèles de notifications
 

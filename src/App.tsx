@@ -36,7 +36,8 @@ const loadAuthScreens = () => import('./admin/AuthScreens');
 const AdminApp = lazy(() => loadAdminApp().then((m) => ({ default: m.AdminApp })));
 const AdminLogin = lazy(() => loadAdminLogin().then((m) => ({ default: m.AdminLogin })));
 const ForcedPasswordChange = lazy(() => loadAuthScreens().then((m) => ({ default: m.ForcedPasswordChange })));
-const CourierComingSoon = lazy(() => loadAuthScreens().then((m) => ({ default: m.CourierComingSoon })));
+// Courier app (DISPATCH_SPEC §6): its own chunk, fetched only for courier accounts.
+const CourierApp = lazy(() => import('./courier/CourierApp').then((m) => ({ default: m.CourierApp })));
 const NoAccess = lazy(() => loadAuthScreens().then((m) => ({ default: m.NoAccess })));
 
 /** What a signed-in account opens at the console path (IAM_RBAC_SPEC §9). */
@@ -142,12 +143,15 @@ function MainAppContent() {
 
   // The session is read once by AuthProvider. On the console path, fetch the console code
   // while that check runs, so the split adds no wait.
+  // The staff console code is large: it is fetched once the session shows a staff account, so
+  // couriers (on mobile data) never download it. Signed-out visitors get the sign-in screen first.
+  const signedInKind = auth.user ? consoleKind(auth.user.permissions) : null;
   useEffect(() => {
     if (currentPage === 'admin') {
       loadAdminLogin().catch(() => {});
-      loadAdminApp().catch(() => {});
+      if (signedInKind === 'console') loadAdminApp().catch(() => {});
     }
-  }, [currentPage]);
+  }, [currentPage, signedInKind]);
 
   // Keep tracked shipment in continuous live synchronization with simulation engine
   useEffect(() => {
@@ -404,7 +408,7 @@ function MainAppContent() {
           // A temporary password is replaced before anything else (IAM_RBAC_SPEC §5.5).
           <ForcedPasswordChange />
         ) : kind === 'courier' ? (
-          <CourierComingSoon />
+          <CourierApp />
         ) : kind === 'none' ? (
           <NoAccess />
         ) : (

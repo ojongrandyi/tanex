@@ -6,6 +6,8 @@
 // until the server answers, so a key already applied returns the stored answer instead of
 // applying the step twice. The key is written in the same transaction as the step.
 import { Router, Request, Response } from 'express';
+import crypto from 'crypto';
+import path from 'path';
 import { db } from '../db.js';
 import { audit } from '../audit.js';
 import { requirePermission } from '../middleware/auth.js';
@@ -13,11 +15,14 @@ import { getRequestAuth } from '../auth/permissions.js';
 import { inTransaction } from '../auth/schema.js';
 import { serverError } from '../errors.js';
 import { readMultipart } from '../multipart.js';
-import { DEFAULT_IMAGE_TYPES, MAX_UPLOAD_BYTES, deleteUpload, detectImageType, writeImageUpload } from '../uploads.js';
+import {
+  DEFAULT_IMAGE_TYPES, IMAGE_CONTENT_TYPES, MAX_UPLOAD_BYTES, deleteUpload, detectImageType, resolveUploadPath, writeImageUpload,
+} from '../uploads.js';
 import {
   DELIVERY_CODE_TRIES, NOTE_MAX, actionTime, deliveryCodeMatches, fail, isFail, jobOut, loadJob, readCashEntries,
-  writeTransition, type Fail, type JobRow,
+  readMoney, writeTransition, type Fail, type JobRow,
 } from '../dispatch/jobs.js';
+import { allocateCashRef } from '../dispatch/cashRef.js';
 import { MAX_POINTS_PER_REQUEST, insertLocations, readLocationPoint, type LocationPoint } from '../dispatch/locations.js';
 import { sendPodFile, transitionFail } from './dispatch.js';
 import {
@@ -284,6 +289,200 @@ courierRouter.post('/pod/:id', async (req: Request, res: Response) => {
     if (savedPhoto && current.pod_photo_file) deleteUpload('pod', current.pod_photo_file);
     if (savedSig && current.pod_signature_file) deleteUpload('pod', current.pod_signature_file);
     res.json({ success: true, data: jobOut(db, loadJob(db, job.id)!, { view: 'courier' }) });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// ---- Profile, duty and cash (courier app Today, Cash and Profile screens; DISPATCH_SPEC §6, §9) ----
+
+interface OwnProfileRow {
+  user_id: string; vehicle_type: string; plate_number: string | null; public_first_name: string;
+  show_photo_publicly: number; photo_file: string | null; is_on_duty: number; city_name: string | null;
+}
+
+function ownProfile(req: Request): OwnProfileRow | undefined {
+  return db.prepare(`
+    SELECT c.user_id, c.vehicle_type, c.plate_number, c.public_first_name, c.show_photo_publicly, c.photo_file,
+           c.is_on_duty, dc.name AS city_name
+    FROM couriers c LEFT JOIN delivery_cities dc ON dc.id = c.home_city_id WHERE c.user_id = ?
+  `).get(me(req).id) as OwnProfileRow | undefined;
+}
+
+const NO_PROFILE = fail(404, 'NO_COURIER_PROFILE', 'This account has no courier profile yet. Ask the office to finish it.');
+
+function profileOut(row: OwnProfileRow) {
+  return {
+    vehicleType: row.vehicle_type,
+    plateNumber: row.plate_number,
+    publicFirstName: row.public_first_name,
+    homeCityName: row.city_name,
+    isOnDuty: row.is_on_duty === 1,
+    showPhotoPublicly: row.show_photo_publicly === 1,
+    photoUrl: row.photo_file ? `/api/courier/me/photo?v=${encodeURIComponent(row.photo_file.split('.')[0])}` : null,
+  };
+}
+
+// GET /api/courier/me: own profile (vehicle, public first name, duty, photo consent).
+courierRouter.get('/me', (req: Request, res: Response) => {
+  try {
+    const row = ownProfile(req);
+    if (!row) return send(res, NO_PROFILE);
+    noStore(res);
+    res.json({ success: true, data: profileOut(row) });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// GET /api/courier/me/photo: own photo (the one customers may see with consent).
+courierRouter.get('/me/photo', (req: Request, res: Response) => {
+  const row = ownProfile(req);
+  const filePath = row?.photo_file ? resolveUploadPath('couriers', row.photo_file) : null;
+  if (!row?.photo_file || !filePath) return send(res, fail(404, 'NOT_FOUND', 'No photo.'));
+  res.setHeader('Content-Type', IMAGE_CONTENT_TYPES[path.extname(row.photo_file).slice(1)]);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'private, max-age=86400');
+  res.sendFile(filePath, { cacheControl: false }, (err) => {
+    if (err && !res.headersSent) send(res, fail(404, 'NOT_FOUND', 'No photo.'));
+  });
+});
+
+// PATCH /api/courier/me { isOnDuty?: boolean, showPhotoPublicly?: false }
+// The courier starts and ends their shift, and may withdraw photo consent. Staff record the
+// agreement (tracker #161); the courier can only take it back here.
+courierRouter.patch('/me', (req: Request, res: Response) => {
+  try {
+    const row = ownProfile(req);
+    if (!row) return send(res, NO_PROFILE);
+    const b = body(req);
+    if (b.isOnDuty !== undefined && typeof b.isOnDuty !== 'boolean') {
+      return send(res, fail(400, 'INVALID_REQUEST', 'isOnDuty must be true or false.'));
+    }
+    if (b.showPhotoPublicly !== undefined && b.showPhotoPublicly !== false) {
+      return send(res, fail(403, 'CONSENT_BY_STAFF', 'Ask the office to record your agreement to show your photo.'));
+    }
+    const duty = typeof b.isOnDuty === 'boolean' && (row.is_on_duty === 1) !== b.isOnDuty ? b.isOnDuty : null;
+    const withdraw = b.showPhotoPublicly === false && row.show_photo_publicly === 1;
+    if (duty !== null || withdraw) {
+      const now = Date.now();
+      const name = me(req).displayName;
+      inTransaction(db, () => {
+        if (duty !== null) {
+          db.prepare('UPDATE couriers SET is_on_duty = ?, updated_at_ts = ? WHERE user_id = ?').run(duty ? 1 : 0, now, row.user_id);
+          audit(req, 'courier.duty', 'user', row.user_id, `${duty ? 'On duty' : 'Off duty'} (courier app): ${name}`,
+            { isOnDuty: !duty }, { isOnDuty: duty }, { conn: db });
+        }
+        if (withdraw) {
+          db.prepare('UPDATE couriers SET show_photo_publicly = 0, updated_at_ts = ? WHERE user_id = ?').run(now, row.user_id);
+          audit(req, 'courier.consent_withdrawn', 'user', row.user_id, `Photo consent withdrawn (courier app): ${name}`,
+            { showPhotoPublicly: true }, { showPhotoPublicly: false }, { conn: db });
+        }
+      });
+    }
+    res.json({ success: true, data: profileOut(ownProfile(req)!) });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+interface CashRow {
+  id: string; ref: string; job_id: string | null; entry_type: string; method: string; amount: number; currency: string;
+  momo_reference: string | null; status: string; note: string | null; created_at_ts: number; confirmed_at_ts: number | null;
+  tracking_number: string | null;
+}
+
+/**
+ * A courier's money by currency (DISPATCH_SPEC §9): balance = collected (pending + confirmed)
+ * + confirmed adjustments − confirmed handovers. Handovers waiting for Finance are shown apart.
+ */
+export function courierCashSummary(courierUserId: string) {
+  const sums = db.prepare(`
+    SELECT currency,
+      COALESCE(SUM(CASE WHEN entry_type = 'COLLECTED' AND status != 'REJECTED' THEN amount END), 0) AS collected,
+      COALESCE(SUM(CASE WHEN entry_type = 'HANDOVER' AND status = 'CONFIRMED' THEN amount END), 0) AS handed_over,
+      COALESCE(SUM(CASE WHEN entry_type = 'HANDOVER' AND status = 'PENDING' THEN amount END), 0) AS pending_handover,
+      COALESCE(SUM(CASE WHEN entry_type = 'ADJUSTMENT' AND status = 'CONFIRMED' THEN amount END), 0) AS adjustments
+    FROM cash_ledger WHERE courier_user_id = ? GROUP BY currency ORDER BY currency
+  `).all(courierUserId) as { currency: string; collected: number; handed_over: number; pending_handover: number; adjustments: number }[];
+  return sums.map((s) => ({
+    currency: s.currency,
+    collected: s.collected,
+    handedOver: s.handed_over,
+    pendingHandover: s.pending_handover,
+    balance: s.collected + s.adjustments - s.handed_over,
+  }));
+}
+
+const cashOut = (r: CashRow) => ({
+  id: r.id, ref: r.ref, jobId: r.job_id, trackingNumber: r.tracking_number, type: r.entry_type, method: r.method,
+  amount: r.amount, currency: r.currency, momoReference: r.momo_reference, status: r.status, note: r.note,
+  createdAt: r.created_at_ts, confirmedAt: r.confirmed_at_ts,
+});
+
+// GET /api/courier/cash: own balance by currency, entries of the last 30 days and anything pending.
+courierRouter.get('/cash', (req: Request, res: Response) => {
+  try {
+    const id = me(req).id;
+    const rows = db.prepare(`
+      SELECT l.*, j.tracking_number FROM cash_ledger l LEFT JOIN dispatch_jobs j ON j.id = l.job_id
+      WHERE l.courier_user_id = ? AND (l.created_at_ts >= ? OR l.status = 'PENDING')
+      ORDER BY l.created_at_ts DESC LIMIT 300
+    `).all(id, Date.now() - HISTORY_MS) as unknown as CashRow[];
+    noStore(res);
+    res.json({ success: true, data: { balances: courierCashSummary(id), entries: rows.map(cashOut) } });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// POST /api/courier/cash/handover { amount, currency?, note?, idempotencyKey, deviceTs? }
+// The courier declares cash handed to the office; it stays PENDING until Finance confirms it
+// (cash.confirm, G.8). Queued offline like job actions: a repeated key returns the stored answer.
+// Keys share dispatch_action_keys with job actions (job_id '-', action 'cash_handover').
+courierRouter.post('/cash/handover', (req: Request, res: Response) => {
+  try {
+    const user = me(req);
+    const b = body(req);
+    const key = typeof b.idempotencyKey === 'string' ? b.idempotencyKey : '';
+    if (!IDEMPOTENCY_KEY.test(key)) {
+      return send(res, fail(400, 'IDEMPOTENCY_KEY_REQUIRED', 'Each action needs an idempotency key (8 to 100 letters, digits, - or _).'));
+    }
+    const seen = db.prepare('SELECT action, response_json FROM dispatch_action_keys WHERE courier_user_id = ? AND idem_key = ?')
+      .get(user.id, key) as { action: string; response_json: string } | undefined;
+    if (seen) {
+      if (seen.action !== 'cash_handover') {
+        return send(res, fail(409, 'IDEMPOTENCY_KEY_REUSED', 'This idempotency key was already used for another action.'));
+      }
+      return res.json({ ...JSON.parse(seen.response_json), replayed: true });
+    }
+    const currency = typeof b.currency === 'string' && /^[A-Z]{3}$/.test(b.currency) ? b.currency : 'XAF';
+    const amount = readMoney(b.amount, currency, 'INVALID_CASH', 'The amount handed over');
+    if (isFail(amount)) return send(res, amount);
+    if (amount <= 0) return send(res, fail(400, 'INVALID_CASH', 'The amount handed over must be more than 0.'));
+    const note = text(b.note, NOTE_MAX);
+    const now = Date.now();
+    const device = typeof b.deviceTs === 'number' && Number.isFinite(b.deviceTs) ? Math.round(b.deviceTs) : NaN;
+    const at = device <= now && device > now - 7 * 86_400_000 ? device : now;
+    const response = inTransaction(db, () => {
+      const ref = allocateCashRef(db);
+      const id = 'csh_' + crypto.randomBytes(9).toString('hex');
+      db.prepare(`
+        INSERT INTO cash_ledger (id, ref, courier_user_id, job_id, entry_type, method, amount, currency, momo_reference,
+                                 status, recorded_by, note, created_at_ts)
+        VALUES (?, ?, ?, NULL, 'HANDOVER', 'CASH', ?, ?, NULL, 'PENDING', ?, ?, ?)
+      `).run(id, ref, user.id, amount, currency, user.id, note, at);
+      audit(req, 'cash.handover', 'cash_ledger', id, `Cash handover declared (${amount} ${currency}): ${user.displayName}`,
+        undefined, { ref, amount, currency, idempotencyKey: key, ...(note ? { note } : {}) }, { conn: db });
+      const row = db.prepare('SELECT l.*, NULL AS tracking_number FROM cash_ledger l WHERE l.id = ?').get(id) as unknown as CashRow;
+      const out = { success: true, data: cashOut(row) };
+      db.prepare(`
+        INSERT INTO dispatch_action_keys (courier_user_id, idem_key, job_id, action, response_json, created_at_ts)
+        VALUES (?, ?, '-', 'cash_handover', ?, ?)
+      `).run(user.id, key, JSON.stringify(out), now);
+      return out;
+    });
+    res.json(response);
   } catch (err) {
     serverError(res, err);
   }

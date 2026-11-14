@@ -2,7 +2,7 @@
 // the forced password change, the courier placeholder (courier app: tracker G.4) and the
 // "no access yet" screen for an account without permissions.
 import React, { useState } from 'react';
-import { KeyRound, Bike, Lock, LogOut } from 'lucide-react';
+import { KeyRound, Lock, LogOut } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../auth/AuthContext';
 import { AUTH_TEXT, passwordErrorText } from '../auth/strings';
@@ -96,13 +96,6 @@ export const ForcedPasswordChange: React.FC = () => {
     </AuthCard>
   );
 };
-
-/** Courier-only accounts until the courier app ships (tracker G.4). */
-export const CourierComingSoon: React.FC = () => (
-  <AuthCard icon={<Bike size={22} />} title={AUTH_TEXT.courier.title} intro={AUTH_TEXT.courier.body}>
-    <SignOutButton />
-  </AuthCard>
-);
 
 /** Signed in, but no role grants anything yet. */
 export const NoAccess: React.FC = () => (
