@@ -82,6 +82,8 @@ const CourierEditor: React.FC<{
     if (!file) return;
     try {
       setPhoto(await preparePhoto(file));
+      // Agreement was for the previous photo (tracker #161): ask again for the new one.
+      setConsent(false);
       setError(null);
     } catch {
       setError(T.photoError);
@@ -98,7 +100,7 @@ const CourierEditor: React.FC<{
     setError(null);
     const input: CourierInput = {
       displayName: name.trim(), phone: phone.trim(), email: email.trim(), locale, vehicleType: vehicle, plateNumber: plate,
-      homeCityId: homeCityId || null, publicFirstName: publicName.trim(), showPhotoPublicly: consent, notes,
+      homeCityId: homeCityId || null, publicFirstName: publicName.trim(), showPhotoPublicly: consent && !!shownPhoto, notes,
     };
     try {
       if (!courier) {
@@ -106,10 +108,11 @@ const CourierEditor: React.FC<{
         onSaved(created.courier, { user: created.user, tempPassword: created.tempPassword });
         return;
       }
-      let saved = await dispatchApi.updateCourier(courier.userId, input);
-      if (typeof photo === 'string') saved = await dispatchApi.setCourierPhoto(courier.userId, photo);
-      else if (photo === null && courier.photoUrl) saved = await dispatchApi.removeCourierPhoto(courier.userId);
-      onSaved(saved);
+      // Photo first: the server clears consent when the photo changes, then the profile save
+      // records the agreement for the new photo if it is ticked.
+      if (typeof photo === 'string') await dispatchApi.setCourierPhoto(courier.userId, photo);
+      else if (photo === null && courier.photoUrl) await dispatchApi.removeCourierPhoto(courier.userId);
+      onSaved(await dispatchApi.updateCourier(courier.userId, input));
     } catch (err) {
       setError(dispatchErrorText(err));
       setBusy(false);
@@ -186,8 +189,8 @@ const CourierEditor: React.FC<{
             </div>
           </div>
           <label className="tx-iam-check">
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-            <span>{T.fields.consent}<span className="tx-iam-sub">{T.fields.consentHint}</span></span>
+            <input type="checkbox" checked={consent && !!shownPhoto} disabled={!shownPhoto} onChange={(e) => setConsent(e.target.checked)} />
+            <span>{T.fields.consent}<span className="tx-iam-sub">{shownPhoto ? T.fields.consentHint : T.fields.consentNoPhoto}</span></span>
           </label>
         </fieldset>
 

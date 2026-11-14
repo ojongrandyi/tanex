@@ -9,6 +9,7 @@ import { IamDialog } from '../components/IamDialog';
 import { dispatchApi, type DeliveryCity, type DeliveryZone, type TariffState } from './dispatchApi';
 import { DISPATCH_TEXT, dispatchErrorText } from './strings';
 import { PinPicker, type Pin } from './PinPicker';
+import { ANY, cellKey, isSymmetricSheet, parseAmount, setCellValue, sheetSignature, type Cell } from './rateSheet';
 import { SIZE_CLASSES, SIZE_CLASS_LABELS, priceLocalDelivery, type SizeClass } from '../../shared/localPricing';
 import { VEHICLE_TYPES, VEHICLE_LABELS } from '../../shared/dispatchStatus';
 import { SPEED_MAX_KMH, SPEED_MIN_KMH } from '../../shared/dispatchSettings';
@@ -36,14 +37,6 @@ export function formatMoney(amount: number, currency: string): string {
   } catch {
     return `${amount} ${currency}`;
   }
-}
-
-/** "" → null, "1 500" / "1500,5" → number, anything else → NaN. */
-function parseAmount(text: string): number | null {
-  const t = text.replace(/[\s  ]/g, '').replace(',', '.');
-  if (t === '') return null;
-  const n = Number(t);
-  return Number.isFinite(n) ? n : NaN;
 }
 
 const validPin = (p: Pin) =>
@@ -283,10 +276,6 @@ const AreasPanel: React.FC<{
 
 // ---- Rates -----------------------------------------------------------------------------------
 
-type Cell = { price: string; express: string };
-const ANY = '*';
-const cellKey = (from: string | null, to: string | null) => `${from ?? ANY}>${to ?? ANY}`;
-
 function sheetFromState(state: TariffState, cityId: string, size: SizeClass): { cells: Record<string, Cell>; currency: string } {
   const cells: Record<string, Cell> = {};
   let currency = 'XAF';
@@ -297,11 +286,6 @@ function sheetFromState(state: TariffState, cityId: string, size: SizeClass): { 
   }
   return { cells, currency };
 }
-
-const sheetSignature = (cells: Record<string, Cell>, currency: string) =>
-  currency + '|' + Object.keys(cells).sort()
-    .filter((k) => cells[k].price.trim() !== '' || cells[k].express.trim() !== '')
-    .map((k) => `${k}=${parseAmount(cells[k].price)}/${parseAmount(cells[k].express)}`).join(';');
 
 const RatesPanel: React.FC<{
   state: TariffState; city: DeliveryCity; zones: DeliveryZone[];
@@ -315,9 +299,14 @@ const RatesPanel: React.FC<{
   const [expressAll, setExpressAll] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Two-way pricing (tracker #155, decided 2026-11-14): on by default; a sheet saved with one-way
+  // prices opens with it off so nothing is overwritten by surprise.
+  const [twoWay, setTwoWay] = useState(() => isSymmetricSheet(saved.cells));
 
   // Reload the sheet when the city, the size or the saved rates change.
-  useEffect(() => { setCells(saved.cells); setCurrency(saved.currency); setError(null); }, [saved]);
+  useEffect(() => {
+    setCells(saved.cells); setCurrency(saved.currency); setError(null); setTwoWay(isSymmetricSheet(saved.cells));
+  }, [saved]);
   const dirty = sheetSignature(cells, currency) !== sheetSignature(saved.cells, saved.currency);
   useEffect(() => { onDirty(dirty); }, [dirty, onDirty]);
   useEffect(() => () => onDirty(false), [onDirty]);
@@ -330,7 +319,7 @@ const RatesPanel: React.FC<{
 
   const setCell = (key: string, field: keyof Cell, value: string) => {
     setError(null);
-    setCells((c) => ({ ...c, [key]: { ...(c[key] ?? { price: '', express: '' }), [field]: value } }));
+    setCells((c) => setCellValue(c, key, field, value, twoWay));
   };
 
   const changeSize = (next: SizeClass) => {
@@ -392,6 +381,10 @@ const RatesPanel: React.FC<{
           <button type="button" className={`tx-iam-btn small${mode === 'express' ? ' primary' : ''}`} aria-pressed={mode === 'express'} onClick={() => setMode('express')}>{T.expressSurcharge}</button>
         </div>
       </div>
+      <label className="tx-iam-check">
+        <input type="checkbox" checked={twoWay} onChange={(e) => setTwoWay(e.target.checked)} />
+        <span>{T.twoWay}<span className="tx-iam-sub">{twoWay ? T.twoWayOn : T.twoWayOff}</span></span>
+      </label>
       <p className="tx-iam-muted tx-tariff-help">{mode === 'price' ? T.ratesIntro : T.expressIntro}</p>
       {zones.length === 0 && <p className="tx-iam-muted tx-tariff-help">{T.needAreas}</p>}
       {mode === 'express' && (

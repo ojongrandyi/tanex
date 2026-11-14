@@ -248,6 +248,22 @@ test('rate sheet: replace per city and size, validation, fallbacks priced by the
   assert.equal(lastAudit('tariffs.zone_delete').entity_id, spare);
 });
 
+test('rate sheet editing: "same price both ways" fills the return trip; directional pricing unchanged', async () => {
+  const { cellKey, mirrorKey, setCellValue, isSymmetricSheet } = await import('../src/admin/dispatch/rateSheet.ts');
+  const ab = cellKey('a', 'b');
+  assert.equal(mirrorKey(ab), cellKey('b', 'a'));
+  assert.equal(mirrorKey(cellKey('a', null)), cellKey(null, 'a'), 'area → any mirrors to any → area');
+  let cells = setCellValue({}, ab, 'price', '700', true);
+  cells = setCellValue(cells, ab, 'express', '200', true);
+  assert.deepEqual(cells[cellKey('b', 'a')], { price: '700', express: '200' });
+  assert.equal(isSymmetricSheet(cells), true);
+  const oneWay = setCellValue(cells, ab, 'price', '900', false);
+  assert.equal(oneWay[cellKey('b', 'a')].price, '700');
+  assert.equal(isSymmetricSheet(oneWay), false, 'a one-way sheet opens with two-way off');
+  assert.equal(isSymmetricSheet({ [cellKey('a', 'a')]: { price: '500', express: '' } }), true, 'diagonal cell is its own return');
+  assert.equal(isSymmetricSheet({ [ab]: { price: '1 000', express: '' }, [cellKey('b', 'a')]: { price: '1000', express: '' } }), true);
+});
+
 test('intercity bands: per direction, validation, priced by the shared function', async () => {
   const bad = [
     { fromCityId: buea, toCityId: buea, bands: [] },
@@ -360,13 +376,26 @@ test('courier photo is private: console route only, never under /media', async (
   assert.equal((await call('GET', `/media/avatars/${file}`)).status, 404);
   assert.equal((await call('GET', `/media/${file}`)).status, 404);
 
+  assert.equal(c.showPhotoPublicly, true, 'consent recorded with the first photo');
   const replaced = await call('POST', `/api/couriers/${courierId}/photo`, ops, { image: PNG });
   assert.equal(replaced.status, 200);
+  assert.equal((await replaced.json()).data.showPhotoPublicly, false, 'a new photo needs a new agreement (#161)');
+  assert.deepEqual(JSON.parse(lastAudit('courier.photo_update').after_json).showPhotoPublicly, false);
+  // Agreement recorded again for the new photo, then cleared when the photo is removed.
+  assert.equal((await call('PATCH', `/api/couriers/${courierId}`, ops, { showPhotoPublicly: true })).status, 200);
   assert.ok(!fs.existsSync(path.join(tmpDir, 'uploads', 'couriers', file)), 'old photo deleted');
   assert.ok(lastAudit('courier.photo_update'));
   await call('DELETE', `/api/couriers/${courierId}/photo`, ops);
-  assert.equal((await (await call('GET', '/api/couriers', ops)).json()).data[0].photoUrl, null);
+  const afterRemove = (await (await call('GET', '/api/couriers', ops)).json()).data[0];
+  assert.equal(afterRemove.photoUrl, null);
+  assert.equal(afterRemove.showPhotoPublicly, false, 'no photo, no public consent');
   assert.ok(lastAudit('courier.photo_remove'));
+  // Consent needs a photo, on edit and on create.
+  const noPhoto = await call('PATCH', `/api/couriers/${courierId}`, ops, { showPhotoPublicly: true });
+  assert.equal(noPhoto.status, 400);
+  assert.equal((await noPhoto.json()).code, 'CONSENT_NEEDS_PHOTO');
+  const createNoPhoto = await call('POST', '/api/couriers', ops, { displayName: 'C', phone: '670000303', vehicleType: 'BIKE', publicFirstName: 'C', showPhotoPublicly: true });
+  assert.equal(createNoPhoto.status, 400);
 });
 
 test('edit, disable and reset a courier; audited; disabling signs out and ends duty', async () => {

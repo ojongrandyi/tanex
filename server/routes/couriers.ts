@@ -48,6 +48,10 @@ const fail = (status: number, code: string, error: string): Fail => ({ status, c
 const send = (res: Response, f: Fail) => res.status(f.status).json({ success: false, code: f.code, error: f.error });
 const body = (req: Request) => (req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>;
 
+// Consent is given for a specific photo (tracker #161, decided 2026-11-14): it needs a photo, and
+// replacing or removing the photo clears it. Who ticked it and when is in the audit log.
+const CONSENT_NEEDS_PHOTO = fail(400, 'CONSENT_NEEDS_PHOTO', 'Add a photo before recording the courier’s agreement to show it.');
+
 const loadProfile = (userId: string) => db.prepare('SELECT * FROM couriers WHERE user_id = ?').get(userId) as CourierRow | undefined;
 
 /** The role to give new couriers: one whose only permission is courier.app (seeded Courier first). */
@@ -209,6 +213,7 @@ couriersRouter.post('/', requirePermission('couriers.manage'), async (req: Reque
       photo = checkAvatar(b.photo);
       if (!photo.ok) return send(res, fail(400, 'INVALID_PHOTO', photo.error));
     }
+    if (profile.showPhotoPublicly && !photo) return send(res, CONSENT_NEEDS_PHOTO);
 
     const tempPassword = generateTempPassword();
     const hash = await hashPassword(tempPassword);
@@ -268,6 +273,7 @@ couriersRouter.patch('/:id', requirePermission('couriers.manage'), loadManageabl
     if (userInput.phone === null) return send(res, fail(400, 'PHONE_REQUIRED', 'Enter the courier’s phone number.'));
     const conflict = identifierConflict(userInput.email ?? null, userInput.phone ?? null, row.user_id);
     if (conflict) return send(res, conflict);
+    if (profile.showPhotoPublicly && !row.photo_file) return send(res, CONSENT_NEEDS_PHOTO);
     if (userInput.status === 'DISABLED' && row.user_id === actor.user.id) {
       return send(res, fail(409, 'SELF_DISABLE', 'You cannot disable your own account.'));
     }
@@ -336,10 +342,15 @@ couriersRouter.post('/:id/photo', requirePermission('couriers.manage'), loadMana
     const checked = checkAvatar(body(req).image);
     if (!checked.ok) return send(res, fail(400, 'INVALID_PHOTO', checked.error));
     const saved = writeImageUpload('couriers', checked.buffer, checked.type);
-    db.prepare('UPDATE couriers SET photo_file = ?, updated_at_ts = ? WHERE user_id = ?').run(saved.fileName, Date.now(), row.user_id);
+    // Consent was given for the old photo; a new one stays private until agreed again.
+    db.prepare('UPDATE couriers SET photo_file = ?, show_photo_publicly = 0, updated_at_ts = ? WHERE user_id = ?')
+      .run(saved.fileName, Date.now(), row.user_id);
     if (row.photo_file) deleteUpload('couriers', row.photo_file);
-    audit(req, 'courier.photo_update', 'user', row.user_id, `Courier photo ${row.photo_file ? 'replaced' : 'added'}: ${row.public_first_name}`,
-      undefined, { sizeBytes: saved.sizeBytes });
+    const consentCleared = row.show_photo_publicly === 1;
+    audit(req, 'courier.photo_update', 'user', row.user_id,
+      `Courier photo ${row.photo_file ? 'replaced' : 'added'}${consentCleared ? ' (public consent cleared)' : ''}: ${row.public_first_name}`,
+      consentCleared ? { showPhotoPublicly: true } : undefined,
+      { sizeBytes: saved.sizeBytes, ...(consentCleared ? { showPhotoPublicly: false } : {}) });
     res.json({ success: true, data: courierOut(loadProfile(row.user_id)!) });
   } catch (err) {
     serverError(res, err);
@@ -351,9 +362,11 @@ couriersRouter.delete('/:id/photo', requirePermission('couriers.manage'), loadMa
   try {
     const row = res.locals.profile as CourierRow;
     if (row.photo_file) {
-      db.prepare('UPDATE couriers SET photo_file = NULL, updated_at_ts = ? WHERE user_id = ?').run(Date.now(), row.user_id);
+      db.prepare('UPDATE couriers SET photo_file = NULL, show_photo_publicly = 0, updated_at_ts = ? WHERE user_id = ?').run(Date.now(), row.user_id);
       deleteUpload('couriers', row.photo_file);
-      audit(req, 'courier.photo_remove', 'user', row.user_id, `Courier photo removed: ${row.public_first_name}`);
+      audit(req, 'courier.photo_remove', 'user', row.user_id, `Courier photo removed: ${row.public_first_name}`,
+        row.show_photo_publicly === 1 ? { showPhotoPublicly: true } : undefined,
+        row.show_photo_publicly === 1 ? { showPhotoPublicly: false } : undefined);
     }
     res.json({ success: true, data: courierOut(loadProfile(row.user_id)!) });
   } catch (err) {
