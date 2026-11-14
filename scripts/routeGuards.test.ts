@@ -84,7 +84,9 @@ const MOUNTS: Record<string, string> = {
   statsRouter: '/api/stats',
   paymentsRouter: '/api/payments',
   blogAdminRouter: '/api/admin/blog',
-  publicBlogRouter: '/api/blog'
+  publicBlogRouter: '/api/blog',
+  tariffsRouter: '/api/tariffs',
+  couriersRouter: '/api/couriers'
 };
 
 // Open to visitors on purpose (IAM_RBAC_SPEC §6–§7).
@@ -112,7 +114,9 @@ const PUBLIC = new Set([
   // A signed, short-lived preview link from the studio (the token is the credential; F.2).
   'GET /api/blog/preview/:token',
   // Staff profile photos (blog authors; F.2).
-  'GET /media/avatars/:file'
+  'GET /media/avatars/:file',
+  // Active delivery cities and areas for the booking form (DISPATCH_SPEC §11; G.2).
+  'GET /api/tariffs/areas'
 ]);
 // Signed-in only (no permission key): the user's own account.
 const SESSION_ONLY = new Set([

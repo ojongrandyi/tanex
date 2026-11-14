@@ -18,6 +18,9 @@ import { AuditLogView } from './pages/AuditLogView';
 // Blog studio and its editor (TipTap) are their own chunk, loaded when the view is opened.
 const BlogStudio = lazy(() => import('./blog/BlogStudio').then((m) => ({ default: m.BlogStudio })));
 const BlogPreview = lazy(() => import('./blog/BlogPreview').then((m) => ({ default: m.BlogPreview })));
+// Tariffs and Couriers (DISPATCH_SPEC §3, §5): their own chunk, with the map pin picker.
+const TariffsView = lazy(() => import('./dispatch/TariffsView').then((m) => ({ default: m.TariffsView })));
+const CouriersView = lazy(() => import('./dispatch/CouriersView').then((m) => ({ default: m.CouriersView })));
 
 /** #blog-preview=<token> from the studio's Preview button (BLOG_SPEC §4). Same shape check as BlogPreview. */
 function blogPreviewToken(): string | null {
@@ -322,6 +325,18 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
         {/* PAYMENTS: proofs of payment (update F.5) */}
         {currentView === 'payments' && (
           <PaymentsView searchQuery={globalSearch} onOpenShipmentDetail={handleOpenShipmentDetail} onProofsChanged={refreshProofsCount} />
+        )}
+
+        {/* DELIVERY: TARIFFS AND COURIERS (G.2) */}
+        {currentView === 'tariffs' && (
+          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+            <TariffsView />
+          </Suspense>
+        )}
+        {currentView === 'couriers' && (
+          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+            <CouriersView searchQuery={globalSearch} />
+          </Suspense>
         )}
 
         {/* TRACKING EVENTS & SCANNER */}

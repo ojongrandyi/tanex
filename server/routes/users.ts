@@ -81,7 +81,7 @@ function loadRow(id: string): UserRow | undefined {
   return db.prepare(`SELECT ${USER_COLUMNS} FROM users WHERE id = ?`).get(id) as UserRow | undefined;
 }
 
-function userById(id: string) {
+export function userById(id: string) {
   const row = loadRow(id);
   return row ? formatUser(row, rolesByUser([id]).get(id) ?? []) : null;
 }
@@ -100,7 +100,7 @@ interface UserInput {
 }
 
 /** Validates the fields present in the body. `creating` makes the name required. */
-function readUserInput(body: unknown, creating: boolean): UserInput | Fail {
+export function readUserInput(body: unknown, creating: boolean): UserInput | Fail {
   const b = (body && typeof body === 'object' ? body : {}) as Record<string, unknown>;
   const out: UserInput = {};
 
@@ -158,10 +158,10 @@ function readUserInput(body: unknown, creating: boolean): UserInput | Fail {
   return out;
 }
 
-const isFail = (v: unknown): v is Fail => !!v && typeof v === 'object' && 'code' in v && 'status' in v;
+export const isFail = (v: unknown): v is Fail => !!v && typeof v === 'object' && 'code' in v && 'status' in v;
 
 /** 409 when another user already has this email or phone. */
-function identifierConflict(email: string | null | undefined, phone: string | null | undefined, exceptId: string | null): Fail | null {
+export function identifierConflict(email: string | null | undefined, phone: string | null | undefined, exceptId: string | null): Fail | null {
   if (email) {
     const row = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as { id: string } | undefined;
     if (row && row.id !== exceptId) return fail(409, 'EMAIL_TAKEN', 'Another account already uses this email address.');

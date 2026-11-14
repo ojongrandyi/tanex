@@ -10,6 +10,8 @@ export type AdminViewType =
   | 'quote-requests'
   | 'messages'
   | 'payments'
+  | 'tariffs'
+  | 'couriers'
   | 'document-center'
   | 'blog'
   | 'settings'
@@ -27,6 +29,9 @@ export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | readonly Per
   'quote-requests': 'quotes.view',
   'messages': 'messages.view',
   'payments': 'payments.view',
+  // Delivery (DISPATCH_SPEC §3, §5): tariffs need tariffs.manage; couriers can be viewed or managed.
+  'tariffs': 'tariffs.manage',
+  'couriers': ['couriers.view', 'couriers.manage'],
   'document-center': 'documents.view',
   // Blog studio (BLOG_SPEC §2): a writer, an editor, a publisher or a category manager.
   'blog': ['blog.view', 'blog.write', 'blog.edit_any', 'blog.publish', 'blog.categories'],
@@ -46,6 +51,8 @@ export const VIEW_ORDER: readonly AdminViewType[] = [
   'quote-requests',
   'messages',
   'payments',
+  'tariffs',
+  'couriers',
   'document-center',
   'blog',
   'settings',

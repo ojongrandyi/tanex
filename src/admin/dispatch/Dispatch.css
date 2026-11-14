@@ -1,0 +1,377 @@
+/* Tariffs and Couriers (G.2). Builds on the Users/Roles look (IamViews.css). */
+
+.tx-city-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.tx-inline-sub {
+  display: inline;
+  margin-left: 0.25rem;
+}
+
+.tx-tariff-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--ngf-slate-200);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tx-tariff-tab {
+  flex: 0 0 auto;
+  padding: 0.6rem 0.9rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ngf-slate-600);
+  cursor: pointer;
+}
+
+.tx-tariff-tab.is-active {
+  color: var(--ngf-ink-900);
+  border-bottom-color: var(--tx-orange-500);
+}
+
+.tx-tariff-tab:focus-visible {
+  outline: 2px solid var(--ngf-ink-900);
+  outline-offset: -2px;
+}
+
+.tx-tariff-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.tx-city-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tx-city-head h2 {
+  margin: 0 0.25rem 0 0;
+  font-size: 1.15rem;
+  color: var(--ngf-ink-900);
+}
+
+.tx-city-head .tx-iam-row-actions {
+  margin-left: auto;
+}
+
+.tx-tariff-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tx-tariff-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tx-tariff-panel-head h3,
+.tx-tariff-subhead,
+.tx-price-check h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ngf-ink-900);
+}
+
+.tx-tariff-help {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.tx-tariff-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+.tx-tariff-controls .tx-iam-field {
+  flex: 1 1 150px;
+  max-width: 240px;
+}
+
+.tx-tariff-controls .tx-tariff-currency {
+  flex: 0 0 90px;
+}
+
+.tx-tariff-mode {
+  display: flex;
+  gap: 0.25rem;
+  padding-bottom: 0.15rem;
+}
+
+.tx-tariff-save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.tx-tariff-save > span,
+.tx-tariff-save > strong {
+  margin-right: auto;
+  font-size: 0.85rem;
+}
+
+.tx-tariff-dirty {
+  color: var(--ngf-warning-700);
+}
+
+/* Rate sheet: scrolls inside its box, never the page. Sticky first row and column. */
+.tx-rate-scroll {
+  overflow: auto;
+  max-height: 70vh;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.5rem;
+}
+
+.tx-rate-scroll:focus-visible {
+  outline: 2px solid var(--ngf-ink-900);
+  outline-offset: 2px;
+}
+
+.tx-rate-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8rem;
+}
+
+.tx-rate-grid th {
+  position: sticky;
+  background: var(--ngf-slate-50);
+  color: var(--ngf-ink-900);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--ngf-slate-200);
+  border-right: 1px solid var(--ngf-slate-100);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.tx-rate-grid thead th {
+  top: 0;
+  z-index: 2;
+}
+
+.tx-rate-grid tbody th {
+  left: 0;
+}
+
+.tx-rate-grid thead th.tx-rate-corner {
+  left: 0;
+  z-index: 3;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--ngf-slate-600);
+}
+
+.tx-rate-corner span {
+  display: block;
+}
+
+.tx-rate-grid th.is-any {
+  font-style: italic;
+}
+
+.tx-rate-grid th .tx-iam-sub {
+  display: inline;
+  margin-left: 0.3rem;
+}
+
+.tx-rate-grid td {
+  padding: 0.2rem;
+  border-bottom: 1px solid var(--ngf-slate-100);
+  border-right: 1px solid var(--ngf-slate-100);
+}
+
+.tx-rate-grid td.has-price {
+  background: var(--tx-orange-50);
+}
+
+.tx-rate-grid input {
+  width: 6.5rem;
+  box-sizing: border-box;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.35rem;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ngf-ink-900);
+  background: var(--ngf-white);
+}
+
+.tx-rate-grid input:focus-visible {
+  outline: 2px solid var(--ngf-ink-900);
+  outline-offset: 0;
+}
+
+.tx-rate-grid input[aria-invalid='true'] {
+  border-color: var(--ngf-danger-600);
+}
+
+.tx-rate-grid input:disabled {
+  background: var(--ngf-slate-50);
+}
+
+.tx-price-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ngf-slate-200);
+}
+
+.tx-price-check-express {
+  padding-bottom: 0.6rem;
+}
+
+.tx-price-check-result {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ngf-ink-900);
+}
+
+.tx-band-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.5rem;
+  max-width: 520px;
+}
+
+.tx-pair-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tx-pair-list .tx-iam-btn[aria-current='true'] {
+  border-color: var(--ngf-ink-900);
+  font-weight: 700;
+}
+
+/* Map pin picker */
+.tx-pin {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.tx-pin legend {
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ngf-ink-900);
+}
+
+.tx-pin-map {
+  height: 220px;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.5rem;
+  background: var(--ngf-slate-50);
+  cursor: crosshair;
+}
+
+.tx-pin-coords {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.tx-pin-marker span {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--tx-orange-500);
+  border: 2px solid var(--ngf-ink-900);
+  box-sizing: border-box;
+}
+
+/* Couriers */
+.tx-courier-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.tx-courier-avatar {
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--tx-cream-200);
+}
+
+.tx-courier-avatar.is-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ngf-ink-900);
+}
+
+.tx-courier-photo {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tx-courier-photo legend {
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ngf-ink-900);
+}
+
+.tx-courier-photo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (max-width: 520px) {
+  .tx-pin-coords {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .tx-pin-coords .tx-iam-btn {
+    grid-column: 1 / -1;
+  }
+  .tx-tariff-controls .tx-iam-field {
+    max-width: none;
+  }
+  .tx-city-head .tx-iam-row-actions {
+    margin-left: 0;
+  }
+}

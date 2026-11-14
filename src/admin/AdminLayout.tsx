@@ -22,12 +22,15 @@ import {
   Users,
   ShieldCheck,
   History,
-  Newspaper
+  Newspaper,
+  Tags,
+  Bike
 } from 'lucide-react';
 import { useAdminData } from '../context/AdminDataContext';
 import { useAuth } from '../auth/AuthContext';
 import { AUTH_TEXT, IAM_TEXT } from '../auth/strings';
 import { BLOG_MENU } from './blog/menuText';
+import { DISPATCH_MENU } from './dispatch/menuText';
 import { LOGO_ALT, LOGO_WORDMARK_HEIGHT, LOGO_WORDMARK_WHITE, LOGO_WORDMARK_WIDTH, TAGLINE } from '../config/brand';
 import { canOpenView, firstAllowedView, type AdminViewType } from './views';
 import './AdminLayout.css';
@@ -88,6 +91,16 @@ const VIEW_METADATA: Record<AdminViewType, { title: string; category: string; de
     title: 'Payments',
     category: 'Commercial Tariffs',
     description: 'Proofs of payment sent from the track page.'
+  },
+  'tariffs': {
+    title: DISPATCH_MENU.tariffs.menu,
+    category: 'Delivery',
+    description: DISPATCH_MENU.tariffs.description
+  },
+  'couriers': {
+    title: DISPATCH_MENU.couriers.menu,
+    category: 'Delivery',
+    description: DISPATCH_MENU.couriers.description
   },
   'document-center': {
     title: 'Documents',
@@ -315,6 +328,35 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             )}
           </div>
 
+          )}
+
+          {/* DELIVERY: tariffs and couriers (DISPATCH_SPEC §3, §5) */}
+          {(['tariffs', 'couriers'] as const).some(allowed) && (
+          <div className="admin-nav-section">
+            <span className="section-label">{DISPATCH_MENU.section}</span>
+            {allowed('tariffs') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'tariffs' ? 'active' : ''}`}
+                onClick={() => { onSelectView('tariffs'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <Tags size={18} />
+                </div>
+                <span className="nav-title">{DISPATCH_MENU.tariffs.menu}</span>
+              </button>
+            )}
+            {allowed('couriers') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'couriers' ? 'active' : ''}`}
+                onClick={() => { onSelectView('couriers'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <Bike size={18} />
+                </div>
+                <span className="nav-title">{DISPATCH_MENU.couriers.menu}</span>
+              </button>
+            )}
+          </div>
           )}
 
           {/* SECTION 3: SYSTEM */}

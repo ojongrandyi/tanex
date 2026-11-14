@@ -20,6 +20,8 @@ import { auditRouter } from './routes/auditLog.js';
 import { mailRouter } from './routes/mail.js';
 import { blogAdminRouter } from './routes/blog.js';
 import { publicBlogRouter } from './routes/publicBlog.js';
+import { tariffsRouter } from './routes/tariffs.js';
+import { couriersRouter } from './routes/couriers.js';
 import { requirePermission } from './middleware/auth.js';
 import { addErrorCodes } from './middleware/errorCodes.js';
 
@@ -60,6 +62,10 @@ export function registerApiRoutes(app: Express): void {
   // public API, which only ever returns published posts.
   app.use('/api/admin/blog', blogAdminRouter);
   app.use('/api/blog', publicBlogRouter);
+  // Dispatch (DISPATCH_SPEC §11): tariffs (tariffs.manage; GET /areas is public) and couriers
+  // (couriers.view / couriers.manage), gated per route.
+  app.use('/api/tariffs', tariffsRouter);
+  app.use('/api/couriers', couriersRouter);
   // Public package and blog images (/media/<id>.<ext>, /media/blog/<id>.<ext>); outside /api
   // so they can be cached.
   app.use(mediaRouter);
