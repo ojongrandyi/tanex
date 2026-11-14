@@ -6,6 +6,7 @@ import { findNearestMetro } from '../src/services/geocodingService.js';
 import { normalizeLng } from '../src/utils/greatCircle.js';
 import { eventTime } from './eventTime.js';
 import { shipmentStatusLabel } from '../src/shared/shipmentStatus.js';
+import { usesScheduleProgress } from '../src/shared/dispatchStatus.js';
 
 /** The shipment's stored transport mode, or the inferred one for rows created before it existed. */
 export function shipmentTransportMode(row: {
@@ -87,6 +88,8 @@ interface ProgressRow {
   transport_mode?: string | null;
   progress_percent: number;
   progress_updated_at_ts: number | null;
+  /** INTERNATIONAL | LOCAL | INTERCITY; NULL on older rows (= INTERNATIONAL). */
+  service_scope?: string | null;
   created_at_ts?: number | null;
   estimated_delivery_date?: string;
   estimated_delivery_time?: string;
@@ -109,6 +112,11 @@ interface ProgressRow {
  * admin action to change, by design.
  */
 export function syncTimeBasedProgress(row: ProgressRow): number {
+  // Local and intercity deliveries move only when their courier records a step
+  // (DISPATCH_SPEC §4); never on a schedule.
+  if (!usesScheduleProgress(row.service_scope)) {
+    return row.progress_percent;
+  }
   if (!MOVING_STATUSES.has(row.status)) {
     return row.progress_percent;
   }

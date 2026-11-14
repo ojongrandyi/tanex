@@ -507,6 +507,13 @@ H1 : `Mentions légales`. Onglets : **Politique de confidentialité · Condition
 `Retour à l'expéditeur : {motif}` · `Parti de la plateforme, en transit` · `Paiement confirmé` · `Scan de contrôle vérifié` ·
 un changement de statut sans titre affiche le nom du statut (§6.3). La description de l'événement reste en anglais
 (texte enregistré) jusqu'à une tâche ultérieure.
+- *Livraisons locales et entre villes (ajouté le 2026-11-14 avec G.1, **à confirmer**) :* `Livraison demandée` ·
+  `Livraison confirmée` · `Livreur assigné` · `Récupéré par {prénom du livreur}` · `En route vers le destinataire` ·
+  `Livré, reçu par {nom masqué}` · `Tentative de livraison infructueuse : {motif}` (motifs §10.3) ·
+  `Retourné à l'expéditeur` · `Livraison annulée`.
+- *Statuts des courses (console et application livreur, ajouté avec G.1, **à confirmer**) :* `Demandée` · `Confirmée` ·
+  `Assignée` · `Acceptée` · `Colis récupéré` · `En route` · `Livrée` · `Tentative de livraison infructueuse` ·
+  `Retournée à l'expéditeur` · `Annulée` · tailles `Petit` · `Moyen` · `Grand`
 
 ## 6.9 Suivi : livraisons locales et entre villes
 - **Étapes :** `Demandée` · `Livreur assigné` · `Récupéré` · `En route` · `Livré` · échec : `Tentative de livraison infructueuse`

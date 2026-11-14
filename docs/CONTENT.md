@@ -483,6 +483,10 @@ French title. These are the existing English titles, unchanged; events staff typ
 `Return Shipment Registered` · `Returning to sender: {reason}` · `Departed Facility — Transit Underway` (automatic) ·
 `Payment confirmed` (§6.8) · `Checkpoint Scan Verified` (event added without a title) · a status change without a title
 shows the status name (§6.3).
+- *Local and intercity deliveries (added 2026-11-14 with G.1, DISPATCH_SPEC §4, **owner to confirm**):* `Delivery requested` ·
+  `Delivery confirmed` · `Courier assigned` · `Picked up by {rider first name}` · `On the way to the recipient` ·
+  `Delivered, received by {masked name}` · `Delivery attempt unsuccessful: {reason}` (reason names §10.3) ·
+  `Returned to sender` · `Delivery cancelled`. "Accepted" and "Declined" by the courier write no public event.
 
 ### 6.12 Interface strings added with E.5 (**owner to confirm**)
 - **Track page:** eyebrow `Track` · tabs name `How to track` · `Clear` · batch filter name `Show` · `All ({n})` · results `Origin` · `Destination` · `Last seen` · `Estimated delivery` · `Open tracking` · `{n} of {m} found` · `Close`. The help band says `Our team is here to help.` (§6.1; the earlier "24/7" line was an unconfirmed claim and is gone). "Where to find your ID" says email or WhatsApp, as §6.1.
@@ -680,6 +684,7 @@ facilities). Replaces the previous list in `src/data/gateways.ts` during E.6.
 
 ### 10.2 Dispatch board and tariffs
 - **Board columns:** `Requested` · `To assign` · `Assigned` · `In progress` · `Problems` · `Done today`
+- **Job statuses** *(added 2026-11-14 with G.1, owner to confirm; `src/shared/dispatchStatus.ts`)*: `Requested` · `Confirmed` · `Assigned` · `Accepted` · `Picked up` · `On the way` · `Delivered` · `Delivery attempt unsuccessful` · `Returned to sender` · `Cancelled` · sizes `Small` · `Medium` · `Large`
 - **Actions:** `Confirm & price` · `Assign` · `Reassign` · `Cancel job` · `Mark returned` · `Send on WhatsApp` · `Override price` (reason required)
 - **Courier status:** `On duty` · `Off duty` · `Last seen {n} min ago`
 - **Tariffs:** `Delivery cities` · `Areas` · `Rates` · `From area` · `To area` · `Any other area` · `Size` · `Price` · `Express surcharge` · `Intercity rates` · `Import suggested areas (no prices)`

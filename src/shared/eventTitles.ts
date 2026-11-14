@@ -5,6 +5,7 @@
 // do rows stored before the key existed.
 import { shipmentStatusLabel, type StatusLang } from './shipmentStatus.js';
 import { frenchSpacing } from './typography.js';
+import { failureReasonLabel } from './dispatchStatus.js';
 
 export const EVENT_TITLES = {
   'event.registered': { en: 'Consignment Registered & Barcode Issued', fr: 'Envoi enregistré et code-barres attribué' },
@@ -16,6 +17,17 @@ export const EVENT_TITLES = {
   'event.checkpoint': { en: 'Checkpoint Scan Verified', fr: 'Scan de contrôle vérifié' },
   // A status change without a title of its own: the status name ({status} is the code).
   'event.status': { en: '{status}', fr: '{status}' },
+  // Local and intercity delivery jobs (DISPATCH_SPEC §4, src/shared/dispatchStatus.ts).
+  // {rider}: courier's public first name; {recipient}: stored masked; {failureReason}: a code.
+  'event.local_requested': { en: 'Delivery requested', fr: 'Livraison demandée' },
+  'event.local_confirmed': { en: 'Delivery confirmed', fr: 'Livraison confirmée' },
+  'event.local_assigned': { en: 'Courier assigned', fr: 'Livreur assigné' },
+  'event.local_picked_up': { en: 'Picked up by {rider}', fr: 'Récupéré par {rider}' },
+  'event.local_on_the_way': { en: 'On the way to the recipient', fr: 'En route vers le destinataire' },
+  'event.local_delivered': { en: 'Delivered, received by {recipient}', fr: 'Livré, reçu par {recipient}' },
+  'event.local_failed': { en: 'Delivery attempt unsuccessful: {failureReason}', fr: 'Tentative de livraison infructueuse : {failureReason}' },
+  'event.local_returned': { en: 'Returned to sender', fr: "Retourné à l'expéditeur" },
+  'event.local_cancelled': { en: 'Delivery cancelled', fr: 'Livraison annulée' },
 } as const satisfies Record<string, Record<StatusLang, string>>;
 
 export type EventTitleKey = keyof typeof EVENT_TITLES;
@@ -30,7 +42,9 @@ export function renderEventTitle(key: EventTitleKey, vars: EventTitleVars = {}, 
   const template = lang === 'fr' ? frenchSpacing(EVENT_TITLES[key].fr) : EVENT_TITLES[key][lang];
   return template.replace(/\{(\w+)\}/g, (_, name: string) => {
     const value = vars[name] ?? '';
-    return name === 'status' ? shipmentStatusLabel(value, lang) : value;
+    if (name === 'status') return shipmentStatusLabel(value, lang);
+    if (name === 'failureReason') return failureReasonLabel(value, lang);
+    return value;
   });
 }
 

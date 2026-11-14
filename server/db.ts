@@ -5,6 +5,7 @@ import { EMAIL, HQ_ADDRESS, LEGAL_NAME } from '../src/config/brand.js';
 import { initIamSchema } from './auth/schema.js';
 import { createMailTables } from './mail/outbox.js';
 import { createBlogTables } from './blog/schema.js';
+import { createDispatchTables } from './dispatch/schema.js';
 
 // DB_PATH lets a real deployment point the database file somewhere OUTSIDE the directory
 // git/the deploy process manages, e.g. a persistent storage path a host provides separately
@@ -312,6 +313,10 @@ export function initDatabase() {
   // 20. Blog posts, categories, media and old-slug redirects (docs/BLOG_SPEC.md §3).
   createBlogTables(db);
 
+  // 21. Couriers, delivery cities/zones, rates, dispatch jobs, courier locations and the cash
+  // ledger (docs/DISPATCH_SPEC.md §3). Empty until the admin enters them.
+  createDispatchTables(db);
+
   // Safe dynamic migrations for existing databases. Must run after every CREATE TABLE above
   // (shipments through settings) — these ALTER statements target quote_requests, documents
   // and tracking_events too, and running them any earlier throws "no such table" on a
@@ -379,6 +384,9 @@ export function initDatabase() {
   try { db.exec(`ALTER TABLE quote_requests ADD COLUMN transport_mode TEXT;`); } catch (e) {}
   // Staff user id that booked the shipment in the console (IAM_RBAC_SPEC §7); NULL for public bookings.
   try { db.exec(`ALTER TABLE shipments ADD COLUMN created_by TEXT;`); } catch (e) {}
+  // INTERNATIONAL | LOCAL | INTERCITY (DISPATCH_SPEC §3); NULL = INTERNATIONAL for older rows.
+  // LOCAL and INTERCITY shipments move only on courier updates (server/progress.ts skips them).
+  try { db.exec(`ALTER TABLE shipments ADD COLUMN service_scope TEXT;`); } catch (e) {}
 
   // Backfill existing rows so they don't all collapse to "unknown, sort last": preserve
   // today's best-effort relative order (by rowid, which reflects insertion order) as a
