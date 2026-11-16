@@ -299,6 +299,25 @@ test('average speeds: defaults from the spec, validated, audited', async () => {
   assert.deepEqual(JSON.parse(entry.after_json), { avgSpeedKmh: { BIKE: 15, TRUCK: 25 } });
 });
 
+test('dispatch board alerts: defaults 15 / 10 min, saved alone, 0 = off, validated, audited', async () => {
+  assert.deepEqual(DEFAULT_DISPATCH_SETTINGS.alertMinutes, { unassigned: 15, notAccepted: 10 });
+  assert.deepEqual(readDispatchSettings({ alertMinutes: { unassigned: -1, notAccepted: 5 } }).alertMinutes, { unassigned: 15, notAccepted: 5 });
+  for (const bad of [{ unassigned: 1.5, notAccepted: 10 }, { unassigned: 2000, notAccepted: 10 }, { unassigned: 10 }, 'x']) {
+    const r = await call('PUT', '/api/tariffs/settings', tar, { alertMinutes: bad });
+    assert.equal(r.status, 400);
+    assert.equal((await r.json()).code, 'INVALID_ALERT_MINUTES');
+  }
+  assert.equal((await call('PUT', '/api/tariffs/settings', tar, {})).status, 400);
+  const res = await call('PUT', '/api/tariffs/settings', tar, { alertMinutes: { unassigned: 0, notAccepted: 5 } });
+  const settings = (await res.json()).data.settings;
+  assert.deepEqual(settings.alertMinutes, { unassigned: 0, notAccepted: 5 });
+  // The speeds saved earlier are kept when only the alerts are sent.
+  assert.deepEqual(settings.avgSpeedKmh, { BIKE: 15, VAN: 30, TRUCK: 25 });
+  const entry = lastAudit('tariffs.settings_update');
+  assert.deepEqual(JSON.parse(entry.after_json), { alertMinutes: { unassigned: 0, notAccepted: 5 } });
+  assert.match(entry.summary, /board alerts/);
+});
+
 let courierId = '';
 
 test('courier routes: 401 signed out; view vs manage', async () => {

@@ -41,6 +41,8 @@ export const BOARD_TEXT = {
   },
   problems: {
     FAILED: 'Failed attempt',
+    NOT_ASSIGNED: 'Waiting for a courier',
+    NOT_ACCEPTED: 'Not accepted yet',
     LATE: 'Late',
     STALE_LOCATION: 'No position for 2 min',
     CODE_LOCKED: 'Delivery code locked',
@@ -146,7 +148,7 @@ export const BOARD_TEXT = {
   assign: {
     title: (tracking: string) => `Assign ${tracking}`,
     reassignTitle: (tracking: string) => `Reassign ${tracking}`,
-    intro: 'Suggested: on duty, in the pickup city, with the vehicle this job needs. Nearest to the pickup first, then the fewest active jobs.',
+    intro: 'Suggested: on duty, in the pickup city (home city, or sharing a position near the pickup), with the vehicle this job needs. Nearest to the pickup first, then the fewest active jobs. A larger vehicle can carry the job and comes next.',
     suggested: 'Suggested',
     others: 'Other couriers',
     noneSuggested: 'No courier on duty in this city has the right vehicle. You can still choose one below.',
@@ -155,7 +157,7 @@ export const BOARD_TEXT = {
     noPosition: 'Position unknown',
     positionAge: (min: number) => (min < 1 ? 'just now' : `${min} min ago`),
     load: (n: number) => plural(n, 'active job', 'active jobs'),
-    misses: { OFF_DUTY: 'Off duty', OTHER_CITY: 'Other city', OTHER_VEHICLE: 'Other vehicle', DISABLED: 'Disabled' } as Record<SuggestionMiss, string>,
+    misses: { LARGER_VEHICLE: 'Larger vehicle', OFF_DUTY: 'Off duty', OTHER_CITY: 'Other city', SMALLER_VEHICLE: 'Smaller vehicle: check the parcel fits' } as Record<SuggestionMiss, string>,
     choose: (name: string) => `Assign to ${name}`,
     done: (name: string) => `Assigned to ${name}.`,
   },

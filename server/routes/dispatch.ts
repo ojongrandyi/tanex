@@ -22,6 +22,7 @@ import {
 import { hasPermission } from '../../src/shared/permissions.js';
 import { boardColumn, needsAttention, startOfDay } from '../../src/shared/dispatchBoard.js';
 import { maskEmail } from '../../src/shared/masking.js';
+import { readStoredDispatchSettings } from './tariffs.js';
 
 const send = (res: Response, f: Fail) =>
   res.status(f.status).json({ success: false, code: f.code, error: f.error, ...(f.details ? { details: f.details } : {}) });
@@ -150,6 +151,8 @@ dispatchRouter.get('/board', canView, (_req: Request, res: Response) => {
       success: true,
       data: {
         serverTime: now,
+        // Waiting-job alert minutes (Tariffs → Average speeds and alerts), for the board's Problems column.
+        alertMinutes: readStoredDispatchSettings().alertMinutes,
         cities: cities.map((c) => ({ id: c.id, name: c.name, lat: c.lat, lng: c.lng, isActive: c.is_active === 1 })),
         zones: zones.map((z) => ({ id: z.id, cityId: z.city_id, name: z.name, lat: z.lat, lng: z.lng, isActive: z.is_active === 1 })),
         jobs: jobs.map((r) => jobOut(db, r, { view: 'dispatch' })),
@@ -180,24 +183,25 @@ dispatchRouter.get('/summary', canView, (_req: Request, res: Response) => {
     const now = Date.now();
     const finals = FINAL_DISPATCH_STATUSES.map(() => '?').join(',');
     const rows = db.prepare(`
-      SELECT j.status, j.courier_user_id, j.scheduled_for_ts, j.eta_ts, j.picked_up_at_ts, j.on_the_way_at_ts,
+      SELECT j.status, j.courier_user_id, j.confirmed_at_ts, j.assigned_at_ts, j.scheduled_for_ts, j.eta_ts, j.picked_up_at_ts, j.on_the_way_at_ts,
         j.delivered_at_ts, j.cancelled_at_ts, j.updated_at_ts, (j.delivery_code_hash IS NOT NULL) AS has_code, j.delivery_code_attempts,
         (SELECT MAX(l.recorded_at_ts) FROM courier_locations l WHERE l.courier_user_id = j.courier_user_id) AS last_ping
       FROM dispatch_jobs j WHERE j.status NOT IN (${finals})
     `).all(...FINAL_DISPATCH_STATUSES) as unknown as {
-      status: DispatchStatus; courier_user_id: string | null; scheduled_for_ts: number | null; eta_ts: number | null;
+      status: DispatchStatus; courier_user_id: string | null; confirmed_at_ts: number | null; assigned_at_ts: number | null; scheduled_for_ts: number | null; eta_ts: number | null;
       picked_up_at_ts: number | null; on_the_way_at_ts: number | null; delivered_at_ts: number | null; cancelled_at_ts: number | null;
       updated_at_ts: number; has_code: number; delivery_code_attempts: number; last_ping: number | null;
     }[];
     const dayStart = startOfDay(now);
+    const rules = readStoredDispatchSettings().alertMinutes;
     const counts = { requested: 0, toAssign: 0, problems: 0, attention: 0 };
     for (const r of rows) {
       const column = boardColumn({
-        status: r.status, courierUserId: r.courier_user_id, scheduledForTs: r.scheduled_for_ts, etaTs: r.eta_ts,
+        status: r.status, courierUserId: r.courier_user_id, confirmedAt: r.confirmed_at_ts, assignedAt: r.assigned_at_ts, scheduledForTs: r.scheduled_for_ts, etaTs: r.eta_ts,
         pickedUpAt: r.picked_up_at_ts, onTheWayAt: r.on_the_way_at_ts, deliveredAt: r.delivered_at_ts, cancelledAt: r.cancelled_at_ts,
         updatedAt: r.updated_at_ts, hasDeliveryCode: r.has_code === 1,
         deliveryCodeTriesLeft: r.has_code === 1 ? Math.max(0, DELIVERY_CODE_TRIES - r.delivery_code_attempts) : null,
-      }, r.last_ping, now, dayStart);
+      }, r.last_ping, now, dayStart, rules);
       if (column === 'REQUESTED') counts.requested++;
       if (column === 'TO_ASSIGN') counts.toAssign++;
       if (column === 'PROBLEMS') counts.problems++;

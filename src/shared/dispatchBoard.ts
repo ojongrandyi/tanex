@@ -14,12 +14,22 @@ export const BOARD_TIME_ZONE = 'Africa/Douala';
 export const BOARD_COLUMNS = ['REQUESTED', 'TO_ASSIGN', 'ASSIGNED', 'IN_PROGRESS', 'PROBLEMS', 'DONE_TODAY'] as const;
 export type BoardColumn = typeof BOARD_COLUMNS[number];
 
-export type JobProblem = 'FAILED' | 'LATE' | 'STALE_LOCATION' | 'CODE_LOCKED';
+export type JobProblem = 'FAILED' | 'NOT_ASSIGNED' | 'NOT_ACCEPTED' | 'LATE' | 'STALE_LOCATION' | 'CODE_LOCKED';
+
+/** Admin-set minutes for the waiting-job alerts (DispatchSettings.alertMinutes); 0 = off. */
+export interface BoardAlertRules {
+  unassigned: number;
+  notAccepted: number;
+}
+/** No waiting-job alerts (for callers that only need the other rules). */
+export const NO_ALERT_RULES: BoardAlertRules = { unassigned: 0, notAccepted: 0 };
 
 /** The job fields the board rules read (the console's job shape has all of them). */
 export interface BoardJob {
   status: DispatchStatus;
   courierUserId: string | null;
+  confirmedAt: number | null;
+  assignedAt: number | null;
   scheduledForTs: number | null;
   etaTs: number | null;
   pickedUpAt: number | null;
@@ -36,14 +46,19 @@ const CARRYING: readonly DispatchStatus[] = ['PICKED_UP', 'ON_THE_WAY'];
 const FINAL: readonly DispatchStatus[] = ['DELIVERED', 'RETURNED', 'CANCELLED'];
 
 /**
- * Why a job needs attention, in display order. Late = the preferred pickup time has passed before
- * pickup, or the ETA has passed before delivery. Stale location = the parcel is with the courier
- * and no position arrived for 2 minutes (counted from pickup when none came yet).
+ * Why a job needs attention, in display order. Not assigned / not accepted = a confirmed job still
+ * without a courier, or an assigned job the courier hasn't accepted, after the admin's minutes
+ * (tracker #170; 0 turns the check off). Late = the preferred pickup time has passed before pickup,
+ * or the ETA has passed before delivery. Stale location = the parcel is with the courier and no
+ * position arrived for 2 minutes (counted from pickup when none came yet).
  */
-export function jobProblems(job: BoardJob, lastPingTs: number | null, now: number): JobProblem[] {
+export function jobProblems(job: BoardJob, lastPingTs: number | null, now: number, rules: BoardAlertRules = NO_ALERT_RULES): JobProblem[] {
   if (FINAL.includes(job.status)) return [];
   const out: JobProblem[] = [];
   if (job.status === 'FAILED_ATTEMPT') out.push('FAILED');
+  const waited = (since: number | null, minutes: number) => minutes > 0 && since !== null && now - since > minutes * 60_000;
+  if (job.status === 'CONFIRMED' && waited(job.confirmedAt, rules.unassigned)) out.push('NOT_ASSIGNED');
+  if (job.status === 'ASSIGNED' && waited(job.assignedAt, rules.notAccepted)) out.push('NOT_ACCEPTED');
   const latePickup = job.scheduledForTs !== null && BEFORE_PICKUP.includes(job.status) && now > job.scheduledForTs;
   const lateEta = job.etaTs !== null && job.status !== 'FAILED_ATTEMPT' && now > job.etaTs;
   if (latePickup || lateEta) out.push('LATE');
@@ -75,9 +90,11 @@ export function startOfDay(now: number, timeZone = BOARD_TIME_ZONE): number {
 }
 
 /** The column a job shows in, or null for a job finished before today (not on the board). */
-export function boardColumn(job: BoardJob, lastPingTs: number | null, now: number, dayStart = startOfDay(now)): BoardColumn | null {
+export function boardColumn(
+  job: BoardJob, lastPingTs: number | null, now: number, dayStart = startOfDay(now), rules: BoardAlertRules = NO_ALERT_RULES,
+): BoardColumn | null {
   if (FINAL.includes(job.status)) return finishedAt(job) >= dayStart ? 'DONE_TODAY' : null;
-  if (jobProblems(job, lastPingTs, now).length > 0) return 'PROBLEMS';
+  if (jobProblems(job, lastPingTs, now, rules).length > 0) return 'PROBLEMS';
   switch (job.status) {
     case 'REQUESTED': return 'REQUESTED';
     case 'CONFIRMED': return 'TO_ASSIGN';
@@ -116,13 +133,24 @@ export interface SuggestCourier {
   lastPosition: { lat: number; lng: number; recordedAt: number } | null;
 }
 
-export type SuggestionMiss = 'OFF_DUTY' | 'OTHER_CITY' | 'OTHER_VEHICLE' | 'DISABLED';
+/**
+ * Why a courier isn't a first choice. LARGER_VEHICLE can still carry the job (a van for a bike job)
+ * and is the mildest; SMALLER_VEHICLE may not fit the parcel and ranks last.
+ */
+export type SuggestionMiss = 'LARGER_VEHICLE' | 'OFF_DUTY' | 'OTHER_CITY' | 'SMALLER_VEHICLE';
+
+/** Capacity order: a vehicle can carry jobs meant for any vehicle before it. */
+export const VEHICLE_CAPACITY: Record<string, number> = { BIKE: 1, VAN: 2, TRUCK: 3 };
+/** A courier with a fresh position this close to the pickup counts as in the city, whatever their home city. */
+export const NEARBY_KM = 15;
+
+const MISS_WEIGHT: Record<SuggestionMiss, number> = { LARGER_VEHICLE: 1, OFF_DUTY: 2, OTHER_CITY: 2, SMALLER_VEHICLE: 4 };
 
 export interface CourierSuggestion<C extends SuggestCourier = SuggestCourier> {
   courier: C;
-  /** On duty, active account, same city, right vehicle. */
+  /** On duty, in the pickup city (home city or a fresh position nearby), exactly the vehicle the job needs. */
   recommended: boolean;
-  /** Why it isn't recommended (empty when it is). */
+  /** Why it isn't recommended (empty when it is), mildest first. */
   misses: SuggestionMiss[];
   /** From the courier's last known position to the pickup; null when either is unknown. */
   distanceKm: number | null;
@@ -131,10 +159,13 @@ export interface CourierSuggestion<C extends SuggestCourier = SuggestCourier> {
 }
 
 /**
- * Couriers for a job, best first (DISPATCH_SPEC §7): recommended ones (on duty, same city as the
- * pickup, the vehicle the job needs) sorted by distance from the pickup, then current load; then
- * every other active courier with the reasons it doesn't fit, so dispatch can still choose one.
- * Disabled accounts and the courier already on the job are left out.
+ * Couriers for a job, best first (DISPATCH_SPEC §7, tracker #170). Recommended: on duty, in the
+ * pickup city (home city, or a position under 2 minutes old within NEARBY_KM of the pickup, so a
+ * rider working away from home still shows), and exactly the vehicle the job needs; sorted by
+ * distance from the pickup, then current load. Then every other active courier, ordered by how far
+ * it is from fitting: a larger vehicle (can carry it) before off duty or another city, a smaller
+ * vehicle last. Dispatch can still choose any of them. Disabled accounts and the courier already on
+ * the job are left out.
  */
 export function suggestCouriers<C extends SuggestCourier>(
   job: { pickupCityId: string; pickup: LatLng | null; vehicleRequired: string; courierUserId: string | null },
@@ -144,23 +175,28 @@ export function suggestCouriers<C extends SuggestCourier>(
   const rows = couriers
     .filter((c) => c.accountStatus === 'ACTIVE' && c.userId !== job.courierUserId)
     .map((c): CourierSuggestion<C> => {
-      const misses: SuggestionMiss[] = [];
-      if (!c.isOnDuty) misses.push('OFF_DUTY');
-      if (c.homeCityId !== job.pickupCityId) misses.push('OTHER_CITY');
-      if (c.vehicleType !== job.vehicleRequired) misses.push('OTHER_VEHICLE');
       const pos = c.lastPosition;
+      const km = pos && job.pickup ? distanceKm(pos, job.pickup) : null;
+      const freshNearby = km !== null && km <= NEARBY_KM && now - pos!.recordedAt <= LOCATION_STALE_MS;
+      const misses: SuggestionMiss[] = [];
+      const have = VEHICLE_CAPACITY[c.vehicleType] ?? 0;
+      const need = VEHICLE_CAPACITY[job.vehicleRequired] ?? 0;
+      if (have > need) misses.push('LARGER_VEHICLE');
+      if (!c.isOnDuty) misses.push('OFF_DUTY');
+      if (c.homeCityId !== job.pickupCityId && !freshNearby) misses.push('OTHER_CITY');
+      if (have < need) misses.push('SMALLER_VEHICLE');
       return {
         courier: c,
         recommended: misses.length === 0,
         misses,
-        distanceKm: pos && job.pickup ? Math.round(distanceKm(pos, job.pickup) * 10) / 10 : null,
+        distanceKm: km === null ? null : Math.round(km * 10) / 10,
         positionAgeMs: pos ? Math.max(0, now - pos.recordedAt) : null,
       };
     });
   const far = Number.POSITIVE_INFINITY;
+  const weight = (s: CourierSuggestion<C>) => s.misses.reduce((n, m) => n + MISS_WEIGHT[m], 0);
   return rows.sort((a, b) =>
-    Number(b.recommended) - Number(a.recommended)
-    || a.misses.length - b.misses.length
+    weight(a) - weight(b)
     || (a.distanceKm ?? far) - (b.distanceKm ?? far)
     || a.courier.activeJobs - b.courier.activeJobs
     || a.courier.displayName.localeCompare(b.courier.displayName));

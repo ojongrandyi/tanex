@@ -167,13 +167,17 @@ in the background; the UI tells the courier to keep the app open during deliveri
 - **Courier list:** status, today's jobs, cash balance, last ping.
 - Refresh every 15 s; counts in the sidebar badge.
 - **Rules (built in G.5, `src/shared/dispatchBoard.ts`, shared by the board and the badge):** a job with a problem
-  shows only under Problems: *failed* (last attempt failed), *late* (preferred pickup time passed before pickup, or
+  shows only under Problems: *failed* (last attempt failed), *waiting for a courier* (confirmed, not assigned
+  after N min) and *not accepted yet* (assigned, not accepted after M min; N and M are admin settings in Tariffs,
+  defaults 15 and 10, 0 = off, #170), *late* (preferred pickup time passed before pickup, or
   the ETA passed before delivery), *stale location* (parcel with the courier and no position for 2 min, counted
   from pickup when none arrived yet), *code locked* (5 wrong delivery codes). Done today = delivered, returned or
   cancelled since midnight Africa/Douala. Badge = Requested + To assign + Problems. Suggestions: recommended =
-  active account, on duty, home city = pickup city, vehicle = the job's vehicle; sorted by straight-line distance
-  from the last known position to the pickup (pin → area pin → city pin), then active jobs; the other active
-  couriers follow with their reasons (off duty, other city, other vehicle) so dispatch can still choose them.
+  active account, on duty, in the pickup city (home city, or a position under 2 min old within 15 km of the pickup)
+  and exactly the job's vehicle; sorted by straight-line distance from the last known position to the pickup
+  (pin → area pin → city pin), then active jobs. The other active couriers follow, ordered by how far they are from
+  fitting: a larger vehicle (it can carry the job) first, then off duty / other city, a smaller vehicle last, each
+  with its reason, so dispatch can still choose them (#170).
 
 ## 8. Customer side
 

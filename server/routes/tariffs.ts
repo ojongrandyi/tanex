@@ -14,7 +14,9 @@ import { serverError } from '../errors.js';
 import { SIZE_CLASSES, isSizeClass, roundMoney, type SizeClass } from '../../src/shared/localPricing.js';
 import { SUGGESTED_AREAS, nameKey } from '../../src/shared/suggestedAreas.js';
 import { VEHICLE_TYPES } from '../../src/shared/dispatchStatus.js';
-import { isValidSpeed, readDispatchSettings, type DispatchSettings } from '../../src/shared/dispatchSettings.js';
+import {
+  ALERT_KEYS, ALERT_MAX_MINUTES, isValidAlertMinutes, isValidSpeed, readDispatchSettings, type DispatchSettings,
+} from '../../src/shared/dispatchSettings.js';
 
 export const NAME_MAX = 60;
 export const ALIASES_MAX = 500;
@@ -574,21 +576,37 @@ tariffsRouter.put('/intercity', requirePermission('tariffs.manage'), (req: Reque
 
 // ---- Settings ---------------------------------------------------------------------------------
 
-// PUT /api/tariffs/settings { avgSpeedKmh: { BIKE, VAN, TRUCK } } (average in-town speeds for ETAs)
+// PUT /api/tariffs/settings { avgSpeedKmh?: { BIKE, VAN, TRUCK }, alertMinutes?: { unassigned, notAccepted } }
+// Average in-town speeds for ETAs and the dispatch board's waiting-job alerts (0 = off). Either part
+// may be sent alone; the other is kept.
 tariffsRouter.put('/settings', requirePermission('tariffs.manage'), (req: Request, res: Response) => {
   try {
-    const raw = body(req).avgSpeedKmh;
-    const speeds = (raw && typeof raw === 'object' ? raw : null) as Record<string, unknown> | null;
-    if (!speeds || !VEHICLE_TYPES.every((v) => isValidSpeed(speeds[v]))) {
+    const b = body(req);
+    const obj = (v: unknown) => (v && typeof v === 'object' ? v as Record<string, unknown> : null);
+    if (b.avgSpeedKmh === undefined && b.alertMinutes === undefined) {
+      return send(res, fail(400, 'INVALID_INPUT', 'Send avgSpeedKmh, alertMinutes or both.'));
+    }
+    const speeds = obj(b.avgSpeedKmh);
+    if (b.avgSpeedKmh !== undefined && (!speeds || !VEHICLE_TYPES.every((v) => isValidSpeed(speeds[v])))) {
       return send(res, fail(400, 'INVALID_SPEED', 'Enter an average speed from 1 to 120 km/h for each vehicle.'));
     }
+    const alerts = obj(b.alertMinutes);
+    if (b.alertMinutes !== undefined && (!alerts || !ALERT_KEYS.every((k) => isValidAlertMinutes(alerts[k])))) {
+      return send(res, fail(400, 'INVALID_ALERT_MINUTES', `Enter whole minutes from 0 to ${ALERT_MAX_MINUTES} (0 turns the alert off).`));
+    }
     const current = readStoredDispatchSettings();
-    const next = readDispatchSettings({ avgSpeedKmh: speeds });
-    const d = diff(current.avgSpeedKmh, next.avgSpeedKmh);
-    if (d.changed.length) {
+    const next = readDispatchSettings({ avgSpeedKmh: speeds ?? current.avgSpeedKmh, alertMinutes: alerts ?? current.alertMinutes });
+    const ds = diff(current.avgSpeedKmh, next.avgSpeedKmh);
+    const da = diff(current.alertMinutes, next.alertMinutes);
+    if (ds.changed.length || da.changed.length) {
+      const parts = [
+        ...(ds.changed.length ? [`average speeds (${ds.changed.join(', ')})`] : []),
+        ...(da.changed.length ? [`board alerts (${da.changed.join(', ')})`] : []),
+      ];
       db.prepare('INSERT OR REPLACE INTO settings (key, value_json) VALUES (?, ?)').run(DISPATCH_SETTINGS_KEY, JSON.stringify(next));
-      audit(req, 'tariffs.settings_update', 'settings', DISPATCH_SETTINGS_KEY,
-        `Average speeds changed (${d.changed.join(', ')})`, { avgSpeedKmh: d.before }, { avgSpeedKmh: d.after });
+      audit(req, 'tariffs.settings_update', 'settings', DISPATCH_SETTINGS_KEY, `Dispatch settings changed: ${parts.join('; ')}`,
+        { ...(ds.changed.length ? { avgSpeedKmh: ds.before } : {}), ...(da.changed.length ? { alertMinutes: da.before } : {}) },
+        { ...(ds.changed.length ? { avgSpeedKmh: ds.after } : {}), ...(da.changed.length ? { alertMinutes: da.after } : {}) });
     }
     res.json({ success: true, data: fullState() });
   } catch (err) {

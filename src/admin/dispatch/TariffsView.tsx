@@ -12,7 +12,7 @@ import { PinPicker, type Pin } from './PinPicker';
 import { ANY, cellKey, isSymmetricSheet, parseAmount, setCellValue, sheetSignature, type Cell } from './rateSheet';
 import { SIZE_CLASSES, SIZE_CLASS_LABELS, priceLocalDelivery, type SizeClass } from '../../shared/localPricing';
 import { VEHICLE_TYPES, VEHICLE_LABELS } from '../../shared/dispatchStatus';
-import { SPEED_MAX_KMH, SPEED_MIN_KMH } from '../../shared/dispatchSettings';
+import { ALERT_KEYS, SPEED_MAX_KMH, SPEED_MIN_KMH, isValidAlertMinutes } from '../../shared/dispatchSettings';
 import { SUGGESTED_AREAS } from '../../shared/suggestedAreas';
 import '../pages/IamViews.css';
 import './Dispatch.css';
@@ -618,6 +618,7 @@ const IntercityPanel: React.FC<{
 
 const SpeedsPanel: React.FC<{ state: TariffState; onState: (s: TariffState, msg?: string) => void }> = ({ state, onState }) => {
   const [speeds, setSpeeds] = useState(() => Object.fromEntries(VEHICLE_TYPES.map((v) => [v, String(state.settings.avgSpeedKmh[v])])));
+  const [alerts, setAlerts] = useState(() => Object.fromEntries(ALERT_KEYS.map((k) => [k, String(state.settings.alertMinutes[k])])) as Record<(typeof ALERT_KEYS)[number], string>);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const save = async (e: React.FormEvent) => {
@@ -627,10 +628,18 @@ const SpeedsPanel: React.FC<{ state: TariffState; onState: (s: TariffState, msg?
       setError(T.speedError);
       return;
     }
+    const minutes = Object.fromEntries(ALERT_KEYS.map((k) => [k, parseAmount(alerts[k])])) as Record<(typeof ALERT_KEYS)[number], number | null>;
+    if (!ALERT_KEYS.every((k) => isValidAlertMinutes(minutes[k]))) {
+      setError(T.alertError);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      onState(await dispatchApi.saveSettings({ avgSpeedKmh: parsed as Record<(typeof VEHICLE_TYPES)[number], number> }), D.saved);
+      onState(await dispatchApi.saveSettings({
+        avgSpeedKmh: parsed as Record<(typeof VEHICLE_TYPES)[number], number>,
+        alertMinutes: minutes as Record<(typeof ALERT_KEYS)[number], number>,
+      }), D.saved);
     } catch (err) {
       setError(dispatchErrorText(err));
     } finally {
@@ -639,12 +648,23 @@ const SpeedsPanel: React.FC<{ state: TariffState; onState: (s: TariffState, msg?
   };
   return (
     <form className="tx-iam-card tx-tariff-panel" onSubmit={save} noValidate>
+      <h3 className="tx-tariff-subhead">{T.speedsTitle}</h3>
       <p className="tx-iam-muted tx-tariff-help">{T.speedsIntro}</p>
       <div className="tx-tariff-controls">
         {VEHICLE_TYPES.map((v) => (
           <label key={v} className="tx-iam-field">
             <span>{VEHICLE_LABELS[v].en} ({T.kmh})</span>
             <input type="text" inputMode="decimal" value={speeds[v]} onChange={(e) => { setSpeeds((s) => ({ ...s, [v]: e.target.value })); setError(null); }} />
+          </label>
+        ))}
+      </div>
+      <h3 className="tx-tariff-subhead">{T.alertsTitle}</h3>
+      <p className="tx-iam-muted tx-tariff-help">{T.alertsIntro}</p>
+      <div className="tx-tariff-controls">
+        {ALERT_KEYS.map((k) => (
+          <label key={k} className="tx-iam-field">
+            <span>{k === 'unassigned' ? T.alertUnassigned : T.alertNotAccepted}</span>
+            <input type="text" inputMode="numeric" value={alerts[k]} onChange={(e) => { setAlerts((a) => ({ ...a, [k]: e.target.value })); setError(null); }} />
           </label>
         ))}
       </div>

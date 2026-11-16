@@ -19,7 +19,7 @@ import {
 
 const NOW = Date.UTC(2026, 10, 14, 12, 0, 0); // 13:00 in Douala (UTC+1)
 const job = (over: Partial<BoardJob> = {}): BoardJob => ({
-  status: 'CONFIRMED', courierUserId: null, scheduledForTs: null, etaTs: null, pickedUpAt: null, onTheWayAt: null,
+  status: 'CONFIRMED', courierUserId: null, confirmedAt: NOW - 60_000, assignedAt: null, scheduledForTs: null, etaTs: null, pickedUpAt: null, onTheWayAt: null,
   deliveredAt: null, cancelledAt: null, updatedAt: NOW - 60_000, hasDeliveryCode: false, deliveryCodeTriesLeft: null, ...over,
 });
 
@@ -85,12 +85,46 @@ test('suggestCouriers: on duty, same city, right vehicle; nearest then least loa
   const list = suggestCouriers({ pickupCityId: 'buea', pickup, vehicleRequired: 'BIKE', courierUserId: 'current' },
     [far, busyNoPos, off, van, douala, disabled, current, idleNoPos, near], NOW);
   assert.deepEqual(list.filter((s) => s.recommended).map((s) => s.courier.userId), ['near', 'far', 'idle', 'busy']);
-  assert.deepEqual(list.filter((s) => !s.recommended).map((s) => s.courier.userId), ['off', 'douala', 'van']);
-  assert.deepEqual(list.find((s) => s.courier.userId === 'van')!.misses, ['OTHER_VEHICLE']);
+  assert.deepEqual(list.filter((s) => !s.recommended).map((s) => s.courier.userId), ['van', 'off', 'douala']);
+  assert.deepEqual(list.find((s) => s.courier.userId === 'van')!.misses, ['LARGER_VEHICLE']);
   assert.ok(!list.some((s) => s.courier.userId === 'disabled' || s.courier.userId === 'current'));
   assert.equal(list[0].distanceKm, 0.2);
   assert.equal(list[0].positionAgeMs, 30_000);
   assert.equal(list.find((s) => s.courier.userId === 'idle')!.distanceKm, null);
+});
+
+test('waiting-job alerts: not assigned / not accepted after the admin minutes; 0 turns them off', () => {
+  const rules = { unassigned: 15, notAccepted: 10 };
+  const confirmed = job({ status: 'CONFIRMED', confirmedAt: NOW - 16 * 60_000 });
+  assert.deepEqual(jobProblems(confirmed, null, NOW, rules), ['NOT_ASSIGNED']);
+  assert.equal(boardColumn(confirmed, null, NOW, undefined, rules), 'PROBLEMS');
+  assert.deepEqual(jobProblems(job({ confirmedAt: NOW - 14 * 60_000 }), null, NOW, rules), []);
+  const assigned = job({ status: 'ASSIGNED', courierUserId: 'c', assignedAt: NOW - 11 * 60_000 });
+  assert.deepEqual(jobProblems(assigned, null, NOW, rules), ['NOT_ACCEPTED']);
+  // Accepted jobs and jobs without the rules are not flagged.
+  assert.deepEqual(jobProblems({ ...assigned, status: 'ACCEPTED' }, null, NOW, rules), []);
+  assert.deepEqual(jobProblems(assigned, null, NOW), []);
+  assert.deepEqual(jobProblems(assigned, null, NOW, { unassigned: 0, notAccepted: 0 }), []);
+  // A requested job waits for pricing, not for a courier.
+  assert.deepEqual(jobProblems(job({ status: 'REQUESTED', confirmedAt: null }), null, NOW, rules), []);
+});
+
+test('suggestCouriers: a fresh position near the pickup counts as in the city; smaller vehicles rank last', () => {
+  const pickup = { lat: 4.155, lng: 9.24 };
+  const base = { vehicleType: 'BIKE', isOnDuty: true, accountStatus: 'ACTIVE', activeJobs: 0 };
+  const visiting = { ...base, userId: 'visiting', displayName: 'visiting', homeCityId: 'douala', lastPosition: { lat: 4.16, lng: 9.25, recordedAt: NOW - 30_000 } };
+  const staleVisit = { ...base, userId: 'stale', displayName: 'stale', homeCityId: 'douala', lastPosition: { lat: 4.16, lng: 9.25, recordedAt: NOW - 10 * 60_000 } };
+  const noHome = { ...base, userId: 'nohome', displayName: 'nohome', homeCityId: null, lastPosition: null };
+  const list = suggestCouriers({ pickupCityId: 'buea', pickup, vehicleRequired: 'VAN', courierUserId: null }, [
+    { ...visiting, vehicleType: 'VAN' }, { ...staleVisit, vehicleType: 'VAN' }, noHome,
+    { ...base, userId: 'truck', displayName: 'truck', homeCityId: 'buea', vehicleType: 'TRUCK', lastPosition: null },
+  ], NOW);
+  assert.deepEqual(list.map((s) => [s.courier.userId, s.misses]), [
+    ['visiting', []],
+    ['truck', ['LARGER_VEHICLE']],
+    ['stale', ['OTHER_CITY']],
+    ['nohome', ['OTHER_CITY', 'SMALLER_VEHICLE']],
+  ]);
 });
 
 test('placePoint and distanceKm', () => {
@@ -270,4 +304,28 @@ test('history: audit timeline with reasons, cash rows, emails; no full audit rec
   assert.notEqual(data.notifications[0].to, 'recipient@example.test');
   assert.match(data.notifications[0].to, /\*/);
   assert.equal((await call('GET', '/api/dispatch/jobs/job_missing/history', sup)).status, 404);
+});
+
+test('alerts: the board carries the admin minutes and the badge counts waiting jobs with them', async () => {
+  const count = async () => (await (await call('GET', '/api/dispatch/summary', disp)).json() as any).data;
+  const board = (await (await call('GET', '/api/dispatch/board', sup)).json() as any).data;
+  assert.deepEqual(board.alertMinutes, { unassigned: 15, notAccepted: 10 });
+  const before = await count();
+  const waiting = await createJob();
+  const assigned = await createJob();
+  assert.equal((await call('POST', `/api/dispatch/jobs/${assigned.id}/assign`, disp, { courierUserId: 'usr_c1' })).status, 200);
+  let s = await count();
+  assert.equal(s.problems, before.problems);
+  // 20 minutes later: the confirmed job still has no courier, the assigned one isn't accepted.
+  db.prepare('UPDATE dispatch_jobs SET confirmed_at_ts = ? WHERE id = ?').run(Date.now() - 20 * 60_000, waiting.id);
+  db.prepare('UPDATE dispatch_jobs SET assigned_at_ts = ? WHERE id = ?').run(Date.now() - 20 * 60_000, assigned.id);
+  s = await count();
+  assert.equal(s.problems, before.problems + 2);
+  assert.equal(s.toAssign, before.toAssign);
+  // Turned off by the admin: no longer problems.
+  db.prepare("INSERT OR REPLACE INTO settings (key, value_json) VALUES ('dispatch', ?)").run(JSON.stringify({ alertMinutes: { unassigned: 0, notAccepted: 0 } }));
+  s = await count();
+  assert.equal(s.problems, before.problems);
+  assert.equal(s.toAssign, before.toAssign + 1);
+  assert.deepEqual((await (await call('GET', '/api/dispatch/board', sup)).json() as any).data.alertMinutes, { unassigned: 0, notAccepted: 0 });
 });

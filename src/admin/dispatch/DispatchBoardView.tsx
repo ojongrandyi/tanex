@@ -9,7 +9,7 @@ import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useStat
 import { AlertCircle, CheckCircle2, Plus, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import {
-  BOARD_COLUMNS, BOARD_REFRESH_MS, LOCATION_STALE_MS, boardColumn, jobProblems, placePoint, startOfDay, finishedAt,
+  BOARD_COLUMNS, BOARD_REFRESH_MS, LOCATION_STALE_MS, NO_ALERT_RULES, boardColumn, jobProblems, placePoint, startOfDay, finishedAt,
   type BoardColumn,
 } from '../../shared/dispatchBoard';
 import { DISPATCH_STATUS_LABELS, VEHICLE_LABELS, VEHICLE_TYPES, type VehicleType } from '../../shared/dispatchStatus';
@@ -142,10 +142,11 @@ export const DispatchBoardView: React.FC<{
     && (!q || j.trackingNumber.includes(q))), [data, city, vehicle, courier, q]);
 
   const dayStart = startOfDay(now);
+  const rules = data?.alertMinutes ?? NO_ALERT_RULES;
   const columns = useMemo(() => {
     const out = Object.fromEntries(BOARD_COLUMNS.map((c) => [c, [] as DispatchJob[]])) as Record<BoardColumn, DispatchJob[]>;
     for (const j of filtered) {
-      const col = boardColumn(j, pingOf(j), now, dayStart);
+      const col = boardColumn(j, pingOf(j), now, dayStart, rules);
       if (col) out[col].push(j);
     }
     // Oldest waiting first; done today newest first.
@@ -153,7 +154,7 @@ export const DispatchBoardView: React.FC<{
       out[c].sort(c === 'DONE_TODAY' ? (a, b) => finishedAt(b) - finishedAt(a) : (a, b) => (a.isExpress === b.isExpress ? a.createdAt - b.createdAt : a.isExpress ? -1 : 1));
     }
     return out;
-  }, [filtered, pingOf, now, dayStart]);
+  }, [filtered, pingOf, now, dayStart, rules]);
 
   const selected = (selectedId && data?.jobs.find((j) => j.id === selectedId)) || (selectedCopy?.id === selectedId ? selectedCopy : null);
   useEffect(() => {
@@ -276,7 +277,7 @@ export const DispatchBoardView: React.FC<{
               <ul className="tx-board-cards">
                 {columns[col].map((j) => (
                   <JobCard key={j.id} job={j} now={now} selected={j.id === selectedId}
-                    problems={jobProblems(j, pingOf(j), now).map((p) => T.problems[p])}
+                    problems={jobProblems(j, pingOf(j), now, rules).map((p) => T.problems[p])}
                     onOpen={() => setSelectedId(j.id)} />
                 ))}
               </ul>
@@ -344,7 +345,7 @@ export const DispatchBoardView: React.FC<{
       </div>
 
       {selected && (
-        <JobDrawer job={selected} problems={jobProblems(selected, pingOf(selected), now)}
+        <JobDrawer job={selected} problems={jobProblems(selected, pingOf(selected), now, rules)}
           couriers={data.couriers} zones={data.zones} cities={data.cities} now={now} canManage={canManage}
           onClose={() => { setSelectedId(null); setSelectedCopy(null); }} onChanged={onJobChanged} onOpenTracking={onOpenTracking} />
       )}

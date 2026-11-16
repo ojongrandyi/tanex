@@ -77,6 +77,8 @@ export interface BoardZone { id: string; cityId: string; name: string; lat: numb
 
 export interface BoardData {
   serverTime: number;
+  /** Waiting-job alert minutes set in Tariffs (0 = off). */
+  alertMinutes: { unassigned: number; notAccepted: number };
   cities: BoardCity[];
   zones: BoardZone[];
   jobs: DispatchJob[];
