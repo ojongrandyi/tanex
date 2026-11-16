@@ -166,6 +166,14 @@ in the background; the UI tells the courier to keep the app open during deliveri
 - **Create job** (phone/walk-in orders): same form as the public one plus price override, COD, payer, delivery code.
 - **Courier list:** status, today's jobs, cash balance, last ping.
 - Refresh every 15 s; counts in the sidebar badge.
+- **Rules (built in G.5, `src/shared/dispatchBoard.ts`, shared by the board and the badge):** a job with a problem
+  shows only under Problems: *failed* (last attempt failed), *late* (preferred pickup time passed before pickup, or
+  the ETA passed before delivery), *stale location* (parcel with the courier and no position for 2 min, counted
+  from pickup when none arrived yet), *code locked* (5 wrong delivery codes). Done today = delivered, returned or
+  cancelled since midnight Africa/Douala. Badge = Requested + To assign + Problems. Suggestions: recommended =
+  active account, on duty, home city = pickup city, vehicle = the job's vehicle; sorted by straight-line distance
+  from the last known position to the pickup (pin → area pin → city pin), then active jobs; the other active
+  couriers follow with their reasons (off duty, other city, other vehicle) so dispatch can still choose them.
 
 ## 8. Customer side
 
@@ -212,7 +220,9 @@ sent automatically when an email address is known.
 | `GET /api/track/:id` | public; adds `localDelivery` block (stepper, courier first name, last position if fresh, ETA) |
 | `GET/POST/PATCH /api/dispatch/jobs`, `POST /api/dispatch/jobs/:id/assign` (assign or reassign), `/confirm`, `/price`, `/cancel`, `/return`, `/delivery-code-override` | `dispatch.view` / `dispatch.manage` |
 | `GET /api/dispatch/jobs/:id/pod/photo` · `/signature` (private POD files) | `dispatch.view`/`dispatch.manage`/`cash.view`/`cash.confirm` (the courier: `GET /api/courier/jobs/:id/pod/:kind`) |
-| `GET /api/dispatch/board` (jobs + courier positions, one call) | `dispatch.view` |
+| `GET /api/dispatch/board` (jobs + courier positions + cities/areas with pins, one call) | `dispatch.view` |
+| `GET /api/dispatch/summary` (sidebar badge: requested, to assign, problems) · `GET /api/dispatch/jobs/:id/history` (drawer: audit timeline with the reason given, cash rows, emails sent; added in G.5) | `dispatch.view` / `dispatch.manage` |
+| `POST /api/dispatch/quote` (rate-sheet price for the create form from cities/areas + size/weight + express; added in G.5) | `dispatch.manage` |
 | `GET/POST/PATCH /api/couriers` | `couriers.view` / `couriers.manage` (creates user + courier profile in one step) |
 | `GET/PUT /api/tariffs/*` (cities, zones, rates, intercity) | `tariffs.manage` (GET of active cities/zones is public) |
 | `GET /api/courier/jobs`, `POST /api/courier/jobs/:id/action` (idempotency key), `POST /api/courier/location`, `POST /api/courier/pod/:id` (multipart) | `courier.app` + own job |

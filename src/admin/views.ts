@@ -10,6 +10,7 @@ export type AdminViewType =
   | 'quote-requests'
   | 'messages'
   | 'payments'
+  | 'dispatch'
   | 'tariffs'
   | 'couriers'
   | 'document-center'
@@ -29,7 +30,9 @@ export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | readonly Per
   'quote-requests': 'quotes.view',
   'messages': 'messages.view',
   'payments': 'payments.view',
-  // Delivery (DISPATCH_SPEC §3, §5): tariffs need tariffs.manage; couriers can be viewed or managed.
+  // Delivery (DISPATCH_SPEC §3, §5, §7): the dispatch board and couriers can be viewed or managed;
+  // tariffs need tariffs.manage.
+  'dispatch': ['dispatch.view', 'dispatch.manage'],
   'tariffs': 'tariffs.manage',
   'couriers': ['couriers.view', 'couriers.manage'],
   'document-center': 'documents.view',
@@ -51,6 +54,7 @@ export const VIEW_ORDER: readonly AdminViewType[] = [
   'quote-requests',
   'messages',
   'payments',
+  'dispatch',
   'tariffs',
   'couriers',
   'document-center',

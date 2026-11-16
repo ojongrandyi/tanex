@@ -24,7 +24,8 @@ import {
   History,
   Newspaper,
   Tags,
-  Bike
+  Bike,
+  Route
 } from 'lucide-react';
 import { useAdminData } from '../context/AdminDataContext';
 import { useAuth } from '../auth/AuthContext';
@@ -53,6 +54,8 @@ interface AdminLayoutProps {
   newMessagesCount?: number;
   /** Proofs of payment waiting for review (update G.1). */
   newProofsCount?: number;
+  /** Dispatch jobs waiting for dispatch: requested, to assign, problems (G.5). */
+  dispatchAttentionCount?: number;
   children: React.ReactNode;
 }
 
@@ -91,6 +94,11 @@ const VIEW_METADATA: Record<AdminViewType, { title: string; category: string; de
     title: 'Payments',
     category: 'Commercial Tariffs',
     description: 'Proofs of payment sent from the track page.'
+  },
+  'dispatch': {
+    title: DISPATCH_MENU.dispatch.menu,
+    category: 'Delivery',
+    description: DISPATCH_MENU.dispatch.description
   },
   'tariffs': {
     title: DISPATCH_MENU.tariffs.menu,
@@ -147,6 +155,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   onSearchChange,
   newMessagesCount = 0,
   newProofsCount = 0,
+  dispatchAttentionCount = 0,
   children
 }) => {
   const { notifications, markNotificationRead, quoteRequests, shipments } = useAdminData();
@@ -330,10 +339,24 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
           )}
 
-          {/* DELIVERY: tariffs and couriers (DISPATCH_SPEC §3, §5) */}
-          {(['tariffs', 'couriers'] as const).some(allowed) && (
+          {/* DELIVERY: dispatch board, tariffs and couriers (DISPATCH_SPEC §3, §5, §7) */}
+          {(['dispatch', 'tariffs', 'couriers'] as const).some(allowed) && (
           <div className="admin-nav-section">
             <span className="section-label">{DISPATCH_MENU.section}</span>
+            {allowed('dispatch') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'dispatch' ? 'active' : ''}`}
+                onClick={() => { onSelectView('dispatch'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <Route size={18} />
+                </div>
+                <span className="nav-title">{DISPATCH_MENU.dispatch.menu}</span>
+                {dispatchAttentionCount > 0 && (
+                  <span className="nav-badge-amber font-mono" aria-label={DISPATCH_MENU.dispatch.attention(dispatchAttentionCount)}>{dispatchAttentionCount}</span>
+                )}
+              </button>
+            )}
             {allowed('tariffs') && (
               <button
                 className={`admin-nav-btn ${currentView === 'tariffs' ? 'active' : ''}`}

@@ -12,7 +12,7 @@ import { inTransaction } from '../auth/schema.js';
 import { serverError } from '../errors.js';
 import { IMAGE_CONTENT_TYPES, resolveUploadPath } from '../uploads.js';
 import {
-  NOTE_MAX, applyTransition, checkJobShape, createJobShipment, defaultVehicle, fail, hashDeliveryCode, isFail, jobOut,
+  DELIVERY_CODE_TRIES, NOTE_MAX, applyTransition, checkJobShape, createJobShipment, defaultVehicle, fail, hashDeliveryCode, isFail, jobOut,
   loadJob, newJobId, parsePlace, priceJob, readJobInput, writeTransition, type Fail, type JobRow, type Place,
 } from '../dispatch/jobs.js';
 import {
@@ -20,6 +20,8 @@ import {
   type TransitionErrorCode,
 } from '../../src/shared/dispatchStatus.js';
 import { hasPermission } from '../../src/shared/permissions.js';
+import { boardColumn, needsAttention, startOfDay } from '../../src/shared/dispatchBoard.js';
+import { maskEmail } from '../../src/shared/masking.js';
 
 const send = (res: Response, f: Fail) =>
   res.status(f.status).json({ success: false, code: f.code, error: f.error, ...(f.details ? { details: f.details } : {}) });
@@ -139,11 +141,17 @@ dispatchRouter.get('/board', canView, (_req: Request, res: Response) => {
       SELECT lat, lng, accuracy_m, speed_mps, heading, recorded_at_ts, job_id FROM courier_locations
       WHERE courier_user_id = ? ORDER BY recorded_at_ts DESC, id DESC LIMIT 1
     `);
+    const cities = db.prepare('SELECT id, name, lat, lng, is_active FROM delivery_cities ORDER BY name COLLATE NOCASE, id').all() as unknown as
+      { id: string; name: string; lat: number | null; lng: number | null; is_active: number }[];
+    const zones = db.prepare('SELECT id, city_id, name, lat, lng, is_active FROM delivery_zones ORDER BY sort_order, name COLLATE NOCASE, id').all() as unknown as
+      { id: string; city_id: string; name: string; lat: number | null; lng: number | null; is_active: number }[];
     noStore(res);
     res.json({
       success: true,
       data: {
         serverTime: now,
+        cities: cities.map((c) => ({ id: c.id, name: c.name, lat: c.lat, lng: c.lng, isActive: c.is_active === 1 })),
+        zones: zones.map((z) => ({ id: z.id, cityId: z.city_id, name: z.name, lat: z.lat, lng: z.lng, isActive: z.is_active === 1 })),
         jobs: jobs.map((r) => jobOut(db, r, { view: 'dispatch' })),
         couriers: couriers.map((c) => {
           const p = lastPing.get(c.user_id) as
@@ -158,6 +166,126 @@ dispatchRouter.get('/board', canView, (_req: Request, res: Response) => {
             } : null,
           };
         }),
+      },
+    });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// GET /api/dispatch/summary: jobs waiting for dispatch (Requested + To assign + Problems, the
+// sidebar badge), counted with the same rules as the board (src/shared/dispatchBoard.ts).
+dispatchRouter.get('/summary', canView, (_req: Request, res: Response) => {
+  try {
+    const now = Date.now();
+    const finals = FINAL_DISPATCH_STATUSES.map(() => '?').join(',');
+    const rows = db.prepare(`
+      SELECT j.status, j.courier_user_id, j.scheduled_for_ts, j.eta_ts, j.picked_up_at_ts, j.on_the_way_at_ts,
+        j.delivered_at_ts, j.cancelled_at_ts, j.updated_at_ts, (j.delivery_code_hash IS NOT NULL) AS has_code, j.delivery_code_attempts,
+        (SELECT MAX(l.recorded_at_ts) FROM courier_locations l WHERE l.courier_user_id = j.courier_user_id) AS last_ping
+      FROM dispatch_jobs j WHERE j.status NOT IN (${finals})
+    `).all(...FINAL_DISPATCH_STATUSES) as unknown as {
+      status: DispatchStatus; courier_user_id: string | null; scheduled_for_ts: number | null; eta_ts: number | null;
+      picked_up_at_ts: number | null; on_the_way_at_ts: number | null; delivered_at_ts: number | null; cancelled_at_ts: number | null;
+      updated_at_ts: number; has_code: number; delivery_code_attempts: number; last_ping: number | null;
+    }[];
+    const dayStart = startOfDay(now);
+    const counts = { requested: 0, toAssign: 0, problems: 0, attention: 0 };
+    for (const r of rows) {
+      const column = boardColumn({
+        status: r.status, courierUserId: r.courier_user_id, scheduledForTs: r.scheduled_for_ts, etaTs: r.eta_ts,
+        pickedUpAt: r.picked_up_at_ts, onTheWayAt: r.on_the_way_at_ts, deliveredAt: r.delivered_at_ts, cancelledAt: r.cancelled_at_ts,
+        updatedAt: r.updated_at_ts, hasDeliveryCode: r.has_code === 1,
+        deliveryCodeTriesLeft: r.has_code === 1 ? Math.max(0, DELIVERY_CODE_TRIES - r.delivery_code_attempts) : null,
+      }, r.last_ping, now, dayStart);
+      if (column === 'REQUESTED') counts.requested++;
+      if (column === 'TO_ASSIGN') counts.toAssign++;
+      if (column === 'PROBLEMS') counts.problems++;
+      if (needsAttention(column)) counts.attention++;
+    }
+    noStore(res);
+    res.json({ success: true, data: counts });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// POST /api/dispatch/quote { pickup: { cityId, zoneId? }, dropoff: { cityId, zoneId? }, sizeClass?,
+// weightKg?, isExpress? } → the rate-sheet price for the create form (the same function job creation
+// uses), or why there is none. Only the city and area matter for the price, so contacts aren't needed.
+dispatchRouter.post('/quote', canManage, (req: Request, res: Response) => {
+  try {
+    const b = body(req);
+    const place = (v: unknown): Place | null => {
+      const p = v && typeof v === 'object' ? v as Record<string, unknown> : {};
+      if (typeof p.cityId !== 'string' || !p.cityId) return null;
+      return {
+        cityId: p.cityId, zoneId: typeof p.zoneId === 'string' && p.zoneId ? p.zoneId : null,
+        landmark: '', directions: null, lat: null, lng: null, contactName: '', contactPhone: '',
+      };
+    };
+    const pickup = place(b.pickup);
+    const dropoff = place(b.dropoff);
+    if (!pickup || !dropoff) return send(res, fail(400, 'INVALID_INPUT', 'Choose the pickup and drop-off cities.'));
+    const input = readJobInput(db, { sizeClass: b.sizeClass, weightKg: b.weightKg, isExpress: b.isExpress }, false);
+    if (isFail(input)) return send(res, input);
+    const quote = priceJob(db, pickup, dropoff, input.sizeClass ?? null, input.weightKg ?? null, !!input.isExpress);
+    noStore(res);
+    res.json({
+      success: true,
+      data: quote.ok
+        ? { ok: true, price: quote.price, currency: quote.currency, match: quote.match ?? null }
+        : { ok: false, reason: quote.reason },
+    });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// GET /api/dispatch/jobs/:id/history: the job drawer's timeline (audit entries for the job: who did
+// what and when, with the reason given), cash rows recorded on it, and emails sent about it.
+dispatchRouter.get('/jobs/:id/history', canView, (req: Request, res: Response) => {
+  try {
+    const job = withJob(req, res);
+    if (!job) return;
+    const entries = db.prepare(`
+      SELECT at_ts, actor_name, action, summary, after_json FROM audit_log
+      WHERE entity_type = 'dispatch_job' AND entity_id = ? ORDER BY at_ts, id
+    `).all(job.id) as unknown as { at_ts: number; actor_name: string | null; action: string; summary: string | null; after_json: string | null }[];
+    const cash = db.prepare(`
+      SELECT ref, entry_type, method, amount, currency, momo_reference, status, created_at_ts FROM cash_ledger
+      WHERE job_id = ? ORDER BY created_at_ts, id
+    `).all(job.id) as unknown as { ref: string; entry_type: string; method: string; amount: number; currency: string;
+      momo_reference: string | null; status: string; created_at_ts: number }[];
+    const emails = db.prepare(`
+      SELECT to_addr, template_key, locale, status, created_at_ts, sent_at_ts FROM email_outbox
+      WHERE (related_type = 'dispatch_job' AND related_id = ?) OR (related_type = 'shipment' AND related_id = ?)
+      ORDER BY created_at_ts, id
+    `).all(job.id, job.tracking_number) as unknown as { to_addr: string; template_key: string; locale: string; status: string;
+      created_at_ts: number; sent_at_ts: number | null }[];
+    // Only the reason or note given with a step is passed on, not the whole audit record (that needs audit.view).
+    const stepReason = (json: string | null): string | null => {
+      try {
+        const a = json ? JSON.parse(json) as Record<string, unknown> : {};
+        const r = a.reason ?? a.priceReason ?? a.note;
+        return typeof r === 'string' && r ? r : null;
+      } catch {
+        return null;
+      }
+    };
+    noStore(res);
+    res.json({
+      success: true,
+      data: {
+        timeline: entries.map((e) => ({ at: e.at_ts, actorName: e.actor_name, action: e.action, summary: e.summary, reason: stepReason(e.after_json) })),
+        cash: cash.map((c) => ({
+          ref: c.ref, entryType: c.entry_type, method: c.method, amount: c.amount, currency: c.currency,
+          momoReference: c.momo_reference, status: c.status, at: c.created_at_ts,
+        })),
+        notifications: emails.map((m) => ({
+          channel: 'EMAIL', to: maskEmail(m.to_addr) ?? '', template: m.template_key, locale: m.locale,
+          status: m.status, at: m.created_at_ts, sentAt: m.sent_at_ts,
+        })),
       },
     });
   } catch (err) {

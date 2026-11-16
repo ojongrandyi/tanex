@@ -1,0 +1,548 @@
+/* Dispatch board (G.5). Builds on the Users/Roles look (IamViews.css) and Dispatch.css. */
+
+.tx-board-toolbar {
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
+.tx-board-toolbar .tx-iam-field {
+  flex: 0 1 180px;
+  min-width: 140px;
+}
+
+/* The shared toolbar rule sizes a bare search box; inside a labelled field it would set the height. */
+.tx-board-toolbar .tx-iam-field input[type='search'] {
+  flex: none;
+  max-width: none;
+}
+
+.tx-board-toolbar-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.tx-board-updated {
+  font-size: 0.75rem;
+}
+
+.tx-board-spin {
+  animation: tx-board-spin 1s linear infinite;
+}
+
+@keyframes tx-board-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tx-board-spin { animation: none; }
+}
+
+/* Columns: one row that scrolls sideways on phones and tablets, three by two from 1024 px (so
+   Problems and Done today are never off screen), six across on very wide screens. */
+.tx-board-columns {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 1fr);
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+
+.tx-board-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  max-height: 70vh;
+  padding: 0.6rem;
+  border-radius: 0.75rem;
+  background: var(--ngf-slate-100);
+  scroll-snap-align: start;
+}
+
+.tx-board-column.is-problems {
+  background: var(--ngf-warning-50);
+}
+
+.tx-board-column h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ngf-ink-900);
+}
+
+.tx-board-count {
+  min-width: 1.6rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--ngf-white);
+  font-family: var(--ngf-font-mono, monospace);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.tx-board-empty {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.tx-board-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.tx-board-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--ngf-slate-200);
+  border-left: 4px solid var(--ngf-slate-200);
+  border-radius: 0.6rem;
+  background: var(--ngf-white);
+  color: var(--ngf-ink-900);
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tx-board-card.is-express {
+  border-left-color: var(--tx-orange-500);
+}
+
+.tx-board-card:hover {
+  border-color: var(--ngf-slate-400);
+}
+
+.tx-board-card.is-selected {
+  border-color: var(--ngf-ink-900);
+  box-shadow: 0 0 0 1px var(--ngf-ink-900);
+}
+
+.tx-board-card:focus-visible {
+  outline: 2px solid var(--ngf-ink-900);
+  outline-offset: 2px;
+}
+
+.tx-board-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.tx-board-card-id {
+  font-weight: 700;
+}
+
+.tx-board-card-route {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.tx-board-card-meta {
+  color: var(--ngf-slate-600);
+}
+
+.tx-board-chips {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.tx-board-status {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--ngf-slate-100);
+  color: var(--ngf-slate-700);
+  margin: 0 0.25rem 0.25rem 0;
+}
+
+.tx-board-status.is-picked_up,
+.tx-board-status.is-on_the_way {
+  background: var(--tx-choc-100);
+  color: var(--tx-choc-800);
+}
+
+.tx-board-status.is-delivered {
+  background: var(--ngf-success-50);
+  color: var(--ngf-success-700);
+}
+
+.tx-board-status.is-failed_attempt {
+  background: var(--ngf-warning-50);
+  color: var(--ngf-warning-700);
+}
+
+/* Map and couriers */
+.tx-board-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1rem;
+}
+
+.tx-board-lower h2,
+.tx-board-drawer h3,
+.tx-board-subhead {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: var(--ngf-ink-900);
+}
+
+.tx-board-map {
+  height: 380px;
+  border-radius: 0.6rem;
+  background: var(--ngf-slate-100);
+  /* Keeps Leaflet's panes (z-index 400+) under the drawer and dialogs. */
+  isolation: isolate;
+}
+
+.tx-board-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--ngf-slate-600);
+}
+
+.tx-board-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tx-board-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--tx-choc-800);
+  border: 2px solid var(--tx-orange-500);
+}
+
+.tx-board-dot.is-stale {
+  background: var(--ngf-slate-400);
+  border-color: var(--ngf-slate-200);
+}
+
+.tx-board-line {
+  display: inline-block;
+  width: 22px;
+  border-top: 3px dashed var(--tx-choc-800);
+}
+
+.tx-board-courier span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--tx-choc-800);
+  border: 3px solid var(--tx-orange-500);
+  color: var(--ngf-white);
+  font-size: 0.65rem;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+.tx-board-courier.is-stale span {
+  background: var(--ngf-slate-400);
+  border-color: var(--ngf-slate-200);
+  color: var(--ngf-ink-900);
+}
+
+.tx-board-table-wrap {
+  overflow-x: auto;
+}
+
+/* Drawer */
+.tx-board-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  width: min(460px, 100vw);
+  background: var(--ngf-white);
+  border-left: 1px solid var(--ngf-slate-200);
+  box-shadow: var(--ngf-shadow-xl);
+  box-sizing: border-box;
+}
+
+.tx-board-drawer:focus-visible {
+  outline: 2px solid var(--ngf-ink-900);
+  outline-offset: -2px;
+}
+
+.tx-board-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.5rem;
+  border-bottom: 1px solid var(--ngf-slate-200);
+}
+
+.tx-board-drawer-head h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: var(--ngf-ink-900);
+}
+
+.tx-board-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.5rem;
+  background: var(--ngf-white);
+  color: var(--ngf-ink-900);
+  cursor: pointer;
+}
+
+.tx-board-icon-btn:focus-visible {
+  outline: 2px solid var(--ngf-ink-900);
+  outline-offset: 2px;
+}
+
+.tx-board-drawer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  color: var(--ngf-ink-900);
+}
+
+.tx-board-drawer-body section p {
+  margin: 0 0 0.25rem;
+}
+
+.tx-board-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tx-board-place {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.6rem;
+}
+
+.tx-board-tel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--ngf-ink-900);
+  font-weight: 600;
+}
+
+.tx-board-dl {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+}
+
+.tx-board-dl-row {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.tx-board-dl dt {
+  color: var(--ngf-slate-600);
+}
+
+.tx-board-dl dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.tx-board-pod {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tx-board-pod img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.5rem;
+  object-fit: contain;
+  background: var(--ngf-slate-100);
+}
+
+.tx-board-pod img.is-signature {
+  background: var(--ngf-white);
+}
+
+.tx-board-timeline,
+.tx-board-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tx-board-timeline li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--ngf-slate-200);
+}
+
+.tx-board-timeline time {
+  font-size: 0.75rem;
+  color: var(--ngf-slate-600);
+}
+
+.tx-board-reason {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ngf-slate-700);
+}
+
+/* Assign suggestions */
+.tx-board-suggest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.tx-board-suggest {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.6rem;
+}
+
+.tx-board-suggest-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  font-size: 0.82rem;
+}
+
+/* Create form */
+.tx-board-create {
+  gap: 1rem;
+}
+
+.tx-board-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--ngf-slate-200);
+  border-radius: 0.6rem;
+  min-width: 0;
+}
+
+.tx-board-fieldset legend {
+  padding: 0 0.3rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ngf-ink-900);
+}
+
+.tx-board-fieldset > .tx-iam-btn {
+  align-self: flex-start;
+}
+
+.tx-board-quote {
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1023px) {
+  .tx-board-lower {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .tx-board-toolbar .tx-iam-field {
+    flex: 1 1 140px;
+  }
+  .tx-board-toolbar-end {
+    margin-left: 0;
+  }
+  .tx-board-columns {
+    grid-auto-columns: minmax(78vw, 1fr);
+    align-items: start;
+  }
+  .tx-board-map {
+    height: 300px;
+  }
+  .tx-board-dl-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .tx-board-suggest {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tx-board-columns {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow-x: visible;
+  }
+  .tx-board-column {
+    max-height: 440px;
+  }
+}
+
+@media (min-width: 1700px) {
+  .tx-board-columns {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .tx-board-column {
+    max-height: 70vh;
+  }
+}

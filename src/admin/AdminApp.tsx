@@ -21,6 +21,8 @@ const BlogPreview = lazy(() => import('./blog/BlogPreview').then((m) => ({ defau
 // Tariffs and Couriers (DISPATCH_SPEC §3, §5): their own chunk, with the map pin picker.
 const TariffsView = lazy(() => import('./dispatch/TariffsView').then((m) => ({ default: m.TariffsView })));
 const CouriersView = lazy(() => import('./dispatch/CouriersView').then((m) => ({ default: m.CouriersView })));
+// Dispatch board (DISPATCH_SPEC §7): its own chunk; Leaflet loads with its map.
+const DispatchBoardView = lazy(() => import('./dispatch/DispatchBoardView').then((m) => ({ default: m.DispatchBoardView })));
 
 /** #blog-preview=<token> from the studio's Preview button (BLOG_SPEC §4). Same shape check as BlogPreview. */
 function blogPreviewToken(): string | null {
@@ -31,6 +33,8 @@ function blogPreviewToken(): string | null {
 import { useAuth } from '../auth/AuthContext';
 import { canOpenView, firstAllowedView } from './views';
 import { api } from '../services/api';
+import { dispatchSummary } from './dispatch/boardApi';
+import { BOARD_REFRESH_MS } from '../shared/dispatchBoard';
 import type { ContactMessage } from '../types/admin';
 import { ShipmentControlModal } from './components/ShipmentControlModal';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -107,6 +111,23 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
     const timer = window.setInterval(refresh, 60_000);
     return () => window.clearInterval(timer);
   }, [handleMessagesChanged, canViewMessages]);
+
+  // Dispatch badge (DISPATCH_SPEC §7): jobs waiting for dispatch (requested, to assign, problems),
+  // read every 15 s while the tab is visible and after each board refresh.
+  const canViewDispatch = can('dispatch.view') || can('dispatch.manage');
+  const [dispatchAttention, setDispatchAttention] = useState(0);
+  const refreshDispatchCount = useCallback(() => {
+    if (!canViewDispatch) return;
+    dispatchSummary().then((s) => setDispatchAttention(s.attention)).catch(() => {});
+  }, [canViewDispatch]);
+  useEffect(() => {
+    if (!canViewDispatch) return;
+    refreshDispatchCount();
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') refreshDispatchCount();
+    }, BOARD_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [canViewDispatch, refreshDispatchCount]);
 
   // Badge for proofs of payment waiting for review (update G.1): read from the stats call every
   // 30 s while the tab is visible, and again as soon as the console is shown or focused.
@@ -257,6 +278,7 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
       onSearchChange={setGlobalSearch}
       newMessagesCount={newMessagesCount}
       newProofsCount={newProofsCount}
+      dispatchAttentionCount={dispatchAttention}
     >
       {/* Toast Alert */}
       {toastMessage && (
@@ -327,7 +349,12 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
           <PaymentsView searchQuery={globalSearch} onOpenShipmentDetail={handleOpenShipmentDetail} onProofsChanged={refreshProofsCount} />
         )}
 
-        {/* DELIVERY: TARIFFS AND COURIERS (G.2) */}
+        {/* DELIVERY: DISPATCH BOARD (G.5), TARIFFS AND COURIERS (G.2) */}
+        {currentView === 'dispatch' && (
+          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+            <DispatchBoardView searchQuery={globalSearch} onBoardChanged={refreshDispatchCount} onOpenTracking={handleOpenShipmentDetail} />
+          </Suspense>
+        )}
         {currentView === 'tariffs' && (
           <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
             <TariffsView />
