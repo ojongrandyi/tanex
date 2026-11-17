@@ -197,6 +197,7 @@ audit entry. Local and intercity jobs never use the automatic time-based progres
 | **G. Dispatch & local delivery** | Zones/tariffs, couriers, jobs, courier app, dispatch board, live tracking, cash, WhatsApp/email | B, D, E |
 | **H. The Journey** | Whole-homepage 3D scroll story with the TanEx bike, route rail, posters, within budget | E (journey layout), models from the 3D artist (#117) |
 | **I. Admin console** | Admin reskin on the new tokens, admin EN/FR | B, C |
+| **M. Shop / Marketplace** | TanEx products, square pictures, review by the admin, cart and orders without online payment, orders to info@ and the console, delivery through dispatch (SHOP_SPEC) | B, D, E, F, G |
 | **J. QA, security & launch** | Tests, audits, secrets, deploy to tanexsarl.com, backups | all |
 
 Each task: read the affected files first → smallest change that does the job → `npm run build` (0 TS errors) and
@@ -217,6 +218,7 @@ shipment creation, documents/PDFs, quote flow, payments, data persistence.
 | `docs/IAM_RBAC_SPEC.md` | Accounts, roles, permissions, sessions, audit, migration. |
 | `docs/DISPATCH_SPEC.md` | Couriers, zones and rates, jobs, courier app, dispatch board, live tracking, cash. |
 | `docs/BLOG_SPEC.md` | Blog data, studio, public pages, SEO. |
+| `docs/SHOP_SPEC.md` | Shop / Marketplace: products, square pictures, review, stock, cart, orders, emails, dispatch link. |
 | `docs/I18N_SPEC.md` | Languages, routing, URL scheme, meta injection, formatting. |
 | `docs/NOTIFICATIONS_SPEC.md` | Email outbox, WhatsApp click-to-chat, templates. |
 | `docs/MOTION_3D_SPEC.md` | The Journey: Stage, chapters, route rail, models, budgets, fallbacks. |

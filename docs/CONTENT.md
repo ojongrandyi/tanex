@@ -881,6 +881,45 @@ The text below is rendered from `src/data/legalDocs.ts` (English and French, CON
 
 Still **[confirm]** (shown as written): the dimensional-weight divisor 5000 (Shipping Terms 4) and the 7-day claims window (Shipping Terms 9, same as Help §8.2).
 
+### 13.2 Returns & Refunds (shop; added 2026-11-17, **approved by the owner 2026-11-17 (#178); lawyer review still required (#11)**)
+Sixth Legal tab, id `returns` (SHOP_SPEC §18). Tab and footer label `Returns & Refunds`; page title `Returns and refunds`.
+Published with the shop (M.8). The 48-hour, 7-day and refund values and the list of items that cannot be returned are
+approved company policy (owner 2026-11-17). Contact address: {{EMAIL}} (owner 2026-11-17, not a separate sales address).
+
+**Returns & Refunds**
+1. *About this policy.*
+   This policy covers products you buy from the {{COMPANY}} shop on {{DOMAIN}}. It does not cover the deliveries and shipments you book with us; those follow our Shipping Terms. Nothing in this policy limits the rights you have under the consumer protection law that applies to you.
+2. *Check your order when it arrives.*
+   Please check your items when you receive them, in front of the courier if you can. If anything is missing, damaged or not what you ordered, tell the courier and contact us within **48 hours** of delivery or pickup, with your order number and photos of the problem.
+3. *Wrong, damaged or faulty items.*
+   If we sent the wrong item, or it arrived damaged or faulty, we will put it right at no cost to you. We collect the item free of charge in {{LOCAL_CITIES}} and arrange its return from other cities at our expense. You then choose a replacement (if we have one in stock) or a full refund of the item and of the delivery fee you paid for it.
+4. *If you change your mind.*
+   You can return an item within **7 days** of receiving it if it is unused, complete, and in its original packaging with all labels and accessories. Bring it to one of our offices, or we can collect it for our usual delivery fee. We refund the price you paid for the item; the original delivery fee is not refunded.
+5. *Items we cannot take back.*
+   Unless they are wrong, damaged or faulty, we cannot take back:
+   - items that have been used, worn, washed or assembled;
+   - cosmetics, personal care and hygiene products once their seal or packaging has been opened;
+   - food and other perishable goods;
+   - items made, cut or changed to your request;
+   - items marked "Final sale" on their product page.
+6. *How to return an item.*
+   Contact us before sending anything back: write to {{EMAIL}}, or call or WhatsApp {{PHONE}} or {{PHONE_2}}. Give your order number, the product ID of each item (it starts with TX-PRD and is shown in your order confirmation), the reason, and photos if the item is damaged. We will confirm whether the item can be returned and arrange a collection or a drop-off at our office.
+7. *When we receive your return.*
+   We check every returned item when it reaches us. If it meets the conditions above, we start your refund or send the replacement. If it does not, we tell you why and arrange to give the item back to you.
+8. *Refunds.*
+   We refund within **7 days** of receiving and checking the item, using the way you paid: MTN MoMo or Orange Money to the number you paid from, or cash at our office if you paid in cash. We send you the refund reference. We never ask for your PIN or any password to make a refund.
+9. *Exchanges.*
+   To swap an item for another product or size, tell us when you contact us. If the new item is in stock we exchange it directly and you pay or receive the price difference; otherwise we refund the returned item and you can place a new order.
+10. *Cancelling an order.*
+    You can cancel free of charge at any time before your order leaves our office. Call, WhatsApp or email us with your order number. If you have already paid, we refund you in full as in section 8. If you refuse a delivery at your door for a reason not covered by section 3, we may charge the delivery fee.
+11. *Contact.*
+    Questions about a return or a refund: {{EMAIL}} · {{PHONE}} · {{PHONE_2}}. {{LEGAL_NAME}}, {{HQ_ADDRESS}}.
+
+*Owner and lawyer notes (not shown on the site):* the Cameroon consumer protection framework law (Law No. 2011/012
+of 6 May 2011, **lawyer to confirm** the reference and whether it requires a longer return or warranty period for
+some goods) may be named in section 1 after legal review. Privacy Policy and Cookie Policy additions for the shop
+(order data, `tx_cart`) are listed in SHOP_SPEC §8 and §17.
+
 ---
 
 ## 14. Notification templates (NOTIFICATIONS_SPEC §4)

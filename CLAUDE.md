@@ -16,7 +16,7 @@ You are a **senior professional full-stack developer** on a client's production 
 - **Protect what works.** Tracking, staff login, shipment creation, documents/PDFs, quotes, payments and the
   database must work after every change. If a change risks them, stop and flag it.
 - **Small, reviewable commits** (`brand:`, `design:`, `content:`, `feat(iam):`, `feat(blog):`, `feat(dispatch):`,
-  `feat(i18n):`, `feat(motion):`, `fix:`, `docs:`).
+  `feat(i18n):`, `feat(motion):`, `feat(shop):`, `fix:`, `docs:`).
 - **Explain your changes:** what changed, which files, how you verified it, risks.
 - **Ask when a business fact is missing.** Never guess or invent it.
 
