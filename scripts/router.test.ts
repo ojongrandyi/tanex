@@ -61,7 +61,7 @@ test('matchPath: canonical forms, trailing slashes and unknown paths', () => {
   assert.equal(matchPath('/index.html')?.canonical, '/');
   assert.equal(matchPath('/track/TX7K2M9P/')?.canonical, '/track/TX7K2M9P');
   assert.equal(matchPath('/fr/suivi/TX7K2M9P')?.id, 'track');
-  for (const p of ['/nope', '/track/a/b', '/admin', '/private-user/', '/Services', '/track/%E0%A4%A', '/track/<x>', '/blog/a/b', '/blog/category/a/b', '/local-delivery', '/fr/livraison-locale']) {
+  for (const p of ['/nope', '/track/a/b', '/admin', '/private-user/', '/Services', '/track/%E0%A4%A', '/track/<x>', '/blog/a/b', '/blog/category/a/b', '/local-delivery/x', '/fr/livraison-locale/x']) {
     assert.equal(matchPath(p), null, p);
   }
 });
@@ -139,7 +139,7 @@ test('server: non-canonical spellings redirect, query kept', async () => {
 });
 
 test('server: unknown and not-yet-live paths are 404; non-GET passes through', async () => {
-  for (const p of ['/nope', '/track/a/b', '/blog/hello/x', '/local-delivery', '/admin', '/Services']) {
+  for (const p of ['/nope', '/track/a/b', '/blog/hello/x', '/local-delivery/x', '/admin', '/Services']) {
     const res = await fetch(base + p, { redirect: 'manual' });
     assert.equal(res.status, 404, p);
   }

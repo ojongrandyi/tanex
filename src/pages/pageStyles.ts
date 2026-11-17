@@ -15,6 +15,7 @@ import './PublicQuoteResultPage.css';
 import './ServicesPage.css';
 import './QuotePage.css';
 import './ShipPage.css';
+import './LocalDeliveryPage.css';
 import '../components/DocumentBrand.css';
 import './AboutPage.css';
 import './ContactPage.css';

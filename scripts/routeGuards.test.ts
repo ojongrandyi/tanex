@@ -88,7 +88,8 @@ const MOUNTS: Record<string, string> = {
   tariffsRouter: '/api/tariffs',
   couriersRouter: '/api/couriers',
   dispatchRouter: '/api/dispatch',
-  courierRouter: '/api/courier'
+  courierRouter: '/api/courier',
+  localDeliveryRouter: '/api/local-delivery'
 };
 
 // Open to visitors on purpose (IAM_RBAC_SPEC §6–§7).
@@ -118,7 +119,12 @@ const PUBLIC = new Set([
   // Staff profile photos (blog authors; F.2).
   'GET /media/avatars/:file',
   // Active delivery cities and areas for the booking form (DISPATCH_SPEC §11; G.2).
-  'GET /api/tariffs/areas'
+  'GET /api/tariffs/areas',
+  // Public local-delivery booking and price look-up, rate-limited (DISPATCH_SPEC §8, §11; G.6).
+  'POST /api/local-delivery/quote',
+  'POST /api/local-delivery/',
+  // The assigned courier's photo on the track page, only with the courier's consent (G.7, #161).
+  'GET /api/track/:trackingNumber/courier-photo'
 ]);
 // Signed-in only (no permission key): the user's own account.
 const SESSION_ONLY = new Set([

@@ -22,6 +22,11 @@ export function quoteUrl(id: string): string {
   return `${appUrl()}${pagePath('quote-result', id)}`;
 }
 
+/** Public tracking page of a shipment, in the customer's language (`/track/:id`, `/fr/suivi/:id`). */
+export function trackUrl(id: string, lang: 'en' | 'fr' = 'en'): string {
+  return `${appUrl()}${pagePath('track-result', id, lang)}`;
+}
+
 /** The staff console (links in staff alerts). */
 export function consoleUrl(): string {
   return `${appUrl()}${ADMIN_PATH}`;

@@ -58,6 +58,8 @@ import './TrackResultPage.css';
 
 // The payment section is only downloaded for shipments that have a payment request.
 const PaymentSection = lazy(() => import('../components/PaymentSection').then((m) => ({ default: m.PaymentSection })));
+// Local and intercity deliveries have their own view (stepper, courier, live map; G.7), in its own chunk.
+const LocalTrackView = lazy(() => import('./localDelivery/LocalTrackView').then((m) => ({ default: m.LocalTrackView })));
 
 interface TrackResultPageProps {
   shipment: Shipment;
@@ -65,7 +67,7 @@ interface TrackResultPageProps {
   onNavigate: (page: string) => void;
 }
 
-export const TrackResultPage: React.FC<TrackResultPageProps> = ({
+const InternationalTrackResult: React.FC<TrackResultPageProps> = ({
   shipment,
   onTrackAnother,
   onNavigate,
@@ -1303,4 +1305,24 @@ export const TrackResultPage: React.FC<TrackResultPageProps> = ({
       />
     </div>
   );
+};
+
+/** Service names stored on local and intercity shipments (server/dispatch/jobs.ts createJobShipment). */
+const LOCAL_SERVICES = ['Local Delivery', 'Intercity Delivery'];
+
+/**
+ * Track result: a local or intercity delivery (DISPATCH_SPEC §8) gets the live delivery view; every
+ * other shipment keeps the worldwide view above.
+ */
+export const TrackResultPage: React.FC<TrackResultPageProps> = (props) => {
+  const s = props.shipment;
+  const local = !!s.localDelivery || s.serviceScope === 'LOCAL' || s.serviceScope === 'INTERCITY' || LOCAL_SERVICES.includes(s.service);
+  if (local) {
+    return (
+      <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+        <LocalTrackView shipment={s} onNavigate={props.onNavigate} />
+      </Suspense>
+    );
+  }
+  return <InternationalTrackResult {...props} />;
 };

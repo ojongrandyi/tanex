@@ -521,6 +521,7 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 - **Carte :** `Position en direct` · `Mise à jour il y a {n} secondes` · `En attente de la prochaine position du livreur`
 - **Arrivée :** `Arrivée dans environ {n} min` · `Estimation basée sur la position actuelle du livreur`
 - **Livré :** `Livré à {heure}, reçu par {nom masqué}.` · `Preuve photo enregistrée` · **Partager :** `Partager le suivi sur WhatsApp`
+- *Ajouté avec G.7 (17/11/2026, **à confirmer**, #171) :* `Livraison locale` / `Livraison entre villes` · `Retour au suivi` · `Avancement de la livraison` · `Notre équipe vous contactera pour convenir d'un nouveau créneau.` · `Retournée à l'expéditeur` · `Livraison annulée` · `Photo de {name}` · `En attente de la prochaine position du chauffeur` · `Estimation basée sur la position actuelle du chauffeur` · `Arrivée dans environ {h} h {m} min` · `Itinéraire` · `Carte de l'itinéraire de la livraison` · `Zone d'enlèvement` / `Zone de livraison` / `Livreur` · `De` / `À` · `Besoin d'aide ?` · `Notre équipe est là pour vous aider.` · `Contacter le support`
 
 ## 7.5 Réserver une livraison à moto
 - **H1 :** `Réserver une livraison à moto` · **Texte :** `Dans Buea, Limbe ou Douala. Un livreur TanEx récupère le colis à la porte et le remet au destinataire, et vous suivez la course en direct.`
@@ -529,6 +530,7 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 - **Prix :** `Prix de la livraison : {montant}` · sans tarif : `Nous vous confirmerons le prix par téléphone ou WhatsApp avant l'enlèvement.`
 - **Bouton :** `Réserver la livraison` · `Réservation…`
 - **Succès :** **Livraison réservée.** `Votre numéro de suivi est {ID}.` · `Suivre cette livraison` · `Envoyer le suivi au destinataire sur WhatsApp` · `Réserver une autre livraison`
+- *Ajouté avec G.6 (17/11/2026, **à confirmer**, #171, relecture native #108) :* `Livraison à moto` · `Choisissez une ville` · `Choisissez un quartier` · `Mon quartier n'est pas dans la liste` · `(facultatif)` · `Laissez vide pour un enlèvement dès que possible.` · `Ajouter un repère` · `Retirer le repère` · `Touchez la carte à l'endroit où le livreur doit aller. Vous pouvez déplacer le repère.` · `Repère ajouté.` · `Carte du point d'enlèvement` / `Carte du point de livraison` · `Vérification du prix…` · `Choisissez la ville, les quartiers et la taille du colis pour voir le prix.` · gros colis : `Les gros colis voyagent en fourgonnette. Nous vous confirmerons le prix avant l'enlèvement.` · `La réservation en ligne n'est pas encore ouverte. Appelez-nous ou écrivez-nous sur WhatsApp et nous réserverons votre livraison.` · `Nous n'avons pas pu charger les zones de livraison. Vérifiez votre connexion et réessayez.` · `Réessayer` · erreurs : `Choisissez une ville.` · `Choisissez le quartier ou décrivez un point de repère.` · `Saisissez le nom du contact.` · `Saisissez un numéro de téléphone valide.` · `Saisissez le nom du destinataire.` · `Saisissez le numéro de téléphone du destinataire.` · `Choisissez la taille du colis.` · `Saisissez le montant à encaisser.` · `Choisissez une heure entre maintenant et 30 jours d'ici.` · `Saisissez une adresse e-mail valide, ou laissez le champ vide.` · `Vérifiez les champs signalés.` · `Nous n'avons pas pu réserver votre livraison. Vérifiez votre connexion et réessayez.` (texte complet : `src/i18n/fr/localDelivery.ts`)
 
 ## 10.3 Application livreur
 - `Courses du jour` · `En service` / `Hors service` · `Aucune course pour l'instant. Les nouvelles courses s'affichent ici.` · `Nouvelle course assignée`
@@ -559,6 +561,8 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 | `contact.staff_alert` (ajouté après B.6, à confirmer) | Objet `Nouveau message de {name} ({ref})` · `{name} a envoyé un message depuis le site (sujet : {subject}). Lisez-le et répondez dans la console : {url}` |
 | `payment.proof_received` (ajouté après B.6, à confirmer) | Objet `Preuve de paiement reçue pour {id}` · `Un client a envoyé une preuve de paiement pour {id}. Vérifiez-la dans la console, rubrique Paiements : {url}` |
 | `mail.test` (ajouté avec B.6, à confirmer) | Objet `E-mail de test TanEx` · `Ceci est un e-mail de test envoyé depuis la console TanEx. Si vous pouvez le lire, l'envoi d'e-mails fonctionne.` |
+| `local.booked` (e-mail, ajouté avec G.6, à confirmer) | Objet `Nous avons bien reçu votre réservation de livraison {id}` · `Merci, {name}. Votre numéro de suivi est {id}. Suivez votre livraison ici : {link}` |
+| `local.share_tracking` (WhatsApp, page de suivi, ajouté avec G.7, à confirmer) | `Suivez cette livraison TanEx en direct : {link}` |
 
 ## 15. Pages du blog (ajouté le 2026-11-12 avec F.2, **à confirmer, relecture native en attente**)
 Traduction de CONTENT §15, dans `src/i18n/fr/blog.ts` (`index`, `article`).

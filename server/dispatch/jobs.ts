@@ -426,7 +426,7 @@ export function jobOut(conn: DatabaseSync, row: JobRow, options: JobOutOptions) 
  * the job's own places, not these columns).
  */
 export function createJobShipment(conn: DatabaseSync, scope: 'LOCAL' | 'INTERCITY', pickup: Place, dropoff: Place,
-  input: { itemDescription: string | null; weightKg: number | null; createdBy: string | null }): string {
+  input: { itemDescription: string | null; weightKg: number | null; createdBy: string | null; senderEmail?: string | null }): string {
   const tracking = generateUniqueTrackingId();
   const pc = loadCity(conn, pickup.cityId)!;
   const dc = loadCity(conn, dropoff.cityId)!;
@@ -459,7 +459,8 @@ export function createJobShipment(conn: DatabaseSync, scope: 'LOCAL' | 'INTERCIT
     input.itemDescription ?? '',
     weightLbs,
     pc.name, o.lat, o.lng, dc.name, d.lat, d.lng, pc.name, o.lat, o.lng, pc.name,
-    JSON.stringify(party(pickup, pc)), JSON.stringify(party(dropoff, dc)),
+    // The sender's email (public booking form, optional) is kept with the sender, for the receipt.
+    JSON.stringify({ ...party(pickup, pc), ...(input.senderEmail ? { email: input.senderEmail } : {}) }), JSON.stringify(party(dropoff, dc)),
     now, now, input.createdBy, scope,
   );
   conn.prepare(`

@@ -34,7 +34,7 @@ export interface RouteDef {
   paramRequired?: boolean;
   /**
    * false while the page doesn't exist yet: the paths are reserved (for the language switch
-   * and the server) but answer 404. Local delivery booking goes live with G.6.
+   * and the server) but answer 404. (Local delivery booking went live with G.6.)
    */
   live?: boolean;
   /**
@@ -48,7 +48,7 @@ export interface RouteDef {
 export const ROUTES: readonly RouteDef[] = [
   { id: 'home', en: '/', fr: '/fr/' },
   { id: 'services', en: '/services', fr: '/fr/services', param: true },
-  { id: 'local-delivery', en: '/local-delivery', fr: '/fr/livraison-locale', live: false },
+  { id: 'local-delivery', en: '/local-delivery', fr: '/fr/livraison-locale' },
   { id: 'track', en: '/track', fr: '/fr/suivi', param: true },
   { id: 'quote', en: '/quote', fr: '/fr/devis', param: true },
   { id: 'ship', en: '/ship', fr: '/fr/expedier' },

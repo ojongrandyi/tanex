@@ -13,6 +13,8 @@ import contactStaffAlertEn from './contact.staff_alert.en.js';
 import contactStaffAlertFr from './contact.staff_alert.fr.js';
 import proofReceivedEn from './payment.proof_received.en.js';
 import proofReceivedFr from './payment.proof_received.fr.js';
+import localBookedEn from './local.booked.en.js';
+import localBookedFr from './local.booked.fr.js';
 
 export interface TemplateVars {
   'auth.reset': { url: string };
@@ -21,6 +23,7 @@ export interface TemplateVars {
   'mail.test': Record<string, never>;
   'contact.staff_alert': { name: string; ref: string; subject: string; url: string };
   'payment.proof_received': { id: string; url: string };
+  'local.booked': { name: string; id: string; link: string };
 }
 
 export type TemplateKey = keyof TemplateVars;
@@ -44,7 +47,8 @@ export const TEMPLATES: { [K in TemplateKey]: TemplateEntry<K> } = {
   'contact.received': { render: { en: contactReceivedEn, fr: contactReceivedFr }, sensitive: false, customer: true },
   'mail.test': { render: { en: mailTestEn, fr: mailTestFr }, sensitive: false, customer: false },
   'contact.staff_alert': { render: { en: contactStaffAlertEn, fr: contactStaffAlertFr }, sensitive: false, customer: false, staffAlert: true },
-  'payment.proof_received': { render: { en: proofReceivedEn, fr: proofReceivedFr }, sensitive: false, customer: false, staffAlert: true }
+  'payment.proof_received': { render: { en: proofReceivedEn, fr: proofReceivedFr }, sensitive: false, customer: false, staffAlert: true },
+  'local.booked': { render: { en: localBookedEn, fr: localBookedFr }, sensitive: false, customer: true }
 };
 
 export function renderTemplate<K extends TemplateKey>(key: K, locale: MailLocale, vars: TemplateVars[K]): RenderedEmail {

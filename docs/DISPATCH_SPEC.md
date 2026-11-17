@@ -222,6 +222,7 @@ sent automatically when an email address is known.
 |---|---|
 | `POST /api/local-delivery/quote` · `POST /api/local-delivery` | public (rate-limited) |
 | `GET /api/track/:id` | public; adds `localDelivery` block (stepper, courier first name, last position if fresh, ETA) |
+| `GET /api/track/:id/courier-photo` (added in G.7) | public; the assigned courier's photo only with consent and only from assignment to on the way (checked per request) |
 | `GET/POST/PATCH /api/dispatch/jobs`, `POST /api/dispatch/jobs/:id/assign` (assign or reassign), `/confirm`, `/price`, `/cancel`, `/return`, `/delivery-code-override` | `dispatch.view` / `dispatch.manage` |
 | `GET /api/dispatch/jobs/:id/pod/photo` · `/signature` (private POD files) | `dispatch.view`/`dispatch.manage`/`cash.view`/`cash.confirm` (the courier: `GET /api/courier/jobs/:id/pod/:kind`) |
 | `GET /api/dispatch/board` (jobs + courier positions + cities/areas with pins, one call) | `dispatch.view` |
@@ -232,6 +233,7 @@ sent automatically when an email address is known.
 | `GET /api/courier/jobs`, `POST /api/courier/jobs/:id/action` (idempotency key), `POST /api/courier/location`, `POST /api/courier/pod/:id` (multipart) | `courier.app` + own job |
 | `GET/PATCH /api/courier/me` (own profile; `isOnDuty`; `showPhotoPublicly: false` only, consent is recorded by staff, #161), `GET /api/courier/me/photo`, `GET /api/courier/cash` (own balance by currency + last 30 days), `POST /api/courier/cash/handover` (`method` CASH / MTN_MOMO / ORANGE_MONEY + `momoReference` for mobile money; idempotency key; PENDING until Finance confirms in G.8; the cash summary includes the 7-day `dueBy` / `overdue`) | `courier.app`, own data only (added in G.4) |
 
+Built in G.6–G.7: `server/routes/localDelivery.ts` (quote: 120 requests / 15 min; booking: the shared public-write limit; only the form's fields are read, the job starts `REQUESTED`), `server/dispatch/publicTracking.ts` and `src/shared/localTracking.ts` (what the public block may show; tests in `scripts/localDelivery.test.ts`).
 Built in G.3 (`server/routes/dispatch.ts`, `server/routes/courier.ts`, `server/dispatch/jobs.ts`); request bodies are
 documented above each route. Error answers carry a `code` (e.g. `INVALID_TRANSITION`, `NOT_YOUR_JOB`,
 `POD_REQUIRED`, `PRICE_REQUIRED`, `DELIVERY_CODE_WRONG` with `details.triesLeft`, `DELIVERY_CODE_LOCKED` (423),

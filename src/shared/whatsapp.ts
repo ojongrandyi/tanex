@@ -31,6 +31,11 @@ export const WHATSAPP_TEMPLATES = {
     en: `Delivered: {id} was received by {masked} at {time}. Thank you for choosing ${B}.`,
     fr: `Livré : {id} a été reçu par {masked} à {time}. Merci d'avoir choisi ${B}.`
   },
+  // Track page "Share tracking on WhatsApp" (G.7, owner to confirm): no number, the person picks the contact.
+  'local.share_tracking': {
+    en: `Follow this ${B} delivery live: {link}`,
+    fr: `Suivez cette livraison ${B} en direct : {link}`
+  },
   'local.failed': {
     en: "We couldn't deliver {id}: {reason}. Our team will contact you to arrange a new time.",
     fr: "Nous n'avons pas pu livrer {id} : {reason}. Notre équipe vous contactera pour convenir d'un nouveau créneau."
@@ -83,4 +88,9 @@ export function buildWhatsAppLink(
   const digits = whatsAppDigits(phone);
   if (!digits) return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(renderWhatsAppMessage(templateKey, vars, locale))}`;
+}
+
+/** `https://wa.me/?text=<message>`: WhatsApp opens with the message and the person chooses who gets it. */
+export function buildWhatsAppShareLink(templateKey: WhatsAppTemplateKey, vars: TemplateVars, locale: WhatsAppLocale = 'en'): string {
+  return `https://wa.me/?text=${encodeURIComponent(renderWhatsAppMessage(templateKey, vars, locale))}`;
 }

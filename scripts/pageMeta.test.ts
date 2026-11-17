@@ -231,7 +231,8 @@ test('sitemap: every live page in both languages with xhtml:link alternates; no 
     assert.match(block, /hreflang="x-default"/);
   }
   assert.ok(!xml.includes(ADMIN_PATH.replace(/\/+$/, '')), 'console never listed');
-  assert.doesNotMatch(xml, /\/blog|\/local-delivery|livraison-locale/, 'pages not live yet are not listed; the blog comes from the database (extras)');
+  assert.doesNotMatch(xml, /\/blog/, 'the blog comes from the database (extras)');
+  assert.ok(locs.includes(`${SITE_URL}/local-delivery`) && xml.includes('/fr/livraison-locale'), 'the local-delivery booking page is listed (G.6)');
   assert.doesNotMatch(xml, /\/track\/|\/quote\/|\/services\//, 'no results or tiers');
   // Every listed path is a page the server answers with 200 at its canonical spelling.
   for (const loc of locs) {

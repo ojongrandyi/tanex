@@ -1,5 +1,6 @@
 import type { PublicPayment } from '../shared/paymentRequest.js';
 import type { TransportMode } from '../shared/transportMode.js';
+import type { PublicLocalDelivery } from '../shared/localTracking.js';
 
 export type ShipmentStatus =
   | 'CREATED'
@@ -274,6 +275,10 @@ export interface Shipment {
   images?: PublicShipmentImage[];
   /** The shipment's payment request as the customer sees it (track response only; update D.4). */
   payment?: PublicPayment | null;
+  /** LOCAL or INTERCITY for in-town and city-to-city deliveries (track response only; G.7). */
+  serviceScope?: string;
+  /** The delivery's public block for LOCAL and INTERCITY shipments (track response only; G.7). */
+  localDelivery?: PublicLocalDelivery | null;
   service: 'Express' | 'Standard' | 'Priority' | 'Freight LTL' | string;
   /** Main-leg transport mode; the server infers it for records created before it was stored. */
   transportMode?: TransportMode;

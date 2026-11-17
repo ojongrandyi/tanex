@@ -53,6 +53,7 @@ const PublicQuoteResultPage = lazy(() => import('./pages/PublicQuoteResultPage')
 const ServicesPage = lazy(() => import('./pages/ServicesPage').then((m) => ({ default: m.ServicesPage })));
 const QuotePage = lazy(() => import('./pages/QuotePage').then((m) => ({ default: m.QuotePage })));
 const ShipPage = lazy(() => import('./pages/ShipPage').then((m) => ({ default: m.ShipPage })));
+const LocalDeliveryPage = lazy(() => import('./pages/LocalDeliveryPage').then((m) => ({ default: m.LocalDeliveryPage })));
 const AboutPage = lazy(() => import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then((m) => ({ default: m.ContactPage })));
 const HelpPage = lazy(() => import('./pages/HelpPage').then((m) => ({ default: m.HelpPage })));
@@ -486,6 +487,10 @@ function MainAppContent() {
 
         {currentPage === 'ship' && (
           <ShipPage onTrack={(tn) => handleTrackShipment(tn)} onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'local-delivery' && (
+          <LocalDeliveryPage onNavigate={handleNavigate} />
         )}
 
         {currentPage === 'about' && (

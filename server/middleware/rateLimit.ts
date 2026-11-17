@@ -35,3 +35,14 @@ export const publicLookupLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, code: 'RATE_LIMITED', error: 'Too many requests. Please try again in a few minutes.' }
 });
+
+// Price look-ups from the local-delivery booking form (POST /api/local-delivery/quote, G.6). The
+// form asks again when the city, areas, size or express change, so the ceiling is higher than for
+// bookings; it still stops a script from reading the whole rate sheet quickly.
+export const localQuoteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, code: 'RATE_LIMITED', error: 'Too many requests. Please try again in a few minutes.' }
+});

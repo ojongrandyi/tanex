@@ -465,6 +465,7 @@ Shown only when the shipment has a payment request. Hidden completely when the r
 - **ETA:** `Arriving in about {n} min` · `Approximate, based on the rider's current position`
 - **Delivered:** `Delivered at {time}, received by {masked name}.` · `Photo proof recorded`
 - **Share:** `Share tracking on WhatsApp`
+- *Added with G.7 (2026-11-17, **owner to confirm**, #171):* eyebrow `Local delivery` / `Intercity delivery` · `Back to tracking` · stepper name `Delivery progress` · failed attempt adds `Our team will contact you to arrange a new time.` · banners `Returned to sender` · `Delivery cancelled` · photo alt `Photo of {name}` · driver versions `Waiting for the driver's next location update` · `Approximate, based on the driver's current position` · long trips `Arriving in about {h} h {m} min` · map `Route` (before pickup and after delivery) · `Map of the delivery route` · markers `Pickup area` / `Drop-off area` / `Courier` · `From` / `To` · help card `Need help?` · `Our team is here to help.` · `Contact Support`.
 
 ### 6.10 Payment methods added for TanEx (extends §6.7)
 | Method name | Fields shown to the customer (each with Copy) | Extra |
@@ -547,6 +548,7 @@ Reused where possible: service names and summaries (§3.1), add-ons (§3.4), sta
 - **Submit:** `Book delivery` · while sending `Booking…`
 - **Success:** **Delivery booked.** `Your tracking ID is {ID}.` · buttons `Track this delivery` · `Send tracking to the recipient on WhatsApp` · `Book another delivery`
 - **Large parcels:** `Large items travel by van. We'll confirm the price before pickup.`
+- *Added with G.6 (2026-11-17, **owner to confirm**, #171):* eyebrow `Bike delivery` · `Choose a city` · `Choose an area` · `My area isn't listed` · `(optional)` · time hint `Leave empty for as soon as possible.` · pin `Add a pin` · `Remove the pin` · `Tap the map where the rider should go. You can drag the pin.` · `Pin added.` · map names `Map for the pickup point` / `Map for the drop-off point` · price `Checking the price…` · `Choose the city, the areas and the parcel size to see the price.` · COD amount label `Amount (FCFA)` · no city open: `Online booking isn't open yet. Call or WhatsApp us and we'll book your delivery.` · `We couldn't load the delivery areas. Check your connection and try again.` · `Try again` · errors `Choose a city.` · `Choose the area or describe a landmark.` · `Enter the contact name.` · `Enter a valid phone number.` · `Enter the recipient's name.` · `Enter the recipient's phone number.` · `Choose the parcel size.` · `Enter the amount to collect.` · `Choose a time from now up to 30 days ahead.` · `Enter a valid email address, or leave it empty.` · `Please check the highlighted fields.` · `We couldn't book your delivery. Check your connection and try again.` · success also repeats the price line (`Delivery price: {amount}` or the "we'll confirm" line).
 
 ---
 
@@ -893,6 +895,8 @@ Plain text, short, signed `— TanEx`. `{link}` = the public tracking URL in the
 | `contact.staff_alert` (email to `MAIL_STAFF_ALERTS_TO`, *added after B.6, owner to confirm*) | Subject `New message from {name} ({ref})` · body `{name} sent a message through the website (topic: {subject}). Read and answer it in the console: {url}` (the visitor's message itself is not copied into the email) |
 | `payment.proof_received` (email to `MAIL_STAFF_ALERTS_TO`, *added after B.6, owner to confirm*) | Subject `Proof of payment received for {id}` · body `A customer uploaded a proof of payment for {id}. Check it in the console under Payments: {url}` |
 | `mail.test` (email, *added with B.6, owner to confirm*) | Subject `TanEx test email` · body `This is a test email from the TanEx Operations Console. If you can read it, email sending works.` |
+| `local.booked` (email, *added with G.6, owner to confirm*) | Subject `We've received your delivery booking {id}` · body `Thank you, {name}. Your tracking ID is {id}. Follow your delivery here: {link}` |
+| `local.share_tracking` (WhatsApp, track page, *added with G.7, owner to confirm*) | `Follow this TanEx delivery live: {link}` (no number: the person picks the contact) |
 
 ---
 

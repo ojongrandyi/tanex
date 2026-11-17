@@ -11,6 +11,9 @@ import { publicPaymentView } from '../../src/shared/paymentRequest.js';
 import { maskEmail, maskName, maskPhone } from '../../src/shared/masking.js';
 import { serverError } from '../errors.js';
 import { isEventTitleKey, parseEventTitleVars } from '../../src/shared/eventTitles.js';
+import path from 'path';
+import { IMAGE_CONTENT_TYPES, resolveUploadPath } from '../uploads.js';
+import { publicCourierPhoto, publicLocalDelivery, shipmentJob } from '../dispatch/publicTracking.js';
 
 export const trackRouter = Router();
 
@@ -221,8 +224,67 @@ trackRouter.get('/:trackingNumber', (req: Request, res: Response) => {
       ]
     };
 
+    // Local and intercity deliveries (DISPATCH_SPEC §8, tracker G.7): the delivery block, and the
+    // shipment fields reduced to what the public page may show. No phone numbers, emails,
+    // landmarks or customer map pins, whatever the masking setting; map points are area or city
+    // pins; no paperwork list (those documents belong to worldwide shipments).
+    const scope = String(row.service_scope || '').toUpperCase();
+    if (scope === 'LOCAL' || scope === 'INTERCITY') {
+      const job = shipmentJob(db, row.tracking_number);
+      const local = job ? publicLocalDelivery(db, job) : null;
+      const party = (json: string, city: string) => {
+        let p: { name?: string } = {};
+        try { p = JSON.parse(json || '{}'); } catch { /* keep empty */ }
+        return { name: maskName(p.name), city, state: '' };
+      };
+      const at = (p: { lat: number; lng: number } | null | undefined, city: string) =>
+        ({ city, state: '', lat: p?.lat ?? 0, lng: p?.lng ?? 0 });
+      const origin = at(local?.route.pickup, row.origin_city);
+      const destination = at(local?.route.dropoff, row.destination_city);
+      Object.assign(publicShipment, {
+        serviceScope: scope,
+        localDelivery: local,
+        sender: party(row.sender_json, row.origin_city),
+        recipient: party(row.recipient_json, row.destination_city),
+        origin,
+        destination,
+        currentLocation: { ...(local && local.step >= 3 ? destination : origin), facility: '' },
+        // Always masked here, whatever the masking setting.
+        statusText: maskSignerName(row.status_text),
+        references: undefined,
+        documents: [],
+      });
+      res.set('Cache-Control', 'no-store');
+    }
+
     res.json({ success: true, data: publicShipment });
   } catch (err: any) {
+    serverError(res, err);
+  }
+});
+
+// GET /api/track/:trackingNumber/courier-photo: the assigned courier's photo, only when the courier
+// agreed to show it (tracker #161) and only while the job is theirs (assigned to on the way).
+trackRouter.get('/:trackingNumber/courier-photo', (req: Request, res: Response) => {
+  const notFound = () => res.status(404).json({ success: false, code: 'NOT_FOUND', error: 'No photo.' });
+  try {
+    const parsed = parseTrackingInput(req.params.trackingNumber as string);
+    if (!parsed) return notFound();
+    const ship = db.prepare('SELECT tracking_number FROM shipments WHERE tracking_number = ? AND deleted_at_ts IS NULL').get(parsed.trackingId);
+    if (!ship) return notFound();
+    const job = shipmentJob(db, parsed.trackingId);
+    const file = job ? publicCourierPhoto(db, job) : null;
+    const filePath = file ? resolveUploadPath('couriers', file) : null;
+    const type = file ? IMAGE_CONTENT_TYPES[path.extname(file).slice(1)] : undefined;
+    if (!file || !filePath || !type) return notFound();
+    res.setHeader('Content-Type', type);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    // Short and private: consent can be withdrawn, and the job moves on.
+    res.setHeader('Cache-Control', 'private, max-age=300');
+    res.sendFile(filePath, (err) => {
+      if (err && !res.headersSent) notFound();
+    });
+  } catch (err) {
     serverError(res, err);
   }
 });
