@@ -206,12 +206,14 @@ paymentsRouter.post('/proofs/:id/approve', requirePermission('payments.manage'),
       throw err;
     }
     // payment.confirmed to the sender when the shipment has their email (NOTIFICATIONS_SPEC §4), in
-    // the language of its delivery job when there is one.
+    // the language of its delivery job, else the one chosen when the shipment was booked (#177).
     const email = shipmentSenderEmail(db, proof.tracking_number);
     if (email) {
       const job = db.prepare("SELECT notify_locale FROM dispatch_jobs WHERE tracking_number = ? ORDER BY created_at_ts DESC LIMIT 1").get(proof.tracking_number) as { notify_locale: string } | undefined;
+      const ship = db.prepare('SELECT notify_locale FROM shipments WHERE tracking_number = ?').get(proof.tracking_number) as { notify_locale: string | null } | undefined;
+      const locale = (job?.notify_locale ?? ship?.notify_locale) === 'fr' ? 'fr' : 'en';
       queueEmail({
-        to: email, template: 'payment.confirmed', locale: job?.notify_locale === 'fr' ? 'fr' : 'en',
+        to: email, template: 'payment.confirmed', locale,
         vars: { id: proof.tracking_number, reason: cleanVar(payment.charge_reason, 120) },
         related: { type: 'shipment', id: proof.tracking_number },
       });

@@ -393,6 +393,9 @@ export function initDatabase() {
   // INTERNATIONAL | LOCAL | INTERCITY (DISPATCH_SPEC §3); NULL = INTERNATIONAL for older rows.
   // LOCAL and INTERCITY shipments move only on courier updates (server/progress.ts skips them).
   try { db.exec(`ALTER TABLE shipments ADD COLUMN service_scope TEXT;`); } catch (e) {}
+  // Language of the customer emails for a shipment booked in the console (en | fr; G.8, #177).
+  // NULL = en for older rows; local/intercity jobs keep their own dispatch_jobs.notify_locale.
+  try { db.exec(`ALTER TABLE shipments ADD COLUMN notify_locale TEXT;`); } catch (e) {}
   // Type-specific details of a generated document as JSON: for a Proof of Delivery (doc_type
   // 'POD', written by the server when a delivery job is delivered) the job id, delivery time,
   // receiver, courier and which proof files exist (server/dispatch/podDocument.ts).

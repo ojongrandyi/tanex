@@ -29,6 +29,9 @@ export const CASH_TEXT = {
   rejectTitle: (ref: string) => `Reject ${ref}`,
   rejectReason: 'Why is it rejected?',
   rejectHint: 'The courier sees the entry as rejected; the reason is kept in the audit log.',
+  chargeCourier: (amount: string) => `Also charge ${amount} to the courier`,
+  chargeHint: 'Only when the courier is responsible, for example the parcel was released without the payment arriving. Records an adjustment linked to this entry. Otherwise nothing is charged.',
+  rejectedCharged: (ref: string, amount: string) => `${ref} rejected; ${amount} charged to the courier.`,
   reasonRequired: 'Give a reason.',
   by: (name: string) => `by ${name}`,
   couriers: {
@@ -71,6 +74,7 @@ export const CASH_TEXT = {
     REASON_REQUIRED: 'Give a reason.',
     INVALID_CASH: 'Check the amount.',
     NOT_FOUND: 'Not found. The list was refreshed.',
+    CHARGE_NOT_ALLOWED: 'Only a mobile money payment recorded by the courier can be charged to them.',
     FORBIDDEN: 'You do not have permission to do this.',
     fallback: 'Something went wrong. Try again.',
   } as Record<string, string>,

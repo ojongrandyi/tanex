@@ -39,7 +39,8 @@ export const cashApi = {
   overview: () => send<CashOverview>('GET', `${C}/overview`),
   entries: (courierUserId: string) => send<CashEntry[]>('GET', `${C}/entries?courier=${encodeURIComponent(courierUserId)}`),
   confirm: (id: string) => send<CashEntry>('POST', `${C}/entries/${encodeURIComponent(id)}/confirm`, {}),
-  reject: (id: string, reason: string) => send<CashEntry>('POST', `${C}/entries/${encodeURIComponent(id)}/reject`, { reason }),
+  reject: (id: string, reason: string, chargeCourier = false) =>
+    send<CashEntry>('POST', `${C}/entries/${encodeURIComponent(id)}/reject`, { reason, ...(chargeCourier ? { chargeCourier: true } : {}) }),
   adjust: (courierUserId: string, amount: number, currency: string, reason: string) =>
     send<CashEntry>('POST', `${C}/adjustments`, { courierUserId, amount, currency, reason }),
   report: (date: string) => send<CashReport>('GET', `${C}/report?date=${encodeURIComponent(date)}`),

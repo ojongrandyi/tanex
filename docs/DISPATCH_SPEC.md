@@ -241,7 +241,7 @@ documented above each route. Error answers carry a `code` (e.g. `INVALID_TRANSIT
 `IDEMPOTENCY_KEY_REUSED`, `NO_ACTIVE_JOB`) for the apps to show in the user's language.
 | `GET/POST /api/cash/*` | `cash.view` / `cash.confirm`; couriers see and record their own |
 | G.8: `GET /api/cash/overview` · `GET /api/cash/entries?courier=&days=` · `GET /api/cash/report?date=YYYY-MM-DD[&format=csv]` | `cash.view` or `cash.confirm` |
-| G.8: `POST /api/cash/entries/:id/confirm` · `/reject { reason }` · `POST /api/cash/adjustments { courierUserId, amount, currency?, reason }` (audited `cash.confirm` / `cash.reject` / `cash.adjust`) | `cash.confirm` |
+| G.8: `POST /api/cash/entries/:id/confirm` · `/reject { reason, chargeCourier? }` (charge only for a mobile money payment the courier recorded, #175) · `POST /api/cash/adjustments { courierUserId, amount, currency?, reason }` (audited `cash.confirm` / `cash.reject` / `cash.adjust`) | `cash.confirm` |
 | G.8: `POST /api/notifications/whatsapp` (`{ jobId, template, to }` or `{ userId, template: 'auth.temp_password' }`) · `POST /api/local-delivery/whatsapp-opened { trackingNumber }` (public, online bookings of the last 24 h) | job: `dispatch.view`/`dispatch.manage` or the job's courier; account: `users.manage`/`couriers.manage` |
 
 ## 12. Tests

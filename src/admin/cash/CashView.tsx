@@ -78,8 +78,11 @@ const EntryTable: React.FC<{
   </div>
 );
 
-const RejectDialog: React.FC<{ entry: CashEntry; onClose: () => void; onDone: (e: CashEntry) => void }> = ({ entry, onClose, onDone }) => {
+const RejectDialog: React.FC<{ entry: CashEntry; onClose: () => void; onDone: (e: CashEntry, charged: boolean) => void }> = ({ entry, onClose, onDone }) => {
   const [reason, setReason] = useState('');
+  // #175: never charged by default; offered only for a mobile money payment the courier recorded.
+  const chargeable = entry.type === 'COLLECTED' && entry.method !== 'CASH';
+  const [charge, setCharge] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submit = async (ev: React.FormEvent) => {
@@ -88,7 +91,7 @@ const RejectDialog: React.FC<{ entry: CashEntry; onClose: () => void; onDone: (e
     setBusy(true);
     setError(null);
     try {
-      onDone(await cashApi.reject(entry.id, reason.trim()));
+      onDone(await cashApi.reject(entry.id, reason.trim(), chargeable && charge), chargeable && charge);
     } catch (err) {
       setError(cashErrorText(err));
       setBusy(false);
@@ -103,6 +106,12 @@ const RejectDialog: React.FC<{ entry: CashEntry; onClose: () => void; onDone: (e
           <textarea rows={2} maxLength={500} required value={reason} onChange={(e) => setReason(e.target.value)} />
           <small>{T.rejectHint}</small>
         </label>
+        {chargeable && (
+          <label className="tx-iam-check">
+            <input type="checkbox" checked={charge} onChange={(e) => setCharge(e.target.checked)} />
+            <span>{T.chargeCourier(money(entry.amount, entry.currency))}<small className="tx-iam-hint">{T.chargeHint}</small></span>
+          </label>
+        )}
         <NoticeLine notice={error ? { kind: 'error', text: error } : null} />
         <div className="tx-iam-dialog-actions">
           <button type="button" className="tx-iam-btn" onClick={onClose}>{T.adjust.cancel}</button>
@@ -404,7 +413,7 @@ export const CashView: React.FC<{ searchQuery?: string; onCashChanged?: () => vo
 
       {rejecting && (
         <RejectDialog entry={rejecting} onClose={() => setRejecting(null)}
-          onDone={(e) => { setRejecting(null); changed(T.rejected(e.ref)); }} />
+          onDone={(e, charged) => { setRejecting(null); changed(charged ? T.rejectedCharged(e.ref, money(e.amount, e.currency)) : T.rejected(e.ref)); }} />
       )}
       {adjusting && (
         <AdjustDialog courier={adjusting} onClose={() => setAdjusting(null)}

@@ -229,6 +229,8 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   const [senderName, setSenderName] = useState('');
   const [senderCompany, setSenderCompany] = useState('');
   const [senderEmail, setSenderEmail] = useState('');
+  // Language of the customer emails for this shipment (booking and payment confirmations, G.8).
+  const [notifyLocale, setNotifyLocale] = useState<'en' | 'fr'>('en');
   const [senderPhone, setSenderPhone] = useState('');
   const [senderAddress, setSenderAddress] = useState('');
   const [senderCountry, setSenderCountry] = useState('');
@@ -1096,6 +1098,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
         lng: destGeo.lng,
         facility: destGeo.facilityName
       } as any,
+      notifyLocale,
       sender: {
         name: senderName.trim() || 'Sender / Shipper',
         company: senderCompany.trim(),
@@ -1686,6 +1689,17 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       onChange={setSenderPhone}
                       defaultCountry={senderCountry || 'US'}
                     />
+                  </div>
+                </div>
+
+                <div className="input-grid-2">
+                  <div className="input-field">
+                    <label htmlFor="sender-locale">Customer language</label>
+                    <select id="sender-locale" value={notifyLocale} onChange={e => setNotifyLocale(e.target.value === 'fr' ? 'fr' : 'en')}>
+                      <option value="en">English</option>
+                      <option value="fr">French</option>
+                    </select>
+                    <small className="tx-iam-hint">Language of the emails the sender receives (booking and payment confirmations).</small>
                   </div>
                 </div>
 

@@ -6,7 +6,8 @@
 // GET  /api/cash/overview                         couriers with balances, and every entry waiting for Finance
 // GET  /api/cash/entries?courier=&days=           one courier's entries (last N days, default 30, max 366) + all pending
 // POST /api/cash/entries/:id/confirm { note? }    a pending handover, or a pending collection / mobile money reference
-// POST /api/cash/entries/:id/reject  { reason }   reason required
+// POST /api/cash/entries/:id/reject  { reason, chargeCourier? }   reason required; chargeCourier only for a
+//      mobile money reference: also records a confirmed adjustment of that amount against the courier (#175)
 // POST /api/cash/adjustments { courierUserId, amount, currency?, reason }   signed amount, recorded as confirmed
 // GET  /api/cash/report?date=YYYY-MM-DD[&format=csv]   daily per-courier report (Africa/Douala day)
 import { Router, Request, Response } from 'express';
@@ -127,6 +128,12 @@ function review(req: Request, res: Response, to: 'CONFIRMED' | 'REJECTED') {
     const b = body(req);
     const reason = text(b.reason ?? b.note);
     if (to === 'REJECTED' && !reason) return fail(res, 400, 'REASON_REQUIRED', 'Say why the entry is rejected.');
+    // Owner decision #175: a rejected mobile money reference is never charged automatically; Finance
+    // may choose to charge it to the courier in the same step, linked to the rejected entry.
+    const charge = to === 'REJECTED' && b.chargeCourier === true;
+    if (charge && !(entry.entry_type === 'COLLECTED' && entry.method !== 'CASH')) {
+      return fail(res, 400, 'CHARGE_NOT_ALLOWED', 'Only a mobile money payment recorded by the courier can be charged to them.');
+    }
     const user = getRequestAuth(req)!.user;
     const now = Date.now();
     inTransaction(db, () => {
@@ -140,8 +147,22 @@ function review(req: Request, res: Response, to: 'CONFIRMED' | 'REJECTED') {
         `${label} ${to === 'CONFIRMED' ? 'confirmed' : 'rejected'} (${entry.amount} ${entry.currency}): ${entry.ref}`,
         { status: 'PENDING' },
         { status: to, ref: entry.ref, courierUserId: entry.courier_user_id, amount: entry.amount, currency: entry.currency,
-          method: entry.method, ...(entry.momo_reference ? { momoReference: entry.momo_reference } : {}), ...(reason ? { reason } : {}) },
+          method: entry.method, ...(entry.momo_reference ? { momoReference: entry.momo_reference } : {}), ...(reason ? { reason } : {}),
+          ...(charge ? { chargedToCourier: true } : {}) },
         { conn: db });
+      if (charge) {
+        const adjId = 'csh_' + crypto.randomBytes(9).toString('hex');
+        const adjRef = allocateCashRef(db);
+        const note = `Rejected mobile money ${entry.ref}: ${reason}`.slice(0, NOTE_MAX);
+        db.prepare(`
+          INSERT INTO cash_ledger (id, ref, courier_user_id, job_id, entry_type, method, amount, currency, momo_reference,
+                                   status, recorded_by, confirmed_by, note, created_at_ts, confirmed_at_ts)
+          VALUES (?, ?, ?, ?, 'ADJUSTMENT', 'CASH', ?, ?, NULL, 'CONFIRMED', ?, ?, ?, ?, ?)
+        `).run(adjId, adjRef, entry.courier_user_id, entry.job_id, entry.amount, entry.currency, user.id, user.id, note, now, now);
+        audit(req, 'cash.adjust', 'cash_ledger', adjId, `Cash adjustment (${entry.amount} ${entry.currency}): ${entry.courier_name ?? entry.courier_user_id}`,
+          undefined, { ref: adjRef, courierUserId: entry.courier_user_id, amount: entry.amount, currency: entry.currency, reason: note, rejectedRef: entry.ref },
+          { conn: db });
+      }
     });
     res.json({ success: true, data: entryOut(loadEntry(entry.id)!) });
   } catch (err) {

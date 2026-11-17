@@ -338,3 +338,41 @@ test('temporary password WhatsApp tap: needs users.manage or couriers.manage', a
   assert.equal(row.channel, 'WHATSAPP_LINK');
   assert.equal(row.status, 'OPENED');
 });
+
+test('#175: rejecting a mobile money reference can charge the courier in the same step, never by default', async () => {
+  const ins = db.prepare(`
+    INSERT INTO cash_ledger (id, ref, courier_user_id, job_id, entry_type, method, amount, currency, momo_reference, status, recorded_by, created_at_ts)
+    VALUES (?, ?, 'usr_c2', NULL, ?, ?, ?, 'XAF', ?, 'PENDING', 'usr_c2', ?)
+  `);
+  ins.run('m175', 'TX-CSH-917501', 'COLLECTED', 'ORANGE_MONEY', 3000, 'OM-FAKE-1', Date.now());
+  ins.run('h175', 'TX-CSH-917502', 'HANDOVER', 'CASH', 500, null, Date.now());
+  const before = (await (await call('GET', '/api/courier/cash', c2)).json()).data.balances.find((b: any) => b.currency === 'XAF')?.balance ?? 0;
+
+  // Only a mobile money payment can be charged.
+  const wrong = await call('POST', '/api/cash/entries/h175/reject', fin, { reason: 'Never received', chargeCourier: true });
+  assert.equal(wrong.status, 400);
+  assert.equal((await wrong.json()).code, 'CHARGE_NOT_ALLOWED');
+
+  const res = await call('POST', '/api/cash/entries/m175/reject', fin, { reason: 'Not on the Orange Money statement', chargeCourier: true });
+  assert.equal(res.status, 200);
+  const adj = db.prepare("SELECT * FROM cash_ledger WHERE entry_type = 'ADJUSTMENT' AND note LIKE 'Rejected mobile money TX-CSH-917501%'").get() as any;
+  assert.equal(adj.amount, 3000);
+  assert.equal(adj.status, 'CONFIRMED');
+  assert.equal(adj.courier_user_id, 'usr_c2');
+  const after = (await (await call('GET', '/api/courier/cash', c2)).json()).data.balances.find((b: any) => b.currency === 'XAF').balance;
+  assert.equal(after, before + 3000);
+});
+
+test('#177: a console booking stores the customer language; booking.confirmed goes out in it', async () => {
+  const res = await call('POST', '/api/shipments', sa, {
+    notifyLocale: 'fr', service: 'Standard',
+    origin: { city: 'Buea', lat: 4.15, lng: 9.24 }, destination: { city: 'Paris', lat: 48.85, lng: 2.35 },
+    sender: { name: 'Ada Obi', email: 'ada.ship@example.test', phone: '' }, recipient: { name: 'Bob' },
+  });
+  assert.equal(res.status, 201);
+  const id = (await res.json()).data.trackingNumber;
+  assert.equal((db.prepare('SELECT notify_locale FROM shipments WHERE tracking_number = ?').get(id) as any).notify_locale, 'fr');
+  const mail = outbox('booking.confirmed').find((m) => m.related_id === id);
+  assert.equal(mail.locale, 'fr');
+  assert.ok(mail.text.includes(`/fr/suivi/${id}`));
+});

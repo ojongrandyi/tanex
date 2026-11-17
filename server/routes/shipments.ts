@@ -367,9 +367,10 @@ shipmentsRouter.post('/', publicWriteLimiter,
     // booking.confirmed to the sender (NOTIFICATIONS_SPEC §4) when staff book it in the console and
     // the sender has an email. Public bookings get no email here: the address would be typed by
     // anyone, with no one checking the booking first.
+    const locale = s.notifyLocale === 'fr' ? 'fr' : 'en';
+    db.prepare('UPDATE shipments SET notify_locale = ? WHERE tracking_number = ?').run(locale, trackingNumber);
     const senderEmail = typeof s.sender?.email === 'string' ? s.sender.email.trim() : '';
     if (creator && isDeliverableAddress(senderEmail)) {
-      const locale = s.notifyLocale === 'fr' ? 'fr' : 'en';
       queueEmail({
         to: senderEmail, template: 'booking.confirmed', locale,
         vars: { name: cleanVar(String(s.sender?.name ?? '').trim().split(/\s+/)[0] ?? ''), id: trackingNumber, link: trackUrl(trackingNumber, locale) },

@@ -180,6 +180,8 @@ export interface AdminShipmentImage extends PublicShipmentImage {
 
 export interface Shipment {
   trackingNumber: string;
+  /** Language of the customer emails (console bookings, G.8 #177). Sent on create only. */
+  notifyLocale?: 'en' | 'fr';
   barcodeCode?: string;
   id?: string;
   status: ShipmentStatus;
