@@ -15,7 +15,9 @@ export function isHandoverMethod(value: unknown): value is HandoverMethod {
 
 export interface LedgerLine {
   type: string;      // COLLECTED | HANDOVER | ADJUSTMENT
-  status: string;    // PENDING | CONFIRMED | REJECTED
+  /** CASH | MTN_MOMO | ORANGE_MONEY (missing = CASH). A customer's mobile money payment goes to the company account, so it is never due from the courier. */
+  method?: string;
+  status: string;   // PENDING | CONFIRMED | REJECTED
   amount: number;
   createdAt: number;
 }
@@ -35,7 +37,7 @@ export interface HandoverDue {
  */
 export function handoverDue(lines: readonly LedgerLine[], now = Date.now()): HandoverDue {
   const collected = lines
-    .filter((l) => l.type === 'COLLECTED' && l.status !== 'REJECTED' && l.amount > 0)
+    .filter((l) => l.type === 'COLLECTED' && (l.method ?? 'CASH') === 'CASH' && l.status !== 'REJECTED' && l.amount > 0)
     .sort((a, b) => a.createdAt - b.createdAt);
   let covered = lines
     .filter((l) => l.type === 'HANDOVER' && l.status !== 'REJECTED')

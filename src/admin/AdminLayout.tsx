@@ -110,6 +110,11 @@ const VIEW_METADATA: Record<AdminViewType, { title: string; category: string; de
     category: 'Delivery',
     description: DISPATCH_MENU.couriers.description
   },
+  'cash': {
+    title: DISPATCH_MENU.cash.menu,
+    category: 'Delivery',
+    description: DISPATCH_MENU.cash.description
+  },
   'document-center': {
     title: 'Documents',
     category: 'Compliance & Governance',
@@ -340,7 +345,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           )}
 
           {/* DELIVERY: dispatch board, tariffs and couriers (DISPATCH_SPEC §3, §5, §7) */}
-          {(['dispatch', 'tariffs', 'couriers'] as const).some(allowed) && (
+          {(['dispatch', 'tariffs', 'couriers', 'cash'] as const).some(allowed) && (
           <div className="admin-nav-section">
             <span className="section-label">{DISPATCH_MENU.section}</span>
             {allowed('dispatch') && (
@@ -377,6 +382,17 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   <Bike size={18} />
                 </div>
                 <span className="nav-title">{DISPATCH_MENU.couriers.menu}</span>
+              </button>
+            )}
+            {allowed('cash') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'cash' ? 'active' : ''}`}
+                onClick={() => { onSelectView('cash'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <Wallet size={18} />
+                </div>
+                <span className="nav-title">{DISPATCH_MENU.cash.menu}</span>
               </button>
             )}
           </div>

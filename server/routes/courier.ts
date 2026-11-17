@@ -23,7 +23,8 @@ import {
   readMoney, writeTransition, type Fail, type JobRow,
 } from '../dispatch/jobs.js';
 import { allocateCashRef } from '../dispatch/cashRef.js';
-import { handoverDue, isHandoverMethod } from '../../src/shared/cashHandover.js';
+import { isHandoverMethod } from '../../src/shared/cashHandover.js';
+import { courierCashSummary } from '../dispatch/cash.js';
 import { MAX_POINTS_PER_REQUEST, insertLocations, readLocationPoint, type LocationPoint } from '../dispatch/locations.js';
 import { sendPodFile, transitionFail } from './dispatch.js';
 import {
@@ -393,34 +394,6 @@ interface CashRow {
   tracking_number: string | null;
 }
 
-/**
- * A courier's money by currency (DISPATCH_SPEC §9): balance = collected (pending + confirmed)
- * + confirmed adjustments − confirmed handovers. Handovers waiting for Finance are shown apart.
- * outstanding / dueBy / overdue: the 7-day handover deadline (src/shared/cashHandover.ts).
- */
-export function courierCashSummary(courierUserId: string, now = Date.now()) {
-  const rows = db.prepare('SELECT entry_type, status, amount, currency, created_at_ts FROM cash_ledger WHERE courier_user_id = ?')
-    .all(courierUserId) as { entry_type: string; status: string; amount: number; currency: string; created_at_ts: number }[];
-  const currencies = [...new Set(rows.map((r) => r.currency))].sort();
-  return currencies.map((currency) => {
-    const lines = rows.filter((r) => r.currency === currency);
-    const sum = (type: string, ok: (s: string) => boolean) => lines.filter((l) => l.entry_type === type && ok(l.status)).reduce((s, l) => s + l.amount, 0);
-    const collected = sum('COLLECTED', (s) => s !== 'REJECTED');
-    const handedOver = sum('HANDOVER', (s) => s === 'CONFIRMED');
-    const due = handoverDue(lines.map((l) => ({ type: l.entry_type, status: l.status, amount: l.amount, createdAt: l.created_at_ts })), now);
-    return {
-      currency,
-      collected,
-      handedOver,
-      pendingHandover: sum('HANDOVER', (s) => s === 'PENDING'),
-      balance: collected + sum('ADJUSTMENT', (s) => s === 'CONFIRMED') - handedOver,
-      outstanding: due.outstanding,
-      dueBy: due.dueBy,
-      overdue: due.overdue,
-    };
-  });
-}
-
 const cashOut = (r: CashRow) => ({
   id: r.id, ref: r.ref, jobId: r.job_id, trackingNumber: r.tracking_number, type: r.entry_type, method: r.method,
   amount: r.amount, currency: r.currency, momoReference: r.momo_reference, status: r.status, note: r.note,
@@ -437,7 +410,7 @@ courierRouter.get('/cash', (req: Request, res: Response) => {
       ORDER BY l.created_at_ts DESC LIMIT 300
     `).all(id, Date.now() - HISTORY_MS) as unknown as CashRow[];
     noStore(res);
-    res.json({ success: true, data: { balances: courierCashSummary(id), entries: rows.map(cashOut) } });
+    res.json({ success: true, data: { balances: courierCashSummary(db, id), entries: rows.map(cashOut) } });
   } catch (err) {
     serverError(res, err);
   }

@@ -1,0 +1,33 @@
+/* Console → Cash & Mobile Money (G.8). Builds on the console table and form styles (IamViews.css),
+   which turn tables into labelled cards below 768px (data-label on every cell). */
+.tx-cash-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tx-cash-line { display: block; }
+.tx-cash-line .tx-iam-chip { margin-left: 0.35rem; }
+.tx-cash-statement { padding: 0.5rem 0; }
+.tx-cash-statement h3 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.tx-cash-date { max-width: 12rem; }
+
+@media (min-width: 1024px) {
+  .tx-cash-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  .tx-cash-table th, .tx-cash-table td { white-space: nowrap; }
+  .tx-cash-table .tx-iam-sub { white-space: normal; max-width: 16rem; }
+  .tx-cash-table td.is-wrap { white-space: normal; min-width: 10rem; }
+  .tx-cash-table .is-num { text-align: right; font-variant-numeric: tabular-nums; }
+}
+
+/* 768–1023px: too narrow for every column with the sidebar, so each row becomes a card (as below
+   768px in IamViews.css), with its fields in a grid so the Confirm / Reject buttons stay in view. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tx-cash-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tx-cash-table, .tx-cash-table tbody { display: block; width: 100%; }
+  .tx-cash-table tr {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 0.25rem 1rem;
+    border: 1px solid var(--ngf-slate-200); border-radius: 0.6rem; padding: 0.5rem 0.75rem; margin-bottom: 0.6rem;
+  }
+  .tx-cash-table tr.tx-cash-statement-row { display: block; border: 0; padding: 0; }
+  .tx-cash-table td { display: block; border: 0; padding: 0.25rem 0; }
+  .tx-cash-table td[data-label]::before {
+    content: attr(data-label); display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ngf-slate-600);
+  }
+}

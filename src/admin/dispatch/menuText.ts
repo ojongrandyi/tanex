@@ -10,4 +10,5 @@ export const DISPATCH_MENU = {
   },
   tariffs: { menu: 'Tariffs', description: 'Delivery cities, areas, rates and average speeds.' },
   couriers: { menu: 'Couriers', description: 'Riders and drivers: accounts, vehicles and photos.' },
+  cash: { menu: 'Cash & Mobile Money', description: 'Courier balances, handovers and mobile money to confirm, daily report.' },
 } as const;

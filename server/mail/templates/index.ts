@@ -15,6 +15,14 @@ import proofReceivedEn from './payment.proof_received.en.js';
 import proofReceivedFr from './payment.proof_received.fr.js';
 import localBookedEn from './local.booked.en.js';
 import localBookedFr from './local.booked.fr.js';
+import bookingConfirmedEn from './booking.confirmed.en.js';
+import bookingConfirmedFr from './booking.confirmed.fr.js';
+import localDeliveredEn from './local.delivered.en.js';
+import localDeliveredFr from './local.delivered.fr.js';
+import quoteReadyEn from './quote.ready.en.js';
+import quoteReadyFr from './quote.ready.fr.js';
+import paymentConfirmedEn from './payment.confirmed.en.js';
+import paymentConfirmedFr from './payment.confirmed.fr.js';
 
 export interface TemplateVars {
   'auth.reset': { url: string };
@@ -24,6 +32,10 @@ export interface TemplateVars {
   'contact.staff_alert': { name: string; ref: string; subject: string; url: string };
   'payment.proof_received': { id: string; url: string };
   'local.booked': { name: string; id: string; link: string };
+  'booking.confirmed': { name: string; id: string; link: string };
+  'local.delivered': { id: string; masked: string; time: string; link: string };
+  'quote.ready': { ref: string; url: string };
+  'payment.confirmed': { id: string; reason: string };
 }
 
 export type TemplateKey = keyof TemplateVars;
@@ -48,7 +60,12 @@ export const TEMPLATES: { [K in TemplateKey]: TemplateEntry<K> } = {
   'mail.test': { render: { en: mailTestEn, fr: mailTestFr }, sensitive: false, customer: false },
   'contact.staff_alert': { render: { en: contactStaffAlertEn, fr: contactStaffAlertFr }, sensitive: false, customer: false, staffAlert: true },
   'payment.proof_received': { render: { en: proofReceivedEn, fr: proofReceivedFr }, sensitive: false, customer: false, staffAlert: true },
-  'local.booked': { render: { en: localBookedEn, fr: localBookedFr }, sensitive: false, customer: true }
+  'local.booked': { render: { en: localBookedEn, fr: localBookedFr }, sensitive: false, customer: true },
+  // Sent after a staff or courier step (G.8), not straight from a public form: no per-address cap.
+  'booking.confirmed': { render: { en: bookingConfirmedEn, fr: bookingConfirmedFr }, sensitive: false, customer: false },
+  'local.delivered': { render: { en: localDeliveredEn, fr: localDeliveredFr }, sensitive: false, customer: false },
+  'quote.ready': { render: { en: quoteReadyEn, fr: quoteReadyFr }, sensitive: false, customer: false },
+  'payment.confirmed': { render: { en: paymentConfirmedEn, fr: paymentConfirmedFr }, sensitive: false, customer: false }
 };
 
 export function renderTemplate<K extends TemplateKey>(key: K, locale: MailLocale, vars: TemplateVars[K]): RenderedEmail {

@@ -204,6 +204,9 @@ quotesRouter.post('/', publicWriteLimiter,
       });
     }
 
+    // The form's language, for the quote.ready email later (G.8).
+    db.prepare('UPDATE quote_requests SET locale = ? WHERE id = ?').run(q.locale === 'fr' ? 'fr' : 'en', id);
+
     const created = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(id);
     res.status(201).json({ success: true, data: formatQuote(created) });
   } catch (err: any) {
@@ -234,6 +237,21 @@ const publishHandler = (req: Request, res: Response) => {
         internal_notes = COALESCE(?, internal_notes)
       WHERE id = ?
     `).run(JSON.stringify(updatedPricing), internalNotes || null, id);
+
+    // quote.ready to the customer (NOTIFICATIONS_SPEC §4) the first time a price is published,
+    // not on later edits. The placeholder address of old forms is never written to.
+    const before = row as { status?: string; customer_email?: string | null; locale?: string | null };
+    const email = typeof before.customer_email === 'string' ? before.customer_email.trim() : '';
+    const firstPublish = before.status !== 'RATE_PUBLISHED' && before.status !== 'QUOTE_PUBLISHED';
+    if (firstPublish && email && email.toLowerCase() !== 'client@example.com' && isDeliverableAddress(email)) {
+      queueEmail({
+        to: email,
+        template: 'quote.ready',
+        locale: before.locale === 'fr' ? 'fr' : 'en',
+        vars: { ref: id, url: quoteUrl(id) },
+        related: { type: 'quote', id }
+      });
+    }
 
     const updated = db.prepare('SELECT * FROM quote_requests WHERE id = ?').get(id);
     res.json({ success: true, data: formatQuote(updated) });

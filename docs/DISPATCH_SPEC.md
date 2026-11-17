@@ -201,6 +201,7 @@ in the background; the UI tells the courier to keep the app open during deliveri
 - **COD & fees:** when the courier records `COLLECTED`, a `cash_ledger` row (PENDING) is created. The courier's
   balance = confirmed+pending collected − confirmed handovers. **Handovers** are made in cash at the office or by MTN MoMo / Orange Money transfer to the company account (transaction ID required), and money collected must be **handed over within 7 days** (owner 2026-11-14; rule in `src/shared/cashHandover.ts`: declared handovers cover the oldest collections first). Finance (`cash.confirm`) confirms handovers and can
   add adjustments (reason required). Daily per-courier report (screen + CSV export).
+  **Built in G.8:** the balance counts only cash in the courier's hands: a `COLLECTED` row with method MTN_MOMO / ORANGE_MONEY is a customer payment to the company account (the courier only records its transaction ID), shown apart as "mobile money recorded" and checked by Finance, and it never counts towards the balance or the 7-day deadline (`src/shared/cashReport.ts`, `cashHandover.ts`). Finance confirms or rejects any pending row (rejection needs a reason; `confirmed_by` / `confirmed_at_ts` record who and when for both); adjustments are signed (+ owes more, − owes less), recorded `CONFIRMED` at once. The daily report is per courier and currency for one Africa/Douala day, with the balance at the end of that day. Console → Cash & Mobile Money (`src/admin/cash/`).
 - **Company MoMo:** customers can pay the delivery fee or COD to the company's MTN MoMo / Orange Money accounts.
   The courier (or customer, via the existing proof-of-payment flow) records the transaction reference; Finance
   confirms it against the company wallet statement. No automatic MoMo API in v1 (aggregators such as MTN MoMo API,
@@ -239,6 +240,9 @@ documented above each route. Error answers carry a `code` (e.g. `INVALID_TRANSIT
 `POD_REQUIRED`, `PRICE_REQUIRED`, `DELIVERY_CODE_WRONG` with `details.triesLeft`, `DELIVERY_CODE_LOCKED` (423),
 `IDEMPOTENCY_KEY_REUSED`, `NO_ACTIVE_JOB`) for the apps to show in the user's language.
 | `GET/POST /api/cash/*` | `cash.view` / `cash.confirm`; couriers see and record their own |
+| G.8: `GET /api/cash/overview` · `GET /api/cash/entries?courier=&days=` · `GET /api/cash/report?date=YYYY-MM-DD[&format=csv]` | `cash.view` or `cash.confirm` |
+| G.8: `POST /api/cash/entries/:id/confirm` · `/reject { reason }` · `POST /api/cash/adjustments { courierUserId, amount, currency?, reason }` (audited `cash.confirm` / `cash.reject` / `cash.adjust`) | `cash.confirm` |
+| G.8: `POST /api/notifications/whatsapp` (`{ jobId, template, to }` or `{ userId, template: 'auth.temp_password' }`) · `POST /api/local-delivery/whatsapp-opened { trackingNumber }` (public, online bookings of the last 24 h) | job: `dispatch.view`/`dispatch.manage` or the job's courier; account: `users.manage`/`couriers.manage` |
 
 ## 12. Tests
 

@@ -13,6 +13,7 @@ export type AdminViewType =
   | 'dispatch'
   | 'tariffs'
   | 'couriers'
+  | 'cash'
   | 'document-center'
   | 'blog'
   | 'settings'
@@ -35,6 +36,8 @@ export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | readonly Per
   'dispatch': ['dispatch.view', 'dispatch.manage'],
   'tariffs': 'tariffs.manage',
   'couriers': ['couriers.view', 'couriers.manage'],
+  // Cash & Mobile Money (DISPATCH_SPEC §9, G.8): Finance confirms with cash.confirm.
+  'cash': ['cash.view', 'cash.confirm'],
   'document-center': 'documents.view',
   // Blog studio (BLOG_SPEC §2): a writer, an editor, a publisher or a category manager.
   'blog': ['blog.view', 'blog.write', 'blog.edit_any', 'blog.publish', 'blog.categories'],
@@ -57,6 +60,7 @@ export const VIEW_ORDER: readonly AdminViewType[] = [
   'dispatch',
   'tariffs',
   'couriers',
+  'cash',
   'document-center',
   'blog',
   'settings',

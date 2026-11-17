@@ -13,7 +13,8 @@ import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { inTransaction } from '../auth/schema.js';
 import { serverError } from '../errors.js';
-import { localQuoteLimiter, publicWriteLimiter } from '../middleware/rateLimit.js';
+import { localQuoteLimiter, publicLookupLimiter, publicWriteLimiter } from '../middleware/rateLimit.js';
+import { logNotification } from '../notifications/log.js';
 import { isDeliverableAddress, queueEmail } from '../mail/outbox.js';
 import { cleanVar } from '../mail/layout.js';
 import { trackUrl } from '../mail/urls.js';
@@ -191,6 +192,35 @@ localDeliveryRouter.post('/', publicWriteLimiter, (req: Request, res: Response) 
         currency: quote.ok ? quote.currency : 'XAF',
       },
     });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+/** How long after an online booking its success page may log the share tap. */
+const SHARE_LOG_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+// POST /api/local-delivery/whatsapp-opened { trackingNumber } (G.8): the booking success page opened
+// the "send tracking to the recipient" WhatsApp link. Logged once per tap in notification_log
+// (NOTIFICATIONS_SPEC §2), only for an online booking made in the last 24 h. The phone comes from
+// the job and is stored masked. Answers 204 either way, so it tells a visitor nothing.
+localDeliveryRouter.post('/whatsapp-opened', publicLookupLimiter, (req: Request, res: Response) => {
+  try {
+    const b = body(req);
+    const tracking = typeof b.trackingNumber === 'string' ? b.trackingNumber.trim().toUpperCase() : '';
+    const job = /^TX[A-Z0-9]{6}$/.test(tracking)
+      ? db.prepare("SELECT id, dropoff_json, notify_locale, created_at_ts FROM dispatch_jobs WHERE tracking_number = ? AND scope = 'LOCAL' AND created_by IS NULL ORDER BY created_at_ts DESC LIMIT 1")
+        .get(tracking) as { id: string; dropoff_json: string; notify_locale: string; created_at_ts: number } | undefined
+      : undefined;
+    if (job && Date.now() - job.created_at_ts < SHARE_LOG_WINDOW_MS) {
+      const dropoff = JSON.parse(job.dropoff_json) as { contactPhone?: unknown };
+      logNotification(db, {
+        channel: 'WHATSAPP_LINK', templateKey: 'local.share_recipient', locale: job.notify_locale === 'fr' ? 'fr' : 'en',
+        phone: typeof dropoff.contactPhone === 'string' ? dropoff.contactPhone : null,
+        related: { type: 'dispatch_job', id: job.id }, userId: null,
+      });
+    }
+    res.status(204).end();
   } catch (err) {
     serverError(res, err);
   }

@@ -23,6 +23,7 @@ import { hasPermission } from '../../src/shared/permissions.js';
 import { boardColumn, needsAttention, startOfDay } from '../../src/shared/dispatchBoard.js';
 import { maskEmail } from '../../src/shared/masking.js';
 import { readStoredDispatchSettings } from './tariffs.js';
+import { readNotificationLog } from '../notifications/log.js';
 
 const send = (res: Response, f: Fail) =>
   res.status(f.status).json({ success: false, code: f.code, error: f.error, ...(f.details ? { details: f.details } : {}) });
@@ -247,7 +248,8 @@ dispatchRouter.post('/quote', canManage, (req: Request, res: Response) => {
 });
 
 // GET /api/dispatch/jobs/:id/history: the job drawer's timeline (audit entries for the job: who did
-// what and when, with the reason given), cash rows recorded on it, and emails sent about it.
+// what and when, with the reason given), cash rows recorded on it, emails sent about it and WhatsApp
+// links opened for it.
 dispatchRouter.get('/jobs/:id/history', canView, (req: Request, res: Response) => {
   try {
     const job = withJob(req, res);
@@ -286,10 +288,17 @@ dispatchRouter.get('/jobs/:id/history', canView, (req: Request, res: Response) =
           ref: c.ref, entryType: c.entry_type, method: c.method, amount: c.amount, currency: c.currency,
           momoReference: c.momo_reference, status: c.status, at: c.created_at_ts,
         })),
-        notifications: emails.map((m) => ({
-          channel: 'EMAIL', to: maskEmail(m.to_addr) ?? '', template: m.template_key, locale: m.locale,
-          status: m.status, at: m.created_at_ts, sentAt: m.sent_at_ts,
-        })),
+        notifications: [
+          ...emails.map((m) => ({
+            channel: 'EMAIL' as const, to: maskEmail(m.to_addr) ?? '', template: m.template_key, locale: m.locale,
+            status: m.status, at: m.created_at_ts, sentAt: m.sent_at_ts as number | null, byName: null as string | null,
+          })),
+          // WhatsApp links opened from the board, the courier app or the booking page (G.8).
+          ...readNotificationLog(db, [{ type: 'dispatch_job', id: job.id }, { type: 'shipment', id: job.tracking_number }]).map((n) => ({
+            channel: 'WHATSAPP_LINK' as const, to: n.to_masked ?? '', template: n.template_key, locale: n.locale,
+            status: n.status, at: n.at_ts, sentAt: null, byName: n.user_name,
+          })),
+        ].sort((x, y) => x.at - y.at),
       },
     });
   } catch (err) {

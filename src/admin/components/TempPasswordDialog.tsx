@@ -8,6 +8,7 @@ import { IAM_TEXT } from '../../auth/strings';
 import { buildWhatsAppLink } from '../../shared/whatsapp';
 import { ADMIN_URL } from '../../config/brand';
 import type { StaffUser } from '../../services/api';
+import { logWhatsAppTap } from '../../services/whatsappLog';
 
 const T = IAM_TEXT.temp;
 
@@ -40,6 +41,7 @@ export const TempPasswordDialog: React.FC<{
   onClose: () => void;
 }> = ({ user, tempPassword, onClose }) => {
   const [copied, setCopied] = useState(false);
+  const [opened, setOpened] = useState(false);
   const identifier = user.email || user.phone || '';
   // The message goes to the account's own phone, in the account's language.
   const link = buildWhatsAppLink(
@@ -70,7 +72,8 @@ export const TempPasswordDialog: React.FC<{
         <span className="tx-iam-hint" role="status" aria-live="polite">{copied ? T.copied : ''}</span>
         <div>
           {link ? (
-            <a className="tx-iam-btn" href={link} target="_blank" rel="noopener noreferrer">
+            <a className="tx-iam-btn" href={link} target="_blank" rel="noopener noreferrer"
+              onClick={() => { setOpened(true); logWhatsAppTap({ userId: user.id, template: 'auth.temp_password' }); }}>
               <MessageCircle size={15} aria-hidden="true" />
               <span>{T.whatsapp}</span>
             </a>
@@ -81,7 +84,7 @@ export const TempPasswordDialog: React.FC<{
             </button>
           )}
           <p id="tx-temp-wa-hint" className="tx-iam-hint" style={{ margin: '0.35rem 0 0' }}>
-            {link ? T.whatsappHint : T.whatsappNoPhone}
+            {!link ? T.whatsappNoPhone : opened ? T.whatsappOpened : T.whatsappHint}
           </p>
         </div>
         <div className="tx-iam-dialog-actions">

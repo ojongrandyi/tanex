@@ -89,7 +89,9 @@ const MOUNTS: Record<string, string> = {
   couriersRouter: '/api/couriers',
   dispatchRouter: '/api/dispatch',
   courierRouter: '/api/courier',
-  localDeliveryRouter: '/api/local-delivery'
+  localDeliveryRouter: '/api/local-delivery',
+  cashRouter: '/api/cash',
+  notificationsRouter: '/api/notifications'
 };
 
 // Open to visitors on purpose (IAM_RBAC_SPEC §6–§7).
@@ -123,6 +125,8 @@ const PUBLIC = new Set([
   // Public local-delivery booking and price look-up, rate-limited (DISPATCH_SPEC §8, §11; G.6).
   'POST /api/local-delivery/quote',
   'POST /api/local-delivery/',
+  // The booking success page's WhatsApp share tap, logged for a booking made in the last 24 h (G.8).
+  'POST /api/local-delivery/whatsapp-opened',
   // The assigned courier's photo on the track page, only with the courier's consent (G.7, #161).
   'GET /api/track/:trackingNumber/courier-photo'
 ]);

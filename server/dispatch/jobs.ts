@@ -12,6 +12,7 @@ import { audit } from '../audit.js';
 import { eventTime } from '../eventTime.js';
 import { inTransaction } from '../auth/schema.js';
 import { allocateCashRef } from './cashRef.js';
+import { queueJobEmails } from './notify.js';
 import { createPodDocument } from './podDocument.js';
 import { generateUniqueTrackingId } from '../trackingIds.js';
 import { normalizePhone } from '../../src/shared/identifier.js';
@@ -623,6 +624,8 @@ export function writeTransition(conn: DatabaseSync, job: JobRow, t: DispatchTran
       ...(podDocumentId ? { podDocumentId } : {}),
     },
     { conn });
+  // booking.confirmed / local.delivered to the sender when an email is known (G.8).
+  queueJobEmails(conn, updated, t.to);
   return updated;
 }
 

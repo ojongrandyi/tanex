@@ -88,7 +88,7 @@ export interface BoardData {
 export interface JobHistory {
   timeline: { at: number; actorName: string | null; action: string; summary: string | null; reason: string | null }[];
   cash: { ref: string; entryType: string; method: string; amount: number; currency: string; momoReference: string | null; status: string; at: number }[];
-  notifications: { channel: 'EMAIL'; to: string; template: string; locale: string; status: string; at: number; sentAt: number | null }[];
+  notifications: { channel: 'EMAIL' | 'WHATSAPP_LINK'; to: string; template: string; locale: string; status: string; at: number; sentAt: number | null; byName: string | null }[];
 }
 
 export interface DispatchSummary { requested: number; toAssign: number; problems: number; attention: number }

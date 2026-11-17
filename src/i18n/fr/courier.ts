@@ -114,6 +114,15 @@ const courier = {
     needReference: "Saisissez l'ID de transaction du mobile money.",
     needAmount: 'Saisissez le montant encaissé.',
   },
+  messages: {
+    title: 'Écrire au client',
+    hint: 'Ouvre WhatsApp avec le message prêt. Vous appuyez encore sur Envoyer.',
+    onTheWay: 'Dire au destinataire que vous êtes en route',
+    delivered: "Dire à l'expéditeur que c'est livré",
+    failed: "Dire à l'expéditeur que la livraison n'a pas eu lieu",
+    opened: 'Ouvert dans WhatsApp',
+    noPhone: 'Pas de numéro de téléphone valide pour cette personne.',
+  },
   methods: {
     CASH: 'Espèces',
     MTN_MOMO: 'MTN MoMo',

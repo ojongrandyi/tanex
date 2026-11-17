@@ -3,7 +3,7 @@
 // audit log, cash recorded on it and notifications sent, plus the dispatch actions the shared state
 // machine allows (job.allowedActions). The server checks dispatch.manage and audits every action.
 import React, { useEffect, useRef, useState } from 'react';
-import { AlertCircle, ExternalLink, Phone, X } from 'lucide-react';
+import { AlertCircle, ExternalLink, MessageCircle, Phone, X } from 'lucide-react';
 import { IamDialog } from '../components/IamDialog';
 import { DISPATCH_STATUS_LABELS, VEHICLE_LABELS, failureReasonLabel } from '../../shared/dispatchStatus';
 import { SIZE_CLASS_LABELS } from '../../shared/localPricing';
@@ -11,6 +11,9 @@ import { placePoint, suggestCouriers, type JobProblem } from '../../shared/dispa
 import { boardApi, type BoardCity, type BoardCourier, type BoardZone, type DispatchJob, type JobHistory, type JobPlace } from './boardApi';
 import { BOARD_TEXT, boardErrorText } from './boardStrings';
 import { money, when } from './boardFormat';
+import { buildJobMessages, type JobMessage } from '../../shared/jobMessages';
+import { pagePath } from '../../router/routes';
+import { logWhatsAppTap } from '../../services/whatsappLog';
 
 const T = BOARD_TEXT;
 const D = BOARD_TEXT.drawer;
@@ -237,6 +240,62 @@ const LiftCodeDialog: React.FC<{ job: DispatchJob; onClose: () => void; onDone: 
   );
 };
 
+// ---- WhatsApp click-to-chat (DISPATCH_SPEC §10, NOTIFICATIONS_SPEC §2) ----
+
+/** The messages that fit the job's step, in its notify_locale, with the public tracking link. */
+export function boardJobMessages(job: DispatchJob): JobMessage[] {
+  const locale = job.notifyLocale === 'fr' ? 'fr' : 'en';
+  return buildJobMessages({
+    status: job.status, trackingNumber: job.trackingNumber, locale,
+    trackLink: `${window.location.origin}${pagePath('track-result', job.trackingNumber, locale)}`,
+    senderName: job.pickup.contactName, senderPhone: job.pickup.contactPhone,
+    recipientName: job.dropoff.contactName, recipientPhone: job.dropoff.contactPhone,
+    riderFirstName: job.courier?.publicFirstName ?? null, podRecipientName: job.pod.recipientName,
+    deliveredAt: job.deliveredAt, failureReason: job.failureReason,
+  }, 'dispatch');
+}
+
+const WhatsAppSection: React.FC<{ job: DispatchJob; onOpened: () => void }> = ({ job, onOpened }) => {
+  const [opened, setOpened] = useState<string[]>([]);
+  useEffect(() => { setOpened([]); }, [job.id, job.status]);
+  const messages = boardJobMessages(job);
+  if (messages.length === 0) return null;
+  const W = D.whatsApp;
+  return (
+    <section aria-label={W.title}>
+      <h3>{W.title}</h3>
+      <p className="tx-iam-hint">{W.hint}</p>
+      <ul className="tx-board-wa">
+        {messages.map((m) => {
+          const key = `${m.template}:${m.to}`;
+          const label = W.send(D.templateNames[m.template] ?? m.template, m.to);
+          return (
+            <li key={key}>
+              {m.link ? (
+                <a className="tx-iam-btn small" href={m.link} target="_blank" rel="noopener noreferrer"
+                  onClick={() => {
+                    setOpened((o) => (o.includes(key) ? o : [...o, key]));
+                    logWhatsAppTap({ jobId: job.id, template: m.template, to: m.to });
+                    // Let the log row land before the timeline reloads.
+                    window.setTimeout(onOpened, 800);
+                  }}>
+                  <MessageCircle size={14} aria-hidden="true" /> {label}
+                </a>
+              ) : (
+                <button type="button" className="tx-iam-btn small" disabled title={W.noPhone}>
+                  <MessageCircle size={14} aria-hidden="true" /> {label}
+                </button>
+              )}
+              {!m.link && <span className="tx-iam-muted"> {W.noPhone}</span>}
+              {opened.includes(key) && <span className="tx-iam-chip" role="status">{W.opened}</span>}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+};
+
 // ---- Drawer ----
 
 export const JobDrawer: React.FC<{
@@ -254,6 +313,7 @@ export const JobDrawer: React.FC<{
   const [sub, setSub] = useState<Sub>(null);
   const [history, setHistory] = useState<JobHistory | null>(null);
   const [historyError, setHistoryError] = useState(false);
+  const [historyTick, setHistoryTick] = useState(0);
   const [rateBusy, setRateBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const ref = useRef<HTMLElement>(null);
@@ -284,7 +344,7 @@ export const JobDrawer: React.FC<{
       .then((h) => { if (!cancelled) setHistory(h); })
       .catch(() => { if (!cancelled) setHistoryError(true); });
     return () => { cancelled = true; };
-  }, [job.id, job.updatedAt]);
+  }, [job.id, job.updatedAt, historyTick]);
   useEffect(() => { setHistory(null); setActionError(null); }, [job.id]);
 
   const done = (updated: DispatchJob, message: string) => {
@@ -358,6 +418,8 @@ export const JobDrawer: React.FC<{
         )}
         {!canManage && <p className="tx-iam-hint">{D.viewOnly}</p>}
         {actionError && <DialogError error={actionError} />}
+
+        <WhatsAppSection job={job} onOpened={() => setHistoryTick((n) => n + 1)} />
 
         <PlaceCard title={D.pickup} place={job.pickup} />
         <PlaceCard title={D.dropoff} place={job.dropoff} />
@@ -471,7 +533,14 @@ export const JobDrawer: React.FC<{
             <ul className="tx-board-list">
               {history.notifications.map((n, i) => (
                 <li key={`${n.at}-${i}`}>
-                  {when(n.at, now)}{' · '}{D.emailTo(n.to)}{' · '}<span className="tx-iam-muted">{D.emailStatus[n.status] ?? n.status}</span>
+                  {when(n.at, now)}{' · '}{D.templateNames[n.template] ?? n.template}{' · '}
+                  {n.channel === 'WHATSAPP_LINK' ? (
+                    <>
+                      {D.whatsAppTo(n.to)}{' · '}<span className="tx-iam-muted">{D.whatsAppOpenedStatus}{n.byName ? ` (${D.whatsAppBy(n.byName)})` : ''}</span>
+                    </>
+                  ) : (
+                    <>{D.emailTo(n.to)}{' · '}<span className="tx-iam-muted">{D.emailStatus[n.status] ?? n.status}</span></>
+                  )}
                 </li>
               ))}
             </ul>

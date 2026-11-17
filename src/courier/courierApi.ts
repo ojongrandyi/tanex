@@ -50,6 +50,9 @@ export interface CourierJob {
   createdAt: number;
   updatedAt: number;
   allowedActions: DispatchAction[];
+  /** Language of the customer messages (DISPATCH_SPEC §3). */
+  notifyLocale?: 'en' | 'fr';
+  courier?: { publicFirstName: string } | null;
 }
 
 export interface CourierProfile {

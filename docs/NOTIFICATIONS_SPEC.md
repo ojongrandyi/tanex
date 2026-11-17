@@ -25,6 +25,7 @@ Upgrade path (§5) keeps the same templates.
 - Each tap creates a `notification_log` row (channel `WHATSAPP_LINK`, template, job/shipment, user). We record that
   the link was **opened**, not that the message was sent; the UI says so ("Opened in WhatsApp").
 - On a desktop browser the link opens WhatsApp Web/Desktop; on phones the app.
+- **Built in G.8:** the job messages per step live in `src/shared/jobMessages.ts` (plan + builder, shared by the dispatch drawer and the courier app, in the job's `notify_locale`). The browser tells the server after each tap (`POST /api/notifications/whatsapp`, or `POST /api/local-delivery/whatsapp-opened` from the booking page); the server takes the phone from the job or account, never from the request, stores it masked, and never stores the message text (it can hold a temporary password). Rows show in the job drawer next to the emails.
 
 ## 3. Email
 
@@ -51,7 +52,7 @@ Upgrade path (§5) keeps the same templates.
 | `booking.confirmed` | email + WhatsApp link | shipment/local job booked | sender (+ recipient link for local jobs) |
 | `local.assigned` | WhatsApp link | courier assigned | recipient / sender |
 | `local.on_the_way` | WhatsApp link (+ email) | courier marked on the way | recipient |
-| `local.delivered` | WhatsApp link + email | delivered | sender |
+| `local.delivered` | WhatsApp link + email | delivered (not a first-mile leg) | sender |
 | `local.failed` | WhatsApp link | failed attempt | sender |
 | `contact.received` | email | contact/callback/support form | customer (+ staff alert) |
 | `payment.proof_received` | email | proof uploaded | staff alert |

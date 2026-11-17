@@ -1,0 +1,82 @@
+// Console → Cash & Mobile Money copy (CONTENT §10.2 "Added with G.8", owner to confirm). English
+// until the console moves to t() in phase I, like the other console views.
+export const CASH_TEXT = {
+  loading: 'Loading…',
+  loadError: 'Could not load the cash ledger. Check your connection and try again.',
+  retry: 'Try again',
+  viewOnly: 'You can view the cash ledger. Confirming entries and adjustments needs the "Confirm courier cash handovers" permission.',
+  search: 'Search courier, reference or tracking ID',
+  tabs: { pending: 'Waiting for Finance', couriers: 'Courier balances', report: 'Daily report' },
+  pending: {
+    intro: 'Handovers the couriers declared and payments they recorded. Check each one against the cash received or the company MTN MoMo / Orange Money statement, then confirm or reject it.',
+    empty: 'Nothing is waiting for confirmation.',
+    noMatch: 'No entry matches your search.',
+  },
+  columns: {
+    when: 'Recorded', ref: 'Reference', courier: 'Courier', type: 'Entry', method: 'Method', amount: 'Amount',
+    momoRef: 'Transaction ID', job: 'Tracking ID', status: 'Status', note: 'Note', actions: 'Actions',
+    balance: 'Balance', toHandOver: 'To hand over', mobileMoney: 'Mobile money recorded', waiting: 'Waiting',
+  },
+  types: { COLLECTED: 'Collected', HANDOVER: 'Handover', ADJUSTMENT: 'Adjustment' } as Record<string, string>,
+  methods: { CASH: 'Cash', MTN_MOMO: 'MTN MoMo', ORANGE_MONEY: 'Orange Money' } as Record<string, string>,
+  statuses: { PENDING: 'Waiting for confirmation', CONFIRMED: 'Confirmed', REJECTED: 'Rejected' } as Record<string, string>,
+  collectedMoMo: 'Paid to the company account',
+  confirm: 'Confirm',
+  reject: 'Reject',
+  confirmed: (ref: string) => `${ref} confirmed.`,
+  rejected: (ref: string) => `${ref} rejected.`,
+  confirmAsk: (ref: string, amount: string) => `Confirm ${ref} for ${amount}? Check it against the cash received or the wallet statement first.`,
+  rejectTitle: (ref: string) => `Reject ${ref}`,
+  rejectReason: 'Why is it rejected?',
+  rejectHint: 'The courier sees the entry as rejected; the reason is kept in the audit log.',
+  reasonRequired: 'Give a reason.',
+  by: (name: string) => `by ${name}`,
+  couriers: {
+    intro: 'Balance = cash collected + adjustments − handovers Finance confirmed. Money collected must be handed over within 7 days.',
+    empty: 'No courier yet.',
+    none: 'No money recorded',
+    dueBy: (date: string) => `due by ${date}`,
+    overdue: (date: string) => `Late: was due on ${date}`,
+    entries: 'Entries',
+    hideEntries: 'Hide entries',
+    entriesTitle: (name: string) => `Last 30 days: ${name}`,
+    noEntries: 'No entries in the last 30 days.',
+    adjust: 'Adjust',
+  },
+  adjust: {
+    title: (name: string) => `Adjustment: ${name}`,
+    intro: 'Corrects what the courier owes. Use a positive amount when the courier owes more, a negative one (with −) when they owe less.',
+    amount: 'Amount',
+    currency: 'Currency',
+    reason: 'Reason',
+    reasonHint: 'Required. Kept in the audit log and shown on the courier\'s statement.',
+    save: 'Record adjustment',
+    saving: 'Saving…',
+    cancel: 'Cancel',
+    invalidAmount: 'Enter an amount other than 0.',
+    done: (name: string) => `Adjustment recorded for ${name}.`,
+  },
+  report: {
+    intro: 'Per courier for one day (Cameroon time). Balances are at the end of the day.',
+    date: 'Day',
+    csv: 'Download CSV',
+    empty: 'No cash activity on this day.',
+    columns: {
+      collected: 'Cash collected', mobileMoney: 'Mobile money recorded', declared: 'Handovers declared',
+      confirmed: 'Handovers confirmed', adjustments: 'Adjustments', waiting: 'Waiting for Finance', balance: 'Balance at end of day',
+    },
+  },
+  errors: {
+    ALREADY_REVIEWED: 'This entry was already confirmed or rejected. The list was refreshed.',
+    REASON_REQUIRED: 'Give a reason.',
+    INVALID_CASH: 'Check the amount.',
+    NOT_FOUND: 'Not found. The list was refreshed.',
+    FORBIDDEN: 'You do not have permission to do this.',
+    fallback: 'Something went wrong. Try again.',
+  } as Record<string, string>,
+} as const;
+
+export function cashErrorText(err: unknown): string {
+  const e = err as { code?: string; message?: string } | null;
+  return (e?.code && CASH_TEXT.errors[e.code]) || e?.message || CASH_TEXT.errors.fallback;
+}

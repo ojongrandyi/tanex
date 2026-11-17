@@ -67,6 +67,7 @@ const localDelivery = {
       id: 'Your tracking ID is {id}.',
       track: 'Track this delivery',
       whatsapp: 'Send tracking to the recipient on WhatsApp',
+      whatsappOpened: 'Opened in WhatsApp. Tap Send there to share it.',
       again: 'Book another delivery',
     },
     unavailable: "Online booking isn't open yet. Call or WhatsApp us and we'll book your delivery.",

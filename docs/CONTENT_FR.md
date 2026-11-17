@@ -546,11 +546,11 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 
 | Clé | Français |
 |---|---|
-| `booking.confirmed` | `Bonjour {name}, votre réservation TanEx est confirmée. Numéro de suivi : {id}. Suivez-la ici : {link}` |
+| `booking.confirmed` | `Bonjour {name}, votre réservation TanEx est confirmée. Numéro de suivi : {id}. Suivez-la ici : {link}` · e-mail (*objet ajouté avec G.8, à confirmer*) : Objet `Votre réservation TanEx {id} est confirmée`, même texte |
 | `local.share_recipient` | `Bonjour {name}, {sender} vous envoie un colis avec TanEx. Suivez la livraison en direct : {link}` |
 | `local.assigned` | `Votre livreur TanEx {rider} prend en charge {id}. Suivi : {link}` |
 | `local.on_the_way` | `Votre colis {id} est en route avec {rider}. Suivez en direct : {link}` |
-| `local.delivered` | `Livré : {id} a été reçu par {masked} à {time}. Merci d'avoir choisi TanEx.` |
+| `local.delivered` | `Livré : {id} a été reçu par {masked} à {time}. Merci d'avoir choisi TanEx.` · e-mail (*ajouté avec G.8, à confirmer*) : Objet `Livré : {id}`, même texte + `Détails : {link}` |
 | `local.failed` | `Nous n'avons pas pu livrer {id} : {reason}. Notre équipe vous contactera pour convenir d'un nouveau créneau.` |
 | `auth.temp_password` | `Votre compte TanEx est prêt. Connectez-vous sur {url} avec {identifier} et ce mot de passe temporaire : {password}. Vous choisirez le vôtre à la connexion.` |
 | `auth.reset` | Objet `Réinitialiser votre mot de passe TanEx` · `Une demande de réinitialisation a été faite pour votre compte TanEx. Utilisez ce lien dans les 30 minutes : {url}. Si ce n'était pas vous, ignorez cet e-mail.` |
@@ -562,6 +562,8 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 | `payment.proof_received` (ajouté après B.6, à confirmer) | Objet `Preuve de paiement reçue pour {id}` · `Un client a envoyé une preuve de paiement pour {id}. Vérifiez-la dans la console, rubrique Paiements : {url}` |
 | `mail.test` (ajouté avec B.6, à confirmer) | Objet `E-mail de test TanEx` · `Ceci est un e-mail de test envoyé depuis la console TanEx. Si vous pouvez le lire, l'envoi d'e-mails fonctionne.` |
 | `local.booked` (e-mail, ajouté avec G.6, à confirmer) | Objet `Nous avons bien reçu votre réservation de livraison {id}` · `Merci, {name}. Votre numéro de suivi est {id}. Suivez votre livraison ici : {link}` |
+| page de réservation après l'appui sur WhatsApp (*ajouté avec G.8, à confirmer*) | `Ouvert dans WhatsApp. Appuyez sur Envoyer pour le partager.` |
+| application livreur (*ajouté avec G.8, à confirmer*) | `Écrire au client` · `Ouvre WhatsApp avec le message prêt. Vous appuyez encore sur Envoyer.` · `Dire au destinataire que vous êtes en route` · `Dire à l'expéditeur que c'est livré` · `Dire à l'expéditeur que la livraison n'a pas eu lieu` · `Ouvert dans WhatsApp` · `Pas de numéro de téléphone valide pour cette personne.` |
 | `local.share_tracking` (WhatsApp, page de suivi, ajouté avec G.7, à confirmer) | `Suivez cette livraison TanEx en direct : {link}` |
 
 ## 15. Pages du blog (ajouté le 2026-11-12 avec F.2, **à confirmer, relecture native en attente**)

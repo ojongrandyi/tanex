@@ -25,6 +25,8 @@ import { couriersRouter } from './routes/couriers.js';
 import { dispatchRouter } from './routes/dispatch.js';
 import { courierRouter } from './routes/courier.js';
 import { localDeliveryRouter } from './routes/localDelivery.js';
+import { cashRouter } from './routes/cash.js';
+import { notificationsRouter } from './routes/notifications.js';
 import { requirePermission } from './middleware/auth.js';
 import { addErrorCodes } from './middleware/errorCodes.js';
 
@@ -75,6 +77,10 @@ export function registerApiRoutes(app: Express): void {
   app.use('/api/courier', courierRouter);
   // Public local-delivery booking and its price look-up (DISPATCH_SPEC §8, G.6): rate-limited, no session.
   app.use('/api/local-delivery', localDeliveryRouter);
+  // Cash & Mobile Money (DISPATCH_SPEC §9, G.8): cash.view to read, cash.confirm to confirm, reject and adjust.
+  app.use('/api/cash', cashRouter);
+  // WhatsApp click-to-chat taps (NOTIFICATIONS_SPEC §2, G.8): signed in; the job or account decides the permission.
+  app.use('/api/notifications', notificationsRouter);
   // Public package and blog images (/media/<id>.<ext>, /media/blog/<id>.<ext>); outside /api
   // so they can be cached.
   app.use(mediaRouter);

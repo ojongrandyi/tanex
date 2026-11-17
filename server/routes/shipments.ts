@@ -16,6 +16,9 @@ import { shipmentStatusLabel } from '../../src/shared/shipmentStatus.js';
 import { deleteAllShipmentImages } from './shipmentImages.js';
 import { deleteShipmentPayment } from './shipmentPayments.js';
 import { serverError } from '../errors.js';
+import { isDeliverableAddress, queueEmail } from '../mail/outbox.js';
+import { cleanVar } from '../mail/layout.js';
+import { trackUrl } from '../mail/urls.js';
 
 export const shipmentsRouter = Router();
 
@@ -360,6 +363,19 @@ shipmentsRouter.post('/', publicWriteLimiter,
       0, 1, 1, 1,
       createdTime.occurredAtTs, createdTime.timeZone, registered.titleKey, registered.titleVarsJson
     );
+
+    // booking.confirmed to the sender (NOTIFICATIONS_SPEC §4) when staff book it in the console and
+    // the sender has an email. Public bookings get no email here: the address would be typed by
+    // anyone, with no one checking the booking first.
+    const senderEmail = typeof s.sender?.email === 'string' ? s.sender.email.trim() : '';
+    if (creator && isDeliverableAddress(senderEmail)) {
+      const locale = s.notifyLocale === 'fr' ? 'fr' : 'en';
+      queueEmail({
+        to: senderEmail, template: 'booking.confirmed', locale,
+        vars: { name: cleanVar(String(s.sender?.name ?? '').trim().split(/\s+/)[0] ?? ''), id: trackingNumber, link: trackUrl(trackingNumber, locale) },
+        related: { type: 'shipment', id: trackingNumber },
+      });
+    }
 
     const createdRow = db.prepare('SELECT * FROM shipments WHERE tracking_number = ?').get(trackingNumber);
     res.status(201).json({ success: true, data: formatShipment(createdRow) });

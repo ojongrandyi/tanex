@@ -6,6 +6,7 @@ import { initIamSchema } from './auth/schema.js';
 import { createMailTables } from './mail/outbox.js';
 import { createBlogTables } from './blog/schema.js';
 import { createDispatchTables } from './dispatch/schema.js';
+import { createNotificationTables } from './notifications/log.js';
 
 // DB_PATH lets a real deployment point the database file somewhere OUTSIDE the directory
 // git/the deploy process manages, e.g. a persistent storage path a host provides separately
@@ -317,6 +318,9 @@ export function initDatabase() {
   // ledger (docs/DISPATCH_SPEC.md §3). Empty until the admin enters them.
   createDispatchTables(db);
 
+  // 22. WhatsApp click-to-chat links opened (docs/NOTIFICATIONS_SPEC.md §2), G.8.
+  createNotificationTables(db);
+
   // Safe dynamic migrations for existing databases. Must run after every CREATE TABLE above
   // (shipments through settings) — these ALTER statements target quote_requests, documents
   // and tracking_events too, and running them any earlier throws "no such table" on a
@@ -382,6 +386,8 @@ export function initDatabase() {
   try { db.exec(`ALTER TABLE tracking_events ADD COLUMN title_vars_json TEXT;`); } catch (e) {}
   // Mode the customer asked for on a quote (tracker 2.8); carried onto the shipment on convert.
   try { db.exec(`ALTER TABLE quote_requests ADD COLUMN transport_mode TEXT;`); } catch (e) {}
+  // Language of the quote form (en | fr) for the quote.ready email (G.8); NULL = en for older rows.
+  try { db.exec(`ALTER TABLE quote_requests ADD COLUMN locale TEXT;`); } catch (e) {}
   // Staff user id that booked the shipment in the console (IAM_RBAC_SPEC §7); NULL for public bookings.
   try { db.exec(`ALTER TABLE shipments ADD COLUMN created_by TEXT;`); } catch (e) {}
   // INTERNATIONAL | LOCAL | INTERCITY (DISPATCH_SPEC §3); NULL = INTERNATIONAL for older rows.

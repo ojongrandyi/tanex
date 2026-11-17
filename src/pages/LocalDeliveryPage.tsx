@@ -14,6 +14,7 @@ import { useCompanyContact } from '../utils/useCompanyContact';
 import { normalizePhone } from '../shared/identifier';
 import { SIZE_CLASSES, type SizeClass } from '../shared/localPricing';
 import { buildWhatsAppLink } from '../shared/whatsapp';
+import { logBookingShareTap } from '../services/whatsappLog';
 import { localDeliveryApi, type BookingResult, type LocalQuote, type PublicCity } from '../services/localDeliveryApi';
 import type { MapPin as Pin } from './localDelivery/PinMap';
 import './LocalDeliveryPage.css';
@@ -67,6 +68,7 @@ export const LocalDeliveryPage: React.FC<LocalDeliveryPageProps> = () => {
   const [cities, setCities] = useState<PublicCity[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [loadTick, setLoadTick] = useState(0);
+  const [shareOpened, setShareOpened] = useState(false);
   useEffect(() => {
     let alive = true;
     setLoadFailed(false);
@@ -216,6 +218,7 @@ export const LocalDeliveryPage: React.FC<LocalDeliveryPageProps> = () => {
 
   const bookAnother = () => {
     setDone(null);
+    setShareOpened(false);
     setPickup(emptyPlace());
     setDropoff(emptyPlace());
     setSize('');
@@ -263,12 +266,14 @@ export const LocalDeliveryPage: React.FC<LocalDeliveryPageProps> = () => {
               <div className="tx-ld__done-actions">
                 <Link page="track-result" param={done.trackingNumber} className="tx-btn tx-btn--primary">{t('book.success.track')}</Link>
                 {wa && (
-                  <a className="tx-btn tx-btn--secondary" href={wa} target="_blank" rel="noopener noreferrer">
+                  <a className="tx-btn tx-btn--secondary" href={wa} target="_blank" rel="noopener noreferrer"
+                    onClick={() => { setShareOpened(true); logBookingShareTap(done.trackingNumber); }}>
                     <MessageCircle aria-hidden="true" />{t('book.success.whatsapp')}
                   </a>
                 )}
                 <Button variant="ghost" onClick={bookAnother}>{t('book.success.again')}</Button>
               </div>
+              {shareOpened && <p className="tx-ld__hint" aria-live="polite">{t('book.success.whatsappOpened')}</p>}
             </div>
           </div>
         </section>

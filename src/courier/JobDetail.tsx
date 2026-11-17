@@ -10,6 +10,9 @@ import { FailSheet, PickupSheet, PodSheet, type CourierStep } from './sheets';
 import { StatusChip } from './ui';
 import type { LocationSharing } from './useLocationSharing';
 import { LocationCard } from './LocationCard';
+import { buildJobMessages, type JobMessageTemplate } from '../shared/jobMessages';
+import { pagePath } from '../router/routes';
+import { logWhatsAppTap } from '../services/whatsappLog';
 
 const JobMap = lazy(() => import('./JobMap').then((m) => ({ default: m.JobMap })));
 
@@ -35,6 +38,56 @@ const PlaceCard: React.FC<{ kind: 'pickup' | 'dropoff'; place: CourierPlace }> =
           : <span className="tx-cr-btn tx-cr-btn--secondary is-disabled" aria-disabled="true"><MessageCircle size={20} aria-hidden="true" />{t('job.whatsApp')}</span>}
         <a className="tx-cr-btn tx-cr-btn--secondary" href={mapsLink(place)} target="_blank" rel="noopener noreferrer"><Navigation size={20} aria-hidden="true" />{t('job.openMaps')}</a>
       </div>
+    </section>
+  );
+};
+
+const MESSAGE_LABEL: Partial<Record<JobMessageTemplate, 'messages.onTheWay' | 'messages.delivered' | 'messages.failed'>> = {
+  'local.on_the_way': 'messages.onTheWay',
+  'local.delivered': 'messages.delivered',
+  'local.failed': 'messages.failed',
+};
+
+/**
+ * WhatsApp messages for the step the courier just recorded (DISPATCH_SPEC §10): on the way to the
+ * recipient, delivered or failed to the sender. Written in the job's language, not the app's.
+ * Each tap is logged (notification_log); the courier still taps Send in WhatsApp.
+ */
+const MessagesCard: React.FC<{ job: CourierJob; status: DispatchStatus }> = ({ job, status }) => {
+  const { t } = useCourierText();
+  const [opened, setOpened] = useState<string[]>([]);
+  const locale = job.notifyLocale === 'fr' ? 'fr' : 'en';
+  const messages = buildJobMessages({
+    status, trackingNumber: job.trackingNumber, locale,
+    trackLink: `${window.location.origin}${pagePath('track-result', job.trackingNumber, locale)}`,
+    senderName: job.pickup.contactName, senderPhone: job.pickup.contactPhone,
+    recipientName: job.dropoff.contactName, recipientPhone: job.dropoff.contactPhone,
+    riderFirstName: job.courier?.publicFirstName ?? null, podRecipientName: job.pod.recipientName,
+    deliveredAt: job.deliveredAt ?? (status === 'DELIVERED' ? Date.now() : null), failureReason: job.failureReason,
+  }, 'courier');
+  if (messages.length === 0) return null;
+  return (
+    <section className="tx-cr-facts" aria-labelledby="tx-cr-messages">
+      <p id="tx-cr-messages"><strong>{t('messages.title')}</strong></p>
+      <p className="tx-cr-muted">{t('messages.hint')}</p>
+      {messages.map((m) => {
+        const key = `${m.template}:${m.to}`;
+        const label = t(MESSAGE_LABEL[m.template] ?? 'messages.title');
+        return (
+          <div key={key} className="tx-cr-message">
+            {m.link ? (
+              <a className="tx-cr-btn tx-cr-btn--secondary" href={m.link} target="_blank" rel="noopener noreferrer"
+                onClick={() => { setOpened((o) => (o.includes(key) ? o : [...o, key])); logWhatsAppTap({ jobId: job.id, template: m.template, to: m.to }); }}>
+                <MessageCircle size={20} aria-hidden="true" />{label}
+              </a>
+            ) : (
+              <span className="tx-cr-btn tx-cr-btn--secondary is-disabled" aria-disabled="true"><MessageCircle size={20} aria-hidden="true" />{label}</span>
+            )}
+            {!m.link && <span className="tx-cr-muted">{t('messages.noPhone')}</span>}
+            {opened.includes(key) && <span className="tx-cr-muted" role="status">{t('messages.opened')}</span>}
+          </div>
+        );
+      })}
     </section>
   );
 };
@@ -104,6 +157,8 @@ export const JobDetail: React.FC<{
         {job.hasDeliveryCode && <p>{t('job.codeNeeded')}</p>}
         {job.attempts > 0 && <p>{t('job.attempts', { n: job.attempts })}</p>}
       </section>
+
+      <MessagesCard job={job} status={status} />
 
       {(p || actions.includes('decline') || actions.includes('fail')) && (
         <div className="tx-cr-actionbar">

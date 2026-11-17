@@ -21,6 +21,8 @@ const BlogPreview = lazy(() => import('./blog/BlogPreview').then((m) => ({ defau
 // Tariffs and Couriers (DISPATCH_SPEC §3, §5): their own chunk, with the map pin picker.
 const TariffsView = lazy(() => import('./dispatch/TariffsView').then((m) => ({ default: m.TariffsView })));
 const CouriersView = lazy(() => import('./dispatch/CouriersView').then((m) => ({ default: m.CouriersView })));
+// Cash & Mobile Money (DISPATCH_SPEC §9, G.8): its own chunk.
+const CashView = lazy(() => import('./cash/CashView').then((m) => ({ default: m.CashView })));
 // Dispatch board (DISPATCH_SPEC §7): its own chunk; Leaflet loads with its map.
 const DispatchBoardView = lazy(() => import('./dispatch/DispatchBoardView').then((m) => ({ default: m.DispatchBoardView })));
 
@@ -363,6 +365,11 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
         {currentView === 'couriers' && (
           <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
             <CouriersView searchQuery={globalSearch} />
+          </Suspense>
+        )}
+        {currentView === 'cash' && (
+          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+            <CashView searchQuery={globalSearch} />
           </Suspense>
         )}
 

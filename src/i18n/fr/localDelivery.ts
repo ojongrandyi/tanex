@@ -69,6 +69,7 @@ const localDelivery: Translation<LocalDeliveryMessages> = {
       id: 'Votre numéro de suivi est {id}.',
       track: 'Suivre cette livraison',
       whatsapp: 'Envoyer le suivi au destinataire sur WhatsApp',
+      whatsappOpened: 'Ouvert dans WhatsApp. Appuyez sur Envoyer pour le partager.',
       again: 'Réserver une autre livraison',
     },
     unavailable: "La réservation en ligne n'est pas encore ouverte. Appelez-nous ou écrivez-nous sur WhatsApp et nous réserverons votre livraison.",

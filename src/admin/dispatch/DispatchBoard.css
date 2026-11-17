@@ -546,3 +546,8 @@
     max-height: 70vh;
   }
 }
+
+/* WhatsApp click-to-chat buttons in the job drawer (G.8) */
+.tx-board-wa { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.tx-board-wa li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.tx-board-wa a.tx-iam-btn { text-decoration: none; }

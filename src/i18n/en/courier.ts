@@ -111,6 +111,16 @@ const courier = {
     needReference: 'Enter the transaction ID for mobile money.',
     needAmount: 'Enter the amount collected.',
   },
+  // WhatsApp messages to the customer at the courier's steps (G.8, owner to confirm).
+  messages: {
+    title: 'Message the customer',
+    hint: 'Opens WhatsApp with the message ready. You still tap Send.',
+    onTheWay: 'Tell the recipient you are on the way',
+    delivered: 'Tell the sender it was delivered',
+    failed: 'Tell the sender the delivery did not happen',
+    opened: 'Opened in WhatsApp',
+    noPhone: 'No valid phone number for this person.',
+  },
   methods: {
     CASH: 'Cash',
     MTN_MOMO: 'MTN MoMo',

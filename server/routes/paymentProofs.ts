@@ -14,6 +14,9 @@ import { OPERATIONS_CENTRE } from '../../src/config/brand.js';
 import { PROOF_LIMITS, PROOF_STATUSES } from '../../src/shared/paymentProof.js';
 import type { AdminPaymentProof, ProofStatus, PublicProofStatus } from '../../src/shared/paymentProof.js';
 import { serverError } from '../errors.js';
+import { queueEmail } from '../mail/outbox.js';
+import { cleanVar } from '../mail/layout.js';
+import { shipmentSenderEmail } from '../dispatch/notify.js';
 
 // Proofs of payment (docs/update.md Phase F). The screenshots are private: they are only served
 // through admin-authenticated routes, never from /media.
@@ -201,6 +204,17 @@ paymentsRouter.post('/proofs/:id/approve', requirePermission('payments.manage'),
     } catch (err) {
       db.exec('ROLLBACK');
       throw err;
+    }
+    // payment.confirmed to the sender when the shipment has their email (NOTIFICATIONS_SPEC §4), in
+    // the language of its delivery job when there is one.
+    const email = shipmentSenderEmail(db, proof.tracking_number);
+    if (email) {
+      const job = db.prepare("SELECT notify_locale FROM dispatch_jobs WHERE tracking_number = ? ORDER BY created_at_ts DESC LIMIT 1").get(proof.tracking_number) as { notify_locale: string } | undefined;
+      queueEmail({
+        to: email, template: 'payment.confirmed', locale: job?.notify_locale === 'fr' ? 'fr' : 'en',
+        vars: { id: proof.tracking_number, reason: cleanVar(payment.charge_reason, 120) },
+        related: { type: 'shipment', id: proof.tracking_number },
+      });
     }
     res.json({ success: true, data: getProof(proof.id) });
   } catch (err: any) {

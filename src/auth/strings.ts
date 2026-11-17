@@ -169,6 +169,7 @@ export const IAM_TEXT = {
     whatsapp: 'Send on WhatsApp',
     whatsappHint: 'Opens WhatsApp with the message ready. You still tap Send.',
     whatsappNoPhone: 'Add a valid phone number to this account to send it on WhatsApp.',
+    whatsappOpened: 'Opened in WhatsApp. Tap Send there to deliver it.',
     done: 'Done'
   },
   roles: {
