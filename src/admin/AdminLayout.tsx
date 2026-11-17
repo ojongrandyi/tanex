@@ -33,6 +33,7 @@ import { AUTH_TEXT, IAM_TEXT } from '../auth/strings';
 import { BLOG_MENU } from './blog/menuText';
 import { DISPATCH_MENU } from './dispatch/menuText';
 import { LOGO_ALT, LOGO_WORDMARK_HEIGHT, LOGO_WORDMARK_WHITE, LOGO_WORDMARK_WIDTH, TAGLINE } from '../config/brand';
+import { Button } from '../components/ui';
 import { canOpenView, firstAllowedView, type AdminViewType } from './views';
 import './AdminLayout.css';
 
@@ -199,9 +200,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   return (
     <div className="ngf-admin-root">
       {/* =========================================================================
-          LEFT SIDEBAR: EXECUTIVE DISPATCH COMMAND (DEEP NAVY)
+          SIDEBAR: Chocolate 950, a .tx-dark context for the role tokens (I.1)
           ========================================================================= */}
-      <aside className={`ngf-admin-sidebar ${mobileSidebarOpen ? 'open' : ''}`}>
+      <aside className={`ngf-admin-sidebar tx-dark ${mobileSidebarOpen ? 'open' : ''}`}>
         {/* Brand Header */}
         <div className="admin-sidebar-header">
           <div className="admin-brand-card" onClick={() => onSelectView(homeView)}>
@@ -491,15 +492,17 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
         {/* Sidebar Footer: Return to Public & Dispatcher Card */}
         <div className="admin-sidebar-footer">
-          <button
-            type="button"
-            className="btn-exit-to-public"
+          <Button
+            variant="onDark"
+            size="sm"
+            block
+            className="admin-sidebar-site-link"
             onClick={() => onNavigatePublic('home')}
             title="Switch to public customer view"
+            iconEnd={<ArrowUpRight size={16} />}
           >
-            <span>View Public Website</span>
-            <ArrowUpRight size={16} />
-          </button>
+            View Public Website
+          </Button>
 
           <div className="sidebar-operator-card">
             <div className="operator-avatar" aria-hidden="true">

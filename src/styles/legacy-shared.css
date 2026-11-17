@@ -144,7 +144,7 @@
 }
 
 /* AdminLogin.css: the console's loading placeholder (App.tsx) shows this shell before the
-   sign-in chunk and its stylesheet arrive. */
+   sign-in chunk and its stylesheet arrive. Same ground as the sign-in screen (I.1). */
 .admin-login-shell {
   min-height: 100vh;
   width: 100%;
@@ -152,37 +152,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--ngf-ink-950);
+  background-color: var(--tx-choc-950);
   background-image:
-    radial-gradient(ellipse at center, rgba(10, 12, 16, 0.35) 0%, rgba(10, 12, 16, 0.82) 75%),
-    linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.25) 45%, rgba(10, 12, 16, 0.7) 100%),
-    url('/images/site/locations-hero-1600.jpg');
-  background-image:
-    radial-gradient(ellipse at center, rgba(10, 12, 16, 0.35) 0%, rgba(10, 12, 16, 0.82) 75%),
-    linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.25) 45%, rgba(10, 12, 16, 0.7) 100%),
-    image-set(url('/images/site/locations-hero-1600.webp') type('image/webp'), url('/images/site/locations-hero-1600.jpg') type('image/jpeg'));
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+    radial-gradient(60% 45% at 50% 0%, rgb(var(--tx-orange-500-rgb) / 0.14) 0%, transparent 70%),
+    linear-gradient(180deg, var(--tx-choc-950) 0%, var(--tx-choc-900) 100%);
   padding: 1.5rem;
   box-sizing: border-box;
-  font-family: var(--ngf-font-sans, 'Inter', sans-serif);
-}
-
-@media (max-width: 768px) {
-  .admin-login-shell {
-    background-image:
-      radial-gradient(ellipse at center, rgba(10, 12, 16, 0.35) 0%, rgba(10, 12, 16, 0.82) 75%),
-      linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.25) 45%, rgba(10, 12, 16, 0.7) 100%),
-      image-set(url('/images/site/locations-hero-1024.webp') type('image/webp'), url('/images/site/locations-hero-1024.jpg') type('image/jpeg'));
-  }
-}
-
-@media (min-width: 1800px) {
-  .admin-login-shell {
-    background-image:
-      radial-gradient(ellipse at center, rgba(10, 12, 16, 0.35) 0%, rgba(10, 12, 16, 0.82) 75%),
-      linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.25) 45%, rgba(10, 12, 16, 0.7) 100%),
-      image-set(url('/images/site/locations-hero-2400.webp') type('image/webp'), url('/images/site/locations-hero-2400.jpg') type('image/jpeg'));
-  }
+  font-family: var(--tx-font-body);
 }

@@ -1,6 +1,6 @@
 # Free stock photos (Pexels License)
 
-> **E.7 (2026-11-09):** the TanEx redesign no longer uses these photos on the public site; their optimised copies were removed from `Public/images/site/`. Only `locations-hero` (free-stock) remains, as the console sign-in background until I.1. Records kept for history.
+> **E.7 (2026-11-09):** the TanEx redesign no longer uses these photos on the public site; their optimised copies were removed from `Public/images/site/`. Only `locations-hero` (free-stock) remains, as the console sign-in background until I.1. **I.1 (2026-11-17)** removed it too: no stock photo is published any more. Records kept for history.
 
 Downloaded 2026-10-02 from Pexels as the photographer's original file (full resolution, no resizing).
 Pexels License: free for commercial use, no attribution required, may be modified.

@@ -88,7 +88,7 @@ export const ForcedPasswordChange: React.FC = () => {
         {field(confirm, setConfirm, F.confirm, 'new-password')}
         <p className="tx-auth-hint">{F.hint}</p>
         <AuthError message={error} />
-        <button type="submit" className="admin-login-submit" disabled={submitting || !current || !next || !confirm}>
+        <button type="submit" className="admin-login-submit tx-btn tx-btn--primary tx-btn--block" disabled={submitting || !current || !next || !confirm}>
           {submitting ? F.busy : F.submit}
         </button>
       </form>

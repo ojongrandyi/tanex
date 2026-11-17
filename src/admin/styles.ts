@@ -17,3 +17,5 @@ import './pages/SettingsView.css';
 import './pages/MessagesView.css';
 import './components/ShipmentControlModal.css';
 import './AdminLogin.css';
+// The shared console look (I.1), last so it sits on top of the view stylesheets.
+import './console-theme.css';

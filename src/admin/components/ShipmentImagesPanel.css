@@ -46,7 +46,7 @@
   padding: 1rem;
   border: 1.5px dashed var(--ngf-slate-300);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-700);
   font-size: 0.8rem;
   text-align: center;
@@ -75,7 +75,7 @@
   padding: 0.4rem 0.75rem;
   border: 1px solid var(--ngf-slate-300);
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-800);
   font-size: 0.78rem;
   font-weight: 600;
@@ -113,7 +113,7 @@
   height: 30px;
   border: 1px solid var(--ngf-slate-200);
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-700);
   cursor: pointer;
   flex-shrink: 0;
@@ -151,7 +151,7 @@
   padding: 0.4rem 0.55rem;
   border: 1px solid var(--ngf-slate-300);
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-900);
   font-size: 0.8rem;
   font-family: inherit;
@@ -195,7 +195,7 @@
   padding: 0.6rem;
   border: 1px solid var(--ngf-slate-200);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--tx-white);
 }
 
 .ngf-images-pending-row > img {
@@ -257,7 +257,7 @@
   padding: 0.5rem;
   border: 1px solid var(--ngf-slate-200);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--tx-white);
 }
 
 .ngf-images-thumb {
@@ -286,7 +286,7 @@
   padding: 0.1rem 0.4rem;
   border-radius: 4px;
   background: var(--ngf-slate-900);
-  color: #ffffff;
+  color: var(--tx-white);
   font-size: 0.65rem;
   font-weight: 700;
 }

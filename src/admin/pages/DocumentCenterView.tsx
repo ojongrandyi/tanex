@@ -307,6 +307,16 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
     };
   }, [activeMenuDocId]);
 
+  // Escape closes the document preview, like a click on its backdrop (#57).
+  useEffect(() => {
+    if (!previewDoc) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPreviewDoc(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [previewDoc]);
+
   const handleOpenPreview = (doc: AdminDocument) => {
     setPreviewDoc(doc);
     setSelectedVersionIndex(0);

@@ -16,13 +16,13 @@
 }
 
 .trash-modal-card {
-  background: #ffffff;
+  background: var(--tx-white);
   border-radius: 14px;
   width: 100%;
   max-width: 560px;
   max-height: 80vh;
-  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.08);
-  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 45px -10px rgb(var(--tx-choc-950-rgb) / 0.25), 0 0 0 1px rgb(var(--tx-choc-950-rgb) / 0.08);
+  border: 1px solid var(--tx-choc-100);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -36,7 +36,7 @@
 
 .trash-modal-top {
   padding: 1.25rem 1.25rem 1rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--tx-cream-200);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -53,21 +53,21 @@
   margin: 0 0 0.15rem;
   font-size: 1.1rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--tx-choc-900);
 }
 
 .trash-modal-title-group p {
   margin: 0;
   font-size: 0.78rem;
-  color: #64748b;
+  color: var(--tx-choc-600);
   line-height: 1.4;
   max-width: 400px;
 }
 
 .trash-close-btn {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  color: #94a3b8;
+  background: var(--tx-white);
+  border: 1px solid var(--tx-choc-100);
+  color: var(--tx-choc-500);
   cursor: pointer;
   padding: 0.35rem;
   border-radius: 8px;
@@ -79,9 +79,9 @@
 }
 
 .trash-close-btn:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #cbd5e1;
+  background: var(--tx-cream-100);
+  color: var(--tx-choc-900);
+  border-color: var(--tx-choc-200);
 }
 
 .trash-toast-inline {
@@ -107,12 +107,12 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 2.5rem 1rem;
-  color: #64748b;
+  color: var(--tx-choc-600);
   text-align: center;
 }
 
 .trash-empty-state strong {
-  color: #0f172a;
+  color: var(--tx-choc-900);
   font-size: 0.95rem;
 }
 
@@ -133,8 +133,8 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem 0.9rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--tx-cream-100);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 10px;
   flex-wrap: wrap;
 }
@@ -148,12 +148,12 @@
 
 .trash-tracking {
   font-size: 0.85rem;
-  color: #0f172a;
+  color: var(--tx-choc-900);
 }
 
 .trash-route {
   font-size: 0.75rem;
-  color: #475569;
+  color: var(--tx-choc-600);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -161,7 +161,7 @@
 
 .trash-cargo {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--tx-choc-500);
 }
 
 .trash-row-actions {
@@ -181,7 +181,7 @@
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--tx-white);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -200,16 +200,16 @@
   align-items: center;
   justify-content: center;
   padding: 0.4rem;
-  background: #ffffff;
+  background: var(--tx-white);
   border: 1px solid #fecaca;
   border-radius: 6px;
-  color: #dc2626;
+  color: var(--tx-danger-600);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .trash-btn-purge:hover {
-  background: #fef2f2;
+  background: var(--tx-danger-50);
 }
 
 .trash-btn-purge:disabled {
@@ -229,23 +229,23 @@
 
 .trash-btn-ghost {
   padding: 0.35rem 0.7rem;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--tx-white);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 6px;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--tx-choc-600);
   cursor: pointer;
 }
 
 .trash-btn-danger {
   padding: 0.35rem 0.7rem;
-  background: #dc2626;
+  background: var(--tx-danger-600);
   border: none;
   border-radius: 6px;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--tx-white);
   cursor: pointer;
 }
 

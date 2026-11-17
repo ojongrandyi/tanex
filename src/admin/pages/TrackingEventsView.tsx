@@ -135,7 +135,7 @@ const getEventColors = (statusStr?: string, title?: string) => {
   if (s.includes('RECEIVED')) {
     return { color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', text: '#115e59', label: 'RECEIVED', theme: 'theme-received' };
   }
-  return { color: '#475569', bg: '#f8fafc', border: '#cbd5e1', text: '#334155', label: 'SHIPMENT CREATED', theme: 'theme-created' };
+  return { color: 'var(--tx-choc-600)', bg: 'var(--tx-cream-100)', border: 'var(--tx-choc-200)', text: 'var(--tx-choc-700)', label: 'SHIPMENT CREATED', theme: 'theme-created' };
 };
 
 interface TrackingEventsViewProps {
@@ -703,7 +703,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
 
                     {/* Customer-Facing Tracking Message */}
                     <div className="customer-facing-box">
-                      <span className="box-tag-label" style={{ color: theme.color }}>CUSTOMER-FACING MESSAGE</span>
+                      <span className="box-tag-label" style={{ color: theme.text }}>CUSTOMER-FACING MESSAGE</span>
                       <p className="customer-msg-text">"{event.description}"</p>
                     </div>
 
@@ -780,7 +780,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                 </label>
                 <div className="input-grid-3">
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: '#64748b' }}>Date</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Date</label>
                     <input
                       type="date"
                       value={formEventDate}
@@ -790,7 +790,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                     />
                   </div>
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: '#64748b' }}>Time</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Time</label>
                     <input
                       type="text"
                       value={formEventTime}
@@ -801,7 +801,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                     />
                   </div>
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: '#64748b' }}>Timezone</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Timezone</label>
                     <select
                       value={formTimezone}
                       onChange={e => setFormTimezone(e.target.value)}
@@ -958,7 +958,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                 </label>
                 <div className="input-grid-3">
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: '#64748b' }}>Date (e.g. August 20, 2026)</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Date (e.g. August 20, 2026)</label>
                     <input
                       type="text"
                       value={correctedEventDate}
@@ -969,7 +969,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                     />
                   </div>
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: '#64748b' }}>Time (e.g. 4:35 PM)</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Time (e.g. 4:35 PM)</label>
                     <input
                       type="text"
                       value={correctedEventTime}
@@ -980,7 +980,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                     />
                   </div>
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: '#64748b' }}>Timezone</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Timezone</label>
                     <select
                       value={correctedTimezone}
                       onChange={e => setCorrectedTimezone(e.target.value)}

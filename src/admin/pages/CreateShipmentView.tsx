@@ -3881,7 +3881,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     {petSpecialInstructions && (
                       <div style={{ marginTop: '0.4rem' }}>
                         <small>Care & Feeding Directives:</small>
-                        <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                        <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: 'var(--tx-choc-200)' }}>
                           Last Fed: {petLastFed} | Hydration: {petWaterProtocol} | Notes: {petSpecialInstructions}
                         </p>
                       </div>

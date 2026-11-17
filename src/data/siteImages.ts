@@ -7,7 +7,6 @@ export interface SiteImageInfo {
 }
 
 export const SITE_IMAGES = {
-  'locations-hero': { width: 2400, height: 1200, widths: [640, 1024, 1600, 2400] },
   'about-md': { width: 810, height: 1013, widths: [400, 640, 810] },
   'svc-road': { width: 900, height: 990, widths: [400, 640, 900] },
   'svc-warehousing': { width: 760, height: 836, widths: [400, 640] },

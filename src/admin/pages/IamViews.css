@@ -142,7 +142,7 @@
 }
 
 .tx-iam-notice.error {
-  background: #fef2f2;
+  background: var(--tx-danger-50);
   border: 1px solid #fecaca;
   color: #b91c1c;
 }
@@ -267,7 +267,7 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgb(var(--tx-choc-950-rgb) / 0.45);
 }
 
 .tx-iam-dialog {

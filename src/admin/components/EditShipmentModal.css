@@ -18,13 +18,13 @@
 }
 
 .edit-modal-card {
-  background: #ffffff;
+  background: var(--tx-white);
   border-radius: 14px;
   width: 100%;
   max-width: 660px;
   max-height: 94vh;
-  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(15, 23, 42, 0.08);
-  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 45px -10px rgb(var(--tx-choc-950-rgb) / 0.2), 0 0 0 1px rgb(var(--tx-choc-950-rgb) / 0.08);
+  border: 1px solid var(--tx-choc-100);
   display: flex;
   flex-direction: column;
   animation: editModalPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -44,12 +44,12 @@
 
 .edit-modal-header {
   padding: 1rem 1.25rem 0.85rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--tx-cream-200);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  background: #ffffff;
+  background: var(--tx-white);
 }
 
 .edit-title-group {
@@ -82,21 +82,21 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--tx-choc-900);
 }
 
 .edit-route-sub {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--tx-choc-600);
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
 }
 
 .edit-close-btn {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  color: #94a3b8;
+  background: var(--tx-white);
+  border: 1px solid var(--tx-choc-100);
+  color: var(--tx-choc-500);
   cursor: pointer;
   padding: 0.3rem;
   border-radius: 8px;
@@ -108,9 +108,9 @@
 }
 
 .edit-close-btn:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #cbd5e1;
+  background: var(--tx-cream-100);
+  color: var(--tx-choc-900);
+  border-color: var(--tx-choc-200);
 }
 
 /* Form Body */
@@ -130,8 +130,8 @@
 }
 
 .form-section-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--tx-cream-100);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 10px;
   padding: 0.75rem 0.95rem;
   display: flex;
@@ -146,7 +146,7 @@
   gap: 0.4rem;
   font-size: 0.72rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--tx-choc-900);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -201,7 +201,7 @@
 .edit-field label {
   font-size: 0.7rem;
   font-weight: 700;
-  color: #475569;
+  color: var(--tx-choc-600);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -214,11 +214,11 @@
   box-sizing: border-box;
   min-width: 0;
   padding: 0.45rem 0.65rem;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  background: var(--tx-white);
+  border: 1px solid var(--tx-choc-200);
   border-radius: 6px;
   font-size: 0.8125rem;
-  color: #0f172a;
+  color: var(--tx-choc-900);
   outline: none;
   transition: border-color 0.15s ease;
   font-family: inherit;
@@ -279,25 +279,25 @@
   justify-content: flex-end;
   gap: 0.65rem;
   padding-top: 0.5rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--tx-cream-200);
 }
 
 .edit-btn-cancel {
   padding: 0.55rem 1.1rem;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--tx-white);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 6px;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--tx-choc-600);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .edit-btn-cancel:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #cbd5e1;
+  background: var(--tx-cream-100);
+  color: var(--tx-choc-900);
+  border-color: var(--tx-choc-200);
 }
 
 .edit-btn-save {

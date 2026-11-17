@@ -134,7 +134,7 @@
 }
 
 .message-summary:hover {
-  background: #f8fafc;
+  background: var(--tx-cream-100);
 }
 
 .message-status-dot {

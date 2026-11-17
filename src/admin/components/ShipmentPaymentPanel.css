@@ -70,7 +70,7 @@
   padding: 0.85rem;
   border: 1px solid var(--ngf-slate-200);
   border-radius: 9px;
-  background: #ffffff;
+  background: var(--tx-white);
 }
 
 .ngf-spp-amount {
@@ -139,7 +139,7 @@
   padding: 0.45rem 0.8rem;
   border: 1px solid var(--ngf-slate-300);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-800);
   font-size: 0.8rem;
   font-weight: 700;

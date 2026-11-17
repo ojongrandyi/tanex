@@ -65,7 +65,7 @@
   padding: 0.5rem 0.65rem;
   border: 1px solid var(--ngf-slate-300);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-900);
   font-size: 0.85rem;
   font-family: inherit;
@@ -108,7 +108,7 @@
   padding: 0.45rem 0.8rem;
   border: 1px solid var(--ngf-slate-300);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-800);
   font-size: 0.8rem;
   font-weight: 700;
@@ -143,7 +143,7 @@
   height: 30px;
   border: 1px solid var(--ngf-slate-200);
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-700);
   cursor: pointer;
   flex-shrink: 0;
@@ -212,7 +212,7 @@
   padding: 0.6rem 0.7rem;
   border: 1px solid var(--ngf-slate-200);
   border-radius: 9px;
-  background: #ffffff;
+  background: var(--tx-white);
 }
 
 .ngf-pre-account.has-error {
@@ -316,7 +316,7 @@
   padding: 0.6rem 0.7rem;
   border: 1px solid var(--ngf-slate-200);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--tx-white);
   color: var(--ngf-slate-900);
   font-size: 0.78rem;
   font-weight: 600;
@@ -345,8 +345,8 @@
   flex-shrink: 0;
   border: 1.5px solid var(--ngf-slate-300);
   border-radius: 5px;
-  background: #ffffff;
-  color: #ffffff;
+  background: var(--tx-white);
+  color: var(--tx-white);
 }
 
 .ngf-pre-type.is-selected {

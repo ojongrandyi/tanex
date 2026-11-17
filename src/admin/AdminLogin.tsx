@@ -136,7 +136,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onNavigatePublic }) => {
 
         <AuthError message={error} />
 
-        <button type="submit" className="admin-login-submit" disabled={submitting || !identifier.trim() || !password}>
+        <button type="submit" className="admin-login-submit tx-btn tx-btn--primary tx-btn--block" disabled={submitting || !identifier.trim() || !password}>
           {submitting ? T.busy : T.submit}
           {!submitting && <ArrowRight size={15} aria-hidden="true" />}
         </button>
@@ -203,7 +203,7 @@ const ForgotPassword: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             />
           </div>
           <AuthError message={error} />
-          <button type="submit" className="admin-login-submit" disabled={submitting || !email.trim()}>
+          <button type="submit" className="admin-login-submit tx-btn tx-btn--primary tx-btn--block" disabled={submitting || !email.trim()}>
             {submitting ? F.busy : F.submit}
           </button>
         </form>
@@ -274,7 +274,7 @@ const ResetPassword: React.FC<{ token: string; onDone: () => void; onAskAgain?: 
             <CheckCircle2 size={14} aria-hidden="true" />
             <span>{R.done}</span>
           </div>
-          <button type="button" className="admin-login-submit" onClick={onDone}>
+          <button type="button" className="admin-login-submit tx-btn tx-btn--primary tx-btn--block" onClick={onDone}>
             {R.signIn}
             <ArrowRight size={15} aria-hidden="true" />
           </button>
@@ -283,7 +283,7 @@ const ResetPassword: React.FC<{ token: string; onDone: () => void; onAskAgain?: 
         <>
           <AuthError message={R.invalid} />
           {onAskAgain && (
-            <button type="button" className="admin-login-submit" onClick={onAskAgain}>
+            <button type="button" className="admin-login-submit tx-btn tx-btn--primary tx-btn--block" onClick={onAskAgain}>
               {R.askAgain}
             </button>
           )}
@@ -298,7 +298,7 @@ const ResetPassword: React.FC<{ token: string; onDone: () => void; onAskAgain?: 
             {field(confirm, setConfirm, R.confirm)}
             <p className="tx-auth-hint">{R.hint}</p>
             <AuthError message={error} />
-            <button type="submit" className="admin-login-submit" disabled={submitting || !next || !confirm}>
+            <button type="submit" className="admin-login-submit tx-btn tx-btn--primary tx-btn--block" disabled={submitting || !next || !confirm}>
               {submitting ? R.busy : R.submit}
             </button>
           </form>

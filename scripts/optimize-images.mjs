@@ -337,11 +337,9 @@ async function buildBrand() {
 // `widths` limits a hero to the step widths its page actually uses.
 // free-stock/* are full-resolution Pexels originals (see images/free-stock/SOURCES.md); each hero
 // slot has its own photo. Outputs stay capped at STEP_WIDTHS / CARD_STEP_SIZES.
-// E.7: the previous deployment's stock photos were removed with the redesign; the console login
-// background (locations-hero, phase I) and TanEx's own photos remain.
+// E.7: the previous deployment's stock photos were removed with the redesign; I.1 removed the last
+// one (locations-hero, the old console sign-in background). Only TanEx's own photos remain.
 const PHOTOS = [
-  // Console sign-in background (AdminLogin.css), until the console reskin (I.1).
-  { name: 'locations-hero', src: 'free-stock/locations-hero.jpg', kind: 'hero', aspect: 2 / 1 },
   // TanEx owner photos (images/tanex files/, committed). About page leadership slot, 4:5 portrait
   // kept from the top so the face and the TanEx wall sign stay in frame (CONTENT §4, §12).
   { name: 'about-md', src: 'tanex files/Managing Director.png', kind: 'hero', aspect: 4 / 5, position: 'top', quality: { webp: 80, jpeg: 82 }, widths: [400, 640, 810] },
