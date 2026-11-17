@@ -98,6 +98,11 @@ canvas) use `BRAND_COLORS` in `src/config/brand.ts`.
 thousands of lines. Components are then moved to `--tx-*` as they are redesigned; the aliases are deleted at the end
 (tracker I.3). Class prefix for new components: `tx-`. Storage keys for new features: `tx_`.
 
+**Categorical hues (console only, #186):** `--tx-cat-{violet,indigo,rose,teal,sky}-*` tell *kinds* of things apart
+in the console (document types, cargo presets, tracking-event types). They are not brand colours and carry no status
+meaning; each use is paired with an icon and a label, so colour is never the only cue. Text uses the 600+ steps. Do not
+use them on public pages. To change the hues, edit `tokens.css` only.
+
 ### 4.4 How colour is used
 
 - **Light sections:** Cream 100 background, white cards, chocolate text.
