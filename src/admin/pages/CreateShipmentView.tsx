@@ -86,60 +86,50 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   // STEP 1: Shipment Information
   // ----------------------------------------------------
   const [shipmentType, setShipmentType] = useState<ShipmentTypeOption>('Parcel');
-  const [cargoCategory, setCargoCategory] = useState('Automotive & Parts');
+  const [cargoCategory, setCargoCategory] = useState('General Cargo');
   const [service, setService] = useState<ServiceOption>('Express');
   // 'Auto' leaves the mode to inference (road within ~1,500 mi or North America, sea for
   // containers/freight, otherwise air); the server applies the same rule on read.
   const [transportModeChoice, setTransportModeChoice] = useState<'Auto' | TransportMode>('Auto');
   const units = useUnitLabels();
   const money = useCurrency();
-  const [customerRef, setCustomerRef] = useState('PO-45821');
-  const [invoiceRef, setInvoiceRef] = useState('INV-2026-892');
-  const [internalRef, setInternalRef] = useState('INT-CORP-01');
-  const [shipmentDescription, setShipmentDescription] = useState('Generator spare parts');
+  const [customerRef, setCustomerRef] = useState('');
+  const [invoiceRef, setInvoiceRef] = useState('');
+  const [internalRef, setInternalRef] = useState('');
+  const [shipmentDescription, setShipmentDescription] = useState('');
 
   // ----------------------------------------------------
   // VEHICLE CARGO SPECIFIC STATE (When shipmentType === 'Vehicle')
   // ----------------------------------------------------
-  const [vehMake, setVehMake] = useState('Toyota');
-  const [vehModel, setVehModel] = useState('Land Cruiser');
-  const [vehYear, setVehYear] = useState('2024');
+  const [vehMake, setVehMake] = useState('');
+  const [vehModel, setVehModel] = useState('');
+  const [vehYear, setVehYear] = useState('');
   const [vehVin, setVehVin] = useState('');
-  const [vehColor, setVehColor] = useState('White');
+  const [vehColor, setVehColor] = useState('');
   const [vehBodyType, setVehBodyType] = useState('SUV / Crossover');
   const [vehOperable, setVehOperable] = useState(true);
-  const [vehCondition, setVehCondition] = useState('Good');
-  const [vehPlate, setVehPlate] = useState('7XYZ892 (NY)');
-  const [vehTitleNumber, setVehTitleNumber] = useState('TITLE-NY-90214');
-  const [vehWeightLbs, setVehWeightLbs] = useState('5490');
-  const [vehLengthIn, setVehLengthIn] = useState('195');
-  const [vehWidthIn, setVehWidthIn] = useState('78');
-  const [vehHeightIn, setVehHeightIn] = useState('75');
+  const [vehCondition, setVehCondition] = useState('');
+  const [vehPlate, setVehPlate] = useState('');
+  const [vehTitleNumber, setVehTitleNumber] = useState('');
+  const [vehWeightLbs, setVehWeightLbs] = useState('');
+  const [vehLengthIn, setVehLengthIn] = useState('');
+  const [vehWidthIn, setVehWidthIn] = useState('');
+  const [vehHeightIn, setVehHeightIn] = useState('');
 
   // Vehicle Condition Checklist
-  const [damageChecklist, setDamageChecklist] = useState<string[]>(['No major visible damage']);
-  const [inspectionNotes, setInspectionNotes] = useState('Minor 1-inch cosmetic clearcoat mark on rear tailgate. All factory glass intact.');
-  const [itemsReceived, setItemsReceived] = useState<string[]>([
-    'Vehicle',
-    'Primary Key',
-    'Title Document',
-    'Registration'
-  ]);
+  const [damageChecklist, setDamageChecklist] = useState<string[]>([]);
+  const [inspectionNotes, setInspectionNotes] = useState('');
+  const [itemsReceived, setItemsReceived] = useState<string[]>([]);
   // ----------------------------------------------------
   // PALLET CARGO SPECIFIC STATE (When shipmentType === 'Pallet')
   // ----------------------------------------------------
   const [palletStandard, setPalletStandard] = useState('GMA Standard 48×40 in (US Wood)');
-  const [palletCount, setPalletCount] = useState<number>(2);
-  const [palletWeightPerSkid, setPalletWeightPerSkid] = useState<number>(850);
-  const [palletHeightIn, setPalletHeightIn] = useState<number>(54);
+  const [palletCount, setPalletCount] = useState<number>(1);
+  const [palletWeightPerSkid, setPalletWeightPerSkid] = useState<number>(0);
+  const [palletHeightIn, setPalletHeightIn] = useState<number>(0);
   const [palletStackable, setPalletStackable] = useState<boolean>(false);
   const [palletForkliftAccess, setPalletForkliftAccess] = useState('4-Way Forklift Entry');
-  const [palletSecuringChecks, setPalletSecuringChecks] = useState<string[]>([
-    'Heat-Treated (ISPM-15 Certified)',
-    'Heavy Gauge Stretch-Wrapped',
-    'Steel Banded / Strapped',
-    'Corner Edge Protectors'
-  ]);
+  const [palletSecuringChecks, setPalletSecuringChecks] = useState<string[]>([]);
 
   const handleTogglePalletCheck = (check: string) => {
     setPalletSecuringChecks(prev =>
@@ -150,76 +140,70 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   // ----------------------------------------------------
   // CONTAINER CARGO SPECIFIC STATE (When shipmentType === 'Container')
   // ----------------------------------------------------
-  const [containerNumber, setContainerNumber] = useState('MSCU-749102-3');
-  const [containerIsoSize, setContainerIsoSize] = useState('40ft High-Cube (40HC)');
-  const [containerBoltSeal, setContainerBoltSeal] = useState('HSS-NY-984021');
-  const [containerChassisNumber, setContainerChassisNumber] = useState('CHAS-8812 (Tri-axle)');
-  const [containerTerminal, setContainerTerminal] = useState('Port of New York / Newark Container Terminal (PNCT)');
-  const [containerVgmWeight, setContainerVgmWeight] = useState('48200');
+  const [containerNumber, setContainerNumber] = useState('');
+  const [containerIsoSize, setContainerIsoSize] = useState('40ft High-Cube Dry Van (40HC / 9ft 6in)');
+  const [containerBoltSeal, setContainerBoltSeal] = useState('');
+  const [containerChassisNumber, setContainerChassisNumber] = useState('');
+  const [containerTerminal, setContainerTerminal] = useState('');
+  const [containerVgmWeight, setContainerVgmWeight] = useState('');
   const [containerTemperature, setContainerTemperature] = useState('Ambient / Dry Cargo');
-  const [containerCustomsStatus, setContainerCustomsStatus] = useState('Pre-Cleared / Manifest Approved');
+  const [containerCustomsStatus, setContainerCustomsStatus] = useState('');
 
   // ----------------------------------------------------
   // HEAVY FREIGHT SPECIFIC STATE (When shipmentType === 'Freight')
   // ----------------------------------------------------
-  const [freightClass, setFreightClass] = useState('Class 70');
-  const [freightNmfcCode, setFreightNmfcCode] = useState('NMFC 18260-Sub 2');
-  const [freightLoadingMethod, setFreightLoadingMethod] = useState('Standard Raised Commercial Loading Dock');
+  const [freightClass, setFreightClass] = useState('Class 50 (Clean dense freight)');
+  const [freightNmfcCode, setFreightNmfcCode] = useState('');
+  const [freightLoadingMethod, setFreightLoadingMethod] = useState('Standard Raised Commercial Loading Dock (48" Dock Height)');
   const [freightLiftgatePickup, setFreightLiftgatePickup] = useState(false);
   const [freightLiftgateDelivery, setFreightLiftgateDelivery] = useState(true);
   const [freightHazMat, setFreightHazMat] = useState(false);
   const [freightUnNumber, setFreightUnNumber] = useState('');
   const [freightPiecesCount, setFreightPiecesCount] = useState<number>(1);
-  const [freightTotalWeightLbs, setFreightTotalWeightLbs] = useState<number>(1850);
+  const [freightTotalWeightLbs, setFreightTotalWeightLbs] = useState<number>(0);
 
   // ----------------------------------------------------
   // DOCUMENT CARGO SPECIFIC STATE (When shipmentType === 'Document')
   // ----------------------------------------------------
-  const [docEnvelopeType, setDocEnvelopeType] = useState(`${COMPANY_SHORT} Waterproof Pouch`);
+  const [docEnvelopeType, setDocEnvelopeType] = useState(`${COMPANY_SHORT} Waterproof Legal Pouch (12×16 in)`);
   const [docSealNumber, setDocSealNumber] = useState(() => generateReference('seal'));
   const [docDirectSignOnly, setDocDirectSignOnly] = useState(true);
-  const [docUrgentDeadline, setDocUrgentDeadline] = useState('By 10:30 AM Next Business Day');
-  const [docFilingCourtRef, setDocFilingCourtRef] = useState('CASE-2026-NY-4481');
-  const [docContentsDescription, setDocContentsDescription] = useState('Executed Commercial Vehicle Titles & Sales Contracts (35 Pages)');
+  const [docUrgentDeadline, setDocUrgentDeadline] = useState('By 10:30 AM Next Business Day (Priority Legal)');
+  const [docFilingCourtRef, setDocFilingCourtRef] = useState('');
+  const [docContentsDescription, setDocContentsDescription] = useState('');
 
   // ----------------------------------------------------
   // PETS & LIVE ANIMAL SPECIFIC STATE (When shipmentType === 'Pets')
   // ----------------------------------------------------
-  const [petName, setPetName] = useState('Barnaby');
+  const [petName, setPetName] = useState('');
   const [petSpecies, setPetSpecies] = useState('Canine (Dog)');
-  const [petBreed, setPetBreed] = useState('Golden Retriever');
-  const [petAge, setPetAge] = useState('3 Years');
+  const [petBreed, setPetBreed] = useState('');
+  const [petAge, setPetAge] = useState('');
   const [petGender, setPetGender] = useState('Male (Neutered)');
-  const [petWeightLbs, setPetWeightLbs] = useState<number>(68);
-  const [petMicrochip, setPetMicrochip] = useState('985141002849102');
-  const [petCollarTag, setPetCollarTag] = useState('Barnaby • (212) 555-0199');
+  const [petWeightLbs, setPetWeightLbs] = useState<number>(0);
+  const [petMicrochip, setPetMicrochip] = useState('');
+  const [petCollarTag, setPetCollarTag] = useState('');
 
   // Travel Crate & IATA LAR Compliance
   const [petCrateType, setPetCrateType] = useState('IATA LAR Certified Series 400 (Large Rigid Kennel - 36×25×27 in)');
-  const [petCrateLength, setPetCrateLength] = useState<number>(36);
-  const [petCrateWidth, setPetCrateWidth] = useState<number>(25);
-  const [petCrateHeight, setPetCrateHeight] = useState<number>(27);
-  const [petCrateWeightLbs, setPetCrateWeightLbs] = useState<number>(22);
+  const [petCrateLength, setPetCrateLength] = useState<number>(0);
+  const [petCrateWidth, setPetCrateWidth] = useState<number>(0);
+  const [petCrateHeight, setPetCrateHeight] = useState<number>(0);
+  const [petCrateWeightLbs, setPetCrateWeightLbs] = useState<number>(0);
   const [petIsBrachycephalic, setPetIsBrachycephalic] = useState<boolean>(false);
 
   // Veterinary & Health Certificates
-  const [petHealthCertNumber, setPetHealthCertNumber] = useState('CVI-NY-2026-88194');
-  const [petRabiesTag, setPetRabiesTag] = useState('RAB-2027-11-04 (NY Dept of Health)');
-  const [petVetClinic, setPetVetClinic] = useState('Manhattan Animal Health Hospital');
-  const [petVetPhone, setPetVetPhone] = useState('(212) 555-0149');
+  const [petHealthCertNumber, setPetHealthCertNumber] = useState('');
+  const [petRabiesTag, setPetRabiesTag] = useState('');
+  const [petVetClinic, setPetVetClinic] = useState('');
+  const [petVetPhone, setPetVetPhone] = useState('');
   const [petAcclimationCert, setPetAcclimationCert] = useState<boolean>(true);
 
   // Care & Welfare Directives
-  const [petLastFed, setPetLastFed] = useState('4 Hours Prior to Tender (Light Meal)');
-  const [petWaterProtocol, setPetWaterProtocol] = useState('Fresh spring water refreshed at every terminal transfer waypoint');
-  const [petSpecialInstructions, setPetSpecialInstructions] = useState('Gentle handling; favorite comfort blanket inside crate. No sedation per AVMA protocol.');
-  const [petCareDirectives, setPetCareDirectives] = useState<string[]>([
-    'Dual Door-Accessible Food/Water Dishes Attached',
-    'IATA Live Animals (AVI) Green Label Affixed',
-    'Active Climate Control 68°F-74°F Hold Guaranteed',
-    'Absorbent Bedding Layer Pre-Installed',
-    'Emergency 24/7 Vet On-Call Authorized'
-  ]);
+  const [petLastFed, setPetLastFed] = useState('');
+  const [petWaterProtocol, setPetWaterProtocol] = useState('');
+  const [petSpecialInstructions, setPetSpecialInstructions] = useState('');
+  const [petCareDirectives, setPetCareDirectives] = useState<string[]>([]);
 
   const handleTogglePetDirective = (directive: string) => {
     setPetCareDirectives(prev =>
@@ -272,22 +256,14 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   // STEP 3: Packages (For Non-Vehicle Cargo)
   // ----------------------------------------------------
   const [packagesList, setPackagesList] = useState<PackageItem[]>([
-    {
-      id: '1',
-      type: 'Box',
-      weightLbs: 45.0,
-      length: 72,
-      width: 24,
-      height: 18,
-      description: 'Generator spare parts (factory packed)'
-    }
+    { id: '1', type: 'Box', weightLbs: 0, length: 0, width: 0, height: 0, description: '' }
   ]);
 
   // ----------------------------------------------------
   // STEP 4: Route & Intake Location
   // ----------------------------------------------------
   const [initialLocationMode, setInitialLocationMode] = useState<'NOT_RECEIVED' | 'ORIGIN' | 'CUSTOM'>('ORIGIN');
-  const [customInitialLocation, setCustomInitialLocation] = useState('New York Gateway Facility');
+  const [customInitialLocation, setCustomInitialLocation] = useState('');
 
   // ----------------------------------------------------
   // STEP 5: Service & Operational Requirements
@@ -325,12 +301,14 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   // ----------------------------------------------------
   // STEP 6: Pricing (administrator only)
   // ----------------------------------------------------
-  const [baseRate, setBaseRate] = useState<number>(shipmentType === 'Vehicle' ? 1450.00 : 125.00);
-  const [additionalCharges, setAdditionalCharges] = useState<number>(shipmentType === 'Vehicle' ? 150.00 : 25.00);
-  const [surcharges, setSurcharges] = useState<number>(shipmentType === 'Vehicle' ? 95.00 : 12.50);
+  // Charges start at zero and are entered by staff: the console has no tariff for these lanes, and
+  // an invented price must never reach a waybill or receipt (#184).
+  const [baseRate, setBaseRate] = useState<number>(0);
+  const [additionalCharges, setAdditionalCharges] = useState<number>(0);
+  const [surcharges, setSurcharges] = useState<number>(0);
   const [discount, setDiscount] = useState<number>(0.00);
   const [manualAdjustment, setManualAdjustment] = useState<number>(0.00);
-  const [internalPricingNotes, setInternalPricingNotes] = useState('Private negotiated commercial tariff rate.');
+  const [internalPricingNotes, setInternalPricingNotes] = useState('');
 
   // ----------------------------------------------------
   // STEP 7 / Creation State
@@ -388,72 +366,19 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
     }
   }, [previewEstimatedDeliveryDate, expectedDeliveryDateTouched]);
 
-  // Adjust base pricing defaults when switching shipment type
-  useEffect(() => {
-    if (shipmentType === 'Vehicle') {
-      setBaseRate(1450.00);
-      setAdditionalCharges(150.00);
-      setSurcharges(95.00);
-      if (!shipmentDescription || shipmentDescription.includes('spare parts') || shipmentDescription.includes('Skid') || shipmentDescription.includes('Container') || shipmentDescription.includes('Gearbox')) {
-        setShipmentDescription('2024 Toyota Land Cruiser');
-      }
-    } else if (shipmentType === 'Pallet') {
-      setBaseRate(380.00);
-      setAdditionalCharges(45.00);
-      setSurcharges(35.00);
-      if (!shipmentDescription || shipmentDescription.includes('Land Cruiser') || shipmentDescription.includes('spare parts')) {
-        setShipmentDescription('Industrial Machinery Spares (2 Pallet Skids)');
-      }
-    } else if (shipmentType === 'Container') {
-      setBaseRate(2850.00);
-      setAdditionalCharges(350.00);
-      setSurcharges(180.00);
-      if (!shipmentDescription || shipmentDescription.includes('Land Cruiser') || shipmentDescription.includes('spare parts')) {
-        setShipmentDescription('Automotive Sub-Assemblies (40HC FCL Container)');
-      }
-    } else if (shipmentType === 'Freight') {
-      setBaseRate(620.00);
-      setAdditionalCharges(75.00);
-      setSurcharges(55.00);
-      if (!shipmentDescription || shipmentDescription.includes('Land Cruiser') || shipmentDescription.includes('spare parts')) {
-        setShipmentDescription('Heavy Industrial Gearbox & Drivetrain Unit');
-      }
-    } else if (shipmentType === 'Document') {
-      setBaseRate(45.00);
-      setAdditionalCharges(10.00);
-      setSurcharges(5.00);
-      if (!shipmentDescription || shipmentDescription.includes('Land Cruiser') || shipmentDescription.includes('spare parts')) {
-        setShipmentDescription('Executed Commercial Vehicle Titles & Master Agreements');
-      }
-    } else if (shipmentType === 'Pets') {
-      setBaseRate(680.00);
-      setAdditionalCharges(120.00);
-      setSurcharges(85.00);
-      if (!shipmentDescription || shipmentDescription.includes('Land Cruiser') || shipmentDescription.includes('spare parts') || shipmentDescription.includes('Skid')) {
-        setShipmentDescription('Live Animal / Canine Relocation (Barnaby - Golden Retriever)');
-      }
-    } else {
-      if (baseRate === 1450.00 || baseRate === 2850.00 || baseRate === 380.00 || baseRate === 620.00 || baseRate === 45.00 || baseRate === 680.00) {
-        setBaseRate(125.00);
-        setAdditionalCharges(25.00);
-        setSurcharges(12.50);
-      }
-    }
-  }, [shipmentType]);
-
   // Computed Totals for all Cargo Handling Categories
   const totalWeight = shipmentType === 'Vehicle'
-    ? parseFloat(vehWeightLbs) || 4445
+    ? parseFloat(vehWeightLbs) || 0
     : shipmentType === 'Pallet'
-    ? (palletCount || 1) * (palletWeightPerSkid || 850)
+    ? (palletCount || 1) * (palletWeightPerSkid || 0)
     : shipmentType === 'Container'
-    ? parseFloat(containerVgmWeight) || 48200
+    ? parseFloat(containerVgmWeight) || 0
     : shipmentType === 'Freight'
-    ? freightTotalWeightLbs || 1850
+    ? freightTotalWeightLbs || 0
     : shipmentType === 'Document'
     ? 0.5
     : shipmentType === 'Pets'
-    ? (petWeightLbs || 68) + (petCrateWeightLbs || 22)
+    ? (petWeightLbs || 0) + (petCrateWeightLbs || 0)
     : packagesList.reduce((acc, p) => acc + (Number(p.weightLbs) || 0), 0);
 
   const totalPieces = shipmentType === 'Vehicle'
@@ -516,11 +441,11 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
       {
         id: String(Date.now()),
         type: 'Box',
-        weightLbs: 10.0,
-        length: 18,
-        width: 12,
-        height: 10,
-        description: 'Supplementary cargo package'
+        weightLbs: 0,
+        length: 0,
+        width: 0,
+        height: 0,
+        description: ''
       }
     ]);
   };
@@ -551,150 +476,56 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   };
 
   // Load Preset Test Data (All Cargo Categories)
+  // Quick presets set the cargo template only: type, category, service level, handling flags and
+  // the document pouch rules. They never fill in identifiers, descriptions, weights or animal
+  // details: those come from the real consignment (#184).
   const handleLoadPreset = (
     type: 'vehicle_suv' | 'skid_pallet' | 'ocean_container' | 'heavy_freight' | 'legal_doc' | 'live_pet' | 'parts_parcel' | 'electronics'
   ) => {
     if (type === 'vehicle_suv') {
       setShipmentType('Vehicle');
       setCargoCategory('Automotive & Parts');
-      setShipmentDescription('2024 Toyota Land Cruiser');
-      setVehMake('Toyota');
-      setVehModel('Land Cruiser');
-      setVehYear('2024');
-      setVehColor('White');
-      setVehVin('');
-      setVehBodyType('SUV / Crossover');
-      setVehOperable(true);
-      setVehCondition('Pristine');
-      setVehWeightLbs('5490');
-      setVehLengthIn('195');
-      setVehWidthIn('78');
-      setVehHeightIn('75');
       setService('Standard');
       setIsOversized(true);
       setIsSpecialHandling(true);
     } else if (type === 'skid_pallet') {
       setShipmentType('Pallet');
-      setCargoCategory('Industrial Machinery');
-      setShipmentDescription('Industrial Machine Components (2 Pallet Skids)');
-      setPalletStandard('GMA Standard 48×40 in (US Wood)');
-      setPalletCount(2);
-      setPalletWeightPerSkid(850);
-      setPalletHeightIn(54);
-      setPalletStackable(false);
-      setPalletForkliftAccess('4-Way Forklift Entry');
-      setPalletSecuringChecks([
-        'Heat-Treated (ISPM-15 Certified)',
-        'Heavy Gauge Stretch-Wrapped',
-        'Steel Banded / Strapped',
-        'Corner Edge Protectors'
-      ]);
+      setCargoCategory('General Cargo');
       setService('Standard');
       setIsOversized(true);
       setIsSpecialHandling(true);
     } else if (type === 'ocean_container') {
       setShipmentType('Container');
-      setCargoCategory('Automotive & Parts');
-      setShipmentDescription('Automotive Sub-Assemblies (40HC FCL Container)');
-      setContainerNumber('MSCU-749102-3');
-      setContainerIsoSize('40ft High-Cube Dry Van (40HC / 9ft 6in)');
-      setContainerBoltSeal('HSS-NY-984021');
-      setContainerTerminal('Port of New York / Newark Container Terminal (PNCT)');
-      setContainerChassisNumber('CHAS-8812 (Tri-axle)');
-      setContainerVgmWeight('48200');
-      setContainerTemperature('Ambient / Dry Cargo');
-      setContainerCustomsStatus('Pre-Cleared / Manifest Approved');
+      setCargoCategory('General Cargo');
       setService('Standard');
       setIsOversized(true);
       setIsSpecialHandling(true);
     } else if (type === 'heavy_freight') {
       setShipmentType('Freight');
       setCargoCategory('Industrial Machinery');
-      setShipmentDescription('Heavy Industrial Gearbox & Transmission Unit');
-      setFreightClass('Class 70 (Machinery, auto parts)');
-      setFreightNmfcCode('NMFC 18260-Sub 2');
-      setFreightPiecesCount(1);
-      setFreightTotalWeightLbs(1850);
-      setFreightLoadingMethod('Standard Raised Commercial Loading Dock (48" Dock Height)');
-      setFreightLiftgatePickup(false);
-      setFreightLiftgateDelivery(true);
-      setFreightHazMat(false);
       setService('Priority');
       setIsOversized(true);
       setIsSpecialHandling(true);
     } else if (type === 'legal_doc') {
       setShipmentType('Document');
       setCargoCategory('Legal & Documents');
-      setShipmentDescription('Executed Commercial Vehicle Titles & Sales Contracts (35 Pages)');
-      setDocEnvelopeType(`${COMPANY_SHORT} Waterproof Legal Pouch (12×16 in)`);
-      setDocSealNumber(generateReference('seal'));
       setDocDirectSignOnly(true);
-      setDocUrgentDeadline('By 10:30 AM Next Business Day (Priority Legal)');
-      setDocFilingCourtRef('CASE-2026-NY-4481');
-      setDocContentsDescription('Executed Commercial Vehicle Titles & Sales Contracts (35 Pages)');
       setService('Priority');
       setIsSignatureRequired(true);
     } else if (type === 'live_pet') {
       setShipmentType('Pets');
       setCargoCategory('Live Animals & Pets (USDA / IPATA Regulated)');
-      setShipmentDescription('Live Animal / Canine Relocation (Barnaby - Golden Retriever)');
-      setPetName('Barnaby');
-      setPetSpecies('Canine (Dog)');
-      setPetBreed('Golden Retriever');
-      setPetAge('3 Years');
-      setPetGender('Male (Neutered)');
-      setPetWeightLbs(68);
-      setPetMicrochip('985141002849102');
-      setPetCollarTag('Barnaby • (212) 555-0199');
-      setPetCrateType('IATA LAR Certified Series 400 (Large Rigid Kennel - 36×25×27 in)');
-      setPetCrateLength(36);
-      setPetCrateWidth(25);
-      setPetCrateHeight(27);
-      setPetCrateWeightLbs(22);
-      setPetIsBrachycephalic(false);
-      setPetHealthCertNumber('CVI-NY-2026-88194');
-      setPetRabiesTag('RAB-2027-11-04 (NY Dept of Health)');
-      setPetVetClinic('Manhattan Animal Health Hospital');
-      setPetVetPhone('(212) 555-0149');
-      setPetAcclimationCert(true);
-      setPetLastFed('4 Hours Prior to Tender (Light Meal)');
-      setPetWaterProtocol('Fresh spring water refreshed at every terminal transfer waypoint');
-      setPetSpecialInstructions('Gentle handling; favorite comfort blanket inside crate. No sedation per AVMA protocol.');
       setService('Priority');
       setIsSpecialHandling(true);
     } else if (type === 'parts_parcel') {
       setShipmentType('Parcel');
-      setCargoCategory('Automotive & Parts');
-      setShipmentDescription('Generator spare parts');
+      setCargoCategory('General Cargo');
       setService('Express');
-      setPackagesList([
-        {
-          id: '1',
-          type: 'Box',
-          weightLbs: 45.0,
-          length: 72,
-          width: 24,
-          height: 18,
-          description: 'Generator spare parts'
-        }
-      ]);
-      setIsOversized(true);
+      setIsOversized(false);
     } else {
       setShipmentType('Parcel');
       setCargoCategory('Electronics & Tech');
-      setShipmentDescription('Apple MacBook Pro M3 Max Workstations');
       setService('Express');
-      setPackagesList([
-        {
-          id: '1',
-          type: 'Box',
-          weightLbs: 14.5,
-          length: 20,
-          width: 15,
-          height: 10,
-          description: 'MacBook Pro units (Qty 2)'
-        }
-      ]);
       setIsOversized(false);
     }
   };
@@ -753,9 +584,47 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
     }
   };
 
+  // The cargo facts a waybill needs. Nothing is pre-filled (#184), so they are checked here; the
+  // messages show on step 1 (description) and step 3 (cargo details).
+  const cargoDraftErrors = (): Record<string, string> => {
+    const e: Record<string, string> = {};
+    if (!shipmentDescription.trim()) e.shipmentDescription = 'Describe the cargo.';
+    const missing: string[] = [];
+    if (shipmentType === 'Vehicle') {
+      if (!vehMake.trim()) e.vehMake = 'Enter the make.';
+      if (!vehModel.trim()) e.vehModel = 'Enter the model.';
+      if (!/^\d{4}$/.test(vehYear.trim())) missing.push('the vehicle year (4 digits)');
+      if (!(parseFloat(vehWeightLbs) > 0)) missing.push('the vehicle weight');
+    } else if (shipmentType === 'Pallet') {
+      if (!(palletCount >= 1)) missing.push('the number of pallets');
+      if (!(palletWeightPerSkid > 0)) missing.push('the weight per pallet');
+    } else if (shipmentType === 'Container') {
+      if (!containerNumber.trim()) missing.push('the container number');
+      if (!(parseFloat(containerVgmWeight) > 0)) missing.push('the verified gross mass (VGM)');
+    } else if (shipmentType === 'Freight') {
+      if (!(freightTotalWeightLbs > 0)) missing.push('the total freight weight');
+    } else if (shipmentType === 'Pets') {
+      if (!petName.trim()) missing.push("the animal's name");
+      if (!(petWeightLbs > 0)) missing.push("the animal's weight");
+    } else if (shipmentType !== 'Document' && (packagesList.length === 0 || packagesList.some((p) => !(p.weightLbs > 0)))) {
+      missing.push('a weight for every package');
+    }
+    if (missing.length) e.cargo = `Still needed: ${missing.join(', ')}.`;
+    if (Object.keys(e).length) e.submit = 'Some cargo details are missing: check steps 1 and 3.';
+    return e;
+  };
+
   // Final Action: Create Shipment
   const handleFinalCreateShipment = async () => {
     if (isCreatingShipment) return;
+    const cargoProblems = cargoDraftErrors();
+    if (Object.keys(cargoProblems).length) {
+      setErrors(cargoProblems);
+      setCurrentStep(cargoProblems.shipmentDescription ? 1 : 3);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    setErrors({});
     // Check the optional payment request first, so nothing is created while it still has errors.
     if (paymentEnabled) {
       const paymentProblems = paymentDraftErrors(paymentDraft);
@@ -778,11 +647,11 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
             status: (initialLocationMode === 'NOT_RECEIVED' ? 'BOOKED' : 'RECEIVED') as ShipmentStatus,
             statusText: initialLocationMode === 'NOT_RECEIVED' ? 'Vehicle Manifest Created' : 'Vehicle Ingested & Inspected',
             currentLocation: [senderCity.trim(), shortRegion(senderCountry, senderState)].filter(Boolean).join(', '),
-            weightLbs: parseFloat(vehWeightLbs) || 4445,
+            weightLbs: parseFloat(vehWeightLbs) || 0,
             dimensions: {
-              length: parseFloat(vehLengthIn) || 213,
-              width: parseFloat(vehWidthIn) || 75,
-              height: parseFloat(vehHeightIn) || 71
+              length: parseFloat(vehLengthIn) || 0,
+              width: parseFloat(vehWidthIn) || 0,
+              height: parseFloat(vehHeightIn) || 0
             }
           }
         ]
@@ -795,11 +664,11 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           status: (initialLocationMode === 'NOT_RECEIVED' ? 'BOOKED' : 'RECEIVED') as ShipmentStatus,
           statusText: initialLocationMode === 'NOT_RECEIVED' ? 'Skid Manifested' : 'Skid Received & Scanned',
           currentLocation: `${senderCity}, ${senderState}`,
-          weightLbs: palletWeightPerSkid || 850,
+          weightLbs: palletWeightPerSkid,
           dimensions: {
             length: 48,
             width: 40,
-            height: palletHeightIn || 54
+            height: palletHeightIn || 0
           }
         }))
       : shipmentType === 'Container'
@@ -812,7 +681,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
             status: (initialLocationMode === 'NOT_RECEIVED' ? 'BOOKED' : 'RECEIVED') as ShipmentStatus,
             statusText: initialLocationMode === 'NOT_RECEIVED' ? 'Container Booked' : 'Container Ingested at Terminal',
             currentLocation: `${senderCity}, ${senderState}`,
-            weightLbs: parseFloat(containerVgmWeight) || 48200,
+            weightLbs: parseFloat(containerVgmWeight) || 0,
             dimensions: {
               length: 480,
               width: 96,
@@ -829,7 +698,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           status: (initialLocationMode === 'NOT_RECEIVED' ? 'BOOKED' : 'RECEIVED') as ShipmentStatus,
           statusText: initialLocationMode === 'NOT_RECEIVED' ? 'Freight Linehaul Manifested' : 'Freight Ingested at Raised Dock',
           currentLocation: `${senderCity}, ${senderState}`,
-          weightLbs: Math.round((freightTotalWeightLbs || 1850) / (freightPiecesCount || 1)),
+          weightLbs: Math.round(freightTotalWeightLbs / (freightPiecesCount || 1)),
           dimensions: {
             length: 60,
             width: 48,
@@ -864,11 +733,11 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
             status: (initialLocationMode === 'NOT_RECEIVED' ? 'BOOKED' : 'RECEIVED') as ShipmentStatus,
             statusText: initialLocationMode === 'NOT_RECEIVED' ? 'Pet Relocation Manifest Created' : 'Live Pet Health Ingested & Staged',
             currentLocation: `${senderCity}, ${senderState}`,
-            weightLbs: (petWeightLbs || 68) + (petCrateWeightLbs || 22),
+            weightLbs: (petWeightLbs || 0) + (petCrateWeightLbs || 0),
             dimensions: {
-              length: petCrateLength || 36,
-              width: petCrateWidth || 25,
-              height: petCrateHeight || 27
+              length: petCrateLength || 0,
+              width: petCrateWidth || 0,
+              height: petCrateHeight || 0
             }
           }
         ]
@@ -1003,7 +872,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
       vehicleDetails: shipmentType === 'Vehicle' ? {
         make: vehMake,
         model: vehModel,
-        year: parseInt(vehYear) || 2024,
+        year: parseInt(vehYear) || 0,
         vin: vehVin,
         color: vehColor,
         bodyType: vehBodyType,
@@ -1115,7 +984,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
       totalWeightLbs: totalWeight,
       totalPieces: totalPieces,
       dimensions: shipmentType === 'Vehicle'
-        ? { length: parseFloat(vehLengthIn) || 213, width: parseFloat(vehWidthIn) || 75, height: parseFloat(vehHeightIn) || 71 }
+        ? { length: parseFloat(vehLengthIn) || 0, width: parseFloat(vehWidthIn) || 0, height: parseFloat(vehHeightIn) || 0 }
         : (packagesList[0] ? { length: packagesList[0].length, width: packagesList[0].width, height: packagesList[0].height } : { length: 12, width: 12, height: 12 }),
       references: {
         customerReference: customerRef || undefined,
@@ -1860,6 +1729,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 <span className="dim-label">Weights and dimensions in</span>
                 <UnitToggle />
               </div>
+              {errors.cargo && <p className="field-error-msg" role="alert">{errors.cargo}</p>}
               {/* CASE A: VEHICLE CARGO SPECIFICATION */}
               {shipmentType === 'Vehicle' ? (
                 <div className="vehicle-cargo-builder-deck">
@@ -1869,21 +1739,6 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         <h3>03. Vehicle Cargo Specifications</h3>
                         <p>Vehicle shipping details, VIN identification, operability, and intake inspection.</p>
                       </div>
-                      <button
-                        type="button"
-                        className="preset-spec-btn"
-                        onClick={() => {
-                          setVehMake('Toyota');
-                          setVehModel('Land Cruiser');
-                          setVehYear('2024');
-                          setVehWeightLbs('5490');
-                          setVehLengthIn('195');
-                          setVehWidthIn('78');
-                          setVehHeightIn('75');
-                        }}
-                      >
-                        Use Example Specs
-                      </button>
                     </div>
                   </div>
 
@@ -2168,20 +2023,6 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         <h3>03. Palletized Cargo & Skid Configuration</h3>
                         <p>Configure standard pallet geometry, skid count, forklift entry, and double-stack directives.</p>
                       </div>
-                      <button
-                        type="button"
-                        className="preset-spec-btn"
-                        onClick={() => {
-                          setPalletStandard('GMA Standard 48×40 in (US Wood)');
-                          setPalletCount(2);
-                          setPalletWeightPerSkid(850);
-                          setPalletHeightIn(54);
-                          setPalletStackable(false);
-                          setPalletForkliftAccess('4-Way Forklift Entry');
-                        }}
-                      >
-                        Fill Standard LTL Skid (48×40)
-                      </button>
                     </div>
                   </div>
 
@@ -2345,20 +2186,6 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         <h3>03. Intermodal FCL Container Specifications</h3>
                         <p>SOLAS Verified Gross Mass (VGM), ISO 6346 unit number, ISO 17712 bolt seal, and interchange terminal.</p>
                       </div>
-                      <button
-                        type="button"
-                        className="preset-spec-btn"
-                        onClick={() => {
-                          setContainerNumber('MSCU-749102-3');
-                          setContainerIsoSize('40ft High-Cube Dry Van (40HC / 9ft 6in)');
-                          setContainerBoltSeal('HSS-NY-984021');
-                          setContainerTerminal('Port of New York / Newark Container Terminal (PNCT)');
-                          setContainerChassisNumber('CHAS-8812 (Tri-axle)');
-                          setContainerVgmWeight('48200');
-                        }}
-                      >
-                        Fill 40ft High Cube Container
-                      </button>
                     </div>
                   </div>
 
@@ -2463,6 +2290,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           value={containerCustomsStatus}
                           onChange={e => setContainerCustomsStatus(e.target.value)}
                         >
+                          <option value="">Not set</option>
                           <option value="Pre-Cleared / Manifest Approved">Pre-Cleared / AMS Manifest Approved</option>
                           <option value="In-Bond Transit (IT 7512 Authorized)">In-Bond Transit (IT 7512 Authorized)</option>
                           <option value="Customs Hold / Pending Physical Inspection">Customs Hold / Pending Physical Inspection</option>
@@ -2480,21 +2308,6 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         <h3>03. Heavy Freight & LTL Linehaul Specifications</h3>
                         <p>National Motor Freight Classification (NMFC), freight class rating, dock access, and liftgate requirements.</p>
                       </div>
-                      <button
-                        type="button"
-                        className="preset-spec-btn"
-                        onClick={() => {
-                          setFreightClass('Class 70 (Machinery, auto parts)');
-                          setFreightNmfcCode('NMFC 18260-Sub 2');
-                          setFreightPiecesCount(1);
-                          setFreightTotalWeightLbs(1850);
-                          setFreightLoadingMethod('Standard Raised Commercial Loading Dock (48" Dock Height)');
-                          setFreightLiftgatePickup(false);
-                          setFreightLiftgateDelivery(true);
-                        }}
-                      >
-                        Fill Machinery Freight (Class 70)
-                      </button>
                     </div>
                   </div>
 
@@ -2667,20 +2480,6 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         <h3>03. Secure Document & Courier Pouch Deck</h3>
                         <p>Chain-of-custody tracking, tamper-evident security seal, direct consignee signature mandate, and urgent delivery window.</p>
                       </div>
-                      <button
-                        type="button"
-                        className="preset-spec-btn"
-                        onClick={() => {
-                          setDocEnvelopeType(`${COMPANY_SHORT} Waterproof Legal Pouch (12×16 in)`);
-                          setDocSealNumber(generateReference('seal'));
-                          setDocDirectSignOnly(true);
-                          setDocUrgentDeadline('By 10:30 AM Next Business Day (Priority Legal)');
-                          setDocFilingCourtRef('CASE-2026-NY-4481');
-                          setDocContentsDescription('Executed Commercial Vehicle Titles & Sales Contracts (35 Pages)');
-                        }}
-                      >
-                        Fill Legal Document Pouch
-                      </button>
                     </div>
                   </div>
 
@@ -2782,68 +2581,6 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       <div>
                         <h3>03. Live Animal & Pet Transport Deck (IATA LAR / USDA Regulated)</h3>
                         <p>Individual animal identity, 15-digit RFID microchip verification, certified CR-82 travel crate, USDA health certificates, and in-transit welfare protocols.</p>
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        <button
-                          type="button"
-                          className="preset-spec-btn"
-                          onClick={() => {
-                            setPetName('Barnaby');
-                            setPetSpecies('Canine (Dog)');
-                            setPetBreed('Golden Retriever');
-                            setPetAge('3 Years');
-                            setPetGender('Male (Neutered)');
-                            setPetWeightLbs(68);
-                            setPetMicrochip('985141002849102');
-                            setPetCollarTag('Barnaby • (212) 555-0199');
-                            setPetCrateType('IATA LAR Certified Series 400 (Large Rigid Kennel - 36×25×27 in)');
-                            setPetCrateLength(36);
-                            setPetCrateWidth(25);
-                            setPetCrateHeight(27);
-                            setPetCrateWeightLbs(22);
-                            setPetIsBrachycephalic(false);
-                            setPetHealthCertNumber('CVI-NY-2026-88194');
-                            setPetRabiesTag('RAB-2027-11-04 (NY Dept of Health)');
-                            setPetVetClinic('Manhattan Animal Health Hospital');
-                            setPetVetPhone('(212) 555-0149');
-                            setPetAcclimationCert(true);
-                            setPetLastFed('4 Hours Prior to Tender (Light Meal)');
-                            setPetWaterProtocol('Fresh spring water refreshed at every terminal transfer waypoint');
-                            setPetSpecialInstructions('Gentle handling; favorite comfort blanket inside crate. No sedation per AVMA protocol.');
-                          }}
-                        >
-                          <PawPrint size={13} style={{ marginRight: '4px' }} /> Canine: Golden Retriever
-                        </button>
-                        <button
-                          type="button"
-                          className="preset-spec-btn"
-                          onClick={() => {
-                            setPetName('Cleo');
-                            setPetSpecies('Feline (Cat)');
-                            setPetBreed('Siamese');
-                            setPetAge('2 Years');
-                            setPetGender('Female (Spayed)');
-                            setPetWeightLbs(9.5);
-                            setPetMicrochip('985141009941824');
-                            setPetCollarTag('Cleo • (415) 555-0182');
-                            setPetCrateType('IATA LAR Certified Series 100 (Small Rigid Kennel - 21×16×15 in)');
-                            setPetCrateLength(21);
-                            setPetCrateWidth(16);
-                            setPetCrateHeight(15);
-                            setPetCrateWeightLbs(8);
-                            setPetIsBrachycephalic(false);
-                            setPetHealthCertNumber('CVI-CA-2026-33901');
-                            setPetRabiesTag('RAB-2026-08-19 (SF Health)');
-                            setPetVetClinic('Mission Pet Emergency Clinic');
-                            setPetVetPhone('(415) 555-0199');
-                            setPetAcclimationCert(true);
-                            setPetLastFed('3 Hours Prior to Tender');
-                            setPetWaterProtocol('Clip-on dish with pre-frozen ice block');
-                            setPetSpecialInstructions('Calm feline. Cover kennel with breathable dark cloth during ramp transfer to reduce visual stimulus.');
-                          }}
-                        >
-                          <Heart size={13} style={{ marginRight: '4px' }} /> Feline: Siamese Cat
-                        </button>
                       </div>
                     </div>
                   </div>

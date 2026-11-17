@@ -427,7 +427,7 @@
 .field-error-msg {
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--tx-danger-500);
+  color: var(--tx-danger-700);
 }
 
 /* ==========================================================================
