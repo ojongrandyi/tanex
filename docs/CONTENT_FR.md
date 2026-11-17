@@ -592,3 +592,70 @@ Traduction de CONTENT §15, dans `src/i18n/fr/blog.ts` (`index`, `article`).
 ## 16. Carrières et Politique RSE (pied de page ; ajouté le 2026-11-09, **approuvé par le propriétaire le 2026-11-10**)
 Texte complet dans `src/i18n/fr/company.ts` (traduction de CONTENT §16). Pied de page *Entreprise* : `Carrières` · `Politique RSE`.
 Chemins : `/fr/carrieres`, `/fr/politique-rse`. Titres : `Travaillez avec {{COMPANY}}` · `Notre responsabilité`.
+
+## 17. Boutique (SHOP_SPEC ; ajouté le 2026-11-17 avec M.0, **à confirmer, relecture native en attente**)
+Traduction de CONTENT §17. Les noms, descriptions et catégories des produits sont saisis par l'équipe dans la console.
+Les prix s'affichent `15 000 FCFA`.
+
+### 17.1 En-tête, pied de page, mentions légales
+- Bouton d'en-tête `Boutique` (propriétaire, 2026-11-17) · bouton panier `Panier` avec le nombre, lecteurs d'écran `Panier, {n} articles`
+- Pied de page *Mentions légales* : `Retours et remboursements` (Accessibilité passe à la ligne du bas, SHOP_SPEC §18)
+- Onglet `Retours et remboursements` · titre `Retours et remboursements` (texte §13.2)
+
+### 17.2 Page Boutique (`/fr/boutique`) et page catégorie
+- Surtitre `Boutique {{COMPANY}}` · H1 `Achetez chez {{COMPANY}}` · sous-titre `Des produits vendus par {{COMPANY}}, livrés à votre porte par nos livreurs à {{LOCAL_CITIES}} et par camion dans les autres villes du Cameroun. Commandez en ligne, payez à la livraison ou par mobile money.`
+- Puces `Tout` · recherche `Rechercher un produit` · tri `Trier par` : `En vedette` · `Nouveautés` · `Prix croissant` · `Prix décroissant` · `En stock uniquement` · `{n} produits` / `1 produit`
+- Carte : `Ajouter au panier` → `Ajouté` · `Promo` · `Plus que {n}` · `Épuisé` · lecteurs d'écran `Avant {old}, maintenant {new}`
+- Boutique vide : **La boutique ouvre bientôt.** `Nos produits apparaîtront ici très prochainement.`
+- Aucun résultat : **Aucun produit ne correspond à votre recherche.** `Essayez d'autres mots ou effacez les filtres.` → `Effacer les filtres`
+- Pagination `Pages de la boutique` · `Page {n} sur {total}` · `Précédent` · `Suivant`
+- Page catégorie : surtitre identique, H1 = nom de la catégorie, sous-titre = description de la catégorie.
+
+### 17.3 Fiche produit
+- Fil d'Ariane `Boutique` › {catégorie} › {produit} · `Référence produit : {code}`
+- Stock : `En stock` · `Plus que {n}` · `Épuisé`
+- `Quantité` · `Diminuer la quantité` · `Augmenter la quantité` · `Vous pouvez commander jusqu'à {n} exemplaires de ce produit.`
+- `Ajouter au panier` · message `Ajouté à votre panier.` → `Voir le panier`
+- `Poser une question sur WhatsApp` · message `Bonjour {{COMPANY}}, j'ai une question sur {product} ({code}).`
+- Livraison : `Livraison par un livreur {{COMPANY}} à {{LOCAL_CITIES}}, par camion dans les autres villes du Cameroun, ou retrait dans notre agence de Buea ou de Douala.`
+- Paiement : `Payez à la livraison, par MTN MoMo ou Orange Money, ou dans notre agence. Aucune carte nécessaire.`
+- Liens `Retours et remboursements` · `Conditions d'expédition` · `Description` · `Produits similaires`
+- Galerie : `Photo {n} sur {total}` · `Afficher en plein écran` · `Fermer` · `Photo précédente` · `Photo suivante`
+
+### 17.4 Panier (`/fr/panier`)
+- H1 `Votre panier` · `Retirer` · `Sous-total` · `Continuer vos achats` · `Continuer vers vos coordonnées`
+- Vide : **Votre panier est vide.** → `Découvrir la boutique`
+- Changements : `Le prix de {product} est maintenant de {price}.` · `Il ne reste que {n} {product} : nous avons modifié la quantité.` · `{product} n'est plus disponible et a été retiré de votre panier.`
+
+### 17.5 Commande : vos coordonnées
+- H2 `Vos coordonnées` · `Nom complet` · `Numéro de téléphone` (aide `Un numéro camerounais, par exemple 6XX XX XX XX`) · `Numéro WhatsApp` · ☑ `Identique à mon numéro de téléphone` · `E-mail (facultatif)` (aide `Pour la confirmation de votre commande.`)
+- `Comment souhaitez-vous recevoir votre commande ?` · `Livraison à mon adresse` · `Retrait dans une agence {{COMPANY}}`
+- Agences : `Siège de Buea : {{HQ_ADDRESS}}` · `Douala : {{DOUALA_OFFICE}}` · `Le retrait à Douala peut prendre un peu plus de temps. Nous vous appellerons dès que votre commande sera prête.`
+- Livraison : `Ville` · `Quartier` · `Mon quartier n'est pas dans la liste` · `Adresse ou point de repère` (aide `Par exemple : « En face de la station Total, portail bleu »`) · `Note pour notre équipe (facultatif)`
+- `Comment allez-vous payer ?`
+  - `Paiement à la livraison` : `Payez le livreur à l'arrivée de votre commande.`
+  - `MTN MoMo` : `Payez après notre appel de confirmation. Indiquez votre numéro de commande comme référence de paiement.`
+  - `Orange Money` : même texte que MTN MoMo.
+  - `Paiement en agence` : `Payez au retrait de votre commande.`
+- `Récapitulatif` · `Sous-total` · `Livraison` · `Gratuite (retrait)` · `Nous vous confirmerons les frais de livraison` · `Total` · `Total (frais de livraison à confirmer)`
+- ☐ `J'accepte les Conditions d'utilisation et la politique de Retours et remboursements.`
+- Bouton `Passer la commande` · `Envoi de votre commande…`
+- Erreurs : `Veuillez indiquer votre nom.` · `Indiquez un numéro de téléphone camerounais valide.` · `Indiquez une adresse e-mail valide, ou laissez le champ vide.` · `Choisissez votre ville et votre quartier.` · `Indiquez votre adresse ou un point de repère.` · `Choisissez une agence de retrait.` · `Choisissez votre mode de paiement.` · `Veuillez accepter les conditions pour passer votre commande.` · `Il ne reste que {n} {product}. Mettez votre panier à jour et réessayez.` · `Trop de commandes depuis cette connexion. Patientez quelques minutes et réessayez.` · `Un problème est survenu et votre commande n'a pas été enregistrée. Réessayez, ou commandez sur WhatsApp.`
+
+### 17.6 Commande enregistrée
+- H1 `Merci, {firstName}. Votre commande est enregistrée.` · `Numéro de commande : {order}` · `Une confirmation a été envoyée à {email}.`
+- `La suite` : 1. `Nous vous appelons pour confirmer votre commande et les frais de livraison.` 2. `Nous préparons votre commande.` 3. Livraison : `Un livreur {{COMPANY}} vous l'apporte, et vous recevez un numéro de suivi.` · Retrait : `Nous vous appelons quand elle est prête en agence.`
+- Mobile money : `Payez par {method} au {number} ({accountName}) après notre confirmation, avec {order} comme référence. Nous ne vous demanderons jamais votre code PIN.`
+- Boutons `Nous écrire sur WhatsApp` · `Continuer vos achats`
+
+### 17.7 E-mails client (l'alerte interne est en anglais, CONTENT §17.7)
+- `shop.order_received` : objet `Nous avons bien reçu votre commande {order}` · `Merci, {name}. Nous avons bien reçu votre commande et vous appellerons au {phone} pour la confirmer.` · articles avec références · totaux · paiement comme §17.6 · `Retours et remboursements : {link}` · `L'équipe {{COMPANY}}`
+- `shop.order_dispatched` : objet `Votre commande {order} est en route` · `Bonne nouvelle, {name} : votre commande est en route. Numéro de suivi : {id}. Suivez-la ici : {link}`
+- `shop.order_cancelled` : objet `Votre commande {order} a été annulée` · `Votre commande {order} a été annulée. Motif : {reason}. Si vous avez déjà payé, nous vous rembourserons comme le prévoit notre politique de Retours et remboursements. Des questions ? {{EMAIL}} · {{PHONE}}`
+
+### 17.8 Console
+La console reste en anglais jusqu'à la tâche I.2 ; la traduction de CONTENT §17.8 sera faite avec I.2.
+
+### 17.9 Ajouts aux politiques de confidentialité et de cookies (avec M.8 ; **relecture d'un juriste, #11**)
+- Confidentialité, *Commandes en boutique.* `Lorsque vous commandez dans notre boutique, nous collectons votre nom, vos numéros de téléphone et WhatsApp, votre e-mail si vous le donnez, votre adresse de livraison ou l'agence choisie, et le contenu de votre commande. Nous les utilisons pour confirmer, préparer et livrer votre commande, traiter les retours et tenir notre comptabilité. Nous conservons les commandes et paiements pendant 10 ans, comme l'exigent les règles comptables ; vos numéros de téléphone, votre e-mail et votre adresse sont supprimés de la commande 2 ans après sa clôture.`
+- Cookies, liste du stockage du navigateur : `tx_cart : les produits et quantités de votre panier. Aucune donnée personnelle.`

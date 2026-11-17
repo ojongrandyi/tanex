@@ -974,3 +974,86 @@ Commitments only: no figures, open positions, certifications or partners. Footer
 - **Environment.** Bikes for short trips in town, combined loads between cities and fewer empty journeys. Where we can, we reuse packaging and reduce waste.
 - **Local community.** We are based in Buea and work with businesses across Buea, Limbe and Douala, helping them reach customers at home and abroad.
 - `Questions or suggestions about how we work? Write to us at {{EMAIL}}.`
+
+---
+
+## 17. Shop / Marketplace (SHOP_SPEC; added 2026-11-17 with M.0, **owner to confirm**)
+French: CONTENT_FR §17. Product names, descriptions and categories are written by staff in the console, never here.
+Prices show as `15,000 FCFA` (EN) / `15 000 FCFA` (FR), as elsewhere.
+
+### 17.1 Header, footer, legal
+- Header button `Marketplace` · cart button `Cart` with count, screen readers `Cart, {n} items`
+- Footer *Legal*: `Returns & Refunds` (takes Accessibility's row; Accessibility moves to the bottom line, SHOP_SPEC §18)
+- Legal tab `Returns & Refunds` · page title `Returns and refunds` (text §13.2)
+
+### 17.2 Shop page (`/shop`) and category page
+- Eyebrow `{{COMPANY}} Marketplace` · H1 `Shop with {{COMPANY}}` · sub `Products sold by {{COMPANY}}, delivered to your door by our riders in {{LOCAL_CITIES}} and by truck to other cities in Cameroon. Order online, pay on delivery or by mobile money.`
+- Category chips `All` · search placeholder `Search products` · sort `Sort by`: `Featured` · `Newest` · `Price: low to high` · `Price: high to low` · toggle `In stock only` · count `{n} products` / `1 product`
+- Card: `Add to cart` → `Added` · badge `Sale` · `Only {n} left` · `Out of stock` · screen readers for a sale price `Was {old}, now {new}`
+- Empty shop: **The shop is opening soon.** `Our products will appear here shortly.`
+- No results: **No products match your search.** `Try other words or clear the filters.` → `Clear filters`
+- Pagination name `Shop pages` · `Page {n} of {total}` · `Previous` · `Next`
+- Category page: eyebrow as the shop page, H1 = category name, sub = category description (console).
+
+### 17.3 Product page
+- Breadcrumbs `Marketplace` › {category} › {product} · `Product ID: {code}`
+- Stock: `In stock` · `Only {n} left` · `Out of stock`
+- `Quantity` · `Decrease quantity` · `Increase quantity` · limit `You can order up to {n} of this product.`
+- `Add to cart` · toast `Added to your cart.` → `View cart`
+- `Ask on WhatsApp` · message `Hello {{COMPANY}}, I have a question about {product} ({code}).`
+- Delivery line: `Delivery by {{COMPANY}} rider in {{LOCAL_CITIES}}, by truck to other cities in Cameroon, or pick up at our Buea or Douala office.`
+- Payment line: `Pay on delivery, by MTN MoMo or Orange Money, or at our office. No card needed.`
+- Links `Returns & Refunds` · `Shipping Terms` · heading `Description` · `Related products`
+- Gallery: `Picture {n} of {total}` · `Open full screen` · `Close` · `Previous picture` · `Next picture`
+
+### 17.4 Cart (`/cart`)
+- H1 `Your cart` · `Remove` · `Subtotal` · `Continue shopping` · `Continue to your details`
+- Empty: **Your cart is empty.** → `Browse the marketplace`
+- Changes found on opening: `The price of {product} is now {price}.` · `Only {n} of {product} left: we've changed the quantity.` · `{product} is no longer available and was removed from your cart.`
+
+### 17.5 Checkout: your details
+- H2 `Your details` · `Full name` · `Phone number` (hint `A Cameroon number, for example 6XX XX XX XX`) · `WhatsApp number` · ☑ `Same as my phone number` · `Email (optional)` (hint `For your order confirmation.`)
+- `How would you like to receive your order?` · `Delivery to my address` · `Pick up at a {{COMPANY}} office`
+- Offices: `Buea head office: {{HQ_ADDRESS}}` · `Douala: {{DOUALA_OFFICE}}` · Douala note `Douala pickups can take a little longer. We'll call you when your order is ready.`
+- Delivery: `City` · `Area` · `My area isn't listed` · `Address or landmark` (hint `For example: "Opposite the Total station, blue gate"`) · `Note for our team (optional)`
+- `How will you pay?`
+  - `Cash on delivery`: `Pay the rider when your order arrives.`
+  - `MTN MoMo`: `Pay after we call to confirm your order. Use your order number as the payment reference.`
+  - `Orange Money`: same text as MTN MoMo.
+  - `Pay at the office`: `Pay when you collect your order.`
+- `Order summary` · `Subtotal` · `Delivery` · `Free (pickup)` · `We'll confirm the delivery fee` · `Total` · `Total (delivery fee to confirm)`
+- ☐ `I accept the Terms of Service and the Returns & Refunds policy.` (both linked)
+- Button `Place order` · busy `Placing your order…`
+- Errors: `Please enter your name.` · `Enter a valid Cameroon phone number.` · `Enter a valid email address, or leave it empty.` · `Choose your city and area.` · `Tell us your address or a landmark.` · `Choose a pickup office.` · `Choose how you will pay.` · `Please accept the terms to place your order.` · `Only {n} of {product} left. Update your cart and try again.` · `Too many orders from this connection. Please wait a few minutes and try again.` · `Something went wrong and your order was not placed. Please try again, or order on WhatsApp.`
+
+### 17.6 Order placed
+- H1 `Thank you, {firstName}. Your order is placed.` · `Order number: {order}` · `A confirmation has been sent to {email}.`
+- `What happens next`: 1. `We call you to confirm your order and the delivery fee.` 2. `We prepare your order.` 3. Delivery: `A {{COMPANY}} rider brings it to you, and you get a tracking ID to follow it.` · Pickup: `We call you when it's ready at the office.`
+- Mobile money: `Pay by {method} to {number} ({accountName}) after we confirm your order, with {order} as the reference. We will never ask for your PIN.`
+- Buttons `Message us on WhatsApp` · `Continue shopping`
+
+### 17.7 Emails (SHOP_SPEC §12)
+| Template | Text |
+|---|---|
+| `shop.order_staff_alert` (to the order email, English) | Subject `New order {order} · {n} items · {total}` · headings `Customer` · `Delivery` / `Pickup at {office}` · `Items` (`{qty} × {product} ({code}) · {lineTotal}`) · `Subtotal` · `Delivery fee` (`to confirm`) · `Total` · `Payment method` · `Customer note` · button `Open the order in the console` |
+| `shop.order_received` (customer) | Subject `We've received your order {order}` · `Thank you, {name}. We've received your order and will call you on {phone} to confirm it.` · items with product IDs · totals · payment text as §17.6 · `Returns & Refunds: {link}` · `The {{COMPANY}} team` |
+| `shop.order_dispatched` (customer) | Subject `Your order {order} is on its way` · `Good news, {name}: your order is on its way. Tracking ID: {id}. Follow it here: {link}` |
+| `shop.order_cancelled` (customer) | Subject `Your order {order} has been cancelled` · `Your order {order} has been cancelled. Reason: {reason}. If you have already paid, we will refund you as our Returns & Refunds policy explains. Questions? {{EMAIL}} · {{PHONE}}` |
+
+### 17.8 Console (Shop)
+- Sidebar `Shop` · `Products` · `Categories` · `Orders` · `Shop settings` · dashboard tiles `New orders` · `Low stock`
+- Product statuses `Draft` · `In review` · `Published` · `Hidden` · `Archived` · filter `Needs review` · stock filter `All` · `Low` · `Out of stock`
+- Products list: `New product` · columns `Product` · `Product ID` · `Price` · `Stock` · `Status` · `Categories` · `Updated` · search `Search by name or product ID`
+- Editor sections `Details` · `Pictures` · `Price and stock` · `Delivery` · `Categories` · `SEO` · fields `Name` · `Web address` · `Short description` · `Description` · `Price (FCFA)` · `Sale price (optional)` · `Starting stock` · `Low-stock level` · `Most per order` · `Size` (`Small` · `Medium` · `Large`) · `Weight (kg)` · `Featured` · `Search title` · `Search description`
+- Buttons `Save draft` · `Submit for review` · `Publish` · `Send back` · `Approve changes` · `Reject changes` · `Preview` · `Hide` · `Archive` · `Delete draft`
+- Notices: `Changes waiting for approval.` · `Sent back: {note}` · `Your changes were sent for approval. The live product stays as it is until they are approved.` · `Add the French name and short description before publishing.` · `Sale price must be lower than the price.` · `You have unsaved changes.`
+- Pictures: `Add pictures` · `Crop picture` · `Fill` · `Fit whole picture` · `Background` · `White` · `Cream` · `Zoom` · `Rotate` · `Use this picture` · `Skip (automatic crop)` · `Make main picture` · `Main picture` · `Alt text (English)` · `Alt text (French)` · `Up to 8 pictures.` · `This photo is too small. Use a larger photo.` · `This photo is small and may look soft.`
+- Stock: `Adjust stock` · `New quantity` · `Add or remove` · reasons `Received` · `Counted` · `Damaged` · `Other` · `Note` · `Stock history` · move names `Starting stock` · `Order` · `Cancelled order` · `Return` · `Adjustment`
+- Categories: `New category` · `Parent category` · `None (top level)` · `Visible in the shop` · `This category has {n} products. Move them to another category before deleting it.`
+- Order tabs `New` · `Confirmed` · `Ready` · `Out for delivery` · `Completed` · `Cancelled / returned` · statuses `New` · `Confirmed` · `Ready` · `Out for delivery` · `Delivered` · `Collected` · `Cancelled` · `Returned` · payment `Unpaid` · `Paid` · `Refunded`
+- Order actions `Confirm order` · `Set delivery fee` · `Mark ready` · `Send to dispatch` · `Mark collected` · `Cancel order` (`Reason`) · `Record return` · ☐ `Put back in stock` · `Record payment` (`Method` · `Amount` · `Transaction reference`) · `Record refund` · `Add note` · `Print packing slip` · `Call` · `WhatsApp` · flag `Delivery problem` · `Delivery fee to confirm`
+- Shop settings: `Shop open` · `Order email` · `Ships from` (`City` · `Area` · `Landmark`) · `Pickup offices` · `Payment methods offered` · `Default low-stock level` · `Default most per order` · `Send a test order email`
+
+### 17.9 Privacy and Cookie Policy additions (with M.8; **lawyer review, #11**)
+- Privacy Policy, new section *Shop orders.* `When you order from our shop, we collect your name, phone and WhatsApp numbers, your email if you give it, your delivery address or chosen office, and what you ordered. We use them to confirm, prepare and deliver your order, to handle returns, and to keep our accounts. We keep order and payment records for 10 years, as accounting rules require; your phone numbers, email and address are removed from the order 2 years after it is completed.`
+- Cookie Policy, browser storage list: `tx_cart: the products and quantities in your shopping cart. It holds no personal details.`
