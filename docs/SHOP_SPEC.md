@@ -40,25 +40,25 @@ New keys in `src/shared/permissions.ts` (group **Shop**), checked on the server 
 | Permission | Can |
 |---|---|
 | `shop.view` | See the console Shop area: products, categories (read-only). |
-| `shop.products.write` | Create products, edit drafts, submit for review, propose changes to a published product (§7.3). |
-| `shop.products.publish` | Publish, hide, archive; approve or send back products and proposed changes. **The admin's approval step.** |
+| `shop.write` | Create products, edit drafts, submit for review, propose changes to a published product (§7.3). |
+| `shop.publish` | Publish, hide, archive; approve or send back products and proposed changes. **The admin's approval step.** |
 | `shop.stock` | Change stock quantities (with a reason) on any product, including published ones; applies at once. |
 | `shop.categories` | Create, edit, order and hide categories. |
-| `shop.orders.view` | See orders and customer details. |
-| `shop.orders.manage` | Confirm, set the delivery fee, prepare, send to dispatch, mark collected, cancel, record a return. |
-| `shop.orders.payment` | Record and confirm payments and refunds on orders. |
+| `orders.view` | See orders and customer details. |
+| `orders.manage` | Confirm, set the delivery fee, prepare, send to dispatch, mark collected, cancel, record a return. |
+| `orders.payment` | Record and confirm payments and refunds on orders. |
 | `shop.settings` | Shop on/off, order email, ship-from point, payment methods, stock defaults. |
 
 **Default grants** (Super Admin has everything):
 
 | Role | Shop permissions |
 |---|---|
-| Marketing | `shop.view`, `shop.products.write`, `shop.stock`, `shop.categories`, `shop.orders.view` |
-| Operations Manager | `shop.view`, `shop.stock`, `shop.orders.view`, `shop.orders.manage` |
-| Finance | `shop.view`, `shop.orders.view`, `shop.orders.payment` |
-| Super Admin | all, including `shop.products.publish` and `shop.settings` |
+| Marketing | `shop.view`, `shop.write`, `shop.stock`, `shop.categories`, `orders.view` |
+| Operations Manager | `shop.view`, `shop.stock`, `orders.view`, `orders.manage` |
+| Finance | `shop.view`, `orders.view`, `orders.payment` |
+| Super Admin | all, including `shop.publish` and `shop.settings` |
 
-The Super Admin can give `shop.products.publish` to anyone later in Roles. Roles are seeded only into an empty
+The Super Admin can give `shop.publish` to anyone later in Roles. Roles are seeded only into an empty
 `roles` table (IAM_RBAC_SPEC §4), so a **one-time migration** adds these keys to the existing Marketing, Operations
 Manager and Finance roles (by role id, only if the role still exists, recorded so it never runs twice).
 
@@ -209,7 +209,7 @@ cannot upload a picture of the wrong size, because the console only uploads what
    those slots instead.
 5. Shows the result before upload. Many files can be queued; each gets its own crop step (Skip = automatic start).
 
-**On the server (`POST /api/shop/media`, `shop.products.write` or `shop.categories`):**
+**On the server (`POST /api/shop/media`, `shop.write` or `shop.categories`):**
 - Checks every file by its bytes (`server/uploads.ts`), reads its pixel size (`server/imageSize.ts`) and refuses the
   upload unless each file is **exactly** 1200×1200, 600×600 or 300×300 as its slot says, the right type, and under
   its byte cap (1200: 700 KB, 600: 250 KB, 300: 90 KB). Random file names under `UPLOADS_DIR/shop/`, served from
@@ -373,7 +373,7 @@ limits on every field, `idempotency_key` from the form so a double tap or a retr
   (`src/shared/paymentMethods.ts`), never typed into shop code.
 - The customer is asked to pay mobile money **only after TanEx confirms the order** (stock and fee settled), with the
   order number as the reference.
-- `shop.orders.payment` users record the payment on the order page: method, amount, transaction reference →
+- `orders.payment` users record the payment on the order page: method, amount, transaction reference →
   **PAID** (audit + timeline). **Refund** records the refund method and reference → REFUNDED.
 - **Cash on delivery** with dispatch: the job carries the order total as COD (§13). When Finance **confirms** that
   job's cash or mobile money row in the cash ledger (G.8), the order becomes **PAID** automatically; a rejected row
@@ -393,7 +393,7 @@ email sent is a timeline event.
 
 ## 13. Link to dispatch (DISPATCH_SPEC)
 
-`Send to dispatch` (order READY, delivery method DELIVERY, `shop.orders.manage` and `dispatch.manage` or a
+`Send to dispatch` (order READY, delivery method DELIVERY, `orders.manage` and `dispatch.manage` or a
 dispatcher completes it) creates a normal job through the existing job code (`createJobShipment`, `writeTransition`):
 - **LOCAL** when the customer's city is the ship-from city, otherwise **INTERCITY**;
 - pickup = ship-from area and landmark; drop-off = the customer's area, address, landmark; recipient = the customer;
@@ -440,7 +440,7 @@ both languages. Share image = the product's 1200 JPEG.
 - Every console route uses `requirePermission(...)`; publishing is checked on the server, never only hidden in the UI.
 - Descriptions sanitised with the blog's sanitiser; slugs validated; numbers validated as integers ≥ 0; sale price
   below price; file uploads per §6.
-- Orders hold personal data: visible only with `shop.orders.view`; never in public APIs or logs; customer emails sent
+- Orders hold personal data: visible only with `orders.view`; never in public APIs or logs; customer emails sent
   through the outbox only. The **Privacy Policy** gains a "Shop orders" paragraph (what we collect, why, how long we
   keep it) before launch (lawyer review, #11).
 - **Retention (owner 2026-11-17: "as professional sites do"; the periods are for the lawyer to confirm with #11):**

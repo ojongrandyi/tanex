@@ -70,6 +70,7 @@ Defined once in `src/shared/permissions.ts` (shared by client and server, like `
 | Courier | `courier.app` (courier app; **own jobs only**) |
 | Cash | `cash.view`, `cash.confirm` (confirm courier handovers, adjustments) |
 | Blog | `blog.view`, `blog.write` (own drafts), `blog.edit_any`, `blog.publish`, `blog.categories` |
+| Shop | `shop.view`, `shop.write` (drafts; proposed changes to live products), `shop.publish` (publish, approve), `shop.stock`, `shop.categories`, `shop.settings`, `orders.view`, `orders.manage`, `orders.payment` (SHOP_SPEC §3) |
 | Admin | `users.view`, `users.manage`, `roles.manage`, `settings.view`, `settings.manage`, `audit.view` |
 
 Seeded roles and their keys: TANEX_PLAN §4.1. Seeding runs only when the `roles` table is empty; afterwards the

@@ -161,11 +161,11 @@ devices, behind a static poster; everything respects `prefers-reduced-motion` an
 | Role | Purpose | Main permissions |
 |---|---|---|
 | **Super Admin** | Owner / IT. Everything, including users, roles and settings. Cannot be edited or deleted; at least one active Super Admin must always exist. | `*` |
-| **Operations Manager** | Runs shipments end to end. | shipments, tracking, documents, quotes, messages, payments (view), dispatch, couriers, cash (view), dashboard |
+| **Operations Manager** | Runs shipments end to end. | shipments, tracking, documents, quotes, messages, payments (view), dispatch, couriers, cash (view), dashboard, shop (view, stock), orders (view, manage) |
 | **Dispatch Manager** | Office dispatcher: prices and assigns local/intercity jobs, watches couriers. | dispatch (view, manage), couriers (view), shipments (view), tracking (update), cash (view), messages (view) |
 | **Courier** | Bike rider or truck/van driver (vehicle on their profile). Uses the courier app only. | `courier.app` (own jobs only) |
-| **Marketing** | Blog and public content. | blog (write, publish, categories), messages (view), dashboard |
-| **Finance** | Money in. | payments (view, manage), cash (view, confirm), documents (view), quotes (view), shipments (view) |
+| **Marketing** | Blog, shop products and public content. | blog (write, publish, categories), shop (view, write, stock, categories), orders (view), messages (view), dashboard |
+| **Finance** | Money in. | payments (view, manage), cash (view, confirm), documents (view), quotes (view), shipments (view), shop (view), orders (view, payment) |
 | **Customer Support** | Answers customers. | shipments (view), tracking (update), messages (view, manage), quotes (view), dispatch (view) |
 
 Full permission catalogue: IAM_RBAC_SPEC §4.

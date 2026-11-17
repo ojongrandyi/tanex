@@ -20,6 +20,7 @@ export const PERMISSION_GROUPS = [
   { key: 'courier', label: { en: 'Courier', fr: 'Coursier' } },
   { key: 'cash', label: { en: 'Cash', fr: 'Espèces' } },
   { key: 'blog', label: { en: 'Blog', fr: 'Blog' } },
+  { key: 'shop', label: { en: 'Shop', fr: 'Boutique' } },
   { key: 'admin', label: { en: 'Administration', fr: 'Administration' } }
 ] as const satisfies readonly { key: string; label: LocalizedText }[];
 
@@ -64,6 +65,16 @@ export const PERMISSIONS = [
   { key: 'blog.edit_any', group: 'blog', description: { en: "Edit anyone's posts", fr: 'Modifier les articles de tous les auteurs' } },
   { key: 'blog.publish', group: 'blog', description: { en: 'Publish and unpublish posts', fr: 'Publier et dépublier des articles' } },
   { key: 'blog.categories', group: 'blog', description: { en: 'Manage blog categories', fr: 'Gérer les catégories du blog' } },
+  // Shop (docs/SHOP_SPEC.md §3)
+  { key: 'shop.view', group: 'shop', description: { en: 'View shop products and categories in the console', fr: 'Voir les produits et catégories de la boutique dans la console' } },
+  { key: 'shop.write', group: 'shop', description: { en: 'Create products, edit drafts and propose changes for approval', fr: 'Créer des produits, modifier des brouillons et proposer des changements à approuver' } },
+  { key: 'shop.publish', group: 'shop', description: { en: 'Publish, hide and archive products; approve or send back changes', fr: 'Publier, masquer et archiver des produits ; approuver ou renvoyer des changements' } },
+  { key: 'shop.stock', group: 'shop', description: { en: 'Change stock quantities', fr: 'Modifier les quantités en stock' } },
+  { key: 'shop.categories', group: 'shop', description: { en: 'Manage shop categories', fr: 'Gérer les catégories de la boutique' } },
+  { key: 'orders.view', group: 'shop', description: { en: 'View shop orders and customer details', fr: 'Voir les commandes de la boutique et les coordonnées des clients' } },
+  { key: 'orders.manage', group: 'shop', description: { en: 'Confirm, prepare, dispatch and cancel shop orders', fr: 'Confirmer, préparer, expédier et annuler les commandes de la boutique' } },
+  { key: 'orders.payment', group: 'shop', description: { en: 'Record payments and refunds on shop orders', fr: 'Enregistrer les paiements et remboursements des commandes de la boutique' } },
+  { key: 'shop.settings', group: 'shop', description: { en: 'Change shop settings', fr: 'Modifier les paramètres de la boutique' } },
   // Admin
   { key: 'users.view', group: 'admin', description: { en: 'View staff accounts', fr: 'Voir les comptes du personnel' } },
   { key: 'users.manage', group: 'admin', description: { en: 'Create, edit, disable and reset staff accounts', fr: 'Créer, modifier, désactiver et réinitialiser les comptes du personnel' } },
@@ -132,7 +143,8 @@ export const SEEDED_ROLES: readonly SeededRole[] = [
       'payments.view',
       'dispatch.view', 'dispatch.manage',
       'couriers.view', 'couriers.manage',
-      'cash.view'
+      'cash.view',
+      'shop.view', 'shop.stock', 'orders.view', 'orders.manage'
     ]
   },
   {
@@ -159,10 +171,11 @@ export const SEEDED_ROLES: readonly SeededRole[] = [
   {
     id: 'role_marketing',
     name: 'Marketing',
-    description: 'Blog and public content.',
+    description: 'Blog, shop products and public content.',
     isLocked: false,
     permissions: [
       'blog.view', 'blog.write', 'blog.publish', 'blog.categories',
+      'shop.view', 'shop.write', 'shop.stock', 'shop.categories', 'orders.view',
       'messages.view',
       'dashboard.view'
     ]
@@ -177,7 +190,8 @@ export const SEEDED_ROLES: readonly SeededRole[] = [
       'cash.view', 'cash.confirm',
       'documents.view',
       'quotes.view',
-      'shipments.view'
+      'shipments.view',
+      'shop.view', 'orders.view', 'orders.payment'
     ]
   },
   {

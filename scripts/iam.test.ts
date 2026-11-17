@@ -30,6 +30,8 @@ const SPEC_KEYS = [
   'courier.app',
   'cash.view', 'cash.confirm',
   'blog.view', 'blog.write', 'blog.edit_any', 'blog.publish', 'blog.categories',
+  'shop.view', 'shop.write', 'shop.publish', 'shop.stock', 'shop.categories', 'shop.settings',
+  'orders.view', 'orders.manage', 'orders.payment',
   'users.view', 'users.manage', 'roles.manage', 'settings.view', 'settings.manage', 'audit.view'
 ];
 

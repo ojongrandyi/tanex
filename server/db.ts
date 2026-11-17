@@ -7,6 +7,7 @@ import { createMailTables } from './mail/outbox.js';
 import { createBlogTables } from './blog/schema.js';
 import { createDispatchTables } from './dispatch/schema.js';
 import { createNotificationTables } from './notifications/log.js';
+import { initShopSchema } from './shop/schema.js';
 
 // DB_PATH lets a real deployment point the database file somewhere OUTSIDE the directory
 // git/the deploy process manages, e.g. a persistent storage path a host provides separately
@@ -320,6 +321,11 @@ export function initDatabase() {
 
   // 22. WhatsApp click-to-chat links opened (docs/NOTIFICATIONS_SPEC.md §2), G.8.
   createNotificationTables(db);
+
+  // 23. Shop: categories, products, pictures, stock moves, orders (docs/SHOP_SPEC.md §4), plus
+  // the one-time grant of the shop permissions to the existing Marketing, Operations Manager and
+  // Finance roles. Empty until staff add products; the shop stays off until the owner opens it.
+  initShopSchema(db);
 
   // Safe dynamic migrations for existing databases. Must run after every CREATE TABLE above
   // (shipments through settings) — these ALTER statements target quote_requests, documents

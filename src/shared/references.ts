@@ -9,11 +9,20 @@ export const REFERENCE_PREFIXES = {
   invoice: `${REFERENCE_PREFIX}-INV-`,
   // Cash and mobile-money ledger entries (courier collections and handovers, phase G).
   cash: `${REFERENCE_PREFIX}-CSH-`,
+  // Shop product IDs and order numbers (docs/SHOP_SPEC.md §5). The server allocates both and
+  // retries on the rare collision (unique index); a product ID never changes and is never reused.
+  product: `${REFERENCE_PREFIX}-PRD-`,
+  order: `${REFERENCE_PREFIX}-ORD-`,
 } as const;
 
 export type ReferenceKind = keyof typeof REFERENCE_PREFIXES;
 
-export const REFERENCE_PATTERN = new RegExp(`^${REFERENCE_PREFIX}-(SL|TKT|INV|CSH)-\\d{6}$`);
+export const REFERENCE_PATTERN = new RegExp(`^${REFERENCE_PREFIX}-(SL|TKT|INV|CSH|PRD|ORD)-\\d{6}$`);
+
+/** True for a well-formed reference of this kind, e.g. isReferenceOf('order', 'TX-ORD-037614'). */
+export function isReferenceOf(kind: ReferenceKind, value: unknown): value is string {
+  return typeof value === 'string' && value.startsWith(REFERENCE_PREFIXES[kind]) && REFERENCE_PATTERN.test(value);
+}
 
 // 6 random digits (leading zeros allowed, as in TX-INV-004091). Rejection sampling keeps
 // every value equally likely.
