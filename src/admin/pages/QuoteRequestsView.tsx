@@ -707,7 +707,6 @@ export const QuoteRequestsView: React.FC = () => {
             {/* Table Footer */}
             <div className="quotes-table-footer">
               <span>Showing <strong>{filteredQuotes.length}</strong> of <strong>{quoteRequests.length}</strong> quote inquiries</span>
-              <span className="footer-sub">Private Pricing & Tariff Authority</span>
             </div>
           </div>
         </div>

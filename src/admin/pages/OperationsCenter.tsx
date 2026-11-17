@@ -65,11 +65,14 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
   );
   const inTransitCount = inTransitShipments.length;
   const deliveredCount = shipments.filter(s => s.status === 'DELIVERED').length;
-  const exceptionCount = shipments.filter(s =>
-    s.status === 'HELD' ||
-    s.status === 'EXCEPTION' ||
-    Boolean(s.delayNotice?.hasDelay)
-  ).length;
+  // On hold or delayed (current codes and the legacy HELD/EXCEPTION codes, through the shared
+  // status tones), or carrying a delay notice. One rule for the card, the filter and the status
+  // line (#185); it used to miss ON_HOLD, the code the console sets.
+  const needsAttention = (s: (typeof shipments)[number]) => {
+    const tone = shipmentStatusTone(s.status);
+    return tone === 'hold' || tone === 'delayed' || Boolean(s.delayNotice?.hasDelay);
+  };
+  const exceptionCount = shipments.filter(needsAttention).length;
 
   const totalPieces = shipments.reduce((acc, s) => {
     const piecesCount = Array.isArray(s.pieces) && s.pieces.length > 0 ? s.pieces.length : (s.totalPieces || 1);
@@ -89,7 +92,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
     } else if (tableFilter === 'DELIVERED') {
       if (s.status !== 'DELIVERED') return false;
     } else if (tableFilter === 'HELD') {
-      const isHeld = s.status === 'HELD' || s.status === 'EXCEPTION' || Boolean(s.delayNotice?.hasDelay);
+      const isHeld = needsAttention(s);
       if (!isHeld) return false;
     }
 
@@ -139,11 +142,20 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
          ==================================================================== */}
       <div className="ops-subhead-strip">
         <div className="subhead-left">
-          <span className="live-status-pill">
-            <span className="live-dot" />
-            <span>Network Status: Optimal</span>
-          </span>
-          <span className="subhead-sep">·</span>
+          {/* Measured from the shipment list, not a fixed claim (#185). */}
+          {can('shipments.view') && (
+            <>
+              <span className={`live-status-pill${exceptionCount > 0 ? ' is-attention' : ''}`} role="status">
+                <span className="live-dot" aria-hidden="true" />
+                <span>
+                  {exceptionCount === 0
+                    ? 'No holds or delays'
+                    : `${exceptionCount} ${exceptionCount === 1 ? 'shipment needs' : 'shipments need'} attention`}
+                </span>
+              </span>
+              <span className="subhead-sep" aria-hidden="true">·</span>
+            </>
+          )}
           <span className="subhead-text">{GATEWAYS.length} Gateways in Network</span>
         </div>
         <div className="subhead-right">
@@ -372,7 +384,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                   className={`filter-tab-btn ${tableFilter === 'HELD' ? 'active' : ''}`}
                   onClick={() => setTableFilter('HELD')}
                 >
-                  {shipmentStatusLabel('ON_HOLD')} ({exceptionCount})
+                  {shipmentStatusLabel('ON_HOLD')} / {shipmentStatusLabel('DELAYED')} ({exceptionCount})
                 </button>
               )}
             </div>

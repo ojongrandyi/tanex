@@ -984,7 +984,6 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
         {/* Table Footer */}
         <div className="doc-table-footer">
           <span>Showing <strong>{filteredDocuments.length}</strong> of <strong>{documents.length}</strong> system documents</span>
-          <span className="footer-sub">Official Regulatory & Consignment Records</span>
         </div>
       </div>
 

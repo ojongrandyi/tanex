@@ -45,6 +45,17 @@
   letter-spacing: 0.02em;
 }
 
+.live-status-pill.is-attention {
+  background: var(--tx-warning-50);
+  border-color: var(--tx-warning-200);
+  color: var(--tx-warning-800);
+}
+
+.live-status-pill.is-attention .live-dot {
+  background: var(--tx-warning-600);
+  box-shadow: none;
+}
+
 .live-dot {
   width: 6px;
   height: 6px;

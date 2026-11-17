@@ -615,10 +615,6 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
         {/* Table Footer Stats */}
         <div className="table-card-footer">
           <span>Showing <strong>{filteredShipments.length}</strong> of <strong>{shipments.length}</strong> consignments</span>
-          <span className="footer-system-text">
-            <FileText size={13} className="carrier-archive-icon" />
-            <span>Live Code 128 Carrier Archive</span>
-          </span>
         </div>
       </div>
 
