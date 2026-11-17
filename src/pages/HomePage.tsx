@@ -206,7 +206,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
               {t('hero.titleLine1')}{' '}
               <span className="tx-home__h1-l2"><em className="tx-em">{t('hero.titleLine2')}</em></span>
             </h1>
-            <p className="tx-lead">{t('hero.sub')}</p>
             <form className="tx-home__track" onSubmit={submitTrack} role="search">
               <label className="tx-home__track-label" htmlFor="home-track">{t('hero.trackLabel')}</label>
               <div className="tx-track">
@@ -234,11 +233,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onTrack, onNavigate }) => {
               <Link page="quote" onNavigate={onNavigate} className="tx-btn tx-btn--primary tx-btn--lg">{t('hero.quote')}</Link>
               <Link page={BIKE_BOOKING.page} param={BIKE_BOOKING.param} onNavigate={onNavigate} className="tx-btn tx-btn--on-dark tx-btn--lg">{t('hero.bike')}</Link>
             </div>
-            <ul className="tx-home__facts">
-              <li><Check aria-hidden="true" />{t('hero.facts.live')}</li>
-              <li><Check aria-hidden="true" />{t('hero.facts.photo')}</li>
-              <li><Check aria-hidden="true" />{t('hero.facts.languages')}</li>
-            </ul>
           </div>
         </div>
         <Mountain className="tx-home__mount" />

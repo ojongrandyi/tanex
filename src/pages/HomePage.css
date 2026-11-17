@@ -68,11 +68,14 @@
     --tx-hero-photo: image-set(url('/images/site/home-hero-1080.webp') type('image/webp'), url('/images/site/home-hero-1080.jpg') type('image/jpeg'));
   }
 }
-.tx-ch--hero .tx-ch__grid { align-items: center; }
+.tx-ch--hero .tx-ch__grid { align-items: center; row-gap: 28px; }
+/* The globe lane spans both rows and is taller than the text, so the rows stretch: keep the
+   tracking form and the CTA buttons together at the row boundary instead of centred apart. */
+.tx-ch--hero .tx-ch__intro { align-self: end; }
+.tx-ch--hero .tx-ch__rest { align-self: start; }
 .tx-lane--hero { min-height: 520px; }
-.tx-home__h1 { margin: 0 0 28px; font-size: var(--tx-fs-display); }
+.tx-home__h1 { margin: 0 0 32px; font-size: clamp(2.25rem, 1.4rem + 3vw, 3.5rem); }
 .tx-home__h1-l2 { display: block; }
-.tx-ch--hero .tx-lead { color: var(--tx-choc-200); margin-bottom: 36px; }
 .tx-home__track { margin: 0; }
 .tx-home__track-label { display: block; margin-bottom: 10px; font: 600 .82rem/1 var(--tx-font-body); color: var(--tx-cream-100); }
 .tx-track {
@@ -89,10 +92,7 @@
 .tx-track__input:focus, .tx-track__input:focus-visible { outline: none; box-shadow: none; }
 .tx-track:focus-within { box-shadow: var(--tx-shadow-lift), var(--tx-focus-ring, 0 0 0 3px rgb(244 136 0 / .55)); }
 .tx-track .tx-btn { border-radius: var(--tx-radius-pill, 999px); }
-.tx-home__hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
-.tx-home__facts { list-style: none; padding: 0; margin: 34px 0 0; display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: .9rem; color: var(--tx-choc-200); }
-.tx-home__facts li { display: inline-flex; gap: 8px; align-items: center; }
-.tx-home__facts svg { width: 16px; height: 16px; color: var(--tx-cream-300); }
+.tx-home__hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 0; }
 .tx-home__mount { position: absolute !important; left: 0; right: 0; bottom: 0; top: auto !important; height: 150px; width: 100%; --mount: #241712; --mount2: #2A1B16; pointer-events: none; }
 .tx-home__hero-cap { position: absolute; right: var(--tx-gutter, 40px); bottom: 36px; z-index: 1; }
 .tx-home__pause { position: absolute; left: var(--tx-gutter, 40px); bottom: 26px; z-index: 2; color: var(--tx-cream-100); }

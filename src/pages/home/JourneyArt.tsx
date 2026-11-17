@@ -26,8 +26,8 @@ const Svg: React.FC<React.SVGProps<SVGSVGElement>> = ({ children, className = ''
 /** Chapter 0: globe with Cameroon lit and the paper plane. */
 export const HeroGlobe: React.FC<SceneProps> = ({ className }) => (
   <Svg viewBox="0 0 400 400" className={`tx-scene--globe ${className ?? ''}`}>
-    <use href="#globe" x="30" y="40" width="340" height="340" />
-    <use href="#mark" x="268" y="66" width="62" height="38" />
+    <use href="#globe" x="72.5" y="82.5" width="255" height="255" />
+    <use href="#mark" x="251" y="102" width="47" height="28.5" />
   </Svg>
 );
 

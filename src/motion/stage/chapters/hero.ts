@@ -50,8 +50,8 @@ const REST = { lat: 16, lon: 14 };
 /** Camera distance from the globe centre (radius 1) at rest and at the end of the dive. */
 const DIST_REST = 4;
 const DIST_DIVE = 1.16;
-/** Globe diameter as a share of the lane frame. */
-const GLOBE_FILL = 0.86;
+/** Globe diameter as a share of the lane frame (owner request 2026-11-14: 25% smaller than 0.86). */
+const GLOBE_FILL = 0.645;
 /** Logo width as a share of the globe's diameter, seen face on. */
 const LOGO_SHARE = 0.46;
 /**
