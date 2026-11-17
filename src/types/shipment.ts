@@ -136,18 +136,6 @@ export interface ShipmentPassportStage {
   date?: string;
 }
 
-export interface ShipmentAuditEntry {
-  id: string;
-  timestamp: string;
-  operator: string;
-  action: string;
-  reason?: string;
-  durationHours?: number;
-  prevETA?: string;
-  newETA?: string;
-  details: string;
-}
-
 export interface ReturnJourneyLeg {
   returnTrackingNumber: string;
   originalTrackingNumber: string;
@@ -186,12 +174,9 @@ export interface Shipment {
   id?: string;
   status: ShipmentStatus;
   statusText: string;
-  statusMessage: string;
   health: HealthStatus;
   healthExplanation: string;
   progressPercent?: number;
-  isHoldFrozen?: boolean;
-  frozenProgressPercent?: number;
   shipmentType: 'Parcel' | 'Document' | 'Freight' | 'Pallet' | 'Container' | 'Vehicle' | 'Pets';
   cargoCategory?: string;
   cargoDescription?: string;
@@ -337,7 +322,6 @@ export interface Shipment {
   documents?: ShipmentDocument[];
   passportStages?: ShipmentPassportStage[];
   
-  auditLog?: ShipmentAuditEntry[];
   returnLeg?: ReturnJourneyLeg;
   /** Set on a return shipment: the tracking ID of the shipment it returns. */
   returnOf?: string;

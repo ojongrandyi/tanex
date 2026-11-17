@@ -387,7 +387,15 @@ shipmentsRouter.post('/', publicWriteLimiter,
 
 // PATCH /api/shipments/:trackingNumber/status (Quick update)
 shipmentsRouter.patch('/:trackingNumber/status', requirePermission('tracking.update'),
-  audited('shipment.status', 'shipment', param('trackingNumber', true), (req) => `Status set to ${req.body?.newStatus || req.body?.status}`,
+  // The summary carries the event title (e.g. the hold reason) and its note, so the server log
+  // holds everything the console's old in-browser audit list showed (#12).
+  audited('shipment.status', 'shipment', param('trackingNumber', true), (req) => {
+    const detail = [req.body?.eventTitle, req.body?.notes]
+      .filter((v) => typeof v === 'string' && v.trim())
+      .map((v) => String(v).trim())
+      .join(' · ');
+    return `Status set to ${req.body?.newStatus || req.body?.status}${detail ? `: ${detail.slice(0, 240)}` : ''}`;
+  },
     { after: (req) => ({ status: req.body?.newStatus || req.body?.status }) }), (req: Request, res: Response) => {
   try {
     const tracking = (req.params.trackingNumber as string).trim().toUpperCase();

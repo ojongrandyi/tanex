@@ -170,6 +170,15 @@ test('staff writes record the user: created_by on a console booking, recorded_by
   assert.equal(auditRow.entity_id, tracking);
   assert.deepEqual(JSON.parse(auditRow.after_json), { status: 'IN_TRANSIT' });
 
+  // #12: the server audit summary carries the event title and note (e.g. the hold reason),
+  // which the console used to keep only in an in-browser list.
+  const held = await call('PATCH', `/api/shipments/${tracking}/status`, support, {
+    status: 'ON_HOLD', location: 'Douala', eventTitle: 'Shipment Placed On Hold: Customs inspection', notes: 'ETA extended by +24h.'
+  });
+  assert.equal(held.status, 200);
+  const holdAudit = db.prepare(`SELECT summary FROM audit_log WHERE action = 'shipment.status' ORDER BY at_ts DESC LIMIT 1`).get() as { summary: string };
+  assert.equal(holdAudit.summary, 'Status set to ON_HOLD: Shipment Placed On Hold: Customs inspection · ETA extended by +24h.');
+
   const created = db.prepare(`SELECT actor_user_id FROM audit_log WHERE action = 'shipment.create' AND entity_id = ?`).get(tracking) as any;
   assert.equal(created.actor_user_id, 'usr_role_super_admin');
 

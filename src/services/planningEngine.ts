@@ -9,8 +9,7 @@ import {
   TrackingEvent,
   ShipmentStatus,
   MilestoneState,
-  Shipment,
-  ShipmentAuditEntry
+  Shipment
 } from '../types/shipment.js';
 import { findIntermediateHub } from './routingEngine.js';
 import { ADMIN_ROLE_LABEL } from '../config/brand.js';
@@ -392,35 +391,6 @@ export function generateShipmentPlan(
 }
 
 /**
- * Creates an immutable Audit Log Entry for administrator operational actions
- */
-export function createAuditLogEntry(
-  operator: string,
-  action: string,
-  details: string,
-  params?: {
-    reason?: string;
-    durationHours?: number;
-    prevETA?: string;
-    newETA?: string;
-  }
-): ShipmentAuditEntry {
-  const now = new Date();
-  return {
-    id: `aud-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
-    timestamp: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-      ' · ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-    operator: operator || ADMIN_ROLE_LABEL,
-    action,
-    reason: params?.reason,
-    durationHours: params?.durationHours,
-    prevETA: params?.prevETA,
-    newETA: params?.newETA,
-    details
-  };
-}
-
-/**
  * Recalculates Delivery ETA when a Hold (+hours) or Delay (+hours) is applied
  */
 export function recalculateETAOnDelay(
@@ -442,20 +412,19 @@ export function recalculateETAOnDelay(
 }
 
 /**
- * 1. HOLD Handler: Freezes progress %, freezes estimated position, pushes ETA
+ * 1. HOLD Handler: keeps progress where it is (the server never advances an ON_HOLD shipment), pushes ETA
  */
 export function applyHoldState(
   shipment: Shipment,
   holdReason: string,
   holdHours: number,
   operator = ADMIN_ROLE_LABEL
-): { updatedShipment: Shipment; auditEntry: ShipmentAuditEntry; event: TrackingEvent } {
+): { updatedShipment: Shipment; event: TrackingEvent } {
   const prevETA = typeof shipment.estimatedDelivery === 'string'
     ? shipment.estimatedDelivery
     : (shipment.estimatedDelivery as any)?.date || 'On Schedule';
 
   const { newETADate, newETATime } = recalculateETAOnDelay(prevETA, holdHours);
-  const newETA = `${newETADate} • ${newETATime}`;
 
   const currentProgress = shipment.progressPercent ?? 35;
 
@@ -463,9 +432,6 @@ export function applyHoldState(
     ...shipment,
     status: 'ON_HOLD',
     statusText: `${shipmentStatusLabel('ON_HOLD')} (${holdReason})`,
-    statusMessage: `Shipment temporarily paused: ${holdReason}. Delivery ETA extended by +${holdHours} hours.`,
-    isHoldFrozen: true,
-    frozenProgressPercent: currentProgress,
     progressPercent: currentProgress,
     // estimatedDelivery/estimatedDeliveryDetail (date + time-window, matching how every other
     // part of the app models ETA — see Shipment type) rather than one combined "date • time"
@@ -499,39 +465,25 @@ export function applyHoldState(
     recordedBy: operator
   };
 
-  const auditEntry = createAuditLogEntry(
-    operator,
-    'HOLD_APPLIED',
-    `Shipment placed on hold for ${holdReason}. Progress frozen at ${currentProgress}%. ETA pushed by +${holdHours}h.`,
-    {
-      reason: holdReason,
-      durationHours: holdHours,
-      prevETA,
-      newETA
-    }
-  );
 
   updatedShipment.timeline = [event, ...(shipment.timeline || []).map(e => ({ ...e, isCurrent: false }))];
-  updatedShipment.auditLog = [auditEntry, ...(shipment.auditLog || [])];
 
-  return { updatedShipment, auditEntry, event };
+  return { updatedShipment, event };
 }
 
 /**
- * 2. RESUME Handler: Unfreezes hold and continues linehaul progression
+ * 2. RESUME Handler: back in transit from the progress it was held at
  */
 export function applyResumeState(
   shipment: Shipment,
   operator = ADMIN_ROLE_LABEL
-): { updatedShipment: Shipment; auditEntry: ShipmentAuditEntry; event: TrackingEvent } {
-  const currentProgress = shipment.frozenProgressPercent ?? shipment.progressPercent ?? 35;
+): { updatedShipment: Shipment; event: TrackingEvent } {
+  const currentProgress = shipment.progressPercent ?? 35;
 
   const updatedShipment: Shipment = {
     ...shipment,
     status: 'IN_TRANSIT',
     statusText: shipmentStatusLabel('IN_TRANSIT'),
-    statusMessage: 'Hold condition resolved. Shipment movement has resumed along its planned route.',
-    isHoldFrozen: false,
     progressPercent: currentProgress,
     lastUpdated: 'Just now'
   };
@@ -558,16 +510,10 @@ export function applyResumeState(
     recordedBy: operator
   };
 
-  const auditEntry = createAuditLogEntry(
-    operator,
-    'TRANSIT_RESUMED',
-    `Operational hold resolved. Linehaul progression resumed from ${currentProgress}%.`
-  );
 
   updatedShipment.timeline = [event, ...(shipment.timeline || []).map(e => ({ ...e, isCurrent: false }))];
-  updatedShipment.auditLog = [auditEntry, ...(shipment.auditLog || [])];
 
-  return { updatedShipment, auditEntry, event };
+  return { updatedShipment, event };
 }
 
 /**
@@ -578,19 +524,17 @@ export function applyDelayState(
   delayReason: string,
   delayHours: number,
   operator = ADMIN_ROLE_LABEL
-): { updatedShipment: Shipment; auditEntry: ShipmentAuditEntry; event: TrackingEvent } {
+): { updatedShipment: Shipment; event: TrackingEvent } {
   const prevETA = typeof shipment.estimatedDelivery === 'string'
     ? shipment.estimatedDelivery
     : (shipment.estimatedDelivery as any)?.date || 'On Schedule';
 
   const { newETADate, newETATime } = recalculateETAOnDelay(prevETA, delayHours);
-  const newETA = `${newETADate} • ${newETATime}`;
 
   const updatedShipment: Shipment = {
     ...shipment,
     status: 'DELAYED',
     statusText: `${shipmentStatusLabel('DELAYED')} (${delayReason})`,
-    statusMessage: `Corridor transit delay: ${delayReason}. New estimated delivery is ${newETADate}.`,
     // Split date/time, matching the app's ETA convention — see the same fix in applyHoldState.
     estimatedDelivery: newETADate,
     estimatedDeliveryDetail: newETATime,
@@ -619,22 +563,10 @@ export function applyDelayState(
     recordedBy: operator
   };
 
-  const auditEntry = createAuditLogEntry(
-    operator,
-    'DELAY_LOGGED',
-    `Delay logged: ${delayReason}. Transit schedule shifted by +${delayHours}h.`,
-    {
-      reason: delayReason,
-      durationHours: delayHours,
-      prevETA,
-      newETA
-    }
-  );
 
   updatedShipment.timeline = [event, ...(shipment.timeline || []).map(e => ({ ...e, isCurrent: false }))];
-  updatedShipment.auditLog = [auditEntry, ...(shipment.auditLog || [])];
 
-  return { updatedShipment, auditEntry, event };
+  return { updatedShipment, event };
 }
 
 /**
@@ -665,7 +597,7 @@ export function calculateDynamicTimeProgress(
   }
 
   if (status === 'ON_HOLD' || status === 'HELD') {
-    const frozen = shipment.frozenProgressPercent ?? shipment.progressPercent ?? 35;
+    const frozen = shipment.progressPercent ?? 35;
     return {
       progressPercent: frozen,
       interpolatedLocation: typeof shipment.currentLocation === 'string'

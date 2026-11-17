@@ -974,19 +974,6 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
       trackingNumber: '',
       status: (initialLocationMode === 'NOT_RECEIVED' ? 'BOOKED' : 'RECEIVED') as ShipmentStatus,
       statusText: initialLocationMode === 'NOT_RECEIVED' ? 'Manifest Created' : 'Received at Origin Facility',
-      statusMessage: shipmentType === 'Vehicle'
-        ? `Vehicle Cargo (${vehYear} ${vehMake} ${vehModel}) received. VIN: ${vehVin}. Operable.`
-        : shipmentType === 'Pallet'
-        ? `Pallet Cargo (${palletCount} Skids, ${bothUnits(totalWeight)}). ${palletStackable ? 'Stackable' : 'Non-Stackable (Top-Tier Only)'}.`
-        : shipmentType === 'Container'
-        ? `Container ${containerNumber} (${containerIsoSize.split(' ')[0]}). Seal: ${containerBoltSeal}. VGM: ${bothUnits(containerVgmWeight)}.`
-        : shipmentType === 'Freight'
-        ? `Heavy Freight (${freightClass}, ${freightNmfcCode}). Weight: ${bothUnits(totalWeight)}.`
-        : shipmentType === 'Document'
-        ? `Secure Document (${docEnvelopeType.split(' ')[0]}). Seal: ${docSealNumber}. Direct In-Person Signature Required.`
-        : shipmentType === 'Pets'
-        ? `Live Pet Cargo: ${petName} (${petBreed}). Microchip: ${petMicrochip}. CVI: ${petHealthCertNumber}. Active Climate Hold Guaranteed.`
-        : `Consignment provisioned. ${totalPieces} package(s) totalling ${bothUnits(totalWeight)}.`,
       health: 'ON_TRACK',
       healthExplanation: 'Consignment created on schedule with verified physical barcodes.',
       progressPercent: initialLocationMode === 'NOT_RECEIVED' ? 0 : 5,

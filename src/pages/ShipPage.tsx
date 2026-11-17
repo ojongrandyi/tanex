@@ -320,7 +320,6 @@ export const ShipPage: React.FC<ShipPageProps> = ({ onTrack, onNavigate }) => {
       const created = await createShipment({
         status: 'AWAITING_PICKUP',
         statusText: shipmentStatusLabel('BOOKED'),
-        statusMessage: `${shipmentStatusLabel('BOOKED')} · ${collectionText}`,
         health: 'ON_TRACK',
         progressPercent: 10,
         lastUpdated: 'Just now',

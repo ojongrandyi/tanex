@@ -321,7 +321,7 @@ const InternationalTrackResult: React.FC<TrackResultPageProps> = ({
   const progressPercent = status === 'DELIVERED'
     ? 100
     : isHold
-    ? (liveShipment?.frozenProgressPercent ?? shipment?.frozenProgressPercent ?? shipment?.progressPercent ?? 35)
+    ? (liveShipment?.progressPercent ?? shipment?.progressPercent ?? 35)
     : String(status) === 'CREATED' || String(status) === 'AWAITING_PICKUP' || String(status) === 'BOOKED'
     ? 0
     : (liveShipment as any)?.progressPercent !== undefined

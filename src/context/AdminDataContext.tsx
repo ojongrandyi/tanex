@@ -601,7 +601,6 @@ const normalizeShipment = (s: any): Shipment => {
       id: `shp-${Date.now()}`,
       status: 'RECEIVED',
       statusText: shipmentStatusLabel('RECEIVED'),
-      statusMessage: 'Shipment registered in verified linehaul network.',
       health: 'ON_TRACK',
       healthExplanation: 'Consignment created from approved tariff rate quotation.',
       progressPercent: 15,
@@ -834,7 +833,6 @@ const normalizeShipment = (s: any): Shipment => {
     const draft: any = {
       status: shipmentData.status || 'RECEIVED',
       statusText: shipmentData.statusText || 'Consignment Registered',
-      statusMessage: shipmentData.statusMessage || 'Shipment registered in verified linehaul network.',
       health: shipmentData.health || 'ON_TRACK',
       healthExplanation: shipmentData.healthExplanation || 'Consignment created on schedule with verified physical barcodes.',
       progressPercent: (shipmentData as any)?.progressPercent || 15,

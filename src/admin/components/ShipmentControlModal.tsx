@@ -13,8 +13,7 @@ import { Shipment, TrackingEvent } from '../../types/shipment';
 import {
   applyHoldState,
   applyResumeState,
-  applyDelayState,
-  createAuditLogEntry
+  applyDelayState
 } from '../../services/planningEngine';
 import { simulationEngine } from '../../services/simulationEngine';
 import { ADMIN_ROLE_LABEL } from '../../config/brand';
@@ -162,14 +161,12 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
           isCurrent: true,
           recordedBy: ADMIN_ROLE_LABEL
         };
-        const auditEntry = createAuditLogEntry(ADMIN_ROLE_LABEL, 'START_TRANSIT', 'Linehaul departure confirmed.');
         updated = {
           ...updated,
           status: 'IN_TRANSIT',
           statusText: shipmentStatusLabel('IN_TRANSIT'),
           progressPercent: Math.max(25, updated.progressPercent || 25),
           timeline: [event, ...(updated.timeline || []).map(t => ({ ...t, isCurrent: false }))],
-          auditLog: [auditEntry, ...(updated.auditLog || [])],
           lastUpdated: 'Just now'
         };
       }
@@ -199,7 +196,6 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
         isCurrent: true,
         recordedBy: ADMIN_ROLE_LABEL
       };
-      const auditEntry = createAuditLogEntry(ADMIN_ROLE_LABEL, 'CONFIRM_CHECKPOINT', `Arrived at ${customFacility}.`);
       updated = {
         ...updated,
         currentLocation: {
@@ -214,7 +210,6 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
         statusText: `${shipmentStatusLabel('AT_FACILITY')} (${[city, state].filter(Boolean).join(', ')})`,
         progressPercent: Math.min(85, Math.max(50, (updated.progressPercent || 30) + 20)),
         timeline: [event, ...(updated.timeline || []).map(t => ({ ...t, isCurrent: false }))],
-        auditLog: [auditEntry, ...(updated.auditLog || [])],
         lastUpdated: 'Just now'
       };
     } else if (targetAction === 'OUT_FOR_DELIVERY') {
@@ -235,7 +230,6 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
         isCurrent: true,
         recordedBy: ADMIN_ROLE_LABEL
       };
-      const auditEntry = createAuditLogEntry(ADMIN_ROLE_LABEL, 'OUT_FOR_DELIVERY', 'Dispatched for final-mile delivery.');
       updated = {
         ...updated,
         status: 'OUT_FOR_DELIVERY',
@@ -253,7 +247,6 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
         } as any,
         currentFacility: `${destCity} Local Depot`,
         timeline: [event, ...(updated.timeline || []).map(t => ({ ...t, isCurrent: false }))],
-        auditLog: [auditEntry, ...(updated.auditLog || [])],
         lastUpdated: 'Just now'
       };
     } else if (targetAction === 'DELIVERED') {
@@ -274,7 +267,6 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
         isCurrent: true,
         recordedBy: ADMIN_ROLE_LABEL
       };
-      const auditEntry = createAuditLogEntry(ADMIN_ROLE_LABEL, 'DELIVERY_CONFIRMED', `Delivered to ${signedBy}.`);
       updated = {
         ...updated,
         status: 'DELIVERED',
@@ -289,7 +281,6 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
         } as any,
         currentFacility: 'Recipient Address',
         timeline: [event, ...(updated.timeline || []).map(t => ({ ...t, isCurrent: false }))],
-        auditLog: [auditEntry, ...(updated.auditLog || [])],
         lastUpdated: 'Just now'
       };
     } else if (targetAction === 'ON_HOLD') {
