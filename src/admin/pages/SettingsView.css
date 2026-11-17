@@ -160,7 +160,7 @@
 
 .icon-blue { background: var(--tx-info-50); color: var(--tx-info-600); }
 .icon-emerald { background: var(--tx-success-50); color: var(--tx-success-600); }
-.icon-indigo { background: #eef2ff; color: #4f46e5; }
+.icon-indigo { background: var(--tx-cat-indigo-50); color: var(--tx-cat-indigo-600); }
 .icon-amber { background: var(--tx-warning-50); color: var(--tx-warning-600); }
 
 .settings-card-header h3 {

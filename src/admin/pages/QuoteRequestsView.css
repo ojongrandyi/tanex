@@ -171,7 +171,7 @@
 }
 
 .create-quote-primary-btn:hover {
-  background: #0046b0;
+  background: var(--tx-orange-400);
   transform: translateY(-1px);
 }
 
@@ -454,7 +454,7 @@
 }
 
 .badge-published {
-  background: #e0e7ff;
+  background: var(--tx-cat-indigo-100);
   color: #3730a3;
 }
 
@@ -474,8 +474,8 @@
 }
 
 .badge-converted {
-  background: #ccfbf1;
-  color: #115e59;
+  background: var(--tx-cat-teal-100);
+  color: var(--tx-cat-teal-800);
 }
 
 /* ==========================================================================
@@ -992,7 +992,7 @@
 }
 
 .btn-publish-quote-primary:hover {
-  background: #0046b0;
+  background: var(--tx-orange-400);
   transform: translateY(-1px);
 }
 
@@ -1313,7 +1313,7 @@
 }
 
 .btn-confirm-publish:hover {
-  background: #0046b0;
+  background: var(--tx-orange-400);
 }
 
 /* Modal Form Content */

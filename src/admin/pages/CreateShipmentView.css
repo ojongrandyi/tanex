@@ -114,8 +114,8 @@
 
 .preset-icon-car { color: var(--tx-info-600); }
 .preset-icon-pkg { color: var(--tx-accent-text); }
-.preset-icon-tech { color: #7c3aed; }
-.preset-icon-pet { color: #e11d48; }
+.preset-icon-tech { color: var(--tx-cat-violet-600); }
+.preset-icon-pet { color: var(--tx-cat-rose-600); }
 
 .save-draft-btn {
   display: inline-flex;
@@ -499,11 +499,11 @@
 .tile-circle-icon.accent { background-color: var(--ngf-accent-500); }
 .tile-circle-icon.blue { background-color: var(--tx-info-600); }
 .tile-circle-icon.green { background-color: var(--tx-success-500); }
-.tile-circle-icon.purple { background-color: #7c3aed; }
+.tile-circle-icon.purple { background-color: var(--tx-cat-violet-600); }
 .tile-circle-icon.amber { background-color: var(--tx-warning-600); }
 .tile-circle-icon.navy { background-color: var(--ngf-ink-950); }
-.tile-circle-icon.indigo { background-color: #4f46e5; }
-.tile-circle-icon.rose { background-color: #e11d48; }
+.tile-circle-icon.indigo { background-color: var(--tx-cat-indigo-600); }
+.tile-circle-icon.rose { background-color: var(--tx-cat-rose-600); }
 
 .tile-title {
   font-size: 0.84rem;
@@ -716,11 +716,11 @@
 .photo-count-pill {
   font-size: 0.625rem;
   font-weight: 800;
-  color: #0369a1;
-  background: #e0f2fe;
+  color: var(--tx-cat-sky-700);
+  background: var(--tx-cat-sky-100);
   padding: 0.12rem 0.45rem;
   border-radius: 9999px;
-  border: 1px solid #bae6fd;
+  border: 1px solid var(--tx-cat-sky-200);
 }
 
 /* Custom Admin Condition Input & Quick Suggestion Chips */
@@ -1680,9 +1680,9 @@
 }
 
 .summary-service-pill.freight {
-  background: #f5f3ff;
-  color: #7c3aed;
-  border: 1px solid #ddd6fe;
+  background: var(--tx-cat-violet-50);
+  color: var(--tx-cat-violet-600);
+  border: 1px solid var(--tx-cat-violet-200);
 }
 
 .summary-divider {
@@ -2016,7 +2016,7 @@
   gap: 1rem;
   padding: 1.25rem;
   background: #f0f7ff;
-  border: 1px solid #bae6fd;
+  border: 1px solid var(--tx-cat-sky-200);
   border-radius: 0.75rem;
 }
 
@@ -2027,7 +2027,7 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #e0f2fe;
+  background: var(--tx-cat-sky-100);
   flex-shrink: 0;
 }
 
@@ -2035,7 +2035,7 @@
   display: block;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #0369a1;
+  color: var(--tx-cat-sky-700);
   margin-bottom: 0.2rem;
 }
 
@@ -2510,8 +2510,8 @@
 /* SPECIALIZED CARGO DECKS (Pallet, Container, Freight, Document) */
 /* ---------------------------------------------------- */
 .preset-icon-pallet { color: var(--tx-warning-500); }
-.preset-icon-container { color: #0284c7; }
-.preset-icon-freight { color: #8b5cf6; }
+.preset-icon-container { color: var(--tx-cat-sky-600); }
+.preset-icon-freight { color: var(--tx-cat-violet-500); }
 .preset-icon-doc { color: var(--tx-success-500); }
 
 .pallet-cargo-builder-deck,
@@ -2588,13 +2588,13 @@
 }
 
 .container-highlight {
-  border-left: 3px solid #0284c7 !important;
-  background: #f0f9ff !important;
+  border-left: 3px solid var(--tx-cat-sky-600) !important;
+  background: var(--tx-cat-sky-50) !important;
 }
 
 .freight-highlight {
-  border-left: 3px solid #8b5cf6 !important;
-  background: #faf5ff !important;
+  border-left: 3px solid var(--tx-cat-violet-500) !important;
+  background: var(--tx-cat-violet-50) !important;
 }
 
 .doc-highlight {
@@ -2603,8 +2603,8 @@
 }
 
 .pet-highlight {
-  border-left: 3px solid #e11d48 !important;
-  background: #fff1f2 !important;
+  border-left: 3px solid var(--tx-cat-rose-600) !important;
+  background: var(--tx-cat-rose-50) !important;
 }
 
 /* Pet Deck & Live Animal Directives */
@@ -2615,7 +2615,7 @@
 }
 
 .pet-deck-panel {
-  border-left: 3px solid #e11d48;
+  border-left: 3px solid var(--tx-cat-rose-600);
 }
 
 .pet-weight-calc-pill {
@@ -2623,8 +2623,8 @@
   align-items: center;
   gap: 0.55rem;
   padding: 0.65rem 0.95rem;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
+  background: var(--tx-cat-rose-50);
+  border: 1px solid var(--tx-cat-rose-200);
   border-radius: 0.55rem;
   margin-top: 0.85rem;
   font-size: 0.78rem;
@@ -2633,7 +2633,7 @@
 }
 
 .text-rose {
-  color: #e11d48 !important;
+  color: var(--tx-cat-rose-600) !important;
 }
 
 .brachy-badge {

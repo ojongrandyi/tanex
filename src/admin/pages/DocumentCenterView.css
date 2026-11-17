@@ -117,8 +117,8 @@
 }
 
 .icon-indigo {
-  background: #eef2ff;
-  color: #4f46e5;
+  background: var(--tx-cat-indigo-50);
+  color: var(--tx-cat-indigo-600);
 }
 
 .icon-amber {
@@ -127,19 +127,19 @@
 }
 
 .icon-purple {
-  background: #f5f3ff;
-  color: #7c3aed;
+  background: var(--tx-cat-violet-50);
+  color: var(--tx-cat-violet-600);
 }
 
 .text-purple {
-  color: #7c3aed !important;
+  color: var(--tx-cat-violet-600) !important;
 }
 
 .doc-summary-card.active .icon-blue { background: var(--ngf-primary-900); color: var(--tx-white); }
 .doc-summary-card.active .icon-emerald { background: var(--tx-success-600); color: var(--tx-white); }
-.doc-summary-card.active .icon-indigo { background: #4f46e5; color: var(--tx-white); }
+.doc-summary-card.active .icon-indigo { background: var(--tx-cat-indigo-600); color: var(--tx-white); }
 .doc-summary-card.active .icon-amber { background: var(--tx-warning-600); color: var(--tx-white); }
-.doc-summary-card.active .icon-purple { background: #7c3aed; color: var(--tx-white); }
+.doc-summary-card.active .icon-purple { background: var(--tx-cat-violet-600); color: var(--tx-white); }
 
 .summary-card-info {
   display: flex;
@@ -375,9 +375,9 @@
 
 .badge-type-label { background: var(--tx-info-50); }
 .badge-type-receipt { background: var(--tx-success-50); }
-.badge-type-invoice { background: #eef2ff; }
+.badge-type-invoice { background: var(--tx-cat-indigo-50); }
 .badge-type-bol { background: var(--tx-warning-50); }
-.badge-type-insurance { background: #f5f3ff; }
+.badge-type-insurance { background: var(--tx-cat-violet-50); }
 
 .doc-identity-text {
   display: flex;
@@ -1733,14 +1733,14 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: #f5f3ff;
-  border: 1px solid #e9d5ff;
+  background: var(--tx-cat-violet-50);
+  border: 1px solid var(--tx-cat-violet-200);
   border-radius: 6px;
   padding: 0.55rem;
   font-size: 0.95rem;
   font-weight: 900;
   letter-spacing: 0.04em;
-  color: #6d28d9;
+  color: var(--tx-cat-violet-700);
 }
 
 .ins-certify-text {
@@ -1772,7 +1772,7 @@
 .ins-cell-label {
   font-size: 0.65rem;
   font-weight: 800;
-  color: #6d28d9;
+  color: var(--tx-cat-violet-700);
   letter-spacing: 0.05em;
   margin-bottom: 0.2rem;
 }
@@ -1816,13 +1816,13 @@
 .ins-coverage-panel {
   display: grid;
   grid-template-columns: 1fr 1.3fr;
-  border: 1.5px solid #6d28d9;
+  border: 1.5px solid var(--tx-cat-violet-700);
   border-radius: 6px;
   overflow: hidden;
 }
 
 .ins-sum-insured-block {
-  background: #6d28d9;
+  background: var(--tx-cat-violet-700);
   color: var(--tx-white);
   padding: 0.85rem;
   display: flex;
@@ -1858,7 +1858,7 @@
   justify-content: center;
   gap: 0.4rem;
   font-size: 0.78rem;
-  background: #faf5ff;
+  background: var(--tx-cat-violet-50);
 }
 
 .ins-cov-row {
@@ -1948,13 +1948,13 @@
   width: 96px;
   height: 96px;
   border-radius: 50%;
-  border: 2.5px dashed #7c3aed;
+  border: 2.5px dashed var(--tx-cat-violet-600);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.15rem;
-  color: #6d28d9;
+  color: var(--tx-cat-violet-700);
   transform: rotate(-8deg);
 }
 

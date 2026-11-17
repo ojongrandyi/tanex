@@ -75,6 +75,33 @@
   --tx-danger-600: #DC2626;
   --tx-danger-700: #B3261E;
 
+  /* ---- Categorical hues (console only, #186) ----
+     Tell kinds of things apart: document types, cargo presets, tracking-event types. Never brand
+     colours and never status meaning; always paired with an icon and a label. Text uses the 600+
+     steps (≥ 4.5:1 on white and on their own 50 step). */
+  --tx-cat-violet-50: #F5F3FF;
+  --tx-cat-violet-200: #DDD6FE;
+  --tx-cat-violet-500: #8B5CF6;
+  --tx-cat-violet-600: #7C3AED;
+  --tx-cat-violet-700: #6D28D9;
+  --tx-cat-indigo-50: #EEF2FF;
+  --tx-cat-indigo-100: #E0E7FF;
+  --tx-cat-indigo-600: #4F46E5;
+  --tx-cat-rose-50: #FFF1F2;
+  --tx-cat-rose-200: #FECDD3;
+  --tx-cat-rose-600: #E11D48;
+  --tx-cat-teal-50: #F0FDFA;
+  --tx-cat-teal-100: #CCFBF1;
+  --tx-cat-teal-200: #99F6E4;
+  --tx-cat-teal-600: #0D9488;
+  --tx-cat-teal-800: #115E59;
+  --tx-cat-sky-50: #F0F9FF;
+  --tx-cat-sky-100: #E0F2FE;
+  --tx-cat-sky-200: #BAE6FD;
+  --tx-cat-sky-300: #7DD3FC;
+  --tx-cat-sky-600: #0284C7;
+  --tx-cat-sky-700: #0369A1;
+
   /* Neutral greys: neutral states only (cancelled, draft). UI chrome uses chocolate tints. */
   --tx-grey-50: #F7F7F6;
   --tx-grey-100: #EEECEA;

@@ -124,16 +124,16 @@ const getEventColors = (statusStr?: string, title?: string) => {
     return { color: '#dc2626', bg: '#fef2f2', border: '#fca5a5', text: '#991b1b', label: 'ON HOLD', theme: 'theme-hold' };
   }
   if (s.includes('PROCESSING') || s.includes('SORT') || s.includes('CUSTOMS')) {
-    return { color: '#7c3aed', bg: '#faf5ff', border: '#d8b4fe', text: '#6b21a8', label: 'PROCESSING', theme: 'theme-processing' };
+    return { color: 'var(--tx-cat-violet-600)', bg: 'var(--tx-cat-violet-50)', border: 'var(--tx-cat-violet-200)', text: 'var(--tx-cat-violet-700)', label: 'PROCESSING', theme: 'theme-processing' };
   }
   if (s.includes('DEPARTED') || s.includes('IN_TRANSIT')) {
-    return { color: '#0284c7', bg: '#f0f9ff', border: '#7dd3fc', text: '#0369a1', label: 'DEPARTED', theme: 'theme-departed' };
+    return { color: 'var(--tx-cat-sky-600)', bg: 'var(--tx-cat-sky-50)', border: 'var(--tx-cat-sky-300)', text: 'var(--tx-cat-sky-700)', label: 'DEPARTED', theme: 'theme-departed' };
   }
   if (s.includes('ARRIVED')) {
     return { color: '#2563eb', bg: '#eff6ff', border: '#93c5fd', text: '#1e40af', label: 'ARRIVED', theme: 'theme-arrived' };
   }
   if (s.includes('RECEIVED')) {
-    return { color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4', text: '#115e59', label: 'RECEIVED', theme: 'theme-received' };
+    return { color: 'var(--tx-cat-teal-600)', bg: 'var(--tx-cat-teal-50)', border: 'var(--tx-cat-teal-200)', text: 'var(--tx-cat-teal-800)', label: 'RECEIVED', theme: 'theme-received' };
   }
   return { color: 'var(--tx-choc-600)', bg: 'var(--tx-cream-100)', border: 'var(--tx-choc-200)', text: 'var(--tx-choc-700)', label: 'SHIPMENT CREATED', theme: 'theme-created' };
 };

@@ -513,9 +513,9 @@
 }
 
 .ops-service-pill.freight-ltl {
-  background: #f5f3ff;
-  color: #7c3aed;
-  border: 1px solid #ddd6fe;
+  background: var(--tx-cat-violet-50);
+  color: var(--tx-cat-violet-600);
+  border: 1px solid var(--tx-cat-violet-200);
 }
 
 /* 3. Route Stack */
