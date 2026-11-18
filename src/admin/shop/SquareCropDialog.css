@@ -1,0 +1,100 @@
+/* Crop step for shop pictures (SquareCropDialog.tsx). Console only; uses the IamDialog shell. */
+.tx-shop-crop {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 0.75rem;
+}
+
+.tx-shop-crop__stage {
+  display: grid;
+  place-items: center;
+}
+
+/* Checkerboard behind the square shows the frame edge on a white picture. */
+.tx-shop-crop__preview {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border-radius: 0.5rem;
+  border: 1px solid var(--tx-choc-100, #e8dccd);
+  background: repeating-conic-gradient(#f2ece4 0 25%, #fff 0 50%) 0 0 / 16px 16px;
+  touch-action: none;
+}
+
+.tx-shop-crop__preview.is-draggable {
+  cursor: grab;
+}
+
+.tx-shop-crop__preview.is-draggable:active {
+  cursor: grabbing;
+}
+
+.tx-shop-crop__preview:focus-visible {
+  outline: 2px solid var(--tx-choc-900);
+  outline-offset: 2px;
+}
+
+.tx-shop-crop__controls {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  font-size: 0.875rem;
+}
+
+.tx-shop-crop__group {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.tx-shop-crop__group legend {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.tx-shop-crop__group label,
+.tx-shop-crop__zoom {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tx-shop-crop__zoom span {
+  font-weight: 600;
+}
+
+.tx-shop-crop__zoom input {
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-shop-crop__swatch {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--tx-choc-200, #d6c4ae);
+}
+
+.tx-shop-crop__swatch.is-white { background: #ffffff; }
+.tx-shop-crop__swatch.is-cream { background: var(--tx-cream-50); }
+
+.tx-shop-crop__dims {
+  margin: 0;
+}
+
+/* Wider dialog for the preview and its controls side by side; stacked on phones. */
+.tx-iam-dialog:has(.tx-shop-crop) {
+  max-width: 640px;
+}
+
+@media (max-width: 600px) {
+  .tx-shop-crop {
+    grid-template-columns: 1fr;
+  }
+}

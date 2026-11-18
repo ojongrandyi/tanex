@@ -84,6 +84,7 @@ const MOUNTS: Record<string, string> = {
   statsRouter: '/api/stats',
   paymentsRouter: '/api/payments',
   blogAdminRouter: '/api/admin/blog',
+  shopAdminRouter: '/api/admin/shop',
   publicBlogRouter: '/api/blog',
   tariffsRouter: '/api/tariffs',
   couriersRouter: '/api/couriers',
@@ -116,6 +117,7 @@ const PUBLIC = new Set([
   'GET /api/blog/categories',
   'GET /api/blog/:locale/:slug',
   'GET /media/blog/:file',
+  'GET /media/shop/:file',
   // A signed, short-lived preview link from the studio (the token is the credential; F.2).
   'GET /api/blog/preview/:token',
   // Staff profile photos (blog authors; F.2).

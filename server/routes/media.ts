@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import path from 'path';
 import { db } from '../db.js';
 import { IMAGE_CONTENT_TYPES, resolveUploadPath } from '../uploads.js';
+import { isShopMediaFile } from '../shop/media.js';
 
 export const mediaRouter = Router();
 
@@ -23,6 +24,22 @@ mediaRouter.get('/media/blog/:file', (req: Request, res: Response) => {
   res.setHeader('Content-Type', IMAGE_CONTENT_TYPES[path.extname(file).slice(1)]);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Cache-Control', 'public, max-age=2592000');
+  res.sendFile(filePath, { cacheControl: false }, (err) => {
+    if (err && !res.headersSent) notFound(res);
+  });
+});
+
+// GET /media/shop/<id>.<ext> (public): square product and category pictures (SHOP_SPEC §6), from
+// uploads/shop only and only while a shop_media row lists the file. A picture's bytes never change
+// (a new crop is a new upload with new names), so it can be cached for a year.
+mediaRouter.get('/media/shop/:file', (req: Request, res: Response) => {
+  const file = req.params.file as string;
+  const filePath = resolveUploadPath('shop', file);
+  if (!filePath || !isShopMediaFile(db, file)) return notFound(res);
+
+  res.setHeader('Content-Type', IMAGE_CONTENT_TYPES[path.extname(file).slice(1)]);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   res.sendFile(filePath, { cacheControl: false }, (err) => {
     if (err && !res.headersSent) notFound(res);
   });

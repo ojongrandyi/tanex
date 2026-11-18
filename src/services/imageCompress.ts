@@ -26,13 +26,13 @@ const QUALITIES = [0.82, 0.72, 0.6, 0.5];
 export class ImageCompressError extends Error {}
 
 // Some browsers report HEIC/HEIF photos with an empty type, so the extension is checked too.
-function looksLikeImage(file: Blob): boolean {
+export function looksLikeImage(file: Blob): boolean {
   if (file.type.startsWith('image/')) return true;
   const name = (file as File).name || '';
   return /\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i.test(name);
 }
 
-async function loadImage(file: Blob): Promise<CanvasImageSource & { width: number; height: number }> {
+export async function loadImage(file: Blob): Promise<CanvasImageSource & { width: number; height: number }> {
   // createImageBitmap applies the EXIF orientation, so phone photos aren't drawn sideways.
   if (typeof createImageBitmap === 'function') {
     try {
@@ -55,11 +55,11 @@ async function loadImage(file: Blob): Promise<CanvasImageSource & { width: numbe
   }
 }
 
-function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob | null> {
+export function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
 }
 
-function blobToBase64(blob: Blob): Promise<string> {
+export function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {

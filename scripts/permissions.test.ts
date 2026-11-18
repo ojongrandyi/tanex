@@ -99,6 +99,8 @@ const PROBES: Probe[] = [
   { key: 'payments.view', needs: ['payments.view'], method: 'GET', path: '/api/payments/proofs' },
   { key: 'payments.manage', needs: ['payments.manage'], method: 'POST', path: '/api/payments/proofs/PRF-NOPE/approve', body: {} },
   { key: 'settings.manage', needs: ['settings.manage'], method: 'PUT', path: '/api/settings', body: {} },
+  // Shop pictures (SHOP_SPEC §6): shop.write or shop.categories; no seeded role has only one of them.
+  { key: 'shop.write', needs: ['shop.write'], method: 'DELETE', path: '/api/admin/shop/media/MEDIA-NOPE' },
 ];
 
 const allowedFor = (granted: readonly string[], needs: PermissionKey[]) => needs.every((k) => hasPermission(granted, k));
