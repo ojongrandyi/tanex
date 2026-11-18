@@ -10,14 +10,11 @@ import {
   PaymentDraft, PaymentRequestEditor, draftFromPayment, draftToRequest, emptyPaymentDraft, paymentDraftErrors,
 } from './PaymentRequestEditor';
 import './ShipmentPaymentPanel.css';
+import { SHIPMENT_PAYMENT_PANEL_TEXT as TXT } from './ShipmentPaymentPanel.text';
+import { consoleIntlLocale, consoleLang } from '../i18n/consoleText';
 
-// Shared status names (CONTENT §6.8); the console is English until phase I.
-const STATUS_LABELS: Record<ShipmentPayment['status'], string> = {
-  AWAITING_PAYMENT: PAYMENT_STATUS_LABELS.AWAITING_PAYMENT.en,
-  UNDER_REVIEW: PAYMENT_STATUS_LABELS.UNDER_REVIEW.en,
-  PAID: PAYMENT_STATUS_LABELS.PAID.en,
-  CANCELLED: PAYMENT_STATUS_LABELS.CANCELLED.en,
-};
+// Shared status names (CONTENT §6.8), in the console language.
+const statusLabel = (status: ShipmentPayment['status']) => PAYMENT_STATUS_LABELS[status][consoleLang()];
 
 interface ShipmentPaymentPanelProps {
   trackingNumber: string;
@@ -47,7 +44,7 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
     setLoadError('');
     api.getShipmentPayment(trackingNumber)
       .then((p) => { if (!cancelled) setPayment(p); })
-      .catch((err) => { if (!cancelled) setLoadError(err.message || 'Could not load the payment request.'); })
+      .catch((err) => { if (!cancelled) setLoadError(err.message || TXT.couldNotLoadThePayment); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [trackingNumber, reloadKey]);
@@ -70,7 +67,7 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
     const localErrors = paymentDraftErrors(draft);
     if (Object.keys(localErrors).length) {
       setErrors(localErrors);
-      setMessage({ text: 'Some payment details need fixing.', error: true });
+      setMessage({ text: TXT.somePaymentDetailsNeedFixing, error: true });
       return;
     }
     setBusy(true);
@@ -79,10 +76,10 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
       setPayment(saved);
       setDraft(null);
       setErrors({});
-      setMessage({ text: payment ? 'Payment request saved.' : 'Payment request added. The customer can now see it on the track page.' });
+      setMessage({ text: payment ? TXT.paymentRequestSaved : TXT.paymentRequestAddedTheCustomer });
     } catch (err: any) {
       setErrors(err.fieldErrors ?? {});
-      setMessage({ text: err.message || 'Could not save the payment request.', error: true });
+      setMessage({ text: err.message || TXT.couldNotSaveThePayment, error: true });
     } finally {
       setBusy(false);
     }
@@ -90,34 +87,30 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
 
   // D.3: manual status changes. Marking paid also marks a linked invoice paid (server side).
   const changeStatus = async (action: 'cancel' | 'mark_paid' | 'reopen') => {
-    const prompts = {
-      mark_paid: 'Mark this payment as received (for example cash at the counter)? The customer will see it as paid.',
-      cancel: 'Cancel this payment request? The customer will no longer be asked to pay.',
-      reopen: 'Reopen this payment request? The customer will be asked to pay again.',
-    };
+    const prompts = TXT.confirmStatus;
     if (!window.confirm(prompts[action])) return;
     setBusy(true);
     try {
       const updated = await api.setShipmentPaymentStatus(trackingNumber, action);
       setPayment(updated);
-      setMessage({ text: action === 'mark_paid' ? 'Marked as paid.' : action === 'cancel' ? 'Payment request cancelled.' : 'Payment request reopened.' });
+      setMessage({ text: action === 'mark_paid' ? TXT.markedAsPaid : action === 'cancel' ? TXT.paymentRequestCancelled : TXT.paymentRequestReopened });
     } catch (err: any) {
-      setMessage({ text: err.message || 'Could not change the status.', error: true });
+      setMessage({ text: err.message || TXT.couldNotChangeTheStatus, error: true });
     } finally {
       setBusy(false);
     }
   };
 
   const remove = async () => {
-    if (!window.confirm('Delete this payment request and its accounts? The customer will no longer see it.')) return;
+    if (!window.confirm(TXT.deleteThisPaymentRequestAnd)) return;
     setBusy(true);
     try {
       await api.deleteShipmentPayment(trackingNumber);
       setPayment(null);
       setDraft(null);
-      setMessage({ text: 'Payment request deleted.' });
+      setMessage({ text: TXT.paymentRequestDeleted });
     } catch (err: any) {
-      setMessage({ text: err.message || 'Could not delete the payment request.', error: true });
+      setMessage({ text: err.message || TXT.couldNotDeleteThePayment, error: true });
     } finally {
       setBusy(false);
     }
@@ -126,28 +119,28 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
   return (
     <section className="tx-spp" aria-labelledby={`tx-spp-${trackingNumber}`}>
       <div className="tx-spp-head">
-        <h4 id={`tx-spp-${trackingNumber}`}>Payment request</h4>
-        {payment && !draft && <span className={`tx-spp-status s-${payment.status.toLowerCase()}`}>{STATUS_LABELS[payment.status]}</span>}
+        <h4 id={`tx-spp-${trackingNumber}`}>{TXT.paymentRequest}</h4>
+        {payment && !draft && <span className={`tx-spp-status s-${payment.status.toLowerCase()}`}>{statusLabel(payment.status)}</span>}
       </div>
-      <p className="tx-spp-hint">Shown to the customer on the track page. Saved on its own, separately from Save Changes.</p>
+      <p className="tx-spp-hint">{TXT.shownToTheCustomerOn}</p>
 
       <p className={`tx-spp-message${message?.error ? ' is-error' : ''}`} role="status" aria-live="polite">{message?.text}</p>
 
       {loading ? (
-        <p className="tx-spp-empty">Loading…</p>
+        <p className="tx-spp-empty">{TXT.loading}</p>
       ) : loadError ? (
         <div className="tx-load-error" role="alert">
           <p className="tx-spp-error">{loadError}</p>
-          <button type="button" className="tx-load-retry" onClick={() => setReloadKey((k) => k + 1)}>Try again</button>
+          <button type="button" className="tx-load-retry" onClick={() => setReloadKey((k) => k + 1)}>{TXT.tryAgain}</button>
         </div>
       ) : draft ? (
         <>
           <PaymentRequestEditor value={draft} onChange={setDraft} errors={errors} invoices={invoices} idPrefix={`edit-${trackingNumber}`} compact />
           <div className="tx-spp-actions">
-            <button type="button" className="tx-spp-btn" onClick={() => { setDraft(null); setErrors({}); setMessage(null); }} disabled={busy}>Cancel</button>
+            <button type="button" className="tx-spp-btn" onClick={() => { setDraft(null); setErrors({}); setMessage(null); }} disabled={busy}>{TXT.cancel}</button>
             <button type="button" className="tx-spp-btn primary" onClick={save} disabled={busy}>
               {busy && <Loader2 size={14} className="tx-spp-spin" aria-hidden="true" />}
-              <span>{payment ? 'Save payment request' : 'Add payment request'}</span>
+              <span>{payment ? TXT.savePaymentRequest : TXT.addPaymentRequest}</span>
             </button>
           </div>
         </>
@@ -155,8 +148,8 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
         <div className="tx-spp-summary">
           <div className="tx-spp-amount">{formatPaymentAmount(payment.amount, payment.currency)}</div>
           <p className="tx-spp-reason">{payment.chargeReason}</p>
-          {payment.dueDate && <p className="tx-spp-meta">Due {payment.dueDate}</p>}
-          {payment.paidAt && <p className="tx-spp-meta">Paid {new Date(payment.paidAt).toLocaleString()}</p>}
+          {payment.dueDate && <p className="tx-spp-meta">{TXT.due} {payment.dueDate}</p>}
+          {payment.paidAt && <p className="tx-spp-meta">{TXT.paid} {new Date(payment.paidAt).toLocaleString(consoleIntlLocale())}</p>}
           <ul className="tx-spp-accounts">
             {payment.methods.map((m) => (
               <li key={m.id}>
@@ -171,38 +164,38 @@ export const ShipmentPaymentPanel: React.FC<ShipmentPaymentPanelProps> = ({ trac
               <>
                 <button type="button" className="tx-spp-btn" onClick={() => changeStatus('cancel')} disabled={busy}>
                   <Ban size={14} aria-hidden="true" />
-                  <span>Cancel request</span>
+                  <span>{TXT.cancelRequest}</span>
                 </button>
                 <button type="button" className="tx-spp-btn" onClick={() => changeStatus('mark_paid')} disabled={busy}>
                   <CheckCircle2 size={14} aria-hidden="true" />
-                  <span>Mark paid</span>
+                  <span>{TXT.markPaid}</span>
                 </button>
               </>
             )}
             {(payment.status === 'PAID' || payment.status === 'CANCELLED') && (
               <button type="button" className="tx-spp-btn" onClick={() => changeStatus('reopen')} disabled={busy}>
                 <RotateCcw size={14} aria-hidden="true" />
-                <span>Reopen</span>
+                <span>{TXT.reopen}</span>
               </button>
             )}
             <button type="button" className="tx-spp-btn danger" onClick={remove} disabled={busy}>
               <Trash2 size={14} aria-hidden="true" />
-              <span>Delete</span>
+              <span>{TXT.delete}</span>
             </button>
             <button type="button" className="tx-spp-btn" onClick={startEditing} disabled={busy}>
               <Pencil size={14} aria-hidden="true" />
-              <span>Edit</span>
+              <span>{TXT.edit}</span>
             </button>
           </div>
           )}
         </div>
       ) : (
         <div className="tx-spp-none">
-          <p className="tx-spp-empty">No payment request for this shipment.</p>
+          <p className="tx-spp-empty">{TXT.noPaymentRequestForThis}</p>
           {canManage && (
             <button type="button" className="tx-spp-btn primary" onClick={startEditing}>
               <Plus size={14} aria-hidden="true" />
-              <span>Add payment request</span>
+              <span>{TXT.addPaymentRequest}</span>
             </button>
           )}
         </div>

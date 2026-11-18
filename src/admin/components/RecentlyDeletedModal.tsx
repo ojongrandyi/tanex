@@ -3,6 +3,7 @@ import { Trash2, RotateCcw, X, ArrowRight, AlertTriangle, Inbox } from 'lucide-r
 import { Shipment } from '../../types/shipment';
 import { useAdminData } from '../../context/AdminDataContext';
 import './RecentlyDeletedModal.css';
+import { RECENTLY_DELETED_MODAL_TEXT as TXT } from './RecentlyDeletedModal.text';
 
 interface RecentlyDeletedModalProps {
   onClose: () => void;
@@ -43,9 +44,9 @@ export const RecentlyDeletedModal: React.FC<RecentlyDeletedModalProps> = ({ onCl
     setBusyTracking(null);
     if (result.success) {
       setTrashed(prev => prev.filter(s => s.trackingNumber !== trackingNumber));
-      setToast(`${trackingNumber} restored — back in your Shipments Ledger.`);
+      setToast(TXT.restoredBackInYourShipments(trackingNumber));
     } else {
-      setToast(`Failed to restore ${trackingNumber}: ${result.error || 'server rejected the request'}`);
+      setToast(TXT.failedToRestore(trackingNumber, result.error || TXT.serverRejected));
     }
     setTimeout(() => setToast(null), 4000);
   };
@@ -57,9 +58,9 @@ export const RecentlyDeletedModal: React.FC<RecentlyDeletedModalProps> = ({ onCl
     setConfirmPurgeTracking(null);
     if (result.success) {
       setTrashed(prev => prev.filter(s => s.trackingNumber !== trackingNumber));
-      setToast(`${trackingNumber} permanently deleted.`);
+      setToast(TXT.permanentlyDeleted(trackingNumber));
     } else {
-      setToast(`Failed to permanently delete ${trackingNumber}: ${result.error || 'server rejected the request'}`);
+      setToast(TXT.failedToPermanentlyDelete(trackingNumber, result.error || TXT.serverRejected));
     }
     setTimeout(() => setToast(null), 4000);
   };
@@ -71,11 +72,11 @@ export const RecentlyDeletedModal: React.FC<RecentlyDeletedModalProps> = ({ onCl
           <div className="trash-modal-title-group">
             <Trash2 size={18} className="text-slate" />
             <div>
-              <h3>Recently Deleted</h3>
-              <p>Deleted shipments are kept here and can be restored at any time — nothing is permanently removed unless you choose to.</p>
+              <h3>{TXT.recentlyDeleted}</h3>
+              <p>{TXT.deletedShipmentsAreKeptHere}</p>
             </div>
           </div>
-          <button type="button" className="trash-close-btn" onClick={onClose} title="Close (Esc)">
+          <button type="button" className="trash-close-btn" onClick={onClose} title={TXT.closeEsc}>
             <X size={18} />
           </button>
         </div>
@@ -85,13 +86,13 @@ export const RecentlyDeletedModal: React.FC<RecentlyDeletedModalProps> = ({ onCl
         <div className="trash-modal-body">
           {loading ? (
             <div className="trash-empty-state">
-              <span>Loading…</span>
+              <span>{TXT.loading}</span>
             </div>
           ) : trashed.length === 0 ? (
             <div className="trash-empty-state">
               <Inbox size={32} className="text-slate" />
-              <strong>Nothing in the trash</strong>
-              <p>Deleted shipments will show up here.</p>
+              <strong>{TXT.nothingInTheTrash}</strong>
+              <p>{TXT.deletedShipmentsWillShowUp}</p>
             </div>
           ) : (
             <div className="trash-list">
@@ -116,12 +117,12 @@ export const RecentlyDeletedModal: React.FC<RecentlyDeletedModalProps> = ({ onCl
                     {isConfirmingPurge ? (
                       <div className="trash-purge-confirm">
                         <AlertTriangle size={14} className="text-crimson" />
-                        <span>Permanently delete? This cannot be undone.</span>
+                        <span>{TXT.permanentlyDeleteThisCannotBe}</span>
                         <button type="button" className="trash-btn-ghost" onClick={() => setConfirmPurgeTracking(null)} disabled={isBusy}>
-                          Cancel
+                          {TXT.cancel}
                         </button>
                         <button type="button" className="trash-btn-danger" onClick={() => handlePermanentDelete(s.trackingNumber)} disabled={isBusy}>
-                          {isBusy ? 'Deleting…' : 'Yes, delete forever'}
+                          {isBusy ? TXT.deleting : TXT.yesDeleteForever}
                         </button>
                       </div>
                     ) : (
@@ -133,14 +134,14 @@ export const RecentlyDeletedModal: React.FC<RecentlyDeletedModalProps> = ({ onCl
                           disabled={isBusy}
                         >
                           <RotateCcw size={13} />
-                          <span>{isBusy ? 'Restoring…' : 'Restore'}</span>
+                          <span>{isBusy ? TXT.restoring : TXT.restore}</span>
                         </button>
                         <button
                           type="button"
                           className="trash-btn-purge"
                           onClick={() => setConfirmPurgeTracking(s.trackingNumber)}
                           disabled={isBusy}
-                          title="Permanently delete"
+                          title={TXT.permanentlyDelete}
                         >
                           <Trash2 size={13} />
                         </button>

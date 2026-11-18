@@ -14,6 +14,7 @@ import { MTN_MOMO_NUMBER, ORANGE_MONEY_NUMBER, formatPhone } from '../../config/
 import { PaymentMethodCard } from '../../components/PaymentMethodCard';
 import { REFERENCE_PREFIX } from '../../config/brand';
 import './PaymentRequestEditor.css';
+import { PAYMENT_REQUEST_EDITOR_TEXT as TXT } from './PaymentRequestEditor.text';
 
 // ---------------------------------------------------------------------------------------------
 // Draft model: what the editor holds while the courier types (strings, not yet validated).
@@ -192,8 +193,8 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
     const a = accountEditor.account;
     const checked = validatePaymentDetails(a.type, a.details);
     const errs: Record<string, string> = checked.ok ? {} : { ...checked.errors };
-    if (a.label.trim().length > PAYMENT_LIMITS.labelMax) errs.label = `Keep the display name under ${PAYMENT_LIMITS.labelMax} characters.`;
-    if (a.instructions.trim().length > PAYMENT_LIMITS.instructionsMax) errs.instructions = `Keep the instructions under ${PAYMENT_LIMITS.instructionsMax} characters.`;
+    if (a.label.trim().length > PAYMENT_LIMITS.labelMax) errs.label = TXT.keepTheDisplayNameUnder(PAYMENT_LIMITS.labelMax);
+    if (a.instructions.trim().length > PAYMENT_LIMITS.instructionsMax) errs.instructions = TXT.keepTheInstructionsUnderCharacters(PAYMENT_LIMITS.instructionsMax);
     if (Object.keys(errs).length) {
       setAccountErrors(errs);
       return;
@@ -215,7 +216,7 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
   const removeAccount = (index: number) => {
     const a = value.accounts[index];
     const name = a.label || PAYMENT_METHODS[a.type].label;
-    if (!window.confirm(`Remove “${name}” from this payment request?`)) return;
+    if (!window.confirm(TXT.removeFromThisPaymentRequest(name))) return;
     set({ accounts: value.accounts.filter((_, i) => i !== index) });
   };
 
@@ -252,7 +253,7 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
         <div className="tx-pre-form">
           <div className="tx-pre-row">
             <div className="tx-pre-field">
-              <label htmlFor={id('amount')}>Amount due</label>
+              <label htmlFor={id('amount')}>{TXT.amountDue}</label>
               <input
                 id={id('amount')}
                 type="number"
@@ -267,27 +268,27 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
               {errors.amount && <p className="tx-pre-error">{errors.amount}</p>}
             </div>
             <div className="tx-pre-field tx-pre-field-narrow">
-              <label htmlFor={id('currency')}>Currency</label>
+              <label htmlFor={id('currency')}>{TXT.currency}</label>
               <select id={id('currency')} value={value.currency} onChange={(e) => set({ currency: e.target.value as PaymentCurrency })}>
                 {PAYMENT_CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="tx-pre-field">
-              <label htmlFor={id('due')}>Due date (optional)</label>
+              <label htmlFor={id('due')}>{TXT.dueDateOptional}</label>
               <input id={id('due')} type="date" value={value.dueDate} onChange={(e) => set({ dueDate: e.target.value })} aria-invalid={!!errors.dueDate} />
               {errors.dueDate && <p className="tx-pre-error">{errors.dueDate}</p>}
             </div>
           </div>
 
           <div className="tx-pre-field">
-            <label htmlFor={id('reason')}>What the customer is paying for</label>
+            <label htmlFor={id('reason')}>{TXT.whatTheCustomerIsPaying}</label>
             <input
               id={id('reason')}
               type="text"
               maxLength={PAYMENT_LIMITS.reasonMax}
               value={value.chargeReason}
               onChange={(e) => set({ chargeReason: e.target.value })}
-              placeholder={`e.g. Customs duty – Invoice ${REFERENCE_PREFIX}-INV-104233`}
+              placeholder={TXT.eGCustomsDutyInvoice(REFERENCE_PREFIX)}
               aria-invalid={!!errors.chargeReason}
             />
             {errors.chargeReason && <p className="tx-pre-error">{errors.chargeReason}</p>}
@@ -295,25 +296,25 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
 
           {invoices.length > 0 && (
             <div className="tx-pre-field">
-              <label htmlFor={id('invoice')}>Linked invoice (optional)</label>
+              <label htmlFor={id('invoice')}>{TXT.linkedInvoiceOptional}</label>
               <select id={id('invoice')} value={value.invoiceDocumentId} onChange={(e) => set({ invoiceDocumentId: e.target.value })} aria-invalid={!!errors.invoiceDocumentId}>
-                <option value="">None</option>
+                <option value="">{TXT.none}</option>
                 {invoices.map((inv) => <option key={inv.id} value={inv.id}>{inv.label}</option>)}
               </select>
-              <p className="tx-pre-hint">When the payment is confirmed, this invoice is marked paid.</p>
+              <p className="tx-pre-hint">{TXT.whenThePaymentIsConfirmed}</p>
               {errors.invoiceDocumentId && <p className="tx-pre-error">{errors.invoiceDocumentId}</p>}
             </div>
           )}
 
           <div className="tx-pre-field">
-            <label htmlFor={id('note')}>Note for the customer (optional)</label>
+            <label htmlFor={id('note')}>{TXT.noteForTheCustomerOptional}</label>
             <textarea
               id={id('note')}
               rows={2}
               maxLength={PAYMENT_LIMITS.noteMax}
               value={value.customerNote}
               onChange={(e) => set({ customerNote: e.target.value })}
-              placeholder="e.g. Please pay within 48 hours so the shipment can clear customs."
+              placeholder={TXT.eGPleasePayWithin}
             />
             {errors.customerNote && <p className="tx-pre-error">{errors.customerNote}</p>}
           </div>
@@ -321,10 +322,10 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
           {/* Accounts typed for this shipment */}
           <div className="tx-pre-accounts">
             <div className="tx-pre-accounts-head">
-              <h5>Payment accounts for this shipment</h5>
+              <h5>{TXT.paymentAccountsForThisShipment}</h5>
               <span>{value.accounts.length} / {PAYMENT_LIMITS.maxAccounts}</span>
             </div>
-            <p className="tx-pre-hint">Customers can pay with any account you add. Offering 3–5 methods gives them more choice.</p>
+            <p className="tx-pre-hint">{TXT.customersCanPayWithAny}</p>
             {errors.methods && <p className="tx-pre-error">{errors.methods}</p>}
 
             {value.accounts.length > 0 && (
@@ -340,16 +341,16 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                         {err && <span className="tx-pre-error">{err}</span>}
                       </div>
                       <div className="tx-pre-account-actions">
-                        <button type="button" className="tx-pre-icon-btn" onClick={() => startEdit(index)} disabled={!!accountEditor} aria-label={`Edit ${a.label || PAYMENT_METHODS[a.type].label}`}>
+                        <button type="button" className="tx-pre-icon-btn" onClick={() => startEdit(index)} disabled={!!accountEditor} aria-label={TXT.edit(a.label || PAYMENT_METHODS[a.type].label)}>
                           <Pencil size={14} aria-hidden="true" />
                         </button>
-                        <button type="button" className="tx-pre-icon-btn" onClick={() => moveAccount(index, -1)} disabled={!!accountEditor || index === 0} aria-label="Move up">
+                        <button type="button" className="tx-pre-icon-btn" onClick={() => moveAccount(index, -1)} disabled={!!accountEditor || index === 0} aria-label={TXT.moveUp}>
                           <ArrowUp size={14} aria-hidden="true" />
                         </button>
-                        <button type="button" className="tx-pre-icon-btn" onClick={() => moveAccount(index, 1)} disabled={!!accountEditor || index === value.accounts.length - 1} aria-label="Move down">
+                        <button type="button" className="tx-pre-icon-btn" onClick={() => moveAccount(index, 1)} disabled={!!accountEditor || index === value.accounts.length - 1} aria-label={TXT.moveDown}>
                           <ArrowDown size={14} aria-hidden="true" />
                         </button>
-                        <button type="button" className="tx-pre-icon-btn danger" onClick={() => removeAccount(index)} disabled={!!accountEditor} aria-label={`Remove ${a.label || PAYMENT_METHODS[a.type].label}`}>
+                        <button type="button" className="tx-pre-icon-btn danger" onClick={() => removeAccount(index)} disabled={!!accountEditor} aria-label={TXT.remove(a.label || PAYMENT_METHODS[a.type].label)}>
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </div>
@@ -362,22 +363,22 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
             {!accountEditor && remaining > 0 && (
               <button type="button" className="tx-pre-btn" onClick={startAdd}>
                 <Plus size={14} aria-hidden="true" />
-                <span>{value.accounts.length === 0 ? 'Add payment methods' : 'Add more methods'}</span>
+                <span>{value.accounts.length === 0 ? TXT.addPaymentMethods : TXT.addMoreMethods}</span>
               </button>
             )}
 
             {accountEditor?.mode === 'pick' && (
               <div className="tx-pre-subeditor">
                 <div className="tx-pre-subeditor-head">
-                  <h6>Choose the payment methods to offer</h6>
-                  <button type="button" className="tx-pre-icon-btn" onClick={() => setAccountEditor(null)} aria-label="Cancel">
+                  <h6>{TXT.chooseThePaymentMethodsTo}</h6>
+                  <button type="button" className="tx-pre-icon-btn" onClick={() => setAccountEditor(null)} aria-label={TXT.cancel}>
                     <X size={14} aria-hidden="true" />
                   </button>
                 </div>
                 <p className="tx-pre-hint">
-                  Select one or more (up to {remaining}). You'll add each account's details next.
+                  {TXT.selectOneOrMoreUp} {remaining}{TXT.youLlAddEachAccount}
                 </p>
-                <div className="tx-pre-type-grid" role="group" aria-label="Payment methods">
+                <div className="tx-pre-type-grid" role="group" aria-label={TXT.paymentMethods}>
                   {PAYMENT_METHOD_TYPES.map((t) => {
                     const selected = accountEditor.selected.includes(t);
                     const full = !selected && accountEditor.selected.length >= remaining;
@@ -398,11 +399,11 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                   })}
                 </div>
                 <div className="tx-pre-subeditor-actions">
-                  <button type="button" className="tx-pre-btn" onClick={() => setAccountEditor(null)}>Cancel</button>
+                  <button type="button" className="tx-pre-btn" onClick={() => setAccountEditor(null)}>{TXT.cancel}</button>
                   <button type="button" className="tx-pre-btn primary" onClick={continueWithSelected} disabled={accountEditor.selected.length === 0}>
                     {accountEditor.selected.length === 0
-                      ? 'Select at least one'
-                      : `Continue with ${accountEditor.selected.length} method${accountEditor.selected.length === 1 ? '' : 's'}`}
+                      ? TXT.selectAtLeastOne
+                      : TXT.continueWithMethod(accountEditor.selected.length, accountEditor.selected.length === 1 ? '' : 's')}
                   </button>
                 </div>
               </div>
@@ -414,9 +415,9 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                   <h6>
                     <PaymentIcon type={editing.type} size={18} />
                     <span>{PAYMENT_METHODS[editing.type].label}</span>
-                    {accountEditor.total > 1 && <small className="tx-pre-step">Account {accountEditor.step} of {accountEditor.total}</small>}
+                    {accountEditor.total > 1 && <small className="tx-pre-step">{TXT.account} {accountEditor.step} {TXT.of} {accountEditor.total}</small>}
                   </h6>
-                  <button type="button" className="tx-pre-icon-btn" onClick={() => setAccountEditor(null)} aria-label="Cancel">
+                  <button type="button" className="tx-pre-icon-btn" onClick={() => setAccountEditor(null)} aria-label={TXT.cancel}>
                     <X size={14} aria-hidden="true" />
                   </button>
                 </div>
@@ -425,7 +426,7 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                   const err = accountErrors[field.name];
                   return (
                     <div className="tx-pre-field" key={field.name}>
-                      <label htmlFor={fid}>{field.label}{field.required ? '' : ' (optional)'}</label>
+                      <label htmlFor={fid}>{field.label}{field.required ? '' : TXT.optional}</label>
                       {field.options ? (
                         <select id={fid} value={editing.details[field.name] ?? ''} onChange={(e) => updateEditing({ details: { ...editing.details, [field.name]: e.target.value } })}>
                           {!field.required && <option value="">—</option>}
@@ -454,22 +455,22 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                 })}
                 {accountErrors._form && <p className="tx-pre-error">{accountErrors._form}</p>}
                 <div className="tx-pre-field">
-                  <label htmlFor={id('acc-label')}>Display name (optional)</label>
+                  <label htmlFor={id('acc-label')}>{TXT.displayNameOptional}</label>
                   <input id={id('acc-label')} type="text" maxLength={PAYMENT_LIMITS.labelMax} value={editing.label} placeholder={PAYMENT_METHODS[editing.type].label} onChange={(e) => updateEditing({ label: e.target.value })} />
                   {accountErrors.label && <p className="tx-pre-error">{accountErrors.label}</p>}
                 </div>
                 <div className="tx-pre-field">
-                  <label htmlFor={id('acc-instructions')}>Instructions for the customer (optional)</label>
+                  <label htmlFor={id('acc-instructions')}>{TXT.instructionsForTheCustomerOptional}</label>
                   <textarea id={id('acc-instructions')} rows={2} maxLength={PAYMENT_LIMITS.instructionsMax} value={editing.instructions} onChange={(e) => updateEditing({ instructions: e.target.value })} />
                   {accountErrors.instructions && <p className="tx-pre-error">{accountErrors.instructions}</p>}
                 </div>
                 <div className="tx-pre-subeditor-actions">
-                  <button type="button" className="tx-pre-btn" onClick={() => setAccountEditor(null)}>Cancel</button>
+                  <button type="button" className="tx-pre-btn" onClick={() => setAccountEditor(null)}>{TXT.cancel}</button>
                   {accountEditor.queue.length > 0 && (
-                    <button type="button" className="tx-pre-btn" onClick={skipAccount}>Skip</button>
+                    <button type="button" className="tx-pre-btn" onClick={skipAccount}>{TXT.skip}</button>
                   )}
                   <button type="button" className="tx-pre-btn primary" onClick={saveAccount}>
-                    {accountEditor.index !== null ? 'Update account' : accountEditor.queue.length > 0 ? 'Add and continue' : 'Add this account'}
+                    {accountEditor.index !== null ? TXT.updateAccount : accountEditor.queue.length > 0 ? TXT.addAndContinue : TXT.addThisAccount}
                   </button>
                 </div>
               </div>
@@ -478,17 +479,17 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
         </div>
 
         {/* Live preview of the customer's payment section */}
-        <div className="tx-pre-preview" aria-label="Customer preview">
-          <span className="tx-pre-preview-label">Customer preview</span>
+        <div className="tx-pre-preview" aria-label={TXT.customerPreview}>
+          <span className="tx-pre-preview-label">{TXT.customerPreview}</span>
           <div className="tx-pre-preview-box">
             <div className="tx-pre-preview-amount">
               {Number.isFinite(amountNumber) && amountNumber > 0 ? formatPaymentAmount(amountNumber, value.currency) : formatPaymentAmount(0, value.currency)}
             </div>
-            <p className="tx-pre-preview-reason">{value.chargeReason.trim() || 'Reason for the payment'}</p>
-            {value.dueDate && <p className="tx-pre-preview-meta">Due {value.dueDate}</p>}
+            <p className="tx-pre-preview-reason">{value.chargeReason.trim() || TXT.reasonForThePayment}</p>
+            {value.dueDate && <p className="tx-pre-preview-meta">{TXT.due} {value.dueDate}</p>}
             {value.customerNote.trim() && <p className="tx-pre-preview-note">{value.customerNote.trim()}</p>}
             {previewAccounts.length === 0 ? (
-              <p className="tx-pre-preview-empty">Add an account to show how the customer can pay.</p>
+              <p className="tx-pre-preview-empty">{TXT.addAnAccountToShow}</p>
             ) : (
               <div className="tx-pre-preview-cards">
                 {previewAccounts.map((p) => <PaymentMethodCard key={p.key} view={p.view} instructions={p.instructions} />)}

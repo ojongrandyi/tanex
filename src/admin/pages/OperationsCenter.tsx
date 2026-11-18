@@ -21,6 +21,8 @@ import { shipmentStatusLabel, shipmentStatusTone, type StatusTone } from '../../
 import { GATEWAYS } from '../../data/gateways';
 import { NewProofsPanel } from '../components/NewProofsPanel';
 import { BRAND_COLORS } from '../../config/brand';
+import { OPERATIONS_CENTER_TEXT as TXT } from './OperationsCenter.text';
+import { consoleIntlLocale, consoleLang } from '../i18n/consoleText';
 
 // Badge colours per status family (names come from CONTENT §6.3).
 const OPS_STATUS_CHIP: Record<StatusTone, { className: string; dot: string }> = {
@@ -112,13 +114,13 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
 
   // Helper to format ETA cleanly into date and window
   const getEtaParts = (est: any, detail?: string) => {
-    let dateStr = 'Scheduled';
-    let timeStr = detail || 'Standard linehaul';
+    let dateStr = TXT.scheduled;
+    let timeStr = detail || TXT.standardLinehaul;
     if (typeof est === 'string' && est.trim()) {
       dateStr = est.trim();
     } else if (typeof est === 'object' && est) {
-      dateStr = est.date || 'Scheduled';
-      timeStr = est.timeWindow || detail || 'Standard linehaul';
+      dateStr = est.date || TXT.scheduled;
+      timeStr = est.timeWindow || detail || TXT.standardLinehaul;
     }
     dateStr = dateStr
       .replace('January', 'Jan')
@@ -149,18 +151,18 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                 <span className="live-dot" aria-hidden="true" />
                 <span>
                   {exceptionCount === 0
-                    ? 'No holds or delays'
-                    : `${exceptionCount} ${exceptionCount === 1 ? 'shipment needs' : 'shipments need'} attention`}
+                    ? TXT.noHoldsOrDelays
+                    : TXT.needAttention(exceptionCount)}
                 </span>
               </span>
               <span className="subhead-sep" aria-hidden="true">·</span>
             </>
           )}
-          <span className="subhead-text">{GATEWAYS.length} Gateways in Network</span>
+          <span className="subhead-text">{GATEWAYS.length} {TXT.gatewaysInNetwork}</span>
         </div>
         <div className="subhead-right">
           <span className="subhead-date">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+            {new Date().toLocaleDateString(consoleIntlLocale(), { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
         </div>
       </div>
@@ -181,10 +183,10 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             <div className="ops-circle-icon accent">
               <Package size={15} />
             </div>
-            <span className="ops-card-label">TOTAL CONSIGNMENTS</span>
+            <span className="ops-card-label">{TXT.totalConsignments}</span>
           </div>
           <strong className="ops-card-number">{totalShipmentsCount}</strong>
-          <span className="ops-card-subtext">Active Master Fleet · {totalPieces} pcs</span>
+          <span className="ops-card-subtext">{TXT.activeMasterFleet} {totalPieces} {TXT.pcs}</span>
 
           <div className="ops-sparkline-wrap">
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
@@ -220,10 +222,10 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             <div className="ops-circle-icon blue">
               <Truck size={15} />
             </div>
-            <span className="ops-card-label">IN TRANSIT</span>
+            <span className="ops-card-label">{TXT.inTransit}</span>
           </div>
           <strong className="ops-card-number">{inTransitCount}</strong>
-          <span className="ops-card-subtext">Active Linehaul Fleet</span>
+          <span className="ops-card-subtext">{TXT.activeLinehaulFleet}</span>
 
           <div className="ops-sparkline-wrap">
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
@@ -259,13 +261,13 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             <div className={`ops-circle-icon ${pendingQuotes.length > 0 ? 'amber' : 'green'}`}>
               <Tag size={15} />
             </div>
-            <span className="ops-card-label">PENDING QUOTES</span>
+            <span className="ops-card-label">{TXT.pendingQuotes}</span>
           </div>
           <strong className="ops-card-number" style={{ color: pendingQuotes.length > 0 ? 'var(--tx-accent-text)' : 'var(--tx-text)' }}>
             {pendingQuotes.length}
           </strong>
           <span className="ops-card-subtext">
-            {pendingQuotes.length > 0 ? 'Commercial Review Required' : 'All Requests Certified'}
+            {pendingQuotes.length > 0 ? TXT.commercialReviewRequired : TXT.allRequestsCertified}
           </span>
 
           <div className="ops-sparkline-wrap">
@@ -302,13 +304,13 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             <div className="ops-circle-icon red">
               <AlertCircle size={15} />
             </div>
-            <span className="ops-card-label">EXCEPTIONS & HOLDS</span>
+            <span className="ops-card-label">{TXT.exceptionsHolds}</span>
           </div>
           <strong className="ops-card-number" style={{ color: exceptionCount > 0 ? 'var(--tx-danger-600)' : 'var(--tx-text)' }}>
             {exceptionCount}
           </strong>
           <span className="ops-card-subtext">
-            {exceptionCount > 0 ? 'Dispatcher Action Needed' : 'Zero Freight Holds Logged'}
+            {exceptionCount > 0 ? TXT.dispatcherActionNeeded : TXT.zeroFreightHoldsLogged}
           </span>
 
           <div className="ops-sparkline-wrap">
@@ -353,8 +355,8 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
         <div className="ops-table-header-block">
           <div className="table-title-group">
             <div className="table-title-row">
-              <h2 className="ops-section-title">Recent Shipments</h2>
-              <span className="ops-shipment-count-pill">{filteredShipments.length} Active</span>
+              <h2 className="ops-section-title">{TXT.recentShipments}</h2>
+              <span className="ops-shipment-count-pill">{filteredShipments.length} {TXT.active}</span>
             </div>
           </div>
 
@@ -365,26 +367,26 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                 className={`filter-tab-btn ${tableFilter === 'ALL' ? 'active' : ''}`}
                 onClick={() => setTableFilter('ALL')}
               >
-                All ({totalShipmentsCount})
+                {TXT.all}{totalShipmentsCount})
               </button>
               <button
                 className={`filter-tab-btn ${tableFilter === 'IN_TRANSIT' ? 'active' : ''}`}
                 onClick={() => setTableFilter('IN_TRANSIT')}
               >
-                {shipmentStatusLabel('IN_TRANSIT')} ({inTransitCount})
+                {shipmentStatusLabel('IN_TRANSIT', consoleLang())} ({inTransitCount})
               </button>
               <button
                 className={`filter-tab-btn ${tableFilter === 'DELIVERED' ? 'active' : ''}`}
                 onClick={() => setTableFilter('DELIVERED')}
               >
-                Delivered ({deliveredCount})
+                {TXT.delivered}{deliveredCount})
               </button>
               {exceptionCount > 0 && (
                 <button
                   className={`filter-tab-btn ${tableFilter === 'HELD' ? 'active' : ''}`}
                   onClick={() => setTableFilter('HELD')}
                 >
-                  {shipmentStatusLabel('ON_HOLD')} / {shipmentStatusLabel('DELAYED')} ({exceptionCount})
+                  {shipmentStatusLabel('ON_HOLD', consoleLang())} / {shipmentStatusLabel('DELAYED', consoleLang())} ({exceptionCount})
                 </button>
               )}
             </div>
@@ -394,7 +396,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
               <Search size={13} className="table-search-icon" />
               <input
                 type="text"
-                placeholder="Search tracking, customer..."
+                placeholder={TXT.searchTrackingCustomer}
                 value={tableSearch}
                 onChange={(e) => setTableSearch(e.target.value)}
                 className="table-search-input"
@@ -406,7 +408,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
               className="ops-btn-secondary"
               onClick={() => onSelectView('all-shipments')}
             >
-              All Shipments →
+              {TXT.allShipments}
             </button>
           </div>
         </div>
@@ -414,27 +416,27 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
         {totalShipmentsCount === 0 ? (
           <div className="ops-empty-panel">
             <Package size={36} className="empty-panel-icon" />
-            <h4>No Consignments in Ledger</h4>
-            <p>Zero shipments registered in the local fleet database.</p>
+            <h4>{TXT.noConsignmentsInLedger}</h4>
+            <p>{TXT.zeroShipmentsRegisteredInThe}</p>
             {can('shipments.create') && (
               <button
                 className="ops-btn-primary"
                 onClick={() => onSelectView('create-shipment')}
               >
-                + Book New Shipment
+                {TXT.bookNewShipment}
               </button>
             )}
           </div>
         ) : filteredShipments.length === 0 ? (
           <div className="ops-empty-panel">
             <Search size={32} className="empty-panel-icon" />
-            <h4>No matching shipments found</h4>
-            <p>{tableSearch ? `No consignments found matching "${tableSearch}".` : 'No shipments found with the selected status filter.'}</p>
+            <h4>{TXT.noMatchingShipmentsFound}</h4>
+            <p>{tableSearch ? TXT.noConsignmentsFoundMatching(tableSearch) : TXT.noShipmentsFoundWithThe}</p>
             <button
               className="ops-btn-secondary"
               onClick={() => { setTableFilter('ALL'); setTableSearch(''); }}
             >
-              Reset Filters
+              {TXT.resetFilters}
             </button>
           </div>
         ) : (
@@ -451,13 +453,13 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
               </colgroup>
               <thead>
                 <tr>
-                  <th>CONSIGNMENT</th>
-                  <th>SERVICE</th>
-                  <th>ROUTE</th>
-                  <th>CUSTOMER</th>
-                  <th>STATUS</th>
-                  <th>EST. DELIVERY</th>
-                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
+                  <th>{TXT.consignment}</th>
+                  <th>{TXT.service}</th>
+                  <th>{TXT.route}</th>
+                  <th>{TXT.customer}</th>
+                  <th>{TXT.status}</th>
+                  <th>{TXT.estDelivery}</th>
+                  <th style={{ textAlign: 'right' }}>{TXT.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -515,8 +517,8 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                           <span className="ops-route-origin">{senderCity}{senderState ? `, ${senderState}` : ''}</span>
                           <span className="ops-route-arrow">→</span>
                           <span className="ops-route-dest">{destCity}{destState ? `, ${destState}` : ''}</span>
-                          <span className="ops-cargo-desc truncate" title={shipment.cargoDescription || shipment.shipmentType || 'Commercial Freight'}>
-                            {shipment.cargoDescription || shipment.shipmentType || 'Commercial Freight'}
+                          <span className="ops-cargo-desc truncate" title={shipment.cargoDescription || shipment.shipmentType || TXT.commercialFreight}>
+                            {shipment.cargoDescription || shipment.shipmentType || TXT.commercialFreight}
                           </span>
                         </div>
                       </td>
@@ -525,14 +527,14 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                       <td>
                         <div className="ops-customer-cell">
                           <strong className="ops-customer-name truncate" title={senderName}>{senderName}</strong>
-                          <span className="ops-customer-consignee truncate" title={`to ${recipientName}`}>to {recipientName}</span>
+                          <span className="ops-customer-consignee truncate" title={TXT.to2(recipientName)}>{TXT.to} {recipientName}</span>
                         </div>
                       </td>
 
                       {/* 5. STATUS */}
                       <td>
                         <span className={`ops-status-chip ${OPS_STATUS_CHIP[shipmentStatusTone(shipment.status)].className}`}>
-                          <span className={`chip-dot ${OPS_STATUS_CHIP[shipmentStatusTone(shipment.status)].dot}`} /> {shipmentStatusLabel(shipment.status)}
+                          <span className={`chip-dot ${OPS_STATUS_CHIP[shipmentStatusTone(shipment.status)].dot}`} /> {shipmentStatusLabel(shipment.status, consoleLang())}
                         </span>
                       </td>
 
@@ -540,7 +542,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                       <td>
                         <div className="ops-eta-cell">
                           <strong className="ops-eta-date">{eta.date}</strong>
-                          <span className="ops-eta-subtext">{eta.time || 'Just now'}</span>
+                          <span className="ops-eta-subtext">{eta.time || TXT.justNow}</span>
                         </div>
                       </td>
 
@@ -552,10 +554,10 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                               type="button"
                               className={`ops-control-btn ${isSimulating ? 'sim-active' : ''}`}
                               onClick={() => onQuickUpdateStatus(shipment)}
-                              title="Operations Control"
+                              title={TXT.operationsControl}
                             >
                               <SlidersHorizontal size={12} className="control-dash" aria-hidden="true" />
-                              <span>{isSimulating ? 'Moving' : 'Control'}</span>
+                              <span>{isSimulating ? TXT.moving : TXT.control}</span>
                             </button>
                           )}
 
@@ -565,8 +567,8 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                               type="button"
                               className="ops-inspect-icon-btn ops-edit-icon-btn"
                               onClick={() => setEditShipment(shipment)}
-                              title="Edit Consignment"
-                              aria-label={`Edit ${shipment.trackingNumber}`}
+                              title={TXT.editConsignment}
+                              aria-label={TXT.edit(shipment.trackingNumber)}
                             >
                               <Edit3 size={13} />
                             </button>
@@ -576,7 +578,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
                             type="button"
                             className="ops-inspect-icon-btn"
                             onClick={() => onOpenShipmentDetail(shipment.trackingNumber)}
-                            title="Inspect Consignment"
+                            title={TXT.inspectConsignment}
                           >
                             <Eye size={13} />
                           </button>
@@ -600,7 +602,7 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
             const result = await updateShipmentFull(updated);
             // A failure is shown inside the edit form, which stays open.
             if (result.success) {
-              setSavedToast(`Consignment ${updated.trackingNumber} updated.`);
+              setSavedToast(TXT.consignmentUpdated(updated.trackingNumber));
               setTimeout(() => setSavedToast(null), 4000);
             }
             return result;

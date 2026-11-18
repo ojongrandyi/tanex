@@ -1,7 +1,7 @@
-// Console sign-in and account copy (docs/CONTENT.md §10.1). English only until the i18n
-// foundation (tracker D.3) moves these into src/i18n/en.ts and fr.ts; kept in one object so
-// that move is a straight copy.
-export const AUTH_TEXT = {
+// Console sign-in and account copy (docs/CONTENT.md §10.1). English master; the French is in
+// src/i18n/fr/console/auth.ts (same shape, checked by the build; tracker I.2).
+import { consoleText } from '../admin/i18n/consoleText';
+export const AUTH_TEXT_EN = {
   login: {
     subtitle: 'Sign in with your work email or phone number.',
     identifier: 'Email or phone',
@@ -11,7 +11,8 @@ export const AUTH_TEXT = {
     failed: 'Incorrect sign-in details. Please try again.',
     tooMany: 'Too many login attempts. Try again in a few minutes.',
     forgot: 'Forgot password?',
-    backToSite: '← Back to public site'
+    backToSite: '← Back to public site',
+    language: 'Language'
   },
   forgot: {
     title: 'Reset your password',
@@ -69,6 +70,7 @@ export const AUTH_TEXT = {
     next: 'New password',
     confirm: 'Confirm new password',
     passwordChanged: 'Password changed. Your other devices have been signed out.',
+    saveFailed: 'Could not save.',
     // Blog author profile (tracker F.2; CONTENT §10.4, owner to confirm).
     author: {
       title: 'Author profile',
@@ -94,7 +96,9 @@ export const AUTH_TEXT = {
       confirmSignOutOthers: 'Sign out on every other device? This device stays signed in.',
       signedOut: (n: number) => `Signed out on ${n} other device${n === 1 ? '' : 's'}.`,
       none: 'You are only signed in on this device.',
-      loading: 'Loading…'
+      loading: 'Loading…',
+      loadFailed: 'Could not load.',
+      signOutFailed: 'Could not sign out.'
     }
   },
   noAccess: {
@@ -103,6 +107,7 @@ export const AUTH_TEXT = {
   },
   signOut: 'Sign out'
 } as const;
+export const AUTH_TEXT = consoleText('auth', AUTH_TEXT_EN);
 
 /** Maps a change-password error from the server to the §10.1 wording. */
 export function passwordErrorText(err: unknown): string {
@@ -117,8 +122,7 @@ export function passwordErrorText(err: unknown): string {
 }
 
 // Users, Roles and Audit log screens (CONTENT §10.1; B.5 additions marked owner to confirm).
-// English only until D.3, like AUTH_TEXT above.
-export const IAM_TEXT = {
+export const IAM_TEXT_EN = {
   users: {
     title: 'Users',
     add: 'Add user',
@@ -229,17 +233,19 @@ export const IAM_TEXT = {
     ROLE_LOCKED: "The Super Admin role can't be changed.",
     ROLE_SYSTEM: "System roles can't be deleted. You can rename them or change their permissions.",
     ROLE_IN_USE: 'Some accounts have this role. Remove it from them first.'
-  } as Record<string, string>
+  } as Record<string, string>,
+  genericError: 'Something went wrong. Please try again.'
 } as const;
+export const IAM_TEXT = consoleText('iam', IAM_TEXT_EN);
 
 /** The §10.1 wording for an error from the users/roles API, else the server's own message. */
 export function iamErrorText(err: unknown): string {
   const e = err as { message?: string; code?: string } | null;
-  return (e?.code && IAM_TEXT.errors[e.code]) || e?.message || 'Something went wrong. Please try again.';
+  return (e?.code && IAM_TEXT.errors[e.code]) || e?.message || IAM_TEXT.genericError;
 }
 
-// Settings → Email (NOTIFICATIONS_SPEC §3; B.6 additions, owner to confirm). English only until D.3.
-export const MAIL_TEXT = {
+// Settings → Email (NOTIFICATIONS_SPEC §3; B.6 additions, owner to confirm).
+export const MAIL_TEXT_EN = {
   tab: 'Email',
   title: 'Email',
   intro: 'Emails to customers and staff go out from the company mailbox. They wait in a queue and are tried again if sending fails.',
@@ -271,3 +277,4 @@ export const MAIL_TEXT = {
   loading: 'Loading…',
   manageOnly: 'Sending a test email needs the permission to manage settings.'
 };
+export const MAIL_TEXT = consoleText('mail', MAIL_TEXT_EN);

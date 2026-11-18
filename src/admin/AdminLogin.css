@@ -212,3 +212,30 @@
     padding: 1.85rem 1.25rem 1.6rem;
   }
 }
+
+/* Language switch before sign-in (tracker I.2): top right of the shell, cream on chocolate. */
+.admin-login-shell { position: relative; }
+.admin-login-lang {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--tx-border-on-dark);
+  border-radius: var(--tx-radius-pill);
+}
+.admin-login-lang button {
+  min-height: 32px;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: var(--tx-radius-pill);
+  background: transparent;
+  color: var(--tx-cream-100);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.admin-login-lang button.is-active { background: var(--tx-cream-100); color: var(--tx-choc-950); }
+.admin-login-lang button:focus-visible { outline: 2px solid var(--tx-focus); outline-offset: 2px; }

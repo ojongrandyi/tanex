@@ -48,6 +48,7 @@ import {
   X,
   Wallet
 } from 'lucide-react';
+import { ADMIN_APP_TEXT as TXT } from './AdminApp.text';
 
 // Ids of the proofs of payment this browser has already announced (update G.3). null = storage unavailable.
 const SEEN_PROOFS_KEY = 'tx_seen_proofs';
@@ -87,11 +88,18 @@ export const AdminApp: React.FC<AdminAppProps> = (props) => {
   return <AdminConsole {...props} />;
 };
 
+// The view open when the console language changes: the console is remounted in the new
+// language (ConsoleLanguage) and comes back to the same view. Not kept across page loads.
+let viewBeforeRemount: { userId: number | string; view: AdminViewType } | null = null;
+
 const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicTracking }) => {
   const { shipments, updateShipmentStatus, updateShipmentDirect } = useAdminData();
-  const { can } = useAuth();
+  const { can, user } = useAuth();
   // Land on the first view this user may open; a user with no work views gets My account.
-  const [currentView, setCurrentViewRaw] = useState<AdminViewType>(() => firstAllowedView(can) ?? 'account');
+  const [currentView, setCurrentViewRaw] = useState<AdminViewType>(() =>
+    (viewBeforeRemount && viewBeforeRemount.userId === user?.id && canOpenView(viewBeforeRemount.view, can) ? viewBeforeRemount.view : null)
+    ?? firstAllowedView(can) ?? 'account');
+  useEffect(() => { viewBeforeRemount = user ? { userId: user.id, view: currentView } : null; }, [currentView, user]);
   // Views link to each other (dashboard cards, toasts); a link to a view the user can't open does nothing.
   const setCurrentView = useCallback((view: AdminViewType) => {
     if (canOpenView(view, can)) setCurrentViewRaw(view);
@@ -261,8 +269,8 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
     ).then((result) => {
       setToastIsError(!result.success);
       setToastMessage(result.success
-        ? `Shipment ${updated.trackingNumber} updated: ${updated.statusText}`
-        : `Failed to save the update for ${updated.trackingNumber}: ${result.error || 'server rejected the request'}. Reverted.`);
+        ? TXT.shipmentUpdated(updated.trackingNumber, updated.statusText)
+        : TXT.updateFailed(updated.trackingNumber, result.error || TXT.serverRejected));
       setTimeout(() => setToastMessage(null), 6000);
     });
   };
@@ -297,18 +305,18 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
             <Wallet size={18} aria-hidden="true" />
             <span>
               {proofToast.trackingNumber
-                ? `New payment proof – ${proofToast.trackingNumber}`
-                : `${proofToast.count} new payment proofs`}
+                ? TXT.newProofFor(proofToast.trackingNumber)
+                : TXT.newProofsCount(proofToast.count)}
             </span>
           </button>
-          <button type="button" className="admin-proof-toast-close" onClick={() => setProofToast(null)} aria-label="Dismiss">
+          <button type="button" className="admin-proof-toast-close" onClick={() => setProofToast(null)} aria-label={TXT.dismiss}>
             <X size={16} aria-hidden="true" />
           </button>
         </div>
       )}
 
       {/* Keyed by currentView so a crash in one view can't stay stuck once the admin navigates away */}
-      <ErrorBoundary key={currentView} label="This section" variant="console">
+      <ErrorBoundary key={currentView} label={TXT.thisSection} variant="console">
         {/* OPERATIONS CENTER OVERVIEW */}
         {currentView === 'operations-center' && (
           <OperationsCenter
@@ -353,22 +361,22 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
 
         {/* DELIVERY: DISPATCH BOARD (G.5), TARIFFS AND COURIERS (G.2) */}
         {currentView === 'dispatch' && (
-          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+          <Suspense fallback={<div className="tx-iam-muted" role="status">{TXT.loading}</div>}>
             <DispatchBoardView searchQuery={globalSearch} onBoardChanged={refreshDispatchCount} onOpenTracking={handleOpenShipmentDetail} />
           </Suspense>
         )}
         {currentView === 'tariffs' && (
-          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+          <Suspense fallback={<div className="tx-iam-muted" role="status">{TXT.loading}</div>}>
             <TariffsView />
           </Suspense>
         )}
         {currentView === 'couriers' && (
-          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+          <Suspense fallback={<div className="tx-iam-muted" role="status">{TXT.loading}</div>}>
             <CouriersView searchQuery={globalSearch} />
           </Suspense>
         )}
         {currentView === 'cash' && (
-          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+          <Suspense fallback={<div className="tx-iam-muted" role="status">{TXT.loading}</div>}>
             <CashView searchQuery={globalSearch} />
           </Suspense>
         )}
@@ -388,7 +396,7 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
 
         {/* BLOG STUDIO (BLOG_SPEC §4) */}
         {currentView === 'blog' && (
-          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+          <Suspense fallback={<div className="tx-iam-muted" role="status">{TXT.loading}</div>}>
             <BlogStudio />
           </Suspense>
         )}

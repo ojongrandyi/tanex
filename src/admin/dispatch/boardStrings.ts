@@ -1,12 +1,14 @@
-// Dispatch board copy (docs/CONTENT.md §10.2; "Added with G.5", owner to confirm). The console is
-// English until phase I moves its text into the dictionaries; kept in one object like DISPATCH_TEXT.
+// Dispatch board copy (docs/CONTENT.md §10.2; "Added with G.5", owner to confirm). English master;
+// the French is in src/i18n/fr/console/board.ts.
 // Status, size, vehicle and failure-reason names come from the shared modules.
 import type { BoardColumn, JobProblem, SuggestionMiss } from '../../shared/dispatchBoard';
 import type { JobScope } from '../../shared/dispatchStatus';
+import { consoleText } from '../i18n/consoleText';
+import { IAM_TEXT } from '../../auth/strings';
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-export const BOARD_TEXT = {
+export const BOARD_TEXT_EN = {
   loading: 'Loading…',
   saving: 'Saving…',
   cancel: 'Cancel',
@@ -287,8 +289,9 @@ export const BOARD_TEXT = {
     UNKNOWN_SHIPMENT: 'Enter the tracking ID of the worldwide shipment this leg belongs to.',
   } as Record<string, string>,
 } as const;
+export const BOARD_TEXT = consoleText('board', BOARD_TEXT_EN);
 
 export function boardErrorText(err: unknown): string {
   const e = err as { message?: string; code?: string } | null;
-  return (e?.code && BOARD_TEXT.errors[e.code]) || e?.message || 'Something went wrong. Please try again.';
+  return (e?.code && BOARD_TEXT.errors[e.code]) || e?.message || IAM_TEXT.genericError;
 }

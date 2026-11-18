@@ -1,6 +1,7 @@
 // Console → Cash & Mobile Money copy (CONTENT §10.2 "Added with G.8", owner to confirm). English
-// until the console moves to t() in phase I, like the other console views.
-export const CASH_TEXT = {
+// master; the French is in src/i18n/fr/console/cash.ts.
+import { consoleText } from '../i18n/consoleText';
+export const CASH_TEXT_EN = {
   loading: 'Loading…',
   loadError: 'Could not load the cash ledger. Check your connection and try again.',
   retry: 'Try again',
@@ -79,6 +80,7 @@ export const CASH_TEXT = {
     fallback: 'Something went wrong. Try again.',
   } as Record<string, string>,
 } as const;
+export const CASH_TEXT = consoleText('cash', CASH_TEXT_EN);
 
 export function cashErrorText(err: unknown): string {
   const e = err as { code?: string; message?: string } | null;

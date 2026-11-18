@@ -7,6 +7,7 @@ import { ShipmentPaymentPanel } from './ShipmentPaymentPanel';
 import { usePermission } from '../../auth/AuthContext';
 import './EditShipmentModal.css';
 import { COMPANY_SHORT } from '../../config/brand';
+import { EDIT_SHIPMENT_MODAL_TEXT as TXT } from './EditShipmentModal.text';
 
 interface EditShipmentModalProps {
   shipment: Shipment;
@@ -298,7 +299,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
     const result = await onSave(updated);
     setSaving(false);
     if (result && !result.success) {
-      setSaveError(`The changes were not saved: ${result.error || 'the server did not respond'}. Please try again.`);
+      setSaveError(TXT.theChangesWereNotSaved(result.error || TXT.serverNoResponse));
       return;
     }
     onClose();
@@ -310,7 +311,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
         {/* Header */}
         <div className="edit-modal-header">
           <div className="edit-title-group">
-            <span className="edit-badge">Consignment Editor</span>
+            <span className="edit-badge">{TXT.consignmentEditor}</span>
             <div className="edit-waybill-wrap">
               <h3 className="edit-waybill font-mono">{shipment.trackingNumber}</h3>
               <span className="edit-route-sub">
@@ -318,7 +319,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
               </span>
             </div>
           </div>
-          <button type="button" className="edit-close-btn" onClick={onClose} title="Close (Esc)">
+          <button type="button" className="edit-close-btn" onClick={onClose} title={TXT.closeEsc}>
             <X size={18} />
           </button>
         </div>
@@ -333,48 +334,48 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
             <div className="form-section-card">
               <div className="section-head">
                 <User size={13} className="text-accent" />
-                <span>Shipper (Origin)</span>
+                <span>{TXT.shipperOrigin}</span>
               </div>
               <div className="form-fields-grid">
                 <div className="edit-field full">
-                  <label>Sender Full Name</label>
+                  <label>{TXT.senderFullName}</label>
                   <input
                     type="text"
                     value={senderName}
                     onChange={(e) => setSenderName(e.target.value)}
-                    placeholder="e.g. John Anderson"
+                    placeholder={TXT.eGJohnAnderson}
                     required
                   />
                 </div>
                 <div className="edit-field full">
-                  <label>Company (Optional)</label>
+                  <label>{TXT.companyOptional}</label>
                   <input
                     type="text"
                     value={senderCompany}
                     onChange={(e) => setSenderCompany(e.target.value)}
-                    placeholder="e.g. Acme Corp"
+                    placeholder={TXT.eGAcmeCorp}
                   />
                 </div>
                 <div className="edit-field">
-                  <label>Email (Optional)</label>
+                  <label>{TXT.emailOptional}</label>
                   <input
                     type="email"
                     value={senderEmail}
                     onChange={(e) => setSenderEmail(e.target.value)}
-                    placeholder="sender@company.com"
+                    placeholder={TXT.senderCompanyCom}
                   />
                 </div>
                 <div className="edit-field">
-                  <label>Phone (Optional)</label>
+                  <label>{TXT.phoneOptional}</label>
                   <input
                     type="tel"
                     value={senderPhone}
                     onChange={(e) => setSenderPhone(e.target.value)}
-                    placeholder="With country code, e.g. +44 …"
+                    placeholder={TXT.withCountryCodeEG}
                   />
                 </div>
                 <div className="edit-field">
-                  <label>Origin City</label>
+                  <label>{TXT.originCity}</label>
                   <input
                     type="text"
                     value={senderCity}
@@ -383,7 +384,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                   />
                 </div>
                 <div className="edit-field">
-                  <label>State / Region (optional)</label>
+                  <label>{TXT.stateRegionOptional}</label>
                   <input
                     type="text"
                     value={senderState}
@@ -392,7 +393,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                   />
                 </div>
                 <div className="edit-field full">
-                  <label>Street Address</label>
+                  <label>{TXT.streetAddress}</label>
                   <input
                     type="text"
                     value={senderAddress}
@@ -400,7 +401,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                   />
                 </div>
                 <div className="edit-field">
-                  <label>Postcode / ZIP (optional)</label>
+                  <label>{TXT.postcodeZipOptional}</label>
                   <input
                     type="text"
                     value={senderZip}
@@ -414,48 +415,48 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
             <div className="form-section-card">
               <div className="section-head">
                 <Building size={13} className="text-blue" />
-                <span>Consignee (Destination)</span>
+                <span>{TXT.consigneeDestination}</span>
               </div>
               <div className="form-fields-grid">
                 <div className="edit-field full">
-                  <label>Recipient Name</label>
+                  <label>{TXT.recipientName}</label>
                   <input
                     type="text"
                     value={recipientName}
                     onChange={(e) => setRecipientName(e.target.value)}
-                    placeholder="e.g. Dr. Michael Johnson"
+                    placeholder={TXT.eGDrMichaelJohnson}
                     required
                   />
                 </div>
                 <div className="edit-field full">
-                  <label>Company (Optional)</label>
+                  <label>{TXT.companyOptional}</label>
                   <input
                     type="text"
                     value={recipientCompany}
                     onChange={(e) => setRecipientCompany(e.target.value)}
-                    placeholder="e.g. Acme Corp"
+                    placeholder={TXT.eGAcmeCorp}
                   />
                 </div>
                 <div className="edit-field">
-                  <label>Email (Optional)</label>
+                  <label>{TXT.emailOptional}</label>
                   <input
                     type="email"
                     value={recipientEmail}
                     onChange={(e) => setRecipientEmail(e.target.value)}
-                    placeholder="recipient@company.com"
+                    placeholder={TXT.recipientCompanyCom}
                   />
                 </div>
                 <div className="edit-field">
-                  <label>Phone (Optional)</label>
+                  <label>{TXT.phoneOptional}</label>
                   <input
                     type="tel"
                     value={recipientPhone}
                     onChange={(e) => setRecipientPhone(e.target.value)}
-                    placeholder="With country code, e.g. +44 …"
+                    placeholder={TXT.withCountryCodeEG}
                   />
                 </div>
                 <div className="edit-field">
-                  <label>Destination City</label>
+                  <label>{TXT.destinationCity}</label>
                   <input
                     type="text"
                     value={recipientCity}
@@ -464,7 +465,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                   />
                 </div>
                 <div className="edit-field">
-                  <label>State / Region (optional)</label>
+                  <label>{TXT.stateRegionOptional}</label>
                   <input
                     type="text"
                     value={recipientState}
@@ -473,7 +474,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                   />
                 </div>
                 <div className="edit-field full">
-                  <label>Street Address</label>
+                  <label>{TXT.streetAddress}</label>
                   <input
                     type="text"
                     value={recipientAddress}
@@ -481,7 +482,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                   />
                 </div>
                 <div className="edit-field">
-                  <label>Postcode / ZIP (optional)</label>
+                  <label>{TXT.postcodeZipOptional}</label>
                   <input
                     type="text"
                     value={recipientZip}
@@ -496,32 +497,32 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
           <div className="form-section-card">
             <div className="section-head">
               <Package size={13} className="text-slate" />
-              <span>Cargo & Service Specs</span>
+              <span>{TXT.cargoServiceSpecs}</span>
             </div>
             <div className="cargo-specs-grid">
               <div className="edit-field">
-                <label>Service Class</label>
+                <label>{TXT.serviceClass}</label>
                 <select value={service} onChange={(e) => setService(e.target.value as any)}>
-                  <option value="Express">Express</option>
-                  <option value="Priority">Priority</option>
-                  <option value="Standard">Standard</option>
-                  <option value="Freight LTL">Freight LTL</option>
+                  <option value="Express">{TXT.express}</option>
+                  <option value="Priority">{TXT.priority}</option>
+                  <option value="Standard">{TXT.standard}</option>
+                  <option value="Freight LTL">{TXT.freightLtl}</option>
                 </select>
               </div>
               <div className="edit-field">
-                <label>Cargo Classification</label>
+                <label>{TXT.cargoClassification}</label>
                 <select value={shipmentType} onChange={(e) => setShipmentType(e.target.value as any)}>
-                  <option value="Parcel">Parcel</option>
-                  <option value="Document">Document</option>
-                  <option value="Freight">Freight</option>
-                  <option value="Pallet">Pallet</option>
-                  <option value="Container">Container</option>
-                  <option value="Vehicle">Vehicle</option>
-                  <option value="Pets">Pets</option>
+                  <option value="Parcel">{TXT.parcel}</option>
+                  <option value="Document">{TXT.document}</option>
+                  <option value="Freight">{TXT.freight}</option>
+                  <option value="Pallet">{TXT.pallet}</option>
+                  <option value="Container">{TXT.container}</option>
+                  <option value="Vehicle">{TXT.vehicle}</option>
+                  <option value="Pets">{TXT.pets}</option>
                 </select>
               </div>
               <div className="edit-field">
-                <label>Total Pieces</label>
+                <label>{TXT.totalPieces}</label>
                 <input
                   type="number"
                   min="1"
@@ -531,7 +532,7 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                 />
               </div>
               <div className="edit-field">
-                <label>Scale Weight (lbs)</label>
+                <label>{TXT.scaleWeightLbs}</label>
                 <input
                   type="number"
                   step="0.1"
@@ -542,21 +543,21 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                 />
               </div>
               <div className="edit-field span-2">
-                <label>Cargo Description</label>
+                <label>{TXT.cargoDescription}</label>
                 <input
                   type="text"
                   value={cargoDescription}
                   onChange={(e) => setCargoDescription(e.target.value)}
-                  placeholder="e.g. Automotive components, Electronics"
+                  placeholder={TXT.eGAutomotiveComponentsElectronics}
                 />
               </div>
               <div className="edit-field span-2">
-                <label>Estimated Delivery Schedule</label>
+                <label>{TXT.estimatedDeliverySchedule}</label>
                 <input
                   type="text"
                   value={estDelivery}
                   onChange={(e) => setEstDelivery(e.target.value)}
-                  placeholder="e.g. Aug 28, 2026"
+                  placeholder={TXT.eGAug282026}
                 />
               </div>
             </div>
@@ -569,19 +570,19 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
             <div className="form-section-card">
               <div className="section-head">
                 <Package size={13} className="text-blue" />
-                <span>Vehicle Details</span>
+                <span>{TXT.vehicleDetails}</span>
               </div>
               <div className="cargo-specs-grid">
                 <div className="edit-field">
-                  <label>Make</label>
+                  <label>{TXT.make}</label>
                   <input type="text" value={vehMake} onChange={(e) => setVehMake(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Model</label>
+                  <label>{TXT.model}</label>
                   <input type="text" value={vehModel} onChange={(e) => setVehModel(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Year</label>
+                  <label>{TXT.year}</label>
                   <input type="number" value={vehYear} onChange={(e) => setVehYear(e.target.value)} />
                 </div>
                 <div className="edit-field">
@@ -589,34 +590,34 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
                   <input type="text" value={vehVin} onChange={(e) => setVehVin(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Color</label>
+                  <label>{TXT.color}</label>
                   <input type="text" value={vehColor} onChange={(e) => setVehColor(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Body Type</label>
+                  <label>{TXT.bodyType}</label>
                   <input type="text" value={vehBodyType} onChange={(e) => setVehBodyType(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Condition</label>
+                  <label>{TXT.condition}</label>
                   <select value={vehCondition} onChange={(e) => setVehCondition(e.target.value)}>
-                    <option value="Excellent">Excellent</option>
-                    <option value="Good">Good</option>
-                    <option value="Fair">Fair</option>
-                    <option value="Poor">Poor</option>
+                    <option value="Excellent">{TXT.excellent}</option>
+                    <option value="Good">{TXT.good}</option>
+                    <option value="Fair">{TXT.fair}</option>
+                    <option value="Poor">{TXT.poor}</option>
                   </select>
                 </div>
                 <div className="edit-field checkbox-field">
                   <label>
                     <input type="checkbox" checked={vehOperable} onChange={(e) => setVehOperable(e.target.checked)} />
-                    <span>Operable</span>
+                    <span>{TXT.operable}</span>
                   </label>
                 </div>
                 <div className="edit-field span-2">
-                  <label>Existing Damage (comma-separated)</label>
+                  <label>{TXT.existingDamageCommaSeparated}</label>
                   <input type="text" value={vehExistingDamage} onChange={(e) => setVehExistingDamage(e.target.value)} />
                 </div>
                 <div className="edit-field span-2">
-                  <label>Inspection Notes</label>
+                  <label>{TXT.inspectionNotes}</label>
                   <textarea value={vehInspectionNotes} onChange={(e) => setVehInspectionNotes(e.target.value)} rows={2} />
                 </div>
               </div>
@@ -627,71 +628,71 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
             <div className="form-section-card">
               <div className="section-head">
                 <Package size={13} className="text-blue" />
-                <span>Live Pet Details</span>
+                <span>{TXT.livePetDetails}</span>
               </div>
               <div className="cargo-specs-grid">
                 <div className="edit-field">
-                  <label>Pet Name</label>
+                  <label>{TXT.petName}</label>
                   <input type="text" value={petName} onChange={(e) => setPetName(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Species</label>
+                  <label>{TXT.species}</label>
                   <input type="text" value={petSpecies} onChange={(e) => setPetSpecies(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Breed</label>
+                  <label>{TXT.breed}</label>
                   <input type="text" value={petBreed} onChange={(e) => setPetBreed(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Age</label>
+                  <label>{TXT.age}</label>
                   <input type="text" value={petAge} onChange={(e) => setPetAge(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Gender</label>
+                  <label>{TXT.gender}</label>
                   <input type="text" value={petGender} onChange={(e) => setPetGender(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Weight (lbs)</label>
+                  <label>{TXT.weightLbs}</label>
                   <input type="number" step="0.1" value={petWeightLbs} onChange={(e) => setPetWeightLbs(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Microchip Number</label>
+                  <label>{TXT.microchipNumber}</label>
                   <input type="text" value={petMicrochip} onChange={(e) => setPetMicrochip(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Crate Type</label>
+                  <label>{TXT.crateType}</label>
                   <input type="text" value={petCrateType} onChange={(e) => setPetCrateType(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Health Certificate #</label>
+                  <label>{TXT.healthCertificate}</label>
                   <input type="text" value={petHealthCert} onChange={(e) => setPetHealthCert(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Rabies Vaccine #</label>
+                  <label>{TXT.rabiesVaccine}</label>
                   <input type="text" value={petRabiesTag} onChange={(e) => setPetRabiesTag(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Vet Clinic Name</label>
+                  <label>{TXT.vetClinicName}</label>
                   <input type="text" value={petVetClinic} onChange={(e) => setPetVetClinic(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Vet Phone</label>
+                  <label>{TXT.vetPhone}</label>
                   <input type="text" value={petVetPhone} onChange={(e) => setPetVetPhone(e.target.value)} />
                 </div>
                 <div className="edit-field checkbox-field">
                   <label>
                     <input type="checkbox" checked={petIsBrachycephalic} onChange={(e) => setPetIsBrachycephalic(e.target.checked)} />
-                    <span>Brachycephalic Breed</span>
+                    <span>{TXT.brachycephalicBreed}</span>
                   </label>
                 </div>
                 <div className="edit-field checkbox-field">
                   <label>
                     <input type="checkbox" checked={petAcclimationCert} onChange={(e) => setPetAcclimationCert(e.target.checked)} />
-                    <span>Acclimation Certified</span>
+                    <span>{TXT.acclimationCertified}</span>
                   </label>
                 </div>
                 <div className="edit-field span-2">
-                  <label>Special Care Notes</label>
+                  <label>{TXT.specialCareNotes}</label>
                   <textarea value={petSpecialCareNotes} onChange={(e) => setPetSpecialCareNotes(e.target.value)} rows={2} />
                 </div>
               </div>
@@ -702,37 +703,37 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
             <div className="form-section-card">
               <div className="section-head">
                 <Package size={13} className="text-blue" />
-                <span>Pallet & Skid Details</span>
+                <span>{TXT.palletSkidDetails}</span>
               </div>
               <div className="cargo-specs-grid">
                 <div className="edit-field span-2">
-                  <label>Pallet Standard</label>
+                  <label>{TXT.palletStandard}</label>
                   <input type="text" value={palletStandard} onChange={(e) => setPalletStandard(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Skid Count</label>
+                  <label>{TXT.skidCount}</label>
                   <input type="number" min="1" value={palletCount} onChange={(e) => setPalletCount(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Weight Per Skid (lbs)</label>
+                  <label>{TXT.weightPerSkidLbs}</label>
                   <input type="number" value={palletWeightPerSkid} onChange={(e) => setPalletWeightPerSkid(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Stack Height (in)</label>
+                  <label>{TXT.stackHeightIn}</label>
                   <input type="number" value={palletHeightIn} onChange={(e) => setPalletHeightIn(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Forklift Access</label>
+                  <label>{TXT.forkliftAccess}</label>
                   <input type="text" value={palletForkliftAccess} onChange={(e) => setPalletForkliftAccess(e.target.value)} />
                 </div>
                 <div className="edit-field checkbox-field">
                   <label>
                     <input type="checkbox" checked={palletStackable} onChange={(e) => setPalletStackable(e.target.checked)} />
-                    <span>Stackable</span>
+                    <span>{TXT.stackable}</span>
                   </label>
                 </div>
                 <div className="edit-field span-2">
-                  <label>Securing Checks (comma-separated)</label>
+                  <label>{TXT.securingChecksCommaSeparated}</label>
                   <input type="text" value={palletSecuringChecks} onChange={(e) => setPalletSecuringChecks(e.target.value)} />
                 </div>
               </div>
@@ -743,39 +744,39 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
             <div className="form-section-card">
               <div className="section-head">
                 <Package size={13} className="text-blue" />
-                <span>Intermodal Container Details</span>
+                <span>{TXT.intermodalContainerDetails}</span>
               </div>
               <div className="cargo-specs-grid">
                 <div className="edit-field">
-                  <label>Container Number</label>
+                  <label>{TXT.containerNumber}</label>
                   <input type="text" value={containerNumber} onChange={(e) => setContainerNumber(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>ISO Size</label>
+                  <label>{TXT.isoSize}</label>
                   <input type="text" value={containerIsoSize} onChange={(e) => setContainerIsoSize(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Bolt Seal #</label>
+                  <label>{TXT.boltSeal}</label>
                   <input type="text" value={containerBoltSeal} onChange={(e) => setContainerBoltSeal(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Chassis Number</label>
+                  <label>{TXT.chassisNumber}</label>
                   <input type="text" value={containerChassisNumber} onChange={(e) => setContainerChassisNumber(e.target.value)} />
                 </div>
                 <div className="edit-field span-2">
-                  <label>Terminal</label>
+                  <label>{TXT.terminal}</label>
                   <input type="text" value={containerTerminal} onChange={(e) => setContainerTerminal(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>VGM Weight (lbs)</label>
+                  <label>{TXT.vgmWeightLbs}</label>
                   <input type="number" value={containerVgmWeight} onChange={(e) => setContainerVgmWeight(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Temperature</label>
+                  <label>{TXT.temperature}</label>
                   <input type="text" value={containerTemperature} onChange={(e) => setContainerTemperature(e.target.value)} />
                 </div>
                 <div className="edit-field span-2">
-                  <label>Customs Status</label>
+                  <label>{TXT.customsStatus}</label>
                   <input type="text" value={containerCustomsStatus} onChange={(e) => setContainerCustomsStatus(e.target.value)} />
                 </div>
               </div>
@@ -786,49 +787,49 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
             <div className="form-section-card">
               <div className="section-head">
                 <Package size={13} className="text-blue" />
-                <span>Heavy Freight & LTL Details</span>
+                <span>{TXT.heavyFreightLtlDetails}</span>
               </div>
               <div className="cargo-specs-grid">
                 <div className="edit-field">
-                  <label>Freight Class</label>
+                  <label>{TXT.freightClass}</label>
                   <input type="text" value={freightClass} onChange={(e) => setFreightClass(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>NMFC Code</label>
+                  <label>{TXT.nmfcCode}</label>
                   <input type="text" value={freightNmfcCode} onChange={(e) => setFreightNmfcCode(e.target.value)} />
                 </div>
                 <div className="edit-field span-2">
-                  <label>Loading Method</label>
+                  <label>{TXT.loadingMethod}</label>
                   <input type="text" value={freightLoadingMethod} onChange={(e) => setFreightLoadingMethod(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Pieces Count</label>
+                  <label>{TXT.piecesCount}</label>
                   <input type="number" min="1" value={freightPiecesCount} onChange={(e) => setFreightPiecesCount(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Total Weight (lbs)</label>
+                  <label>{TXT.totalWeightLbs}</label>
                   <input type="number" value={freightTotalWeightLbs} onChange={(e) => setFreightTotalWeightLbs(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>UN Number (if HazMat)</label>
+                  <label>{TXT.unNumberIfHazmat}</label>
                   <input type="text" value={freightUnNumber} onChange={(e) => setFreightUnNumber(e.target.value)} />
                 </div>
                 <div className="edit-field checkbox-field">
                   <label>
                     <input type="checkbox" checked={freightLiftgatePickup} onChange={(e) => setFreightLiftgatePickup(e.target.checked)} />
-                    <span>Liftgate Pickup</span>
+                    <span>{TXT.liftgatePickup}</span>
                   </label>
                 </div>
                 <div className="edit-field checkbox-field">
                   <label>
                     <input type="checkbox" checked={freightLiftgateDelivery} onChange={(e) => setFreightLiftgateDelivery(e.target.checked)} />
-                    <span>Liftgate Delivery</span>
+                    <span>{TXT.liftgateDelivery}</span>
                   </label>
                 </div>
                 <div className="edit-field checkbox-field">
                   <label>
                     <input type="checkbox" checked={freightHazMat} onChange={(e) => setFreightHazMat(e.target.checked)} />
-                    <span>HazMat</span>
+                    <span>{TXT.hazmat}</span>
                   </label>
                 </div>
               </div>
@@ -839,33 +840,33 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
             <div className="form-section-card">
               <div className="section-head">
                 <Package size={13} className="text-blue" />
-                <span>Secure Document Details</span>
+                <span>{TXT.secureDocumentDetails}</span>
               </div>
               <div className="cargo-specs-grid">
                 <div className="edit-field span-2">
-                  <label>Envelope / Pouch Type</label>
+                  <label>{TXT.envelopePouchType}</label>
                   <input type="text" value={docEnvelopeType} onChange={(e) => setDocEnvelopeType(e.target.value)} />
                 </div>
                 <div className="edit-field">
-                  <label>Seal Number</label>
+                  <label>{TXT.sealNumber}</label>
                   <input type="text" value={docSealNumber} onChange={(e) => setDocSealNumber(e.target.value)} />
                 </div>
                 <div className="edit-field checkbox-field">
                   <label>
                     <input type="checkbox" checked={docDirectSignOnly} onChange={(e) => setDocDirectSignOnly(e.target.checked)} />
-                    <span>Direct Signature Only</span>
+                    <span>{TXT.directSignatureOnly}</span>
                   </label>
                 </div>
                 <div className="edit-field span-2">
-                  <label>Urgent Deadline</label>
+                  <label>{TXT.urgentDeadline}</label>
                   <input type="text" value={docUrgentDeadline} onChange={(e) => setDocUrgentDeadline(e.target.value)} />
                 </div>
                 <div className="edit-field span-2">
-                  <label>Filing / Court Reference</label>
+                  <label>{TXT.filingCourtReference}</label>
                   <input type="text" value={docFilingCourtRef} onChange={(e) => setDocFilingCourtRef(e.target.value)} />
                 </div>
                 <div className="edit-field span-2">
-                  <label>Contents Description</label>
+                  <label>{TXT.contentsDescription}</label>
                   <textarea value={docContentsDescription} onChange={(e) => setDocContentsDescription(e.target.value)} rows={2} />
                 </div>
               </div>
@@ -882,11 +883,11 @@ export const EditShipmentModal: React.FC<EditShipmentModalProps> = ({
           {saveError && <p className="edit-save-error" role="alert">{saveError}</p>}
           <div className="edit-modal-footer">
             <button type="button" className="edit-btn-cancel" onClick={onClose} disabled={saving}>
-              Cancel
+              {TXT.cancel}
             </button>
             <button type="submit" className="edit-btn-save" disabled={saving}>
               <Save size={15} />
-              <span>{saving ? 'Saving…' : 'Save Changes'}</span>
+              <span>{saving ? TXT.saving : TXT.saveChanges}</span>
             </button>
           </div>
         </form>

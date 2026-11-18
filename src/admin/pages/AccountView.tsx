@@ -51,7 +51,7 @@ export const AccountView: React.FC = () => {
       }
       setProfileNotice({ kind: 'ok', text: T.saved });
     } catch (err: any) {
-      setProfileNotice({ kind: 'error', text: err?.message || 'Could not save.' });
+      setProfileNotice({ kind: 'error', text: err?.message || T.saveFailed });
     } finally {
       setProfileBusy(false);
     }

@@ -7,7 +7,13 @@
 1. Every public page exists in **English and French**, each at its own indexable URL.
 2. Public pages move from hash URLs (`/#/services`) to **real paths** (`/services`), so pages and blog posts can be
    indexed and shared with correct previews. (This closes tracker #44.)
-3. The courier app is bilingual from day one; the admin console follows in phase I.
+3. The courier app is bilingual from day one; the admin console followed in phase I (I.2): it speaks the staff
+   member's account language (`users.locale`, My account), or before sign-in the sign-in screen's choice
+   (`tx_console_locale`). Mechanism: each console text module keeps its English object and exports
+   `consoleText(area, english)` (`src/admin/i18n/consoleText.ts`), which reads the active language when a property
+   is read; the French objects are one lazy chunk (`src/i18n/fr/console/`, typed against the English, so a missing
+   key fails the build); `ConsoleLanguage` loads it and remounts the console on a change. Dates and numbers use
+   `intlLocale` (en-CM / fr-CM). Printed documents and stored shipment values stay English.
 
 ## 2. URL scheme
 

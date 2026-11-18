@@ -4,6 +4,7 @@ import { OFFICE_TIME_ZONE } from '../../config/brand';
 import { formatDateTime } from '../../i18n/format';
 import type { BlogPostSummary, PostStatus } from './blogApi';
 import type { PermissionKey } from '../../shared/permissions';
+import { consoleLang } from '../i18n/consoleText';
 
 type CanFn = (key: PermissionKey) => boolean;
 
@@ -29,7 +30,7 @@ export function statusChipClass(status: PostStatus): string {
 }
 
 export function when(ts: number | null | undefined): string {
-  return ts ? formatDateTime(ts, 'en') : '';
+  return ts ? formatDateTime(ts, consoleLang()) : '';
 }
 
 /** Offset of Africa/Douala from UTC at a moment, in ms (WAT, UTC+1; computed, not assumed). */

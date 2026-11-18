@@ -1,16 +1,19 @@
 // Formatting for the dispatch board: money with its currency, times in Africa/Douala.
 import { formatCurrencyAmount } from '../../shared/currency';
 import { BOARD_TIME_ZONE } from '../../shared/dispatchBoard';
+import { consoleIntlLocale } from '../i18n/consoleText';
 
-export const money = (amount: number, currency: string) => formatCurrencyAmount(amount, currency, 'en-GB');
+// In the console language (tracker I.2).
+export const money = (amount: number, currency: string) => formatCurrencyAmount(amount, currency, consoleIntlLocale());
 
-const timeFmt = new Intl.DateTimeFormat('en-GB', { timeZone: BOARD_TIME_ZONE, hour: '2-digit', minute: '2-digit' });
-const dayTimeFmt = new Intl.DateTimeFormat('en-GB', { timeZone: BOARD_TIME_ZONE, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 const dayKey = new Intl.DateTimeFormat('en-CA', { timeZone: BOARD_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' });
 
 /** "14:05" today, "12 Nov 14:05" on another day (Cameroon time). */
 export function when(ts: number, now = Date.now()): string {
-  return dayKey.format(ts) === dayKey.format(now) ? timeFmt.format(ts) : dayTimeFmt.format(ts);
+  const sameDay = dayKey.format(ts) === dayKey.format(now);
+  return new Intl.DateTimeFormat(consoleIntlLocale(), sameDay
+    ? { timeZone: BOARD_TIME_ZONE, hour: '2-digit', minute: '2-digit' }
+    : { timeZone: BOARD_TIME_ZONE, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(ts);
 }
 
 export const minutesAgo = (ts: number, now: number) => Math.max(0, Math.floor((now - ts) / 60_000));

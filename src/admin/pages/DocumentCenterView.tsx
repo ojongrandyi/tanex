@@ -45,6 +45,7 @@ import {
   DocumentPouchLine,
   documentTitle
 } from '../../components/DocumentBrand';
+import { DOCUMENT_CENTER_VIEW_TEXT as TXT } from './DocumentCenterView.text';
 
 interface DocumentCenterViewProps {
   onOpenShipmentDetail?: (trackingNumber: string) => void;
@@ -209,43 +210,43 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
       case 'SHIPPING_LABEL':
         return {
           icon: <Tag size={16} className="text-blue" />,
-          label: 'Shipping Label',
+          label: TXT.shippingLabel,
           badgeClass: 'badge-type-label'
         };
       case 'RECEIPT':
         return {
           icon: <Receipt size={16} className="text-emerald" />,
-          label: 'Shipment Receipt',
+          label: TXT.shipmentReceipt,
           badgeClass: 'badge-type-receipt'
         };
       case 'INVOICE':
         return {
           icon: <FileText size={16} className="text-indigo" />,
-          label: 'Commercial Invoice',
+          label: TXT.commercialInvoice,
           badgeClass: 'badge-type-invoice'
         };
       case 'BOL':
         return {
           icon: <FileSpreadsheet size={16} className="text-amber" />,
-          label: 'Bill of Lading',
+          label: TXT.billOfLading,
           badgeClass: 'badge-type-bol'
         };
       case 'INSURANCE':
         return {
           icon: <ShieldCheck size={16} className="text-purple" />,
-          label: 'Insurance Certificate',
+          label: TXT.insuranceCertificate,
           badgeClass: 'badge-type-insurance'
         };
       case 'POD':
         return {
           icon: <PackageCheck size={16} className="text-emerald" />,
-          label: 'Proof of Delivery',
+          label: TXT.proofOfDelivery,
           badgeClass: 'badge-type-receipt'
         };
       default:
         return {
           icon: <FileText size={16} className="text-slate" />,
-          label: type || 'Document',
+          label: type || TXT.document,
           badgeClass: 'badge-type-label'
         };
     }
@@ -255,11 +256,11 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
   const renderStatusBadge = (status: DocumentStatus) => {
     switch (status) {
       case 'GENERATED':
-        return <span className="doc-status-badge badge-generated"><Check size={12} /> Generated</span>;
+        return <span className="doc-status-badge badge-generated"><Check size={12} /> {TXT.generated}</span>;
       case 'UPDATED':
-        return <span className="doc-status-badge badge-updated"><Clock size={12} /> Updated (v2+)</span>;
+        return <span className="doc-status-badge badge-updated"><Clock size={12} /> {TXT.updatedV2}</span>;
       case 'CANCELLED':
-        return <span className="doc-status-badge badge-cancelled"><Ban size={12} /> Cancelled</span>;
+        return <span className="doc-status-badge badge-cancelled"><Ban size={12} /> {TXT.cancelled}</span>;
       default:
         return <span className="doc-status-badge badge-generated"><Check size={12} /> {String(status).replace(/_/g, ' ')}</span>;
     }
@@ -342,7 +343,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
     if (!alreadyOpen) {
       setPreviewDoc(doc);
     }
-    setToastMessage(`Preparing PDF for ${doc.id}...`);
+    setToastMessage(TXT.preparingPdfFor(doc.id));
     // Fetch the PDF libraries while the paper mounts. A failed download is reported by the
     // try/catch below; this catch only stops it counting as unhandled if we return early.
     const pdfTools = loadPdfTools();
@@ -353,7 +354,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
 
     const paperEl = paperRef.current;
     if (!paperEl) {
-      setToastMessage(`Could not generate PDF for ${doc.id}. Please try again.`);
+      setToastMessage(TXT.couldNotGeneratePdfFor(doc.id));
       setTimeout(() => setToastMessage(null), 3500);
       return;
     }
@@ -380,10 +381,10 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
       });
       pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
       pdf.save(`${doc.id}.pdf`);
-      setToastMessage(`Downloaded ${doc.id}.pdf`);
+      setToastMessage(TXT.downloadedPdf(doc.id));
     } catch (err) {
       console.error('[PDF] Failed to generate PDF:', err);
-      setToastMessage(`Failed to generate PDF for ${doc.id}. Please try again.`);
+      setToastMessage(TXT.failedToGeneratePdfFor(doc.id));
     }
     setTimeout(() => setToastMessage(null), 3500);
   };
@@ -398,7 +399,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
     if (!regenerateDocTarget) return;
     const updated = regenerateDocument(regenerateDocTarget.id, regenNotes);
     if (updated) {
-      setToastMessage(`Document ${updated.id} regenerated successfully to Version ${updated.version}!`);
+      setToastMessage(TXT.documentRegeneratedSuccessfullyToVersion(updated.id, updated.version));
       setRegenerateDocTarget(null);
       if (previewDoc && previewDoc.id === updated.id) {
         setPreviewDoc(updated);
@@ -416,7 +417,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
     if (!deleteDocTarget) return;
     const deletedId = deleteDocTarget.id;
     deleteDocument(deletedId);
-    setToastMessage(`Document ${deletedId} has been permanently deleted.`);
+    setToastMessage(TXT.documentHasBeenPermanentlyDeleted(deletedId));
     setDeleteDocTarget(null);
     if (previewDoc && previewDoc.id === deletedId) {
       setPreviewDoc(null);
@@ -433,7 +434,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
       ? (doc.version > 1 ? 'UPDATED' : 'GENERATED')
       : 'CANCELLED';
     updateDocumentStatus(doc.id, newStatus);
-    setToastMessage(`Document ${doc.id} status changed to ${newStatus}.`);
+    setToastMessage(TXT.documentStatusChangedTo(doc.id, newStatus));
     closeMenu();
     if (previewDoc && previewDoc.id === doc.id) {
       setPreviewDoc({ ...previewDoc, status: newStatus });
@@ -444,7 +445,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
   const handleTogglePaymentStatus = (doc: AdminDocument) => {
     const newPaymentStatus: 'PAID' | 'PENDING' = doc.charges?.paymentStatus === 'PAID' ? 'PENDING' : 'PAID';
     updateDocumentPaymentStatus(doc.id, newPaymentStatus);
-    setToastMessage(`Document ${doc.id} marked as ${newPaymentStatus}.`);
+    setToastMessage(TXT.documentMarkedAs(doc.id, newPaymentStatus));
     closeMenu();
     if (previewDoc && previewDoc.id === doc.id && previewDoc.charges) {
       setPreviewDoc({ ...previewDoc, charges: { ...previewDoc.charges, paymentStatus: newPaymentStatus } });
@@ -518,7 +519,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
     });
 
     setShowGenerateModal(false);
-    setToastMessage(`Successfully generated ${getDocTypeMeta(newDoc.docType).label} ${newDoc.id}!`);
+    setToastMessage(TXT.successfullyGenerated(getDocTypeMeta(newDoc.docType).label, newDoc.id));
     setPreviewDoc(newDoc);
     setTimeout(() => setToastMessage(null), 4000);
   };
@@ -538,8 +539,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           ========================================================================= */}
       <div className="doc-page-header">
         <div className="doc-header-titles">
-          <h2>Document Center</h2>
-          <p>Generate, view, print, and manage shipment documents from one place.</p>
+          <h2>{TXT.documentCenter}</h2>
+          <p>{TXT.generateViewPrintAndManage}</p>
         </div>
 
         {canManage && (
@@ -549,7 +550,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
               onClick={() => openGenerateModal()}
             >
               <Plus size={16} />
-              <span>Generate Document</span>
+              <span>{TXT.generateDocument}</span>
             </button>
           </div>
         )}
@@ -567,7 +568,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
             <Tag size={20} />
           </div>
           <div className="summary-card-info">
-            <span className="summary-card-label">Shipping Labels</span>
+            <span className="summary-card-label">{TXT.shippingLabels}</span>
             <strong className="summary-card-count font-mono">{stats.shippingLabels}</strong>
           </div>
         </div>
@@ -580,7 +581,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
             <Receipt size={20} />
           </div>
           <div className="summary-card-info">
-            <span className="summary-card-label">Shipment Receipts</span>
+            <span className="summary-card-label">{TXT.shipmentReceipts}</span>
             <strong className="summary-card-count font-mono">{stats.receipts}</strong>
           </div>
         </div>
@@ -593,7 +594,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
             <FileText size={20} />
           </div>
           <div className="summary-card-info">
-            <span className="summary-card-label">Invoices</span>
+            <span className="summary-card-label">{TXT.invoices}</span>
             <strong className="summary-card-count font-mono">{stats.invoices}</strong>
           </div>
         </div>
@@ -606,7 +607,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
             <FileSpreadsheet size={20} />
           </div>
           <div className="summary-card-info">
-            <span className="summary-card-label">Bills of Lading</span>
+            <span className="summary-card-label">{TXT.billsOfLading}</span>
             <strong className="summary-card-count font-mono">{stats.bols}</strong>
           </div>
         </div>
@@ -619,7 +620,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
             <ShieldCheck size={20} />
           </div>
           <div className="summary-card-info">
-            <span className="summary-card-label">Insurance Certificates</span>
+            <span className="summary-card-label">{TXT.insuranceCertificates}</span>
             <strong className="summary-card-count font-mono">{stats.insuranceCerts}</strong>
           </div>
         </div>
@@ -633,7 +634,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           className={`doc-nav-tab ${typeFilter === 'ALL' ? 'active' : ''}`}
           onClick={() => setTypeFilter('ALL')}
         >
-          <span>All Documents</span>
+          <span>{TXT.allDocuments}</span>
           <span className="tab-count-pill">{stats.total}</span>
         </button>
 
@@ -642,7 +643,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           onClick={() => setTypeFilter('SHIPPING_LABEL')}
         >
           <Tag size={15} />
-          <span>Shipping Labels</span>
+          <span>{TXT.shippingLabels}</span>
           <span className="tab-count-pill">{stats.shippingLabels}</span>
         </button>
 
@@ -651,7 +652,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           onClick={() => setTypeFilter('RECEIPT')}
         >
           <Receipt size={15} />
-          <span>Shipment Receipts</span>
+          <span>{TXT.shipmentReceipts}</span>
           <span className="tab-count-pill">{stats.receipts}</span>
         </button>
 
@@ -660,7 +661,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           onClick={() => setTypeFilter('INVOICE')}
         >
           <FileText size={15} />
-          <span>Invoices</span>
+          <span>{TXT.invoices}</span>
           <span className="tab-count-pill">{stats.invoices}</span>
         </button>
 
@@ -669,7 +670,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           onClick={() => setTypeFilter('BOL')}
         >
           <FileSpreadsheet size={15} />
-          <span>Bills of Lading</span>
+          <span>{TXT.billsOfLading}</span>
           <span className="tab-count-pill">{stats.bols}</span>
         </button>
 
@@ -678,7 +679,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           onClick={() => setTypeFilter('INSURANCE')}
         >
           <ShieldCheck size={15} />
-          <span>Insurance Certificates</span>
+          <span>{TXT.insuranceCertificates}</span>
           <span className="tab-count-pill">{stats.insuranceCerts}</span>
         </button>
 
@@ -687,7 +688,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           onClick={() => setTypeFilter('POD')}
         >
           <PackageCheck size={15} />
-          <span>Proofs of Delivery</span>
+          <span>{TXT.proofsOfDelivery}</span>
           <span className="tab-count-pill">{stats.pods}</span>
         </button>
       </div>
@@ -701,7 +702,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           <input
             type="text"
             className="doc-search-input font-mono"
-            placeholder="Search by document number, tracking number, sender, recipient..."
+            placeholder={TXT.searchByDocumentNumberTracking}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -715,30 +716,30 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
         <div className="doc-filters-cluster">
           {/* Status Filter */}
           <div className="filter-group">
-            <label>Status:</label>
+            <label>{TXT.status}</label>
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value as any)}
               className="filter-select"
             >
-              <option value="ALL">All Statuses</option>
-              <option value="GENERATED">Generated</option>
-              <option value="UPDATED">Updated</option>
-              <option value="CANCELLED">Cancelled</option>
+              <option value="ALL">{TXT.allStatuses}</option>
+              <option value="GENERATED">{TXT.generated}</option>
+              <option value="UPDATED">{TXT.updated}</option>
+              <option value="CANCELLED">{TXT.cancelled}</option>
             </select>
           </div>
 
           {/* Date Filter */}
           <div className="filter-group">
-            <label>Date:</label>
+            <label>{TXT.date}</label>
             <select
               value={dateFilter}
               onChange={e => setDateFilter(e.target.value)}
               className="filter-select"
             >
-              <option value="ALL">All Dates</option>
-              <option value="TODAY">Today</option>
-              <option value="THIS_MONTH">This Month</option>
+              <option value="ALL">{TXT.allDates}</option>
+              <option value="TODAY">{TXT.today}</option>
+              <option value="THIS_MONTH">{TXT.thisMonth}</option>
             </select>
           </div>
         </div>
@@ -752,13 +753,13 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           <table className="doc-master-table">
             <thead>
               <tr>
-                <th style={{ width: '22%' }}>Document</th>
-                <th style={{ width: '16%' }}>Document Number</th>
-                <th style={{ width: '16%' }}>Shipment</th>
-                <th style={{ width: '20%' }}>Related Party</th>
-                <th style={{ width: '12%' }}>Created</th>
-                <th style={{ width: '10%' }}>Status</th>
-                <th style={{ width: '14%', textAlign: 'right' }}>Actions</th>
+                <th style={{ width: '22%' }}>{TXT.document}</th>
+                <th style={{ width: '16%' }}>{TXT.documentNumber}</th>
+                <th style={{ width: '16%' }}>{TXT.shipment}</th>
+                <th style={{ width: '20%' }}>{TXT.relatedParty}</th>
+                <th style={{ width: '12%' }}>{TXT.created}</th>
+                <th style={{ width: '10%' }}>{TXT.status2}</th>
+                <th style={{ width: '14%', textAlign: 'right' }}>{TXT.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -767,15 +768,15 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                   <td colSpan={7} className="empty-docs-row">
                     <div className="empty-docs-box">
                       <FileText size={36} className="empty-icon" />
-                      <h4>No documents yet</h4>
-                      <p>Documents generated from your shipments will appear here.</p>
+                      <h4>{TXT.noDocumentsYet}</h4>
+                      <p>{TXT.documentsGeneratedFromYourShipments}</p>
                       {canManage && (
                         <button
                           className="btn-empty-generate"
                           onClick={() => openGenerateModal()}
                         >
                           <Plus size={14} />
-                          <span>Create Document</span>
+                          <span>{TXT.createDocument}</span>
                         </button>
                       )}
                     </div>
@@ -850,10 +851,10 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                           <button
                             className="btn-view-doc-primary"
                             onClick={() => handleOpenPreview(doc)}
-                            title="View Document"
+                            title={TXT.viewDocument}
                           >
                             <Eye size={14} />
-                            <span>View</span>
+                            <span>{TXT.view}</span>
                           </button>
 
                           <div className="dropdown-action-wrap">
@@ -871,7 +872,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                 setMenuAnchor({ left: rect.right, top: rect.bottom, bottom: rect.top, openUpward });
                                 setActiveMenuDocId(doc.id);
                               }}
-                              title="More actions"
+                              title={TXT.moreActions}
                             >
                               <MoreVertical size={16} />
                             </button>
@@ -894,21 +895,21 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                     onClick={() => handleOpenPreview(doc)}
                                   >
                                     <Eye size={14} />
-                                    <span>View Document</span>
+                                    <span>{TXT.viewDocument}</span>
                                   </button>
                                   <button
                                     className="dropdown-item"
                                     onClick={() => handleDownloadPdf(doc)}
                                   >
                                     <Download size={14} />
-                                    <span>Download PDF</span>
+                                    <span>{TXT.downloadPdf}</span>
                                   </button>
                                   <button
                                     className="dropdown-item"
                                     onClick={() => handlePrint(doc)}
                                   >
                                     <Printer size={14} />
-                                    <span>Print</span>
+                                    <span>{TXT.print}</span>
                                   </button>
                                   {canManage && (
                                     <button
@@ -916,7 +917,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                       onClick={() => handleTriggerRegenerate(doc)}
                                     >
                                       <RotateCcw size={14} />
-                                      <span>Regenerate</span>
+                                      <span>{TXT.regenerate}</span>
                                     </button>
                                   )}
                                   {onOpenShipmentDetail && (
@@ -928,7 +929,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                       }}
                                     >
                                       <ExternalLink size={14} />
-                                      <span>View Shipment</span>
+                                      <span>{TXT.viewShipment}</span>
                                     </button>
                                   )}
                                   {canManage && doc.charges && (doc.docType === 'RECEIPT' || doc.docType === 'INVOICE' || doc.docType === 'BOL') && (
@@ -937,7 +938,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                       onClick={() => handleTogglePaymentStatus(doc)}
                                     >
                                       <DollarSign size={14} />
-                                      <span>Mark as {doc.charges.paymentStatus === 'PAID' ? 'Pending' : 'Paid'}</span>
+                                      <span>{TXT.markAs} {doc.charges.paymentStatus === 'PAID' ? TXT.pending : TXT.paid}</span>
                                     </button>
                                   )}
                                   {canManage && (<>
@@ -949,12 +950,12 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                     {doc.status === 'CANCELLED' ? (
                                       <>
                                         <CheckCircle2 size={14} />
-                                        <span>Restore Document</span>
+                                        <span>{TXT.restoreDocument}</span>
                                       </>
                                     ) : (
                                       <>
                                         <Ban size={14} />
-                                        <span>Cancel Document</span>
+                                        <span>{TXT.cancelDocument}</span>
                                       </>
                                     )}
                                   </button>
@@ -963,7 +964,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                                     onClick={() => handleTriggerDelete(doc)}
                                   >
                                     <Trash2 size={14} />
-                                    <span>Delete Document</span>
+                                    <span>{TXT.deleteDocument}</span>
                                   </button>
                                   </>)}
                                 </div>
@@ -983,7 +984,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
 
         {/* Table Footer */}
         <div className="doc-table-footer">
-          <span>Showing <strong>{filteredDocuments.length}</strong> of <strong>{documents.length}</strong> system documents</span>
+          <span>{TXT.showing} <strong>{filteredDocuments.length}</strong> {TXT.of} <strong>{documents.length}</strong> {TXT.systemDocuments}</span>
         </div>
       </div>
 
@@ -1003,7 +1004,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                 <h3 className="font-mono">{previewDoc.id}</h3>
                 {previewDoc.version > 1 && (
                   <span className="preview-version-pill font-mono">
-                    Version {previewDoc.version} — Current
+                    {TXT.version} {previewDoc.version} {TXT.current}
                   </span>
                 )}
               </div>
@@ -1014,14 +1015,14 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                   onClick={() => handleDownloadPdf(previewDoc)}
                 >
                   <Download size={15} />
-                  <span>Download PDF</span>
+                  <span>{TXT.downloadPdf}</span>
                 </button>
                 <button
                   className="btn-preview-action"
                   onClick={() => handlePrint(previewDoc)}
                 >
                   <Printer size={15} />
-                  <span>Print</span>
+                  <span>{TXT.print}</span>
                 </button>
                 {canManage && (
                   <button
@@ -1029,7 +1030,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     onClick={() => handleTriggerRegenerate(previewDoc)}
                   >
                     <RotateCcw size={15} />
-                    <span>Regenerate</span>
+                    <span>{TXT.regenerate}</span>
                   </button>
                 )}
                 {canManage && previewDoc.charges && (previewDoc.docType === 'RECEIPT' || previewDoc.docType === 'INVOICE' || previewDoc.docType === 'BOL') && (
@@ -1038,7 +1039,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     onClick={() => handleTogglePaymentStatus(previewDoc)}
                   >
                     <DollarSign size={15} />
-                    <span>Mark as {previewDoc.charges.paymentStatus === 'PAID' ? 'Pending' : 'Paid'}</span>
+                    <span>{TXT.markAs} {previewDoc.charges.paymentStatus === 'PAID' ? TXT.pending : TXT.paid}</span>
                   </button>
                 )}
                 {canManage && (
@@ -1047,13 +1048,13 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     onClick={() => handleTriggerDelete(previewDoc)}
                   >
                     <Trash2 size={15} />
-                    <span>Delete</span>
+                    <span>{TXT.delete}</span>
                   </button>
                 )}
                 <button
                   className="btn-preview-close"
                   onClick={() => setPreviewDoc(null)}
-                  title="Close preview"
+                  title={TXT.closePreview}
                 >
                   <X size={18} />
                 </button>
@@ -1065,12 +1066,12 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
               <div className="preview-version-history-bar">
                 <div className="version-bar-title">
                   <Clock size={13} className="text-blue" />
-                  <span>Audit Trail Version History:</span>
+                  <span>{TXT.auditTrailVersionHistory}</span>
                 </div>
                 <div className="version-chips-list">
                   {previewDoc.versionHistory.map((vh, i) => (
                     <span key={i} className={`v-chip font-mono ${i === 0 ? 'current' : 'previous'}`}>
-                      v{vh.version} ({vh.createdDate}) · {vh.notes || 'Document modified'}
+                      v{vh.version} ({vh.createdDate}) · {vh.notes || TXT.documentModified}
                     </span>
                   ))}
                 </div>
@@ -1726,8 +1727,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           <div className="doc-generate-modal-card animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="modal-top-bar">
               <div>
-                <h3>Generate New Shipment Document</h3>
-                <p>Create a document from a shipment's saved details.</p>
+                <h3>{TXT.generateNewShipmentDocument}</h3>
+                <p>{TXT.createADocumentFromA}</p>
               </div>
               <button className="modal-close-btn" onClick={() => setShowGenerateModal(false)}>
                 <X size={18} />
@@ -1737,7 +1738,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
             <form onSubmit={handleGenerateSubmit} className="generate-form-body">
               {/* Step 1: Select Document Type */}
               <div className="form-field-unit">
-                <label className="form-field-label">1. Select Document Type</label>
+                <label className="form-field-label">{TXT.t1SelectDocumentType}</label>
                 <div className="doc-type-radio-grid">
                   <label className={`doc-type-radio-card ${genDocType === 'SHIPPING_LABEL' ? 'selected' : ''}`}>
                     <input
@@ -1749,8 +1750,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     />
                     <Tag size={18} className="text-blue" />
                     <div>
-                      <strong>Shipping Label</strong>
-                      <span>Barcode label with the tracking ID</span>
+                      <strong>{TXT.shippingLabel}</strong>
+                      <span>{TXT.barcodeLabelWithTheTracking}</span>
                     </div>
                   </label>
 
@@ -1764,8 +1765,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     />
                     <Receipt size={18} className="text-emerald" />
                     <div>
-                      <strong>Shipment Receipt</strong>
-                      <span>Receipt with charges</span>
+                      <strong>{TXT.shipmentReceipt}</strong>
+                      <span>{TXT.receiptWithCharges}</span>
                     </div>
                   </label>
 
@@ -1779,8 +1780,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     />
                     <FileText size={18} className="text-indigo" />
                     <div>
-                      <strong>Commercial Invoice</strong>
-                      <span>Charges for the shipment</span>
+                      <strong>{TXT.commercialInvoice}</strong>
+                      <span>{TXT.chargesForTheShipment}</span>
                     </div>
                   </label>
 
@@ -1794,8 +1795,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     />
                     <FileSpreadsheet size={18} className="text-amber" />
                     <div>
-                      <strong>Bill of Lading</strong>
-                      <span>Air waybill for air shipments</span>
+                      <strong>{TXT.billOfLading}</strong>
+                      <span>{TXT.airWaybillForAirShipments}</span>
                     </div>
                   </label>
 
@@ -1809,8 +1810,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                     />
                     <ShieldCheck size={18} className="text-purple" />
                     <div>
-                      <strong>Insurance Certificate</strong>
-                      <span>Insurer and policy you enter</span>
+                      <strong>{TXT.insuranceCertificate}</strong>
+                      <span>{TXT.insurerAndPolicyYouEnter}</span>
                     </div>
                   </label>
                 </div>
@@ -1818,7 +1819,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
 
               {/* Step 2: Select Associated Shipment */}
               <div className="form-field-unit">
-                <label className="form-field-label">2. Select Associated Shipment</label>
+                <label className="form-field-label">{TXT.t2SelectAssociatedShipment}</label>
                 <select
                   value={genShipmentTracking}
                   onChange={e => setGenShipmentTracking(e.target.value)}
@@ -1827,7 +1828,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                 >
                   {shipments.map(s => (
                     <option key={s.trackingNumber} value={s.trackingNumber}>
-                      {s.trackingNumber} — {s.sender.name} → {s.recipient.name} ({s.cargoDescription || 'Parcel'})
+                      {s.trackingNumber} — {s.sender.name} → {s.recipient.name} ({s.cargoDescription || TXT.parcel})
                     </option>
                   ))}
                 </select>
@@ -1836,47 +1837,47 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
               {/* Step 3: Charges (Receipt, Invoice, Bill of Lading / Air Waybill) */}
               {(genDocType === 'RECEIPT' || genDocType === 'INVOICE' || genDocType === 'BOL') && (
                 <div className="form-field-unit">
-                  <label className="form-field-label">3. Charges ({money.currency})</label>
+                  <label className="form-field-label">{TXT.t3Charges}{money.currency})</label>
                   <div className="gen-fields-grid">
                     <label className="gen-field">
-                      <span>Transport</span>
+                      <span>{TXT.transport}</span>
                       <MoneyInput min="0" value={genBaseCharge} onChange={setGenBaseCharge} className="modal-shipment-select font-mono" />
                     </label>
                     <label className="gen-field">
-                      <span>Oversize handling</span>
+                      <span>{TXT.oversizeHandling}</span>
                       <MoneyInput min="0" value={genOversizeFee} onChange={setGenOversizeFee} className="modal-shipment-select font-mono" />
                     </label>
                     <label className="gen-field">
-                      <span>Special handling</span>
+                      <span>{TXT.specialHandling}</span>
                       <MoneyInput min="0" value={genSpecialFee} onChange={setGenSpecialFee} className="modal-shipment-select font-mono" />
                     </label>
                     <label className="gen-field">
-                      <span>Payment</span>
+                      <span>{TXT.payment}</span>
                       <select value={genPaymentStatus} onChange={e => setGenPaymentStatus(e.target.value as 'PENDING' | 'PAID')} className="modal-shipment-select">
-                        <option value="PENDING">Due</option>
-                        <option value="PAID">Paid</option>
+                        <option value="PENDING">{TXT.due}</option>
+                        <option value="PAID">{TXT.paid}</option>
                       </select>
                     </label>
                   </div>
-                  <p className="insured-value-hint">Left empty, a charge is not printed (the total shows "—").</p>
+                  <p className="insured-value-hint">{TXT.leftEmptyAChargeIs}</p>
                 </div>
               )}
 
               {/* Step 3: Insurance details (Insurance Certificate only) */}
               {genDocType === 'INSURANCE' && (
                 <div className="form-field-unit">
-                  <label className="form-field-label">3. Insurance details</label>
+                  <label className="form-field-label">{TXT.t3InsuranceDetails}</label>
                   <div className="gen-fields-grid">
                     <label className="gen-field">
-                      <span>Insurer *</span>
+                      <span>{TXT.insurer}</span>
                       <input type="text" required value={genInsurerName} onChange={e => setGenInsurerName(e.target.value)} className="modal-shipment-select" />
                     </label>
                     <label className="gen-field">
-                      <span>Policy number *</span>
+                      <span>{TXT.policyNumber}</span>
                       <input type="text" required value={genPolicyNumber} onChange={e => setGenPolicyNumber(e.target.value)} className="modal-shipment-select font-mono" />
                     </label>
                     <label className="gen-field">
-                      <span>Sum insured ({money.currency}) *</span>
+                      <span>{TXT.sumInsured}{money.currency}) *</span>
                       <MoneyInput
                         min="0"
                         required
@@ -1889,20 +1890,20 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                       />
                     </label>
                     <label className="gen-field">
-                      <span>Coverage type</span>
+                      <span>{TXT.coverageType}</span>
                       <input type="text" value={genCoverageType} onChange={e => setGenCoverageType(e.target.value)} className="modal-shipment-select" />
                     </label>
                     <label className="gen-field">
-                      <span>Premium ({money.currency})</span>
+                      <span>{TXT.premium}{money.currency})</span>
                       <MoneyInput min="0" value={genPremium} onChange={setGenPremium} className="modal-shipment-select font-mono" />
                     </label>
                     <label className="gen-field">
-                      <span>Deductible ({money.currency})</span>
+                      <span>{TXT.deductible}{money.currency})</span>
                       <MoneyInput min="0" value={genDeductible} onChange={setGenDeductible} className="modal-shipment-select font-mono" />
                     </label>
                   </div>
                   <p className="insured-value-hint">
-                    The sum insured starts from the shipment's declared value. Enter the insurer and policy exactly as issued: nothing is filled in for you.
+                    {TXT.theSumInsuredStartsFrom}
                   </p>
                 </div>
               )}
@@ -1914,13 +1915,13 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                   <div className="auto-populated-preview-card">
                     <div className="preview-card-header">
                       <Sparkles size={14} className="text-blue" />
-                      <span>Filled in from the shipment</span>
+                      <span>{TXT.filledInFromTheShipment}</span>
                     </div>
                     <div className="preview-data-grid font-mono">
-                      <div><span>Shipper:</span> <strong>{targetShipment.sender.name} ({targetShipment.origin.city}, {targetShipment.origin.state})</strong></div>
-                      <div><span>Consignee:</span> <strong>{targetShipment.recipient.name} ({targetShipment.destination.city}, {targetShipment.destination.state})</strong></div>
-                      <div><span>Cargo:</span> <strong>{targetShipment.cargoDescription}</strong></div>
-                      <div><span>Weight / Pieces:</span> <strong>{formatWeightBoth(targetShipment.totalWeightLbs)} · {targetShipment.totalPieces} pcs</strong></div>
+                      <div><span>{TXT.shipper}</span> <strong>{targetShipment.sender.name} ({targetShipment.origin.city}, {targetShipment.origin.state})</strong></div>
+                      <div><span>{TXT.consignee}</span> <strong>{targetShipment.recipient.name} ({targetShipment.destination.city}, {targetShipment.destination.state})</strong></div>
+                      <div><span>{TXT.cargo}</span> <strong>{targetShipment.cargoDescription}</strong></div>
+                      <div><span>{TXT.weightPieces}</span> <strong>{formatWeightBoth(targetShipment.totalWeightLbs)} · {targetShipment.totalPieces} {TXT.pcs}</strong></div>
                     </div>
                   </div>
                 ) : null;
@@ -1932,14 +1933,14 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                   className="btn-cancel-modal"
                   onClick={() => setShowGenerateModal(false)}
                 >
-                  Cancel
+                  {TXT.cancel}
                 </button>
                 <button
                   type="submit"
                   className="btn-submit-generate"
                 >
                   <Plus size={16} />
-                  <span>Generate Document</span>
+                  <span>{TXT.generateDocument}</span>
                 </button>
               </div>
             </form>
@@ -1955,8 +1956,8 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
           <div className="doc-generate-modal-card animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="modal-top-bar">
               <div>
-                <h3>Regenerate Document</h3>
-                <p>Create Version {regenerateDocTarget.version + 1} for {regenerateDocTarget.id}.</p>
+                <h3>{TXT.regenerateDocument}</h3>
+                <p>{TXT.createVersion} {regenerateDocTarget.version + 1} {TXT.for} {regenerateDocTarget.id}.</p>
               </div>
               <button className="modal-close-btn" onClick={() => setRegenerateDocTarget(null)}>
                 <X size={18} />
@@ -1967,20 +1968,20 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
               <div className="auto-populated-preview-card">
                 <div className="preview-card-header">
                   <Clock size={14} className="text-blue" />
-                  <span>Version Preservation</span>
+                  <span>{TXT.versionPreservation}</span>
                 </div>
                 <p className="text-xs text-slate m-0">
-                  Version {regenerateDocTarget.version} will be preserved in the document history. Version {regenerateDocTarget.version + 1} will become the new current version.
+                  {TXT.version} {regenerateDocTarget.version} {TXT.willBePreservedInThe} {regenerateDocTarget.version + 1} {TXT.willBecomeTheNewCurrent}
                 </p>
               </div>
 
               <div className="form-field-unit">
-                <label className="form-field-label">Reason / Revision Notes</label>
+                <label className="form-field-label">{TXT.reasonRevisionNotes}</label>
                 <input
                   type="text"
                   value={regenNotes}
                   onChange={e => setRegenNotes(e.target.value)}
-                  placeholder="e.g. Updated cargo description and routing corridor"
+                  placeholder={TXT.eGUpdatedCargoDescription}
                   className="modal-shipment-select"
                   required
                 />
@@ -1992,7 +1993,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                   className="btn-cancel-modal"
                   onClick={() => setRegenerateDocTarget(null)}
                 >
-                  Cancel
+                  {TXT.cancel}
                 </button>
                 <button
                   type="button"
@@ -2000,7 +2001,7 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
                   onClick={handleConfirmRegenerate}
                 >
                   <RotateCcw size={16} />
-                  <span>Regenerate Version {regenerateDocTarget.version + 1}</span>
+                  <span>{TXT.regenerateVersion} {regenerateDocTarget.version + 1}</span>
                 </button>
               </div>
             </div>
@@ -2018,24 +2019,24 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
               <div className="doc-delete-warning-halo">
                 <AlertTriangle size={24} className="text-danger" />
               </div>
-              <button type="button" className="modal-close-btn" onClick={() => setDeleteDocTarget(null)} title="Cancel">
+              <button type="button" className="modal-close-btn" onClick={() => setDeleteDocTarget(null)} title={TXT.cancel}>
                 <X size={18} />
               </button>
             </div>
 
             <div className="doc-delete-modal-content">
-              <h3 className="doc-delete-modal-title">Delete Document?</h3>
+              <h3 className="doc-delete-modal-title">{TXT.deleteDocument2}</h3>
               <p className="doc-delete-modal-desc">
-                Are you sure you want to permanently delete <strong className="font-mono">{deleteDocTarget.id}</strong>? This action cannot be undone{deleteDocTarget.version > 1 ? ', and all prior versions in its history will be removed as well.' : '.'}
+                {TXT.areYouSureYouWant} <strong className="font-mono">{deleteDocTarget.id}</strong>{TXT.thisActionCannotBeUndone}{deleteDocTarget.version > 1 ? TXT.andAllPriorVersionsIn : '.'}
               </p>
 
               <div className="doc-delete-preview-card">
                 <div className="doc-delete-preview-row">
-                  <span className="doc-delete-preview-label">DOCUMENT</span>
+                  <span className="doc-delete-preview-label">{TXT.document2}</span>
                   <strong className="doc-delete-preview-val">{deleteDocTarget.title}</strong>
                 </div>
                 <div className="doc-delete-preview-row">
-                  <span className="doc-delete-preview-label">SHIPMENT</span>
+                  <span className="doc-delete-preview-label">{TXT.shipment2}</span>
                   <span className="doc-delete-preview-val font-mono">{deleteDocTarget.shipmentTracking}</span>
                 </div>
               </div>
@@ -2043,11 +2044,11 @@ export const DocumentCenterView: React.FC<DocumentCenterViewProps> = ({
 
             <div className="modal-actions-footer">
               <button type="button" className="btn-cancel-modal" onClick={() => setDeleteDocTarget(null)}>
-                Cancel
+                {TXT.cancel}
               </button>
               <button type="button" className="btn-confirm-delete-doc" onClick={handleConfirmDelete}>
                 <Trash2 size={15} />
-                <span>Delete Document</span>
+                <span>{TXT.deleteDocument}</span>
               </button>
             </div>
           </div>

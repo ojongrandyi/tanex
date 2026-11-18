@@ -659,6 +659,20 @@ facilities). Replaces the previous list in `src/data/gateways.ts` during E.6.
 
 > The single-password strings above are superseded by §10.1 once phase B ships.
 
+### 10.0 Console languages (added 2026-11-18 with I.2)
+- The console speaks the signed-in staff member's language (**My account → Language**); before sign-in, a switch
+  on the sign-in screen: `English` · `Français` (each name in its own language), group label `Language`.
+- The English master text of each console screen lives next to it in code: `src/auth/strings.ts`, the
+  `strings.ts` / `menuText.ts` files under `src/admin/blog|dispatch|cash/`, and one `*.text.ts` file per screen
+  under `src/admin/` (keys checked against the French by the build). §10.1–§10.4 below remain the reference for
+  wording decisions; the rest of the console's legacy wording is as it is in those files.
+- Added with I.2 (owner to confirm): `Could not load.` · `Could not sign out.` · `Could not save.` (My account
+  fallbacks); `Something went wrong. Please try again.` (shared fallback); `{n} NEW` and `{n} to review` sidebar
+  badges; `Open menu` (mobile menu button label).
+- **Not translated, on purpose:** the printed documents (labels, receipts, invoices, bills of lading, insurance
+  certificates, proof of delivery papers) and the values stored on shipments (timeline titles and messages, damage
+  notes, default notes, service and cargo names), which customers see in English (#189).
+
 ### 10.1 Staff sign-in and accounts (added 2026-11-06, IAM_RBAC_SPEC §9)
 - **Login:** `TanEx Operations Console` · `Sign in with your work email or phone number.` · fields `Email or phone` · `Password` · button `Sign in` · busy `Signing in…` · error `Incorrect sign-in details. Please try again.` · link `Forgot password?`
   - A locked account (5 wrong passwords, 15 minutes) shows the same error as any failed sign-in; there is no separate lockout message (decided 2026-11-07, tracker #123). The per-IP limit keeps `Too many login attempts. Try again in a few minutes.`
