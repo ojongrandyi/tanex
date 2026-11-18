@@ -25,12 +25,14 @@ import {
   Newspaper,
   Tags,
   Bike,
-  Route
+  Route,
+  Store
 } from 'lucide-react';
 import { useAdminData } from '../context/AdminDataContext';
 import { useAuth } from '../auth/AuthContext';
 import { AUTH_TEXT, IAM_TEXT } from '../auth/strings';
 import { BLOG_MENU } from './blog/menuText';
+import { SHOP_MENU } from './shop/menuText';
 import { DISPATCH_MENU } from './dispatch/menuText';
 import { LOGO_ALT, LOGO_WORDMARK_HEIGHT, LOGO_WORDMARK_WHITE, LOGO_WORDMARK_WIDTH, TAGLINE } from '../config/brand';
 import { Button } from '../components/ui';
@@ -125,6 +127,11 @@ const VIEW_METADATA: Record<AdminViewType, { title: string; category: string; de
     title: BLOG_MENU.menu,
     category: 'Content',
     description: BLOG_MENU.description
+  },
+  'shop': {
+    title: SHOP_MENU.menu,
+    category: 'Content',
+    description: SHOP_MENU.description
   },
   'settings': {
     title: 'Settings',
@@ -426,6 +433,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   <Newspaper size={18} />
                 </div>
                 <span className="nav-title">{BLOG_MENU.menu}</span>
+              </button>
+            )}
+
+            {/* Shop (SHOP_SPEC §7) */}
+            {allowed('shop') && (
+              <button
+                className={`admin-nav-btn ${currentView === 'shop' ? 'active' : ''}`}
+                onClick={() => { onSelectView('shop'); setMobileSidebarOpen(false); }}
+              >
+                <div className="nav-btn-icon-wrap">
+                  <Store size={18} />
+                </div>
+                <span className="nav-title">{SHOP_MENU.menu}</span>
               </button>
             )}
 

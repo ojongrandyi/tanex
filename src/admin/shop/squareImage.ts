@@ -36,7 +36,8 @@ export function rotateSource(src: ImageSource, rotation: number): ImageSource {
  */
 export function drawSquare(rotated: ImageSource, crop: CropState, srcW: number, srcH: number, size: number, target?: HTMLCanvasElement): HTMLCanvasElement {
   const canvas = target ?? newCanvas(size);
-  if (canvas.width !== size) { canvas.width = size; canvas.height = size; }
+  // A new <canvas> is 300 × 150, so both sides are checked (a 300 px preview would stay 150 high).
+  if (canvas.width !== size || canvas.height !== size) { canvas.width = size; canvas.height = size; }
   const ctx = canvas.getContext('2d')!;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';

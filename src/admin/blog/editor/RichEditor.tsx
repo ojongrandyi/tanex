@@ -20,6 +20,10 @@ export interface RichEditorProps {
   content: DocNode;
   editable: boolean;
   onChange: (doc: DocNode, words: number) => void;
+  /** Shop descriptions (SHOP_SPEC §7.2): headings, bold, italic, links and lists only. */
+  basic?: boolean;
+  /** Placeholder and accessible name; defaults to the blog body's. */
+  placeholder?: string;
 }
 
 /** Counts words the way the server does (letters/digits runs). */
@@ -136,7 +140,7 @@ const ImageDialog: React.FC<{ editor: Editor; onClose: () => void }> = ({ editor
   );
 };
 
-const Toolbar: React.FC<{ editor: Editor; onLink: () => void; onImage: () => void }> = ({ editor, onLink, onImage }) => {
+const Toolbar: React.FC<{ editor: Editor; onLink: () => void; onImage: () => void; basic?: boolean }> = ({ editor, onLink, onImage, basic }) => {
   const s = useEditorState({
     editor,
     selector: ({ editor: e }) => ({
@@ -177,15 +181,17 @@ const Toolbar: React.FC<{ editor: Editor; onLink: () => void; onImage: () => voi
       <div className="tx-blog-toolgroup">
         <ToolButton label={tb.bullet} active={s.bullet} onClick={() => c().toggleBulletList().run()}><List size={16} /></ToolButton>
         <ToolButton label={tb.ordered} active={s.ordered} onClick={() => c().toggleOrderedList().run()}><ListOrdered size={16} /></ToolButton>
-        <ToolButton label={tb.quote} active={s.quote} onClick={() => c().toggleBlockquote().run()}><Quote size={16} /></ToolButton>
-        <ToolButton label={tb.callout} active={s.callout} onClick={() => c().toggleCallout().run()}><MessageSquareWarning size={16} /></ToolButton>
-        <ToolButton label={tb.rule} onClick={() => c().setHorizontalRule().run()}><Minus size={16} /></ToolButton>
+        {!basic && <ToolButton label={tb.quote} active={s.quote} onClick={() => c().toggleBlockquote().run()}><Quote size={16} /></ToolButton>}
+        {!basic && <ToolButton label={tb.callout} active={s.callout} onClick={() => c().toggleCallout().run()}><MessageSquareWarning size={16} /></ToolButton>}
+        {!basic && <ToolButton label={tb.rule} onClick={() => c().setHorizontalRule().run()}><Minus size={16} /></ToolButton>}
       </div>
-      <div className="tx-blog-toolgroup">
-        <ToolButton label={s.image ? T.image.edit : tb.image} active={s.image} onClick={onImage}><ImagePlus size={16} /></ToolButton>
-        <ToolButton label={tb.table} active={s.table} disabled={s.table}
-          onClick={() => c().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}><Table2 size={16} /></ToolButton>
-      </div>
+      {!basic && (
+        <div className="tx-blog-toolgroup">
+          <ToolButton label={s.image ? T.image.edit : tb.image} active={s.image} onClick={onImage}><ImagePlus size={16} /></ToolButton>
+          <ToolButton label={tb.table} active={s.table} disabled={s.table}
+            onClick={() => c().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}><Table2 size={16} /></ToolButton>
+        </div>
+      )}
       <div className="tx-blog-toolgroup">
         <ToolButton label={tb.undo} disabled={!s.undo} onClick={() => c().undo().run()}><Undo2 size={16} /></ToolButton>
         <ToolButton label={tb.redo} disabled={!s.redo} onClick={() => c().redo().run()}><Redo2 size={16} /></ToolButton>
@@ -214,19 +220,19 @@ const Toolbar: React.FC<{ editor: Editor; onLink: () => void; onImage: () => voi
   );
 };
 
-export const RichEditor: React.FC<RichEditorProps> = ({ content, editable, onChange }) => {
+export const RichEditor: React.FC<RichEditorProps> = ({ content, editable, onChange, basic = false, placeholder = T.bodyPlaceholder }) => {
   const changeRef = useRef(onChange);
   changeRef.current = onChange;
   const [dialog, setDialog] = useState<'link' | 'image' | null>(null);
 
   const editor = useEditor({
-    extensions: blogExtensions(T.bodyPlaceholder),
+    extensions: blogExtensions(placeholder),
     content,
     editable,
     immediatelyRender: true,
     shouldRerenderOnTransaction: false,
     editorProps: {
-      attributes: { class: 'tx-blog-prose tx-blog-editor-surface', 'aria-label': T.bodyPlaceholder, role: 'textbox', 'aria-multiline': 'true' }
+      attributes: { class: `tx-blog-prose tx-blog-editor-surface${basic ? ' tx-blog-editor-surface--basic' : ''}`, 'aria-label': placeholder, role: 'textbox', 'aria-multiline': 'true' }
     },
     onCreate: ({ editor: e }) => changeRef.current(e.getJSON() as DocNode, wordsOf(e)),
     onUpdate: ({ editor: e }) => changeRef.current(e.getJSON() as DocNode, wordsOf(e))
@@ -239,7 +245,7 @@ export const RichEditor: React.FC<RichEditorProps> = ({ content, editable, onCha
   if (!editor) return null;
   return (
     <div className="tx-blog-editor">
-      {editable && <Toolbar editor={editor} onLink={() => setDialog('link')} onImage={() => setDialog('image')} />}
+      {editable && <Toolbar editor={editor} basic={basic} onLink={() => setDialog('link')} onImage={() => setDialog('image')} />}
       <EditorContent editor={editor} />
       {dialog === 'link' && <LinkDialog editor={editor} onClose={() => setDialog(null)} />}
       {dialog === 'image' && <ImageDialog editor={editor} onClose={() => setDialog(null)} />}

@@ -18,6 +18,8 @@ import { AuditLogView } from './pages/AuditLogView';
 // Blog studio and its editor (TipTap) are their own chunk, loaded when the view is opened.
 const BlogStudio = lazy(() => import('./blog/BlogStudio').then((m) => ({ default: m.BlogStudio })));
 const BlogPreview = lazy(() => import('./blog/BlogPreview').then((m) => ({ default: m.BlogPreview })));
+// Shop (SHOP_SPEC §7): its own chunk; the description editor (TipTap) loads when a product opens.
+const ShopStudio = lazy(() => import('./shop/ShopStudio').then((m) => ({ default: m.ShopStudio })));
 // Tariffs and Couriers (DISPATCH_SPEC §3, §5): their own chunk, with the map pin picker.
 const TariffsView = lazy(() => import('./dispatch/TariffsView').then((m) => ({ default: m.TariffsView })));
 const CouriersView = lazy(() => import('./dispatch/CouriersView').then((m) => ({ default: m.CouriersView })));
@@ -390,6 +392,13 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
         {currentView === 'blog' && (
           <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
             <BlogStudio />
+          </Suspense>
+        )}
+
+        {/* SHOP (SHOP_SPEC §7) */}
+        {currentView === 'shop' && (
+          <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
+            <ShopStudio />
           </Suspense>
         )}
 

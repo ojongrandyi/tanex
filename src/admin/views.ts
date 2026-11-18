@@ -16,6 +16,7 @@ export type AdminViewType =
   | 'cash'
   | 'document-center'
   | 'blog'
+  | 'shop'
   | 'settings'
   | 'users'
   | 'roles'
@@ -41,6 +42,8 @@ export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | readonly Per
   'document-center': 'documents.view',
   // Blog studio (BLOG_SPEC §2): a writer, an editor, a publisher or a category manager.
   'blog': ['blog.view', 'blog.write', 'blog.edit_any', 'blog.publish', 'blog.categories'],
+  // Shop (SHOP_SPEC §3, §7): products and categories; orders join in M.7.
+  'shop': ['shop.view', 'shop.write', 'shop.publish', 'shop.stock', 'shop.categories'],
   'settings': 'settings.view',
   'users': 'users.view',
   'roles': 'roles.manage',
@@ -63,6 +66,7 @@ export const VIEW_ORDER: readonly AdminViewType[] = [
   'cash',
   'document-center',
   'blog',
+  'shop',
   'settings',
   'users',
   'roles',

@@ -22,7 +22,9 @@ export const SquareCropDialog: React.FC<{
   file: File;
   onUploaded: (media: ShopMedia) => void;
   onCancel: () => void;
-}> = ({ file, onUploaded, onCancel }) => {
+  /** When several files were chosen: which one this is. */
+  progress?: { n: number; total: number };
+}> = ({ file, onUploaded, onCancel, progress }) => {
   const [src, setSrc] = useState<ImageSource | null>(null);
   const [crop, setCrop] = useState<CropState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +112,7 @@ export const SquareCropDialog: React.FC<{
   const dims = src && crop ? rotatedSize(src.width, src.height, crop.rotation) : null;
 
   return (
-    <IamDialog title={T.title} onClose={busy ? () => {} : onCancel}>
+    <IamDialog title={progress ? `${T.title} · ${T.queue.replace('{n}', String(progress.n)).replace('{total}', String(progress.total))}` : T.title} onClose={busy ? () => {} : onCancel}>
       <div className="tx-shop-crop">
         <div className="tx-shop-crop__stage">
           <canvas
