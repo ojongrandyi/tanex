@@ -16,6 +16,7 @@ import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { seoRouter, setSitemapExtras } from './seo.js';
 import { publicPages, sendIndex } from './publicPages.js';
 import { blogSitemapEntries, resolveBlogPage } from './blog/pageData.js';
+import { resolveShopPage } from './shop/pageData.js';
 import { blogFeedsRouter } from './blog/feeds.js';
 import { createIndexRenderer } from './render/pageMeta.js';
 import { registerApiRoutes } from './apiRoutes.js';
@@ -237,7 +238,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // The blog's RSS feeds first, so /blog/rss.xml is never read as an article (BLOG_SPEC §7).
 // Blog pages read their head from the database; an admin-only deployment has none.
 if (!ADMIN_PROXY_TARGET) app.use(blogFeedsRouter(db));
-app.use(publicPages(renderIndex, indexHtmlPath, ADMIN_PROXY_TARGET ? undefined : (match, query) => resolveBlogPage(db, match, query)));
+app.use(publicPages(
+  renderIndex,
+  indexHtmlPath,
+  ADMIN_PROXY_TARGET ? undefined : (match, query) => resolveBlogPage(db, match, query),
+  ADMIN_PROXY_TARGET ? undefined : (match, query) => resolveShopPage(db, match, query),
+));
 
 // Anything not matched above is a 404. Browsers get the app with status 404, which shows the
 // "Page not found" page (NotFoundPage, chosen from the path in App.tsx); other requests

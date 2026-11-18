@@ -46,3 +46,14 @@ export const localQuoteLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, code: 'RATE_LIMITED', error: 'Too many requests. Please try again in a few minutes.' }
 });
+
+// Public shop reads (GET /api/shop/..., SHOP_SPEC §14). A shopper opens many pages and filters, so
+// the ceiling is well above the look-up limiters; it still stops a script from copying the
+// catalogue in a loop.
+export const shopBrowseLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 600,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, code: 'RATE_LIMITED', error: 'Too many requests. Please try again in a few minutes.' }
+});

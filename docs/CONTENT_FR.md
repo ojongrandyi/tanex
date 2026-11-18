@@ -622,6 +622,8 @@ Les prix s'affichent `15 000 FCFA`.
 - Aucun résultat : **Aucun produit ne correspond à votre recherche.** `Essayez d'autres mots ou effacez les filtres.` → `Effacer les filtres`
 - Pagination `Pages de la boutique` · `Page {n} sur {total}` · `Précédent` · `Suivant`
 - Page catégorie : surtitre identique, H1 = nom de la catégorie, sous-titre = description de la catégorie.
+- *Ajouté avec M.4 (à confirmer) :* `Catégories` · bouton `Rechercher` · `Nous n'avons pas pu charger les produits. Veuillez réessayer.` → `Réessayer`
+- *Méta (M.4, à confirmer) :* titre `Boutique | {{COMPANY}}` · description `Des produits vendus par {{COMPANY}}, livrés à votre porte à {{LOCAL_CITIES}} et par camion dans les autres villes du Cameroun. Payez à la livraison ou par mobile money.` · panier (M.5) `Votre panier | {{COMPANY}}` · `Vérifiez votre panier et passez commande chez {{COMPANY}}. Nous vous appelons pour la confirmer avant la livraison.`
 
 ### 17.3 Fiche produit
 - Fil d'Ariane `Boutique` › {catégorie} › {produit} · `Référence produit : {code}`
@@ -633,6 +635,7 @@ Les prix s'affichent `15 000 FCFA`.
 - Paiement : `Payez à la livraison, par MTN MoMo ou Orange Money, ou dans notre agence. Aucune carte nécessaire.`
 - Liens `Retours et remboursements` · `Conditions d'expédition` · `Description` · `Produits similaires`
 - Galerie : `Photo {n} sur {total}` · `Afficher en plein écran` · `Fermer` · `Photo précédente` · `Photo suivante`
+- *Ajouté avec M.4 (à confirmer) :* `Fil d'Ariane` · `Dans votre panier : {n}` · `Nous n'avons pas pu charger ce produit. Veuillez réessayer.` · `Photos du produit` · `Agrandir` / `Réduire`
 
 ### 17.4 Panier (`/fr/panier`)
 - H1 `Votre panier` · `Retirer` · `Sous-total` · `Continuer vos achats` · `Continuer vers vos coordonnées`

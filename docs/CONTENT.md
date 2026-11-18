@@ -1008,6 +1008,8 @@ Prices show as `15,000 FCFA` (EN) / `15 000 FCFA` (FR), as elsewhere.
 - No results: **No products match your search.** `Try other words or clear the filters.` → `Clear filters`
 - Pagination name `Shop pages` · `Page {n} of {total}` · `Previous` · `Next`
 - Category page: eyebrow as the shop page, H1 = category name, sub = category description (console).
+- *Added with M.4 (owner to confirm):* chips label `Categories` · search button `Search` · load error `We couldn't load the products. Please try again.` → `Try again`
+- *Page meta (M.4, owner to confirm):* title `Marketplace | {{COMPANY}}` · description `Products sold by {{COMPANY}}, delivered to your door in {{LOCAL_CITIES}} and by truck to other cities in Cameroon. Pay on delivery or by mobile money.` · cart (M.5) `Your cart | {{COMPANY}}` · `Check your cart and place your order with {{COMPANY}}. We call you to confirm it before delivery.`
 
 ### 17.3 Product page
 - Breadcrumbs `Marketplace` › {category} › {product} · `Product ID: {code}`
@@ -1019,6 +1021,7 @@ Prices show as `15,000 FCFA` (EN) / `15 000 FCFA` (FR), as elsewhere.
 - Payment line: `Pay on delivery, by MTN MoMo or Orange Money, or at our office. No card needed.`
 - Links `Returns & Refunds` · `Shipping Terms` · heading `Description` · `Related products`
 - Gallery: `Picture {n} of {total}` · `Open full screen` · `Close` · `Previous picture` · `Next picture`
+- *Added with M.4 (owner to confirm):* breadcrumbs name `Breadcrumb` · `In your cart: {n}` · load error `We couldn't load this product. Please try again.` · gallery name `Product pictures` · viewer `Zoom in` / `Zoom out`
 
 ### 17.4 Cart (`/cart`)
 - H1 `Your cart` · `Remove` · `Subtotal` · `Continue shopping` · `Continue to your details`

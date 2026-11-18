@@ -86,6 +86,7 @@ const MOUNTS: Record<string, string> = {
   blogAdminRouter: '/api/admin/blog',
   shopAdminRouter: '/api/admin/shop',
   publicBlogRouter: '/api/blog',
+  publicShopRouter: '/api/shop',
   tariffsRouter: '/api/tariffs',
   couriersRouter: '/api/couriers',
   dispatchRouter: '/api/dispatch',
@@ -118,6 +119,10 @@ const PUBLIC = new Set([
   'GET /api/blog/:locale/:slug',
   'GET /media/blog/:file',
   'GET /media/shop/:file',
+  // Public shop (SHOP_SPEC §14): published products only, rate-limited, 404 while the shop is off (M.4).
+  'GET /api/shop/categories',
+  'GET /api/shop/products',
+  'GET /api/shop/products/:slug',
   // A signed, short-lived preview link from the studio (the token is the credential; F.2).
   'GET /api/blog/preview/:token',
   // Staff profile photos (blog authors; F.2).

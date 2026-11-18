@@ -18,6 +18,7 @@ import type { BlogMessages } from './en/blog';
 import type { CompanyMessages } from './en/company';
 import type { CourierMessages } from './en/courier';
 import type { LocalDeliveryMessages } from './en/localDelivery';
+import type { ShopMessages } from './en/shop';
 
 export const en = { common };
 
@@ -43,6 +44,7 @@ export interface AreaMessages {
   company: CompanyMessages;
   courier: CourierMessages;
   localDelivery: LocalDeliveryMessages;
+  shop: ShopMessages;
 }
 export type AreaName = keyof AreaMessages;
 
@@ -65,4 +67,5 @@ export const AREA_LOADERS_EN: { [A in AreaName]: () => Promise<AreaMessages[A]> 
   company: () => import('./en/company').then((m) => m.default),
   courier: () => import('./en/courier').then((m) => m.default),
   localDelivery: () => import('./en/localDelivery').then((m) => m.default),
+  shop: () => import('./en/shop').then((m) => m.default),
 };

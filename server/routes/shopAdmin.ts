@@ -22,7 +22,7 @@ import {
   STOCK_ADJUST_REASONS, STOCK_MAX, canEditContent, checkProductTransition, editIsProposal, isProductStatus,
   missingForPublish, type ProductRole,
 } from '../../src/shared/shopProduct.js';
-import { SHOP_SETTINGS_KEY, readShopSettings } from '../../src/shared/shopSettings.js';
+import { loadShopSettings } from '../shop/settings.js';
 import type { PermissionKey } from '../../src/shared/permissions.js';
 
 export const shopAdminRouter = Router();
@@ -46,10 +46,7 @@ const MEDIA_ACCESS: PermissionKey[] = ['shop.write', 'shop.publish', 'shop.categ
 /** A publisher can do everything a writer can (the admin's approval step). */
 const roleOf = (req: Request): ProductRole => (requestHasPermission(req, 'shop.publish') ? 'publisher' : 'writer');
 
-function shopSettings() {
-  const row = db.prepare('SELECT value_json FROM settings WHERE key = ?').get(SHOP_SETTINGS_KEY) as { value_json: string } | undefined;
-  try { return readShopSettings(row ? JSON.parse(row.value_json) : undefined); } catch { return readShopSettings(undefined); }
-}
+const shopSettings = () => loadShopSettings(db);
 
 // ---- Pictures (M.2) ----
 

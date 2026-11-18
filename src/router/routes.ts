@@ -21,6 +21,9 @@ export type RouteId =
   | 'legal'
   | 'blog'
   | 'blog-category'
+  | 'shop'
+  | 'shop-category'
+  | 'cart'
   | 'careers'
   | 'csr';
 
@@ -61,6 +64,12 @@ export const ROUTES: readonly RouteDef[] = [
   // route, listed first so /blog/category/<slug> is never read as an article path.
   { id: 'blog-category', en: '/blog/category', fr: '/fr/blog/categorie', param: true, paramRequired: true },
   { id: 'blog', en: '/blog', fr: '/fr/blog', param: true },
+  // Shop (SHOP_SPEC §8): the shop, a product at /shop/<slug>, category pages listed first as for
+  // the blog. The server answers 404 for all of them while the shop is switched off. The cart
+  // page comes with M.5.
+  { id: 'shop-category', en: '/shop/category', fr: '/fr/boutique/categorie', param: true, paramRequired: true },
+  { id: 'shop', en: '/shop', fr: '/fr/boutique', param: true },
+  { id: 'cart', en: '/cart', fr: '/fr/panier', live: false },
   // Footer-only company pages (owner's note 2026-11-09).
   { id: 'careers', en: '/careers', fr: '/fr/carrieres' },
   { id: 'csr', en: '/csr-policy', fr: '/fr/politique-rse' },
@@ -110,6 +119,11 @@ export function pagePath(page: string, param?: string, lang: Lang = 'en'): strin
       return buildPath(page, param, lang);
     case 'blog-post':
       return buildPath('blog', param, lang);
+    case 'shop':
+    case 'shop-category':
+      return buildPath(page, param, lang);
+    case 'shop-product':
+      return buildPath('shop', param, lang);
     default: {
       const route = ROUTES.find((r) => r.id === page);
       return route ? routePath(route, lang) : buildPath('home', undefined, lang);

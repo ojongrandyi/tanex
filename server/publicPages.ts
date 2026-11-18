@@ -9,13 +9,19 @@
 // Blog pages (/blog, /blog/<slug>, /blog/category/<slug>) also ask the database (BLOG_SPEC §7):
 // an article's head comes from the post, an unknown or unpublished article or an empty category
 // is a real 404, and an old slug of a public article gets a 301 to its current address.
+//
+// Shop pages (/shop, /shop/<slug>, /shop/category/<slug>, SHOP_SPEC §8) are a 404 while the shop is
+// switched off, and for a product or category the public shop doesn't show (server/shop/pageData.ts).
+// Without a shop resolver (an admin-only deployment) they are always a 404.
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { matchPath, type RouteMatch } from '../src/router/routes.js';
 import type { PageContext } from './render/pageMeta.js';
 import type { BlogPageResult } from './blog/pageData.js';
+import type { ShopPageResult } from './shop/pageData.js';
 
 export type IndexRenderer = (ctx: PageContext) => string | null;
 export type BlogResolver = (match: RouteMatch, query: Record<string, unknown>) => BlogPageResult;
+export type ShopResolver = (match: RouteMatch, query: Record<string, unknown>) => ShopPageResult;
 
 /** Sends index.html rendered for `ctx` (no-cache, so a new deploy shows up at once). */
 export function sendIndex(res: Response, next: NextFunction, render: IndexRenderer, ctx: PageContext, fallbackPath: string): void {
@@ -30,7 +36,7 @@ export function sendIndex(res: Response, next: NextFunction, render: IndexRender
   res.type('html').send(html);
 }
 
-export function publicPages(render: IndexRenderer, indexHtmlPath: string, resolveBlog?: BlogResolver): RequestHandler {
+export function publicPages(render: IndexRenderer, indexHtmlPath: string, resolveBlog?: BlogResolver, resolveShop?: ShopResolver): RequestHandler {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') return next();
     const match = matchPath(req.path);
@@ -54,6 +60,16 @@ export function publicPages(render: IndexRenderer, indexHtmlPath: string, resolv
       }
       sendIndex(res, next, render, { kind: 'page', match, blog: result.blog }, indexHtmlPath);
       return;
+    }
+    if (match.id === 'shop' || match.id === 'shop-category') {
+      if (!resolveShop) return next();
+      let result: ShopPageResult;
+      try {
+        result = resolveShop(match, req.query as Record<string, unknown>);
+      } catch (err) {
+        return next(err);
+      }
+      if (result.kind === 'not-found') return next();
     }
     sendIndex(res, next, render, { kind: 'page', match }, indexHtmlPath);
   };

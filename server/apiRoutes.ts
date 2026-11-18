@@ -21,6 +21,7 @@ import { mailRouter } from './routes/mail.js';
 import { blogAdminRouter } from './routes/blog.js';
 import { publicBlogRouter } from './routes/publicBlog.js';
 import { shopAdminRouter } from './routes/shopAdmin.js';
+import { publicShopRouter } from './routes/publicShop.js';
 import { tariffsRouter } from './routes/tariffs.js';
 import { couriersRouter } from './routes/couriers.js';
 import { dispatchRouter } from './routes/dispatch.js';
@@ -70,6 +71,8 @@ export function registerApiRoutes(app: Express): void {
   app.use('/api/blog', publicBlogRouter);
   // Shop console API (SHOP_SPEC §14), each route gated with a Shop permission.
   app.use('/api/admin/shop', shopAdminRouter);
+  // Public shop (SHOP_SPEC §14): published products only, rate-limited, 404 while the shop is off.
+  app.use('/api/shop', publicShopRouter);
   // Dispatch (DISPATCH_SPEC §11): tariffs (tariffs.manage; GET /areas is public) and couriers
   // (couriers.view / couriers.manage), gated per route.
   app.use('/api/tariffs', tariffsRouter);

@@ -64,6 +64,10 @@ const CareersPage = lazy(() => import('./pages/CompanyPages').then((m) => ({ def
 const CsrPage = lazy(() => import('./pages/CompanyPages').then((m) => ({ default: m.CsrPage })));
 const BlogPage = lazy(() => import('./pages/BlogPage').then((m) => ({ default: m.BlogPage })));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then((m) => ({ default: m.BlogPostPage })));
+// The shop's pages share one chunk (SHOP_SPEC §16).
+const loadShop = () => import('./pages/shop');
+const ShopPage = lazy(() => loadShop().then((m) => ({ default: m.ShopPage })));
+const ProductPage = lazy(() => loadShop().then((m) => ({ default: m.ProductPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 // Admin lives at ADMIN_PATH (/private-user/, src/config/brand.ts) on the same host, app and API
@@ -122,6 +126,7 @@ function getInitialPage(): string {
   if (!route) return 'not-found';
   if (route.param && (route.id === 'track' || route.id === 'quote')) return 'track';
   if (route.id === 'blog' && route.param) return 'blog-post';
+  if (route.id === 'shop' && route.param) return 'shop-product';
   return route.id;
 }
 
@@ -191,6 +196,9 @@ function MainAppContent() {
       // The article or category page sets its own title once it has loaded (the server already
       // sent it on a first visit); until then the blog's.
       meta = pageMetaText('blog', lang);
+    } else if (currentPage === 'shop-product' || currentPage === 'shop-category') {
+      // Same for a product or shop category: the shop's until the page has loaded.
+      meta = pageMetaText('shop', lang);
     } else {
       const known = ROUTES.find((r) => r.id === currentPage);
       meta = known ? pageMetaText(known.id, lang) : home;
@@ -255,7 +263,11 @@ function MainAppContent() {
           setServiceTier(prev => (prev.id === sub ? prev : { id: sub, n: prev.n + 1 }));
         }
         if (route.id === 'legal' && route.param) setLegalSection(route.param);
-        setCurrentPage(route.id === 'blog' && route.param ? 'blog-post' : route.id);
+        setCurrentPage(
+          route.id === 'blog' && route.param ? 'blog-post'
+            : route.id === 'shop' && route.param ? 'shop-product'
+              : route.id,
+        );
       }
     };
 
@@ -284,8 +296,9 @@ function MainAppContent() {
       // A tier ID opens that tier; ServicesPage scrolls to it, so skip the scroll to top.
       setServiceTier(prev => ({ id: param || '', n: prev.n + 1 }));
     }
-    // /blog/<slug> is the article page; the route table calls both 'blog'.
-    setCurrentPage(page === 'blog' && param ? 'blog-post' : page);
+    // /blog/<slug> is the article page and /shop/<slug> a product; the route table calls both
+    // 'blog' (or 'shop').
+    setCurrentPage(page === 'blog' && param ? 'blog-post' : page === 'shop' && param ? 'shop-product' : page);
     if (!(page === 'services' && param)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -526,6 +539,18 @@ function MainAppContent() {
 
         {currentPage === 'blog-post' && route?.id === 'blog' && route.param && (
           <BlogPostPage key={route.canonical} slug={route.param} onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'shop' && (
+          <ShopPage key="index" onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'shop-category' && route?.param && (
+          <ShopPage key={`category:${route.param}`} category={route.param} onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'shop-product' && route?.id === 'shop' && route.param && (
+          <ProductPage key={route.canonical} slug={route.param} onNavigate={handleNavigate} />
         )}
 
         {currentPage === 'careers' && (

@@ -26,4 +26,5 @@ export const AREA_LOADERS_FR: { [A in AreaName]: () => Promise<Translation<AreaM
   company: () => import('./fr/company').then((m) => m.default),
   courier: () => import('./fr/courier').then((m) => m.default),
   localDelivery: () => import('./fr/localDelivery').then((m) => m.default),
+  shop: () => import('./fr/shop').then((m) => m.default),
 };

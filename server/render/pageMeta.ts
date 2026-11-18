@@ -398,13 +398,14 @@ export function createIndexRenderer(indexHtmlPath: string): (ctx: PageContext) =
 /**
  * Every public page in both languages, each with its alternates. The blog is listed from the
  * database instead (server/blog/pageData.ts `blogSitemapEntries`): its index only for a language
- * with a public post, then each category and post. Result pages, service tiers and the console
- * never appear.
+ * with a public post, then each category and post. The shop's pages join with M.8, from the
+ * database and only while the shop is on. Result pages, service tiers and the console never appear.
  */
 export function sitemapPaths(): { en: string; fr: string }[] {
   const out: { en: string; fr: string }[] = [];
   for (const route of ROUTES) {
     if (route.live === false || route.noindex || route.id === 'blog' || route.id === 'blog-category') continue;
+    if (route.id === 'shop' || route.id === 'shop-category') continue;
     out.push({ en: buildPath(route.id, undefined, 'en'), fr: buildPath(route.id, undefined, 'fr') });
     if (route.id === 'legal') {
       for (const tab of LEGAL_TABS) {

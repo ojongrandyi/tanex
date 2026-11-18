@@ -86,6 +86,20 @@ const PAGES: Record<InnerRoute, Record<Lang, PageMetaText>> = {
     en: { title: `Blog | ${COMPANY}`, description: `News, guides and shipping tips from the ${COMPANY} team.` },
     fr: { title: `Blog | ${COMPANY}`, description: `Actualités, guides et conseils d'expédition de l'équipe ${COMPANY}.` },
   },
+  // Shop (CONTENT §17.2 / CONTENT_FR §17.2, owner to confirm #187). A category or product page
+  // replaces these with its own name once it has loaded; the server does the same with M.8.
+  shop: {
+    en: { title: `Marketplace | ${COMPANY}`, description: `Products sold by ${COMPANY}, delivered to your door in Buea, Limbe and Douala and by truck to other cities in Cameroon. Pay on delivery or by mobile money.` },
+    fr: { title: `Boutique | ${COMPANY}`, description: `Des produits vendus par ${COMPANY}, livrés à votre porte à Buea, Limbe et Douala et par camion dans les autres villes du Cameroun. Payez à la livraison ou par mobile money.` },
+  },
+  'shop-category': {
+    en: { title: `Marketplace | ${COMPANY}`, description: `Products sold by ${COMPANY}, delivered to your door in Buea, Limbe and Douala and by truck to other cities in Cameroon. Pay on delivery or by mobile money.` },
+    fr: { title: `Boutique | ${COMPANY}`, description: `Des produits vendus par ${COMPANY}, livrés à votre porte à Buea, Limbe et Douala et par camion dans les autres villes du Cameroun. Payez à la livraison ou par mobile money.` },
+  },
+  cart: {
+    en: { title: `Your cart | ${COMPANY}`, description: `Check your cart and place your order with ${COMPANY}. We call you to confirm it before delivery.` },
+    fr: { title: `Votre panier | ${COMPANY}`, description: `Vérifiez votre panier et passez commande chez ${COMPANY}. Nous vous appelons pour la confirmer avant la livraison.` },
+  },
   careers: {
     en: { title: `Careers | ${COMPANY}`, description: `Work with ${COMPANY} in Buea, Limbe and Douala: riders, drivers, operations and office. Send us your CV.` },
     fr: { title: `Carrières | ${COMPANY}`, description: `Travaillez avec ${COMPANY} à Buea, Limbe et Douala : livreurs, chauffeurs, opérations et bureau. Envoyez-nous votre CV.` },

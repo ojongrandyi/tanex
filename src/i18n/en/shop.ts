@@ -1,0 +1,83 @@
+// English master, area "shop" (CONTENT §17.2–§17.3, owner to confirm #187): the public shop,
+// category and product pages (task M.4). Loaded with the shop pages. Product names, descriptions
+// and categories come from the console, never from here.
+const shop = {
+  index: {
+    eyebrow: '{company} Marketplace',
+    title: 'Shop with {company}',
+    sub: 'Products sold by {company}, delivered to your door by our riders in Buea, Limbe and Douala and by truck to other cities in Cameroon. Order online, pay on delivery or by mobile money.',
+    all: 'All',
+    search: 'Search products',
+    sortBy: 'Sort by',
+    sortFeatured: 'Featured',
+    sortNewest: 'Newest',
+    sortPriceAsc: 'Price: low to high',
+    sortPriceDesc: 'Price: high to low',
+    inStockOnly: 'In stock only',
+    count: '{n} products',
+    countOne: '1 product',
+    emptyTitle: 'The shop is opening soon.',
+    emptyBody: 'Our products will appear here shortly.',
+    noResultsTitle: 'No products match your search.',
+    noResultsBody: 'Try other words or clear the filters.',
+    clearFilters: 'Clear filters',
+    pagination: 'Shop pages',
+    pageOf: 'Page {n} of {total}',
+    previous: 'Previous',
+    next: 'Next',
+    // Added with M.4 (owner to confirm).
+    categories: 'Categories',
+    searchButton: 'Search',
+    loadError: "We couldn't load the products. Please try again.",
+    retry: 'Try again',
+  },
+  card: {
+    addToCart: 'Add to cart',
+    added: 'Added',
+    sale: 'Sale',
+    wasNow: 'Was {old}, now {new}',
+  },
+  stock: {
+    in: 'In stock',
+    low: 'Only {n} left',
+    out: 'Out of stock',
+  },
+  product: {
+    marketplace: 'Marketplace',
+    productId: 'Product ID: {code}',
+    quantity: 'Quantity',
+    decrease: 'Decrease quantity',
+    increase: 'Increase quantity',
+    limit: 'You can order up to {n} of this product.',
+    addToCart: 'Add to cart',
+    added: 'Added to your cart.',
+    viewCart: 'View cart',
+    askWhatsApp: 'Ask on WhatsApp',
+    whatsAppMessage: 'Hello {company}, I have a question about {product} ({code}).',
+    delivery: 'Delivery by {company} rider in Buea, Limbe and Douala, by truck to other cities in Cameroon, or pick up at our Buea or Douala office.',
+    payment: 'Pay on delivery, by MTN MoMo or Orange Money, or at our office. No card needed.',
+    returns: 'Returns & Refunds',
+    shippingTerms: 'Shipping Terms',
+    description: 'Description',
+    related: 'Related products',
+    // Added with M.4 (owner to confirm).
+    breadcrumb: 'Breadcrumb',
+    inCart: 'In your cart: {n}',
+    loadError: "We couldn't load this product. Please try again.",
+    retry: 'Try again',
+  },
+  gallery: {
+    pictureOf: 'Picture {n} of {total}',
+    fullScreen: 'Open full screen',
+    close: 'Close',
+    previous: 'Previous picture',
+    next: 'Next picture',
+    // Added with M.4 (owner to confirm).
+    label: 'Product pictures',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+  },
+};
+
+export default shop;
+export type ShopMessages = typeof shop;
