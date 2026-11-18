@@ -1,18 +1,18 @@
 /* ==========================================================================
    Console theme (I.1): the shared look of every console view, on the --tx-* tokens and the C.3
    component styles (src/components/ui/ui.css). Loaded after the view stylesheets and scoped under
-   .ngf-admin-root so it wins over view rules that load later in lazy chunks. It only restyles;
+   .tx-admin-root so it wins over view rules that load later in lazy chunks. It only restyles;
    no layout, sizes or behaviour change. The document paper (labels, receipts, invoices, bills of
    lading) is never targeted: its tables and fonts are what the PDFs print.
    ========================================================================== */
 
 /* ---------- List tables: light header, mono eyebrow labels (was a near-black bar) ---------- */
-.ngf-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table) thead tr,
-.ngf-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table) th {
+.tx-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table) thead tr,
+.tx-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table) th {
   background: var(--tx-cream-100);
 }
 
-.ngf-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table) th {
+.tx-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table) th {
   color: var(--tx-choc-600);
   font-family: var(--tx-font-mono);
   font-weight: 600;
@@ -20,7 +20,7 @@
   border-bottom: 1px solid var(--tx-choc-100);
 }
 
-.ngf-admin-root .tx-iam-table th {
+.tx-admin-root .tx-iam-table th {
   color: var(--tx-choc-600);
   font-family: var(--tx-font-mono);
   font-weight: 600;
@@ -28,16 +28,16 @@
   border-bottom-color: var(--tx-choc-100);
 }
 
-.ngf-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table, .tx-iam-table) tbody tr {
+.tx-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table, .tx-iam-table) tbody tr {
   transition: background-color var(--tx-dur-fast) var(--tx-ease);
 }
 
-.ngf-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table, .tx-iam-table) tbody tr:hover {
+.tx-admin-root :is(.master-data-table, .ops-data-table, .quotes-master-table, .doc-master-table, .tx-iam-table) tbody tr:hover {
   background: var(--tx-cream-50);
 }
 
 /* ---------- Buttons: C.3 primary (orange pill, chocolate text) ---------- */
-.ngf-admin-root :is(
+.tx-admin-root :is(
   .create-shipment-cta-btn, .submit-btn, .step-continue-btn, .action-btn.primary,
   .btn-generate-doc-primary, .btn-empty-generate, .btn-submit-generate,
   .ops-btn-primary, .create-quote-primary-btn, .btn-publish-quote-primary, .btn-confirm-publish,
@@ -52,7 +52,7 @@
   box-shadow: none;
 }
 
-.ngf-admin-root :is(
+.tx-admin-root :is(
   .create-shipment-cta-btn, .submit-btn, .step-continue-btn, .action-btn.primary,
   .btn-generate-doc-primary, .btn-empty-generate, .btn-submit-generate,
   .ops-btn-primary, .create-quote-primary-btn, .btn-publish-quote-primary, .btn-confirm-publish,
@@ -65,28 +65,28 @@
 }
 
 /* Secondary (chocolate) and plain buttons of the newer views: pills like C.3. */
-.ngf-admin-root :is(.tx-iam-btn, .tx-account-btn) {
+.tx-admin-root :is(.tx-iam-btn, .tx-account-btn) {
   border-radius: var(--tx-radius-pill);
 }
 
 /* ---------- Focus: orange ring with a chocolate offset everywhere (BRAND_GUIDE §9) ---------- */
-.ngf-admin-root :is(button, a, [role='button'], [tabindex='0']):focus-visible {
+.tx-admin-root :is(button, a, [role='button'], [tabindex='0']):focus-visible {
   outline: 2px solid var(--tx-focus);
   outline-offset: 2px;
 }
 
-.ngf-admin-root :is(input, select, textarea):not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):focus-visible {
+.tx-admin-root :is(input, select, textarea):not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):focus-visible {
   outline: none;
   border-color: var(--tx-choc-900);
   box-shadow: 0 0 0 2px var(--tx-focus-offset), 0 0 0 4px var(--tx-focus);
 }
 
-.ngf-admin-root :is(input[type='checkbox'], input[type='radio']) {
+.tx-admin-root :is(input[type='checkbox'], input[type='radio']) {
   accent-color: var(--tx-choc-900);
 }
 
 /* ---------- Modals and drawers ---------- */
-.ngf-admin-root :is(
+.tx-admin-root :is(
   .admin-modal-backdrop, .control-modal-overlay, .delete-modal-overlay, .doc-delete-modal-backdrop,
   .doc-generate-modal-backdrop, .doc-preview-modal-backdrop, .edit-modal-overlay, .quote-modal-backdrop,
   .tracking-modal-backdrop, .trash-modal-overlay, .tx-iam-overlay
@@ -96,7 +96,7 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
-.ngf-admin-root :is(
+.tx-admin-root :is(
   .admin-modal-card, .control-modal-card, .delete-modal-card, .doc-delete-modal-card,
   .doc-generate-modal-card, .doc-preview-modal-container, .edit-modal-card, .quote-modal-card,
   .tracking-modal-card, .trash-modal-card, .tx-iam-dialog, .vehicle-photo-modal-card
@@ -106,18 +106,18 @@
   box-shadow: var(--tx-shadow-lift);
 }
 
-.ngf-admin-root .tx-board-drawer {
+.tx-admin-root .tx-board-drawer {
   box-shadow: -16px 0 40px rgb(var(--tx-choc-950-rgb) / 0.16);
 }
 
-.ngf-admin-root :is(.delete-modal-title, .doc-delete-modal-title) {
+.tx-admin-root :is(.delete-modal-title, .doc-delete-modal-title) {
   font-family: var(--tx-font-display);
   font-weight: 800;
   letter-spacing: var(--tx-tracking-heading);
 }
 
 /* ---------- Floating toasts: chocolate with an orange edge, like the shell toast ---------- */
-.ngf-admin-root :is(.doc-toast-notification, .settings-toast) {
+.tx-admin-root :is(.doc-toast-notification, .settings-toast) {
   background: var(--tx-choc-950);
   color: var(--tx-cream-50);
   border: 0;
@@ -126,12 +126,12 @@
   box-shadow: var(--tx-shadow-lift);
 }
 
-.ngf-admin-root .settings-toast.toast-error {
+.tx-admin-root .settings-toast.toast-error {
   border-left-color: var(--tx-danger-500);
 }
 
 /* ---------- Dashboard and summary cards ---------- */
-.ngf-admin-root :is(.ops-kpi-card, .qr-kpi-card, .tev-kpi-card, .stat-pill-card, .doc-summary-card) {
+.tx-admin-root :is(.ops-kpi-card, .qr-kpi-card, .tev-kpi-card, .stat-pill-card, .doc-summary-card) {
   border-radius: var(--tx-radius-card);
   border-color: var(--tx-choc-100);
   box-shadow: var(--tx-shadow-sm);

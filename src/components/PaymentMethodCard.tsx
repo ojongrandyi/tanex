@@ -52,51 +52,51 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
 
   const headContent = (
     <>
-      <span className="ngf-pm-card-icon"><PaymentIcon type={view.type} size={22} /></span>
-      <strong className="ngf-pm-card-name">{term(view.label)}</strong>
+      <span className="tx-pm-card-icon"><PaymentIcon type={view.type} size={22} /></span>
+      <strong className="tx-pm-card-name">{term(view.label)}</strong>
     </>
   );
   const open = !collapsible || expanded;
 
   return (
-    <div className={`ngf-pm-card${collapsible ? ' is-collapsible' : ''}${open ? ' is-open' : ''}`}>
+    <div className={`tx-pm-card${collapsible ? ' is-collapsible' : ''}${open ? ' is-open' : ''}`}>
       {collapsible ? (
-        <h4 className="ngf-pm-card-heading">
+        <h4 className="tx-pm-card-heading">
           <button
             type="button"
-            className="ngf-pm-card-head ngf-pm-card-toggle"
+            className="tx-pm-card-head tx-pm-card-toggle"
             aria-expanded={expanded}
             aria-controls={bodyId}
             onClick={onToggle}
           >
             {headContent}
-            <span className="ngf-sr-only">{expanded ? t('card.hideDetails') : t('card.showDetails')}</span>
-            <ChevronDown className="ngf-pm-card-chevron" size={18} aria-hidden="true" />
+            <span className="tx-sr-only">{expanded ? t('card.hideDetails') : t('card.showDetails')}</span>
+            <ChevronDown className="tx-pm-card-chevron" size={18} aria-hidden="true" />
           </button>
         </h4>
       ) : (
-        <div className="ngf-pm-card-head">{headContent}</div>
+        <div className="tx-pm-card-head">{headContent}</div>
       )}
 
-      <div id={bodyId} className="ngf-pm-card-body" hidden={!open}>
+      <div id={bodyId} className="tx-pm-card-body" hidden={!open}>
         {view.warning && (
-          <p className="ngf-pm-card-warning">
+          <p className="tx-pm-card-warning">
             <AlertTriangle size={15} aria-hidden="true" />
             <span>{term(view.warning)}</span>
           </p>
         )}
 
         {view.fields.length > 0 && (
-          <dl className="ngf-pm-card-fields">
+          <dl className="tx-pm-card-fields">
             {view.fields.map((field) => (
-              <div className="ngf-pm-card-field" key={field.label}>
+              <div className="tx-pm-card-field" key={field.label}>
                 <dt>{term(field.label)}</dt>
                 <dd>
-                  <span className="ngf-pm-card-value">{field.value}</span>
+                  <span className="tx-pm-card-value">{field.value}</span>
                   {field.copyable && (
                     <button
                       type="button"
-                      className={`ngf-pm-copy${copied === field.label ? ' is-copied' : ''}`}
+                      className={`tx-pm-copy${copied === field.label ? ' is-copied' : ''}`}
                       onClick={() => copy(field.label, field.value)}
                       aria-label={t('card.copyField', { field: term(field.label) })}
                     >
@@ -111,24 +111,24 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
         )}
 
         {view.link && (
-          <a className="ngf-pm-card-link" href={view.link.url} target="_blank" rel="noopener noreferrer">
+          <a className="tx-pm-card-link" href={view.link.url} target="_blank" rel="noopener noreferrer">
             <span>{term(view.link.label)}</span>
             <ExternalLink size={14} aria-hidden="true" />
           </a>
         )}
 
         {view.note && (
-          <p className="ngf-pm-card-note">
+          <p className="tx-pm-card-note">
             <Info size={15} aria-hidden="true" />
             <span>{term(view.note)}</span>
           </p>
         )}
 
         {view.qr && (
-          <div className="ngf-pm-card-qr">
+          <div className="tx-pm-card-qr">
             <button
               type="button"
-              className="ngf-pm-qr-toggle"
+              className="tx-pm-qr-toggle"
               aria-expanded={showQr}
               onClick={() => setShowQr((v) => !v)}
             >
@@ -139,10 +139,10 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
           </div>
         )}
 
-        {instructions && <p className="ngf-pm-card-instructions">{instructions}</p>}
+        {instructions && <p className="tx-pm-card-instructions">{instructions}</p>}
       </div>
 
-      {!onCopyMessage && <span className="ngf-sr-only" role="status" aria-live="polite">{announcement}</span>}
+      {!onCopyMessage && <span className="tx-sr-only" role="status" aria-live="polite">{announcement}</span>}
     </div>
   );
 };

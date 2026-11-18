@@ -25,22 +25,22 @@ export const MultiPieceList: React.FC<MultiPieceListProps> = ({
   const t = useAreaT('trackResult');
   const [unitSystem] = useUnitSystem();
   return (
-    <div className={`ngf-pieces-card ${className}`}>
-      <div className="ngf-pieces-header">
-        <h3 className="ngf-pieces-title">{t('pieces.title')}</h3>
-        <span className="ngf-pieces-count-badge">{pieces.length}</span>
+    <div className={`tx-pieces-card ${className}`}>
+      <div className="tx-pieces-header">
+        <h3 className="tx-pieces-title">{t('pieces.title')}</h3>
+        <span className="tx-pieces-count-badge">{pieces.length}</span>
       </div>
 
-      <div className="ngf-pieces-grid">
+      <div className="tx-pieces-grid">
         {pieces.map((piece) => (
-          <div key={piece.id} className="ngf-piece-item">
+          <div key={piece.id} className="tx-piece-item">
             <div className="piece-item-top">
               <div className="piece-meta">
                 <span className="piece-label">{t('pieces.piece', { n: String(piece.pieceNumber).padStart(2, '0') })}</span>
                 <span className="piece-tracking-id">{piece.trackingNumber}</span>
               </div>
               <div className="piece-status-wrap">
-                <span className="ngf-badge-in-transit-sm">{statusLabel.toUpperCase()}</span>
+                <span className="tx-badge-in-transit-sm">{statusLabel.toUpperCase()}</span>
                 {locationText && <span className="piece-location">{locationText}</span>}
               </div>
             </div>

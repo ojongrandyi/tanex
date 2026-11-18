@@ -860,9 +860,9 @@ The text below is rendered from `src/data/legalDocs.ts` (English and French, CON
 2. *Choices saved in your browser.*
    Some pages remember a few choices in your browser's local storage. This data stays on your device and is not sent to us:
    - tx_locale: the language you chose for this website (English or French).
-   - ngf_recent_tracking: tracking IDs you looked up recently, so you can open them again.
-   - ngf_units: whether you prefer metric or imperial units.
-   - ngf_live_shipment_stream: the latest update for a shipment you are viewing, so other open tabs stay in step.
+   - tx_recent_tracking: tracking IDs you looked up recently, so you can open them again.
+   - tx_units: whether you prefer metric or imperial units.
+   - tx_live_shipment_stream: the latest update for a shipment you are viewing, so other open tabs stay in step.
    - tx_motion_paused: that you paused the motion on our home page, so it stays paused. **[added H.1, owner to confirm wording]**
    You can clear these at any time in your browser settings.
 3. *Other services our pages use.*

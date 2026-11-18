@@ -65,22 +65,22 @@ export const PackageImageViewer: React.FC<PackageImageViewerProps> = ({ images, 
   if (!image) return null;
 
   return (
-    <div className="ngf-viewer-backdrop" onClick={onClose} data-lenis-prevent>
+    <div className="tx-viewer-backdrop" onClick={onClose} data-lenis-prevent>
       <div
         ref={dialogRef}
-        className="ngf-viewer"
+        className="tx-viewer"
         role="dialog"
         aria-modal="true"
         aria-label={t('gallery.count', { n: index + 1, total })}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="ngf-viewer-bar">
-          <span className="ngf-viewer-count" aria-live="polite">{t('gallery.count', { n: index + 1, total })}</span>
-          <button ref={closeRef} type="button" className="ngf-viewer-btn" onClick={onClose} aria-label={t('gallery.close')}>
+        <div className="tx-viewer-bar">
+          <span className="tx-viewer-count" aria-live="polite">{t('gallery.count', { n: index + 1, total })}</span>
+          <button ref={closeRef} type="button" className="tx-viewer-btn" onClick={onClose} aria-label={t('gallery.close')}>
             <X size={20} aria-hidden="true" />
           </button>
         </div>
-        <figure className="ngf-viewer-figure">
+        <figure className="tx-viewer-figure">
           <img
             key={image.url}
             src={image.url}
@@ -92,10 +92,10 @@ export const PackageImageViewer: React.FC<PackageImageViewerProps> = ({ images, 
         </figure>
         {total > 1 && (
           <>
-            <button type="button" className="ngf-viewer-btn ngf-viewer-prev" onClick={() => go(-1)} aria-label={t('gallery.previous')}>
+            <button type="button" className="tx-viewer-btn tx-viewer-prev" onClick={() => go(-1)} aria-label={t('gallery.previous')}>
               <ChevronLeft size={24} aria-hidden="true" />
             </button>
-            <button type="button" className="ngf-viewer-btn ngf-viewer-next" onClick={() => go(1)} aria-label={t('gallery.next')}>
+            <button type="button" className="tx-viewer-btn tx-viewer-next" onClick={() => go(1)} aria-label={t('gallery.next')}>
               <ChevronRight size={24} aria-hidden="true" />
             </button>
           </>

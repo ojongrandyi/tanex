@@ -3,7 +3,7 @@
 .proof-review {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--ngf-slate-100);
+  border-top: 1px solid var(--tx-cream-200);
 }
 
 .proof-review-check {
@@ -11,7 +11,7 @@
   align-items: flex-start;
   gap: 0.5rem;
   font-size: 0.8125rem;
-  color: var(--ngf-slate-700);
+  color: var(--tx-choc-700);
   cursor: pointer;
 }
 
@@ -31,32 +31,32 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.85rem;
-  border: 1px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-md);
-  background: var(--ngf-white);
-  color: var(--ngf-slate-700);
+  border: 1px solid var(--tx-choc-100);
+  border-radius: var(--tx-radius-input);
+  background: var(--tx-white);
+  color: var(--tx-choc-700);
   font-size: 0.8125rem;
   font-weight: 700;
   cursor: pointer;
 }
 
 .proof-review-btn.approve {
-  background: var(--ngf-success-600);
-  border-color: var(--ngf-success-600);
-  color: var(--ngf-white);
+  background: var(--tx-success-600);
+  border-color: var(--tx-success-600);
+  color: var(--tx-white);
 }
 
 .proof-review-btn.approve:hover:not(:disabled) {
-  background: var(--ngf-success-700);
+  background: var(--tx-success-700);
 }
 
 .proof-review-btn.reject {
-  border-color: var(--ngf-danger-100);
-  color: var(--ngf-danger-600);
+  border-color: var(--tx-danger-100);
+  color: var(--tx-danger-600);
 }
 
 .proof-review-btn.reject:hover:not(:disabled) {
-  background: var(--ngf-danger-50);
+  background: var(--tx-danger-50);
 }
 
 .proof-review-btn:disabled {
@@ -65,7 +65,7 @@
 }
 
 .proof-review-btn:focus-visible {
-  outline: 2px solid var(--ngf-color-focus);
+  outline: 2px solid var(--tx-focus);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
@@ -75,14 +75,14 @@
   margin-bottom: 0.35rem;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--ngf-slate-800);
+  color: var(--tx-choc-800);
 }
 
 .proof-review-reject textarea {
   width: 100%;
   padding: 0.55rem 0.7rem;
-  border: 1px solid var(--ngf-slate-300);
-  border-radius: var(--ngf-radius-md);
+  border: 1px solid var(--tx-choc-200);
+  border-radius: var(--tx-radius-input);
   font: inherit;
   font-size: 0.875rem;
   resize: vertical;
@@ -92,5 +92,5 @@
   margin: 0.5rem 0 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--ngf-danger-600);
+  color: var(--tx-danger-600);
 }

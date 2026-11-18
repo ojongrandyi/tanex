@@ -6,7 +6,7 @@
 .delete-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(var(--ngf-ink-rgb), 0.45);
+  background: rgb(var(--tx-choc-950-rgb) / 0.45);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   z-index: 99999;

@@ -57,16 +57,16 @@ interface PaymentTabProps {
 const PaymentTab: React.FC<PaymentTabProps> = ({ icon, title, sub, open, onToggle, children }) => {
   const panelId = useId();
   return (
-    <div className={`ngf-pay-tab${open ? ' is-open' : ''}`}>
-      <button type="button" className="ngf-pay-tab-btn" aria-expanded={open} aria-controls={panelId} onClick={onToggle}>
-        <span className="ngf-pay-tab-icon" aria-hidden="true">{icon}</span>
-        <span className="ngf-pay-tab-text">
+    <div className={`tx-pay-tab${open ? ' is-open' : ''}`}>
+      <button type="button" className="tx-pay-tab-btn" aria-expanded={open} aria-controls={panelId} onClick={onToggle}>
+        <span className="tx-pay-tab-icon" aria-hidden="true">{icon}</span>
+        <span className="tx-pay-tab-text">
           <strong>{title}</strong>
           {sub && <small>{sub}</small>}
         </span>
-        <ChevronDown size={18} className="ngf-pay-tab-chevron" aria-hidden="true" />
+        <ChevronDown size={18} className="tx-pay-tab-chevron" aria-hidden="true" />
       </button>
-      <div id={panelId} className="ngf-pay-tab-panel" hidden={!open}>
+      <div id={panelId} className="tx-pay-tab-panel" hidden={!open}>
         {children}
       </div>
     </div>
@@ -136,21 +136,21 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
   const proofAccounts = payment.methods.filter((m) => m.type !== 'cash_on_delivery').length;
 
   return (
-    <section className="ngf-pay-section" aria-labelledby="track-payment-title">
-      <div className="ngf-pay-summary">
-        <div className="ngf-pay-summary-head">
-          <h3 id="track-payment-title" className="card-section-title ngf-pay-title">{t('section.title')}</h3>
-          <span className={`ngf-pay-badge is-${badge.tone}`}>{badge.label}</span>
+    <section className="tx-pay-section" aria-labelledby="track-payment-title">
+      <div className="tx-pay-summary">
+        <div className="tx-pay-summary-head">
+          <h3 id="track-payment-title" className="card-section-title tx-pay-title">{t('section.title')}</h3>
+          <span className={`tx-pay-badge is-${badge.tone}`}>{badge.label}</span>
         </div>
 
         {status === 'AWAITING_PAYMENT' && (
-          <p className="ngf-pay-intro">
+          <p className="tx-pay-intro">
             {t('section.intro')}
           </p>
         )}
 
         {isPaid && (
-          <div className="ngf-pay-received">
+          <div className="tx-pay-received">
             <CheckCircle2 size={20} aria-hidden="true" />
             <div>
               <strong>{t('section.received')}</strong>
@@ -159,17 +159,17 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
           </div>
         )}
 
-        <dl className="ngf-pay-facts">
-          <div className="ngf-pay-fact ngf-pay-fact-amount">
+        <dl className="tx-pay-facts">
+          <div className="tx-pay-fact tx-pay-fact-amount">
             <dt>{t('section.amountDue')}</dt>
-            <dd className="ngf-pay-amount">{formatPaymentAmount(payment.amount, payment.currency, lang)}</dd>
+            <dd className="tx-pay-amount">{formatPaymentAmount(payment.amount, payment.currency, lang)}</dd>
           </div>
-          <div className="ngf-pay-fact">
+          <div className="tx-pay-fact">
             <dt>{t('section.for')}</dt>
             <dd>{payment.chargeReason}</dd>
           </div>
           {payment.dueDate && (
-            <div className="ngf-pay-fact">
+            <div className="tx-pay-fact">
               <dt>{t('section.dueBy')}</dt>
               <dd>{formatDueDate(payment.dueDate, lang)}</dd>
             </div>
@@ -177,7 +177,7 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
         </dl>
 
         {payment.customerNote && (
-          <div className="ngf-pay-note">
+          <div className="tx-pay-note">
             <strong>{t('section.note')}</strong>
             <p>{payment.customerNote}</p>
           </div>
@@ -185,7 +185,7 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
       </div>
 
       {count > 0 && (
-        <div className="ngf-pay-methods">
+        <div className="tx-pay-methods">
           <PaymentTab
             icon={<Wallet size={18} />}
             title={isPaid ? (showMethods ? t('section.hideAccounts') : t('section.showAccounts')) : t('section.howToPay')}
@@ -193,8 +193,8 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
             open={showMethods}
             onToggle={() => setShowMethods((v) => !v)}
           >
-            {!isPaid && <p className="ngf-pay-methods-sub">{t('section.chooseOne')}</p>}
-            <ul className={`ngf-pay-methods-list${narrow ? ' is-accordion' : ''}`}>
+            {!isPaid && <p className="tx-pay-methods-sub">{t('section.chooseOne')}</p>}
+            <ul className={`tx-pay-methods-list${narrow ? ' is-accordion' : ''}`}>
               {payment.methods.map((method) => (
                 <li key={method.id}>
                   <PaymentMethodCard
@@ -213,7 +213,7 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
       )}
 
       {underReview && (
-        <div className="ngf-proof-state is-review">
+        <div className="tx-proof-state is-review">
           <Clock size={18} aria-hidden="true" />
           <div>
             <strong>{t('section.underReview')}</strong>
@@ -223,7 +223,7 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
       )}
 
       {rejected && (
-        <div className="ngf-proof-state is-rejected">
+        <div className="tx-proof-state is-rejected">
           <AlertCircle size={18} aria-hidden="true" />
           <div>
             <strong>{rejected.rejectionReason ? t('section.rejectedReason', { reason: rejected.rejectionReason }) : t('section.rejected')}</strong>
@@ -233,13 +233,13 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
       )}
 
       {sentAt && (
-        <p className="ngf-proof-sent" role="status">
+        <p className="tx-proof-sent" role="status">
           {t('section.sent')}
         </p>
       )}
 
       {status === 'AWAITING_PAYMENT' && proofAccounts > 0 && (
-        <div className="ngf-pay-proof">
+        <div className="tx-pay-proof">
           <PaymentTab
             icon={<Upload size={18} />}
             title={t('section.sendProof')}
@@ -252,7 +252,7 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({ trackingNumber, 
         </div>
       )}
 
-      <div className={`ngf-pay-toast${toast ? ' is-visible' : ''}`} role="status" aria-live="polite">
+      <div className={`tx-pay-toast${toast ? ' is-visible' : ''}`} role="status" aria-live="polite">
         {toast}
       </div>
     </section>

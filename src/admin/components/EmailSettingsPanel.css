@@ -22,13 +22,13 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 .tx-mail-facts dd,
 .tx-mail-figures dd {
   margin: 0.15rem 0 0;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   overflow-wrap: anywhere;
 }
 
@@ -49,7 +49,7 @@
 .tx-mail-title {
   margin: 0 0 0.6rem;
   font-size: 0.95rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-mail-test {

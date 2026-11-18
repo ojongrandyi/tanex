@@ -1,25 +1,25 @@
 /* Shared international form controls: country picker, phone input, unit toggle */
 
-.ngf-country-select {
+.tx-country-select {
   position: relative;
   width: 100%;
 }
 
-.ngf-country-select input {
+.tx-country-select input {
   width: 100%;
   padding-right: 2.25rem;
 }
 
-.ngf-country-chevron {
+.tx-country-chevron {
   position: absolute;
   right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
   pointer-events: none;
 }
 
-.ngf-country-list {
+.tx-country-list {
   position: absolute;
   z-index: 50;
   top: calc(100% + 4px);
@@ -30,98 +30,98 @@
   margin: 0;
   padding: 0.25rem;
   list-style: none;
-  background: var(--ngf-white);
-  border: 1px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-md);
-  box-shadow: var(--ngf-shadow-lg);
+  background: var(--tx-white);
+  border: 1px solid var(--tx-choc-100);
+  border-radius: var(--tx-radius-input);
+  box-shadow: var(--tx-shadow-lg);
 }
 
-.ngf-country-option {
+.tx-country-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.5rem 0.625rem;
-  border-radius: var(--ngf-radius-sm);
+  border-radius: var(--tx-radius-xs);
   font-size: 0.875rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   cursor: pointer;
 }
 
-.ngf-country-option small {
+.tx-country-option small {
   font-size: 0.6875rem;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
   flex-shrink: 0;
 }
 
-.ngf-country-option.active {
-  background: var(--ngf-accent-50);
+.tx-country-option.active {
+  background: var(--tx-orange-50);
 }
 
-.ngf-country-option.selected span {
+.tx-country-option.selected span {
   font-weight: 700;
 }
 
-.ngf-country-empty {
+.tx-country-empty {
   padding: 0.5rem 0.625rem;
   font-size: 0.875rem;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
 }
 
-.ngf-phone-input {
+.tx-phone-input {
   display: grid;
   grid-template-columns: minmax(96px, 7.5rem) 1fr;
   gap: 0.5rem;
   width: 100%;
 }
 
-.ngf-phone-input .ngf-phone-code {
+.tx-phone-input .tx-phone-code {
   min-width: 0;
   padding-right: 0.25rem;
 }
 
-.ngf-phone-input .ngf-phone-number {
+.tx-phone-input .tx-phone-number {
   min-width: 0;
 }
 
-.ngf-phone-hint {
+.tx-phone-hint {
   grid-column: 1 / -1;
   font-size: 0.75rem;
-  color: var(--ngf-warning-700);
+  color: var(--tx-warning-700);
 }
 
-.ngf-unit-toggle {
+.tx-unit-toggle {
   display: inline-flex;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 9999px;
   padding: 2px;
-  background: var(--ngf-white);
+  background: var(--tx-white);
 }
 
-.ngf-unit-toggle button {
+.tx-unit-toggle button {
   border: none;
   background: transparent;
   border-radius: 9999px;
   padding: 0.3rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
   cursor: pointer;
 }
 
-.ngf-unit-toggle button.active {
-  background: var(--ngf-ink-900);
-  color: var(--ngf-white);
+.tx-unit-toggle button.active {
+  background: var(--tx-choc-900);
+  color: var(--tx-white);
 }
 
-.ngf-unit-toggle button:focus-visible {
-  outline: 2px solid var(--ngf-accent-500);
+.tx-unit-toggle button:focus-visible {
+  outline: 2px solid var(--tx-orange-500);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
 /* A form section heading with the unit toggle on the right */
-.ngf-heading-with-units {
+.tx-heading-with-units {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -129,7 +129,7 @@
   flex-wrap: wrap;
 }
 
-.ngf-field-optional {
+.tx-field-optional {
   font-weight: 500;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
 }

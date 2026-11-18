@@ -155,10 +155,10 @@ export const QuotePage: React.FC<QuotePageProps> = ({ onNavigate, initialService
   const steps = [t('steps.review'), t('steps.email'), t('steps.accept')];
   const pieceCount = parseInt(pieces, 10) || 1;
   const req = <span className="tx-label__required" aria-hidden="true">*</span>;
-  const opt = <span className="ngf-field-optional">{t('form.optional')}</span>;
+  const opt = <span className="tx-field-optional">{t('form.optional')}</span>;
 
   return (
-    <div className="ngf-page-quote tx-quote">
+    <div className="tx-page-quote tx-quote">
       <section className="tx-quote__hero tx-dark" aria-labelledby="quote-title">
         <div className="tx-quote__wrap">
           <p className="tx-eyebrow">{t('page.eyebrow')}</p>
@@ -167,7 +167,7 @@ export const QuotePage: React.FC<QuotePageProps> = ({ onNavigate, initialService
         </div>
       </section>
 
-      <div className="ngf-container-wide ngf-quote-body">
+      <div className="tx-container-wide tx-quote-body">
         {submitted ? (
           <div className="quote-confirmation-card" role="status">
             <div className="confirm-header">
@@ -206,7 +206,7 @@ export const QuotePage: React.FC<QuotePageProps> = ({ onNavigate, initialService
             </div>
           </div>
         ) : (
-          <div className="ngf-quote-grid">
+          <div className="tx-quote-grid">
             <div className="quote-form-card">
               {formError && (
                 <div className="quote-form-error" role="alert">
@@ -227,28 +227,28 @@ export const QuotePage: React.FC<QuotePageProps> = ({ onNavigate, initialService
                     <div className="form-row-2">
                       <div className="form-group">
                         <label htmlFor={`${side.key}-country`}>{t('form.country')} {req}</label>
-                        <CountrySelect id={`${side.key}-country`} value={side.country} onChange={side.setCountry} className="ngf-input" required placeholder={t('form.countrySearch')} />
+                        <CountrySelect id={`${side.key}-country`} value={side.country} onChange={side.setCountry} className="tx-form-input" required placeholder={t('form.countrySearch')} />
                       </div>
                       <div className="form-group">
                         <label htmlFor={`${side.key}-city`}>{t('form.city')} {req}</label>
-                        <input id={`${side.key}-city`} type="text" required value={side.city} onChange={(e) => side.setCity(e.target.value)} placeholder={side.placeholder} className="ngf-input" />
+                        <input id={`${side.key}-city`} type="text" required value={side.city} onChange={(e) => side.setCity(e.target.value)} placeholder={side.placeholder} className="tx-form-input" />
                       </div>
                     </div>
                     <div className="form-row-2">
                       <div className="form-group">
                         <label htmlFor={`${side.key}-region`}>{regionLabel(side.country)} {opt}</label>
-                        <input id={`${side.key}-region`} type="text" value={side.region} onChange={(e) => side.setRegion(e.target.value)} className="ngf-input" />
+                        <input id={`${side.key}-region`} type="text" value={side.region} onChange={(e) => side.setRegion(e.target.value)} className="tx-form-input" />
                       </div>
                       <div className="form-group">
                         <label htmlFor={`${side.key}-postcode`}>{postcodeLabel(side.country)} {opt}</label>
-                        <input id={`${side.key}-postcode`} type="text" value={side.postcode} onChange={(e) => side.setPostcode(e.target.value)} className="ngf-input font-mono" />
+                        <input id={`${side.key}-postcode`} type="text" value={side.postcode} onChange={(e) => side.setPostcode(e.target.value)} className="tx-form-input font-mono" />
                       </div>
                     </div>
                   </fieldset>
                 ))}
 
                 <div className="form-section-divider"><Package size={16} className="text-accent" aria-hidden="true" /><span>{t('form.cargo')}</span></div>
-                <div className="ngf-heading-with-units quote-units-row">
+                <div className="tx-heading-with-units quote-units-row">
                   <span className="quote-units-label">{t('form.units')}</span>
                   <UnitToggle label={t('form.units')} />
                 </div>
@@ -256,43 +256,43 @@ export const QuotePage: React.FC<QuotePageProps> = ({ onNavigate, initialService
                 <div className="form-row-3">
                   <div className="form-group">
                     <label htmlFor="quote-pieces">{t('form.pieces')} {req}</label>
-                    <input id="quote-pieces" type="number" min="1" required value={pieces} onChange={(e) => setPieces(e.target.value)} placeholder="1" className="ngf-input font-mono" />
+                    <input id="quote-pieces" type="number" min="1" required value={pieces} onChange={(e) => setPieces(e.target.value)} placeholder="1" className="tx-form-input font-mono" />
                   </div>
                   <div className="form-group">
                     <label htmlFor="quote-weight">{t('form.weight', { unit: units.weight })} {req}</label>
-                    <MeasureInput id="quote-weight" kind="weight" step="0.1" min="0" required value={weight} onChange={setWeight} placeholder={units.system === 'metric' ? '6.5' : '14.5'} className="ngf-input font-mono" />
+                    <MeasureInput id="quote-weight" kind="weight" step="0.1" min="0" required value={weight} onChange={setWeight} placeholder={units.system === 'metric' ? '6.5' : '14.5'} className="tx-form-input font-mono" />
                   </div>
                   <div className="form-group">
                     <label htmlFor="quote-value">{t('form.declared', { currency: money.currency })} {opt}</label>
-                    <MoneyInput id="quote-value" min="0" value={declaredValue} onChange={setDeclaredValue} className="ngf-input font-mono" />
+                    <MoneyInput id="quote-value" min="0" value={declaredValue} onChange={setDeclaredValue} className="tx-form-input font-mono" />
                   </div>
                 </div>
 
                 <div className="form-group">
                   <span className="quote-dims-label" id="quote-dims-label">{t('form.dimensions', { unit: units.length })} {opt}</span>
                   <div className="dimensions-row" role="group" aria-labelledby="quote-dims-label">
-                    <MeasureInput kind="length" min="0" aria-label={t('form.length', { unit: units.length })} value={length} onChange={setLength} placeholder={t('form.length', { unit: units.length })} className="ngf-input font-mono" />
-                    <MeasureInput kind="length" min="0" aria-label={t('form.width', { unit: units.length })} value={width} onChange={setWidth} placeholder={t('form.width', { unit: units.length })} className="ngf-input font-mono" />
-                    <MeasureInput kind="length" min="0" aria-label={t('form.height', { unit: units.length })} value={height} onChange={setHeight} placeholder={t('form.height', { unit: units.length })} className="ngf-input font-mono" />
+                    <MeasureInput kind="length" min="0" aria-label={t('form.length', { unit: units.length })} value={length} onChange={setLength} placeholder={t('form.length', { unit: units.length })} className="tx-form-input font-mono" />
+                    <MeasureInput kind="length" min="0" aria-label={t('form.width', { unit: units.length })} value={width} onChange={setWidth} placeholder={t('form.width', { unit: units.length })} className="tx-form-input font-mono" />
+                    <MeasureInput kind="length" min="0" aria-label={t('form.height', { unit: units.length })} value={height} onChange={setHeight} placeholder={t('form.height', { unit: units.length })} className="tx-form-input font-mono" />
                   </div>
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="quote-contents">{t('form.contents')} {req}</label>
-                  <input id="quote-contents" type="text" required value={cargoDescription} onChange={(e) => setCargoDescription(e.target.value)} placeholder={t('form.contentsPlaceholder')} className="ngf-input" />
+                  <input id="quote-contents" type="text" required value={cargoDescription} onChange={(e) => setCargoDescription(e.target.value)} placeholder={t('form.contentsPlaceholder')} className="tx-form-input" />
                 </div>
 
                 <div className="form-section-divider"><Truck size={16} className="text-accent" aria-hidden="true" /><span>{t('form.service')}</span></div>
                 <div className="form-row-2">
                   <div className="form-group">
                     <label htmlFor="quote-service">{t('form.serviceLabel')} {req}</label>
-                    <select id="quote-service" value={service} onChange={(e) => setService(e.target.value)} className="ngf-input">
+                    <select id="quote-service" value={service} onChange={(e) => setService(e.target.value)} className="tx-form-input">
                       {SERVICE_OPTIONS.map((s) => <option key={s.id} value={s.name}>{t(`services.${s.key}`)}</option>)}
                     </select>
                   </div>
                   <div className="form-group">
                     <label htmlFor="quote-mode">{t('form.mode')}</label>
-                    <select id="quote-mode" value={transportMode} onChange={(e) => setTransportMode(e.target.value as TransportMode | '')} className="ngf-input">
+                    <select id="quote-mode" value={transportMode} onChange={(e) => setTransportMode(e.target.value as TransportMode | '')} className="tx-form-input">
                       <option value="">{t('form.modeAuto')}</option>
                       <option value="Air">{modeLabel('Air')}</option>
                       <option value="Sea">{modeLabel('Sea')}</option>
@@ -303,29 +303,29 @@ export const QuotePage: React.FC<QuotePageProps> = ({ onNavigate, initialService
 
                 <div className="form-group">
                   <label htmlFor="quote-notes">{t('form.instructions')} {opt}</label>
-                  <textarea id="quote-notes" rows={3} value={specialInstructions} onChange={(e) => setSpecialInstructions(e.target.value)} className="ngf-input" />
+                  <textarea id="quote-notes" rows={3} value={specialInstructions} onChange={(e) => setSpecialInstructions(e.target.value)} className="tx-form-input" />
                 </div>
 
                 <div className="form-section-divider"><User size={16} className="text-accent" aria-hidden="true" /><span>{t('form.details')}</span></div>
                 <div className="form-row-2">
                   <div className="form-group">
                     <label htmlFor="quote-name">{t('form.name')} {req}</label>
-                    <input id="quote-name" type="text" required autoComplete="name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="ngf-input" />
+                    <input id="quote-name" type="text" required autoComplete="name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="tx-form-input" />
                   </div>
                   <div className="form-group">
                     <label htmlFor="quote-company">{t('form.company')} {opt}</label>
-                    <input id="quote-company" type="text" autoComplete="organization" value={company} onChange={(e) => setCompany(e.target.value)} className="ngf-input" />
+                    <input id="quote-company" type="text" autoComplete="organization" value={company} onChange={(e) => setCompany(e.target.value)} className="tx-form-input" />
                   </div>
                 </div>
                 <div className="form-row-2">
                   <div className="form-group">
                     <label htmlFor="quote-email">{t('form.email')} {req}</label>
-                    <input id="quote-email" type="email" required autoComplete="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="ngf-input" />
+                    <input id="quote-email" type="email" required autoComplete="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="tx-form-input" />
                   </div>
                   <div className="form-group">
                     <label htmlFor="quote-phone">{t('form.phone')} {opt}</label>
                     <PhoneInput id="quote-phone" value={customerPhone} onChange={setCustomerPhone} defaultCountry={originCountry || DEFAULT_COUNTRY}
-                      className="ngf-input font-mono" placeholder={t('form.phonePlaceholder')} codeLabel={t('form.callingCode')} />
+                      className="tx-form-input font-mono" placeholder={t('form.phonePlaceholder')} codeLabel={t('form.callingCode')} />
                   </div>
                 </div>
 

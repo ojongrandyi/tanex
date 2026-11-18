@@ -2,7 +2,7 @@
    QUOTE REQUESTS WORKSPACE STYLES (console)
    ========================================================================== */
 
-.ngf-quote-requests-workspace {
+.tx-quote-requests-workspace {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -124,7 +124,7 @@
   flex-shrink: 0;
 }
 
-.qr-circle-icon.accent { background-color: var(--ngf-accent-500); }
+.qr-circle-icon.accent { background-color: var(--tx-orange-500); }
 .qr-circle-icon.blue { background-color: var(--tx-info-600); }
 .qr-circle-icon.emerald { background-color: var(--tx-success-600); }
 .qr-circle-icon.green { background-color: var(--tx-success-500); }
@@ -142,7 +142,7 @@
 .qr-card-number {
   font-size: 2rem;
   font-weight: 800;
-  color: var(--ngf-ink-950);
+  color: var(--tx-choc-950);
   line-height: 1.1;
   letter-spacing: -0.025em;
 }
@@ -158,7 +158,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--ngf-accent-500);
+  background: var(--tx-orange-500);
   color: var(--tx-on-accent);
   border: none;
   border-radius: 8px;
@@ -166,7 +166,7 @@
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(var(--ngf-accent-rgb), 0.2);
+  box-shadow: 0 2px 8px rgb(var(--tx-orange-500-rgb) / 0.2);
   transition: all 0.15s ease;
 }
 
@@ -267,11 +267,11 @@
 }
 
 .quotes-master-table thead tr {
-  background: var(--ngf-ink-950);
+  background: var(--tx-choc-950);
 }
 
 .quotes-master-table th {
-  background-color: var(--ngf-ink-950);
+  background-color: var(--tx-choc-950);
   color: var(--tx-white);
   font-size: 0.6875rem;
   font-weight: 800;
@@ -399,8 +399,8 @@
 }
 
 .btn-review-row:hover {
-  background: var(--ngf-accent-500);
-  border-color: var(--ngf-accent-500);
+  background: var(--tx-orange-500);
+  border-color: var(--tx-orange-500);
   color: var(--tx-on-accent);
 }
 
@@ -921,7 +921,7 @@
 
 .validity-date-input:focus {
   border-color: var(--tx-accent-text);
-  box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.1);
+  box-shadow: 0 0 0 2px rgb(var(--tx-orange-500-rgb) / 0.1);
 }
 
 .validity-help-text {
@@ -979,7 +979,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: var(--ngf-accent-500);
+  background: var(--tx-orange-500);
   color: var(--tx-on-accent);
   border: none;
   border-radius: 8px;
@@ -988,7 +988,7 @@
   font-weight: 800;
   cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 8px rgba(var(--ngf-accent-rgb), 0.2);
+  box-shadow: 0 2px 8px rgb(var(--tx-orange-500-rgb) / 0.2);
 }
 
 .btn-publish-quote-primary:hover {
@@ -1189,7 +1189,7 @@
 .quote-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(var(--ngf-ink-rgb), 0.6);
+  background: rgb(var(--tx-choc-950-rgb) / 0.6);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -1302,7 +1302,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--ngf-accent-500);
+  background: var(--tx-orange-500);
   color: var(--tx-on-accent);
   border: none;
   border-radius: 6px;

@@ -74,10 +74,10 @@ export const NewProofsPanel: React.FC<NewProofsPanelProps> = ({ newProofsCount, 
   const shown = proofs.slice(0, PANEL_LIMIT);
 
   return (
-    <section className="ops-section-card ngf-new-proofs" aria-labelledby="ngf-new-proofs-title">
+    <section className="ops-section-card tx-new-proofs" aria-labelledby="tx-new-proofs-title">
       <div className="ops-table-header-block">
         <div className="table-title-row">
-          <h2 id="ngf-new-proofs-title" ref={headingRef} tabIndex={-1} className="ops-section-title">New payment proofs</h2>
+          <h2 id="tx-new-proofs-title" ref={headingRef} tabIndex={-1} className="ops-section-title">New payment proofs</h2>
           <span className={`ops-shipment-count-pill${proofs.length > 0 ? ' new-proofs-pill-active' : ''}`}>
             {proofs.length} to review
           </span>

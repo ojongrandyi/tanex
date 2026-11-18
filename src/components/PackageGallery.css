@@ -1,16 +1,16 @@
 /* Track Result: Package images (CONTENT.md §6.6). */
 
-.ngf-gallery-section {
+.tx-gallery-section {
   margin-bottom: 2rem;
 }
 
-.ngf-gallery-intro {
+.tx-gallery-intro {
   margin: 0.25rem 0 1rem;
   font-size: 0.9rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
-.ngf-gallery-grid {
+.tx-gallery-grid {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -20,7 +20,7 @@
 }
 
 @media (min-width: 600px) {
-  .ngf-gallery-grid {
+  .tx-gallery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -28,52 +28,52 @@
 /* Tablet and desktop: the photos fill the full width at a low, fixed height (cropped to fit;
    the viewer shows the whole photo). Phones keep the 4:3 cards above. */
 @media (min-width: 768px) {
-  .ngf-gallery-grid {
+  .tx-gallery-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .ngf-gallery-grid[data-count="1"] {
+  .tx-gallery-grid[data-count="1"] {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .ngf-gallery-grid[data-count="2"] {
+  .tx-gallery-grid[data-count="2"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ngf-gallery-thumb {
+  .tx-gallery-thumb {
     aspect-ratio: auto;
     height: 220px;
   }
 }
 
 @media (min-width: 1024px) {
-  .ngf-gallery-thumb {
+  .tx-gallery-thumb {
     height: 260px;
   }
 }
 
-.ngf-gallery-item {
+.tx-gallery-item {
   margin: 0;
   background: #ffffff;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   height: 100%;
 }
 
-.ngf-gallery-thumb {
+.tx-gallery-thumb {
   display: block;
   width: 100%;
   padding: 0;
   border: 0;
-  background: var(--ngf-slate-100);
+  background: var(--tx-cream-200);
   cursor: zoom-in;
   aspect-ratio: 4 / 3;
   overflow: hidden;
 }
 
-.ngf-gallery-thumb img {
+.tx-gallery-thumb img {
   display: block;
   width: 100%;
   height: 100%;
@@ -81,30 +81,30 @@
   transition: transform 0.25s ease;
 }
 
-.ngf-gallery-thumb:hover img {
+.tx-gallery-thumb:hover img {
   transform: scale(1.03);
 }
 
-.ngf-gallery-thumb:focus-visible {
-  outline: 3px solid var(--ngf-color-focus);
+.tx-gallery-thumb:focus-visible {
+  outline: 3px solid var(--tx-focus);
   box-shadow: inset 0 0 0 2px var(--tx-focus-offset);
   outline-offset: -4px;
 }
 
-.ngf-gallery-item figcaption {
+.tx-gallery-item figcaption {
   padding: 0.7rem 0.9rem 0.8rem;
   font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.4;
-  color: var(--ngf-slate-800);
+  color: var(--tx-choc-800);
   overflow-wrap: anywhere;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ngf-gallery-thumb img {
+  .tx-gallery-thumb img {
     transition: none;
   }
-  .ngf-gallery-thumb:hover img {
+  .tx-gallery-thumb:hover img {
     transform: none;
   }
 }

@@ -247,11 +247,11 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
   };
 
   return (
-    <div className={`ngf-pre${compact ? " ngf-pre-compact" : ""}`} onKeyDown={blockEnter}>
-      <div className="ngf-pre-layout">
-        <div className="ngf-pre-form">
-          <div className="ngf-pre-row">
-            <div className="ngf-pre-field">
+    <div className={`tx-pre${compact ? " tx-pre-compact" : ""}`} onKeyDown={blockEnter}>
+      <div className="tx-pre-layout">
+        <div className="tx-pre-form">
+          <div className="tx-pre-row">
+            <div className="tx-pre-field">
               <label htmlFor={id('amount')}>Amount due</label>
               <input
                 id={id('amount')}
@@ -264,22 +264,22 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                 aria-invalid={!!errors.amount}
                 placeholder="0.00"
               />
-              {errors.amount && <p className="ngf-pre-error">{errors.amount}</p>}
+              {errors.amount && <p className="tx-pre-error">{errors.amount}</p>}
             </div>
-            <div className="ngf-pre-field ngf-pre-field-narrow">
+            <div className="tx-pre-field tx-pre-field-narrow">
               <label htmlFor={id('currency')}>Currency</label>
               <select id={id('currency')} value={value.currency} onChange={(e) => set({ currency: e.target.value as PaymentCurrency })}>
                 {PAYMENT_CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <div className="ngf-pre-field">
+            <div className="tx-pre-field">
               <label htmlFor={id('due')}>Due date (optional)</label>
               <input id={id('due')} type="date" value={value.dueDate} onChange={(e) => set({ dueDate: e.target.value })} aria-invalid={!!errors.dueDate} />
-              {errors.dueDate && <p className="ngf-pre-error">{errors.dueDate}</p>}
+              {errors.dueDate && <p className="tx-pre-error">{errors.dueDate}</p>}
             </div>
           </div>
 
-          <div className="ngf-pre-field">
+          <div className="tx-pre-field">
             <label htmlFor={id('reason')}>What the customer is paying for</label>
             <input
               id={id('reason')}
@@ -290,22 +290,22 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
               placeholder={`e.g. Customs duty – Invoice ${REFERENCE_PREFIX}-INV-104233`}
               aria-invalid={!!errors.chargeReason}
             />
-            {errors.chargeReason && <p className="ngf-pre-error">{errors.chargeReason}</p>}
+            {errors.chargeReason && <p className="tx-pre-error">{errors.chargeReason}</p>}
           </div>
 
           {invoices.length > 0 && (
-            <div className="ngf-pre-field">
+            <div className="tx-pre-field">
               <label htmlFor={id('invoice')}>Linked invoice (optional)</label>
               <select id={id('invoice')} value={value.invoiceDocumentId} onChange={(e) => set({ invoiceDocumentId: e.target.value })} aria-invalid={!!errors.invoiceDocumentId}>
                 <option value="">None</option>
                 {invoices.map((inv) => <option key={inv.id} value={inv.id}>{inv.label}</option>)}
               </select>
-              <p className="ngf-pre-hint">When the payment is confirmed, this invoice is marked paid.</p>
-              {errors.invoiceDocumentId && <p className="ngf-pre-error">{errors.invoiceDocumentId}</p>}
+              <p className="tx-pre-hint">When the payment is confirmed, this invoice is marked paid.</p>
+              {errors.invoiceDocumentId && <p className="tx-pre-error">{errors.invoiceDocumentId}</p>}
             </div>
           )}
 
-          <div className="ngf-pre-field">
+          <div className="tx-pre-field">
             <label htmlFor={id('note')}>Note for the customer (optional)</label>
             <textarea
               id={id('note')}
@@ -315,41 +315,41 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
               onChange={(e) => set({ customerNote: e.target.value })}
               placeholder="e.g. Please pay within 48 hours so the shipment can clear customs."
             />
-            {errors.customerNote && <p className="ngf-pre-error">{errors.customerNote}</p>}
+            {errors.customerNote && <p className="tx-pre-error">{errors.customerNote}</p>}
           </div>
 
           {/* Accounts typed for this shipment */}
-          <div className="ngf-pre-accounts">
-            <div className="ngf-pre-accounts-head">
+          <div className="tx-pre-accounts">
+            <div className="tx-pre-accounts-head">
               <h5>Payment accounts for this shipment</h5>
               <span>{value.accounts.length} / {PAYMENT_LIMITS.maxAccounts}</span>
             </div>
-            <p className="ngf-pre-hint">Customers can pay with any account you add. Offering 3–5 methods gives them more choice.</p>
-            {errors.methods && <p className="ngf-pre-error">{errors.methods}</p>}
+            <p className="tx-pre-hint">Customers can pay with any account you add. Offering 3–5 methods gives them more choice.</p>
+            {errors.methods && <p className="tx-pre-error">{errors.methods}</p>}
 
             {value.accounts.length > 0 && (
-              <ul className="ngf-pre-account-list">
+              <ul className="tx-pre-account-list">
                 {value.accounts.map((a, index) => {
                   const err = accountErrorFor(index);
                   return (
-                    <li key={a.key} className={`ngf-pre-account${err ? ' has-error' : ''}`}>
-                      <span className="ngf-pre-account-icon"><PaymentIcon type={a.type} size={20} /></span>
-                      <div className="ngf-pre-account-text">
+                    <li key={a.key} className={`tx-pre-account${err ? ' has-error' : ''}`}>
+                      <span className="tx-pre-account-icon"><PaymentIcon type={a.type} size={20} /></span>
+                      <div className="tx-pre-account-text">
                         <strong>{a.label || PAYMENT_METHODS[a.type].label}</strong>
                         <span>{accountSummary(a)}</span>
-                        {err && <span className="ngf-pre-error">{err}</span>}
+                        {err && <span className="tx-pre-error">{err}</span>}
                       </div>
-                      <div className="ngf-pre-account-actions">
-                        <button type="button" className="ngf-pre-icon-btn" onClick={() => startEdit(index)} disabled={!!accountEditor} aria-label={`Edit ${a.label || PAYMENT_METHODS[a.type].label}`}>
+                      <div className="tx-pre-account-actions">
+                        <button type="button" className="tx-pre-icon-btn" onClick={() => startEdit(index)} disabled={!!accountEditor} aria-label={`Edit ${a.label || PAYMENT_METHODS[a.type].label}`}>
                           <Pencil size={14} aria-hidden="true" />
                         </button>
-                        <button type="button" className="ngf-pre-icon-btn" onClick={() => moveAccount(index, -1)} disabled={!!accountEditor || index === 0} aria-label="Move up">
+                        <button type="button" className="tx-pre-icon-btn" onClick={() => moveAccount(index, -1)} disabled={!!accountEditor || index === 0} aria-label="Move up">
                           <ArrowUp size={14} aria-hidden="true" />
                         </button>
-                        <button type="button" className="ngf-pre-icon-btn" onClick={() => moveAccount(index, 1)} disabled={!!accountEditor || index === value.accounts.length - 1} aria-label="Move down">
+                        <button type="button" className="tx-pre-icon-btn" onClick={() => moveAccount(index, 1)} disabled={!!accountEditor || index === value.accounts.length - 1} aria-label="Move down">
                           <ArrowDown size={14} aria-hidden="true" />
                         </button>
-                        <button type="button" className="ngf-pre-icon-btn danger" onClick={() => removeAccount(index)} disabled={!!accountEditor} aria-label={`Remove ${a.label || PAYMENT_METHODS[a.type].label}`}>
+                        <button type="button" className="tx-pre-icon-btn danger" onClick={() => removeAccount(index)} disabled={!!accountEditor} aria-label={`Remove ${a.label || PAYMENT_METHODS[a.type].label}`}>
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </div>
@@ -360,24 +360,24 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
             )}
 
             {!accountEditor && remaining > 0 && (
-              <button type="button" className="ngf-pre-btn" onClick={startAdd}>
+              <button type="button" className="tx-pre-btn" onClick={startAdd}>
                 <Plus size={14} aria-hidden="true" />
                 <span>{value.accounts.length === 0 ? 'Add payment methods' : 'Add more methods'}</span>
               </button>
             )}
 
             {accountEditor?.mode === 'pick' && (
-              <div className="ngf-pre-subeditor">
-                <div className="ngf-pre-subeditor-head">
+              <div className="tx-pre-subeditor">
+                <div className="tx-pre-subeditor-head">
                   <h6>Choose the payment methods to offer</h6>
-                  <button type="button" className="ngf-pre-icon-btn" onClick={() => setAccountEditor(null)} aria-label="Cancel">
+                  <button type="button" className="tx-pre-icon-btn" onClick={() => setAccountEditor(null)} aria-label="Cancel">
                     <X size={14} aria-hidden="true" />
                   </button>
                 </div>
-                <p className="ngf-pre-hint">
+                <p className="tx-pre-hint">
                   Select one or more (up to {remaining}). You'll add each account's details next.
                 </p>
-                <div className="ngf-pre-type-grid" role="group" aria-label="Payment methods">
+                <div className="tx-pre-type-grid" role="group" aria-label="Payment methods">
                   {PAYMENT_METHOD_TYPES.map((t) => {
                     const selected = accountEditor.selected.includes(t);
                     const full = !selected && accountEditor.selected.length >= remaining;
@@ -385,21 +385,21 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                       <button
                         type="button"
                         key={t}
-                        className={`ngf-pre-type${selected ? ' is-selected' : ''}`}
+                        className={`tx-pre-type${selected ? ' is-selected' : ''}`}
                         aria-pressed={selected}
                         disabled={full}
                         onClick={() => toggleType(t)}
                       >
                         <PaymentIcon type={t} size={20} />
                         <span>{PAYMENT_METHODS[t].label}</span>
-                        <span className="ngf-pre-type-check" aria-hidden="true">{selected && <Check size={12} />}</span>
+                        <span className="tx-pre-type-check" aria-hidden="true">{selected && <Check size={12} />}</span>
                       </button>
                     );
                   })}
                 </div>
-                <div className="ngf-pre-subeditor-actions">
-                  <button type="button" className="ngf-pre-btn" onClick={() => setAccountEditor(null)}>Cancel</button>
-                  <button type="button" className="ngf-pre-btn primary" onClick={continueWithSelected} disabled={accountEditor.selected.length === 0}>
+                <div className="tx-pre-subeditor-actions">
+                  <button type="button" className="tx-pre-btn" onClick={() => setAccountEditor(null)}>Cancel</button>
+                  <button type="button" className="tx-pre-btn primary" onClick={continueWithSelected} disabled={accountEditor.selected.length === 0}>
                     {accountEditor.selected.length === 0
                       ? 'Select at least one'
                       : `Continue with ${accountEditor.selected.length} method${accountEditor.selected.length === 1 ? '' : 's'}`}
@@ -409,14 +409,14 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
             )}
 
             {editing && accountEditor?.mode === 'form' && (
-              <div className="ngf-pre-subeditor">
-                <div className="ngf-pre-subeditor-head">
+              <div className="tx-pre-subeditor">
+                <div className="tx-pre-subeditor-head">
                   <h6>
                     <PaymentIcon type={editing.type} size={18} />
                     <span>{PAYMENT_METHODS[editing.type].label}</span>
-                    {accountEditor.total > 1 && <small className="ngf-pre-step">Account {accountEditor.step} of {accountEditor.total}</small>}
+                    {accountEditor.total > 1 && <small className="tx-pre-step">Account {accountEditor.step} of {accountEditor.total}</small>}
                   </h6>
-                  <button type="button" className="ngf-pre-icon-btn" onClick={() => setAccountEditor(null)} aria-label="Cancel">
+                  <button type="button" className="tx-pre-icon-btn" onClick={() => setAccountEditor(null)} aria-label="Cancel">
                     <X size={14} aria-hidden="true" />
                   </button>
                 </div>
@@ -424,7 +424,7 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                   const fid = id(`acc-${field.name}`);
                   const err = accountErrors[field.name];
                   return (
-                    <div className="ngf-pre-field" key={field.name}>
+                    <div className="tx-pre-field" key={field.name}>
                       <label htmlFor={fid}>{field.label}{field.required ? '' : ' (optional)'}</label>
                       {field.options ? (
                         <select id={fid} value={editing.details[field.name] ?? ''} onChange={(e) => updateEditing({ details: { ...editing.details, [field.name]: e.target.value } })}>
@@ -448,27 +448,27 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
                           aria-describedby={err ? `${fid}-err` : undefined}
                         />
                       )}
-                      {err && <p className="ngf-pre-error" id={`${fid}-err`}>{err}</p>}
+                      {err && <p className="tx-pre-error" id={`${fid}-err`}>{err}</p>}
                     </div>
                   );
                 })}
-                {accountErrors._form && <p className="ngf-pre-error">{accountErrors._form}</p>}
-                <div className="ngf-pre-field">
+                {accountErrors._form && <p className="tx-pre-error">{accountErrors._form}</p>}
+                <div className="tx-pre-field">
                   <label htmlFor={id('acc-label')}>Display name (optional)</label>
                   <input id={id('acc-label')} type="text" maxLength={PAYMENT_LIMITS.labelMax} value={editing.label} placeholder={PAYMENT_METHODS[editing.type].label} onChange={(e) => updateEditing({ label: e.target.value })} />
-                  {accountErrors.label && <p className="ngf-pre-error">{accountErrors.label}</p>}
+                  {accountErrors.label && <p className="tx-pre-error">{accountErrors.label}</p>}
                 </div>
-                <div className="ngf-pre-field">
+                <div className="tx-pre-field">
                   <label htmlFor={id('acc-instructions')}>Instructions for the customer (optional)</label>
                   <textarea id={id('acc-instructions')} rows={2} maxLength={PAYMENT_LIMITS.instructionsMax} value={editing.instructions} onChange={(e) => updateEditing({ instructions: e.target.value })} />
-                  {accountErrors.instructions && <p className="ngf-pre-error">{accountErrors.instructions}</p>}
+                  {accountErrors.instructions && <p className="tx-pre-error">{accountErrors.instructions}</p>}
                 </div>
-                <div className="ngf-pre-subeditor-actions">
-                  <button type="button" className="ngf-pre-btn" onClick={() => setAccountEditor(null)}>Cancel</button>
+                <div className="tx-pre-subeditor-actions">
+                  <button type="button" className="tx-pre-btn" onClick={() => setAccountEditor(null)}>Cancel</button>
                   {accountEditor.queue.length > 0 && (
-                    <button type="button" className="ngf-pre-btn" onClick={skipAccount}>Skip</button>
+                    <button type="button" className="tx-pre-btn" onClick={skipAccount}>Skip</button>
                   )}
-                  <button type="button" className="ngf-pre-btn primary" onClick={saveAccount}>
+                  <button type="button" className="tx-pre-btn primary" onClick={saveAccount}>
                     {accountEditor.index !== null ? 'Update account' : accountEditor.queue.length > 0 ? 'Add and continue' : 'Add this account'}
                   </button>
                 </div>
@@ -478,19 +478,19 @@ export const PaymentRequestEditor: React.FC<PaymentRequestEditorProps> = ({ valu
         </div>
 
         {/* Live preview of the customer's payment section */}
-        <div className="ngf-pre-preview" aria-label="Customer preview">
-          <span className="ngf-pre-preview-label">Customer preview</span>
-          <div className="ngf-pre-preview-box">
-            <div className="ngf-pre-preview-amount">
+        <div className="tx-pre-preview" aria-label="Customer preview">
+          <span className="tx-pre-preview-label">Customer preview</span>
+          <div className="tx-pre-preview-box">
+            <div className="tx-pre-preview-amount">
               {Number.isFinite(amountNumber) && amountNumber > 0 ? formatPaymentAmount(amountNumber, value.currency) : formatPaymentAmount(0, value.currency)}
             </div>
-            <p className="ngf-pre-preview-reason">{value.chargeReason.trim() || 'Reason for the payment'}</p>
-            {value.dueDate && <p className="ngf-pre-preview-meta">Due {value.dueDate}</p>}
-            {value.customerNote.trim() && <p className="ngf-pre-preview-note">{value.customerNote.trim()}</p>}
+            <p className="tx-pre-preview-reason">{value.chargeReason.trim() || 'Reason for the payment'}</p>
+            {value.dueDate && <p className="tx-pre-preview-meta">Due {value.dueDate}</p>}
+            {value.customerNote.trim() && <p className="tx-pre-preview-note">{value.customerNote.trim()}</p>}
             {previewAccounts.length === 0 ? (
-              <p className="ngf-pre-preview-empty">Add an account to show how the customer can pay.</p>
+              <p className="tx-pre-preview-empty">Add an account to show how the customer can pay.</p>
             ) : (
-              <div className="ngf-pre-preview-cards">
+              <div className="tx-pre-preview-cards">
                 {previewAccounts.map((p) => <PaymentMethodCard key={p.key} view={p.view} instructions={p.instructions} />)}
               </div>
             )}

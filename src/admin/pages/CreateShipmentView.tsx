@@ -547,7 +547,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
       finalPrice
     };
     try {
-      localStorage.setItem('ngf_admin_shipment_draft', JSON.stringify(draftData));
+      localStorage.setItem('tx_admin_shipment_draft', JSON.stringify(draftData));
       setDraftSavedToast('Draft manifest saved to local session.');
       setTimeout(() => setDraftSavedToast(null), 3000);
     } catch {
@@ -1240,7 +1240,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   // MAIN MULTI-STEP WORKSPACE VIEW
   // ----------------------------------------------------
   return (
-    <div className="ngf-create-shipment-workspace">
+    <div className="tx-create-shipment-workspace">
       {draftSavedToast && (
         <div className="draft-saved-toast animate-fade-in">
           <CheckCircle2 size={16} className="text-emerald" />
@@ -1725,7 +1725,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {/* ---------------------------------------------------- */}
           {currentStep === 3 && (
             <div className="step-inner-content animate-fade-in">
-              <div className="ngf-heading-with-units admin-units-bar">
+              <div className="tx-heading-with-units admin-units-bar">
                 <span className="dim-label">Weights and dimensions in</span>
                 <UnitToggle />
               </div>

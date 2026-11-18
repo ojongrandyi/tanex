@@ -13,12 +13,12 @@ interface NotFoundPageProps {
 export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onNavigate }) => {
   const t = useAreaT('notFound');
   return (
-    <div className="ngf-page-notfound">
-      <section className="ngf-container ngf-notfound-inner">
-        <p className="ngf-notfound-eyebrow">{t('eyebrow')}</p>
+    <div className="tx-page-notfound">
+      <section className="tx-container tx-notfound-inner">
+        <p className="tx-notfound-eyebrow">{t('eyebrow')}</p>
         <h1>{t('title')}</h1>
-        <p className="ngf-notfound-sub">{t('sub')}</p>
-        <div className="ngf-notfound-actions">
+        <p className="tx-notfound-sub">{t('sub')}</p>
+        <div className="tx-notfound-actions">
           <Button variant="primary" icon={<Home size={18} />} onClick={() => onNavigate('home')}>
             {t('home')}
           </Button>
@@ -26,9 +26,9 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onNavigate }) => {
             {t('track')}
           </Button>
         </div>
-        <p className="ngf-notfound-help">
+        <p className="tx-notfound-help">
           {t('needHelp')}{' '}
-          <button type="button" className="ngf-notfound-link" onClick={() => onNavigate('contact')}>
+          <button type="button" className="tx-notfound-link" onClick={() => onNavigate('contact')}>
             {t('contact')}
           </button>
         </p>

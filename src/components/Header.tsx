@@ -254,7 +254,7 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
 
   return (
     <header className={`tx-header${scrolled ? ' is-scrolled' : ''}`}>
-      <button type="button" className="ngf-skip-link" onClick={skipToContent}>
+      <button type="button" className="tx-skip-link" onClick={skipToContent}>
         {t('skipLink')}
       </button>
 

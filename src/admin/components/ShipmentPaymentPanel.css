@@ -1,100 +1,100 @@
 /* Edit Shipment: payment request panel (update D.2/D.3). Same shell as the images panel. */
 
-.ngf-spp {
-  background: var(--ngf-slate-50);
-  border: 1px solid var(--ngf-slate-200);
+.tx-spp {
+  background: var(--tx-cream-100);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 10px;
   padding: 0.85rem 1rem 1rem;
   text-align: left;
   min-width: 0;
 }
 
-.ngf-spp-head {
+.tx-spp-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
 }
 
-.ngf-spp-head h4 {
+.tx-spp-head h4 {
   margin: 0;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--ngf-slate-900);
+  color: var(--tx-choc-900);
 }
 
-.ngf-spp-hint {
+.tx-spp-hint {
   margin: 0.25rem 0 0.25rem;
   font-size: 0.75rem;
   line-height: 1.45;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
-.ngf-spp-message {
+.tx-spp-message {
   min-height: 1.1em;
   margin: 0 0 0.5rem;
   font-size: 0.75rem;
-  color: var(--ngf-success-700);
+  color: var(--tx-success-700);
 }
 
-.ngf-spp-message.is-error,
-.ngf-spp-error {
-  color: var(--ngf-danger-600);
+.tx-spp-message.is-error,
+.tx-spp-error {
+  color: var(--tx-danger-600);
 }
 
-.ngf-spp-error,
-.ngf-spp-empty {
+.tx-spp-error,
+.tx-spp-empty {
   margin: 0;
   font-size: 0.78rem;
 }
 
-.ngf-spp-empty {
-  color: var(--ngf-slate-600);
+.tx-spp-empty {
+  color: var(--tx-choc-600);
 }
 
-.ngf-spp-status {
+.tx-spp-status {
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 700;
   white-space: nowrap;
-  background: var(--ngf-slate-100);
-  color: var(--ngf-slate-700);
+  background: var(--tx-cream-200);
+  color: var(--tx-choc-700);
 }
 
-.ngf-spp-status.s-awaiting_payment { background: var(--ngf-warning-50); color: #92400e; }
-.ngf-spp-status.s-under_review { background: var(--ngf-info-50); color: var(--ngf-info-700); }
-.ngf-spp-status.s-paid { background: var(--ngf-success-50); color: var(--ngf-success-700); }
+.tx-spp-status.s-awaiting_payment { background: var(--tx-warning-50); color: #92400e; }
+.tx-spp-status.s-under_review { background: var(--tx-info-50); color: var(--tx-info-700); }
+.tx-spp-status.s-paid { background: var(--tx-success-50); color: var(--tx-success-700); }
 
-.ngf-spp-summary {
+.tx-spp-summary {
   padding: 0.85rem;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 9px;
   background: var(--tx-white);
 }
 
-.ngf-spp-amount {
+.tx-spp-amount {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--ngf-slate-900);
+  color: var(--tx-choc-900);
   font-variant-numeric: tabular-nums;
 }
 
-.ngf-spp-reason {
+.tx-spp-reason {
   margin: 0.1rem 0 0;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--ngf-slate-800);
+  color: var(--tx-choc-800);
   overflow-wrap: anywhere;
 }
 
-.ngf-spp-meta {
+.tx-spp-meta {
   margin: 0.2rem 0 0;
   font-size: 0.75rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
-.ngf-spp-accounts {
+.tx-spp-accounts {
   list-style: none;
   margin: 0.6rem 0 0;
   padding: 0;
@@ -103,20 +103,20 @@
   gap: 0.4rem;
 }
 
-.ngf-spp-accounts li {
+.tx-spp-accounts li {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.25rem 0.55rem;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 999px;
   font-size: 0.75rem;
-  color: var(--ngf-slate-800);
+  color: var(--tx-choc-800);
   max-width: 100%;
   overflow-wrap: anywhere;
 }
 
-.ngf-spp-none {
+.tx-spp-none {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -124,7 +124,7 @@
   flex-wrap: wrap;
 }
 
-.ngf-spp-actions {
+.tx-spp-actions {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
@@ -132,53 +132,53 @@
   margin-top: 0.85rem;
 }
 
-.ngf-spp-btn {
+.tx-spp-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.8rem;
-  border: 1px solid var(--ngf-slate-300);
+  border: 1px solid var(--tx-choc-200);
   border-radius: 7px;
   background: var(--tx-white);
-  color: var(--ngf-slate-800);
+  color: var(--tx-choc-800);
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
 }
 
-.ngf-spp-btn:hover:not(:disabled) {
-  background: var(--ngf-slate-50);
-  border-color: var(--ngf-slate-400);
+.tx-spp-btn:hover:not(:disabled) {
+  background: var(--tx-cream-100);
+  border-color: var(--tx-choc-300);
 }
 
-.ngf-spp-btn.primary {
-  background: var(--ngf-accent-600);
-  border-color: var(--ngf-accent-600);
+.tx-spp-btn.primary {
+  background: var(--tx-orange-600);
+  border-color: var(--tx-orange-600);
   color: var(--tx-on-accent);
 }
 
-.ngf-spp-btn.primary:hover:not(:disabled) {
-  background: var(--ngf-accent-700);
+.tx-spp-btn.primary:hover:not(:disabled) {
+  background: var(--tx-orange-700);
 }
 
-.ngf-spp-btn.danger:hover:not(:disabled) {
-  border-color: var(--ngf-danger-500);
-  color: var(--ngf-danger-600);
-  background: var(--ngf-danger-50);
+.tx-spp-btn.danger:hover:not(:disabled) {
+  border-color: var(--tx-danger-500);
+  color: var(--tx-danger-600);
+  background: var(--tx-danger-50);
 }
 
-.ngf-spp-btn:disabled {
+.tx-spp-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.ngf-spp button:focus-visible {
-  outline: 2px solid var(--ngf-color-focus);
+.tx-spp button:focus-visible {
+  outline: 2px solid var(--tx-focus);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--tx-focus-offset);
 }
 
-.ngf-spp-spin {
+.tx-spp-spin {
   animation: ngfSppSpin 0.9s linear infinite;
 }
 
@@ -187,5 +187,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ngf-spp-spin { animation: none; }
+  .tx-spp-spin { animation: none; }
 }

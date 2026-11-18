@@ -430,7 +430,7 @@ function MainAppContent() {
 
   const pageMotionKey = `${currentPage}|${route?.canonical ?? ''}`;
   return (
-    <div className="ngf-app-shell">
+    <div className="tx-app-shell">
       <LanguageSuggestion />
       <SmoothScroll routeKey={`${currentPage}|${route?.canonical ?? ''}`} />
       <Header
@@ -439,7 +439,7 @@ function MainAppContent() {
         onNavigate={handleNavigate}
       />
 
-      <main className="ngf-main-view" ref={mainRef}>
+      <main className="tx-main-view" ref={mainRef}>
         {isTrackSearching ? (
           <TrackingLoadingScreen query={trackSearchQuery} />
         ) : (

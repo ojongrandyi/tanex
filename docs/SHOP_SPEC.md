@@ -209,10 +209,10 @@ cannot upload a picture of the wrong size, because the console only uploads what
    those slots instead.
 5. Shows the result before upload. Many files can be queued; each gets its own crop step (Skip = automatic start).
 
-**On the server (`POST /api/shop/media`, `shop.write` or `shop.categories`):**
+**On the server (`POST /api/admin/shop/media`, `shop.write` or `shop.categories`):**
 - Checks every file by its bytes (`server/uploads.ts`), reads its pixel size (`server/imageSize.ts`) and refuses the
   upload unless each file is **exactly** 1200×1200, 600×600 or 300×300 as its slot says, the right type, and under
-  its byte cap (1200: 700 KB, 600: 250 KB, 300: 90 KB). Random file names under `UPLOADS_DIR/shop/`, served from
+  its byte cap (WebP 1200: 700 KB, 600: 250 KB, 300: 90 KB; JPEG 1200: 800 KB, 600: 280 KB; `src/shared/shopImages.ts`). Random file names under `UPLOADS_DIR/shop/`, served from
   `/media/shop/…` with long immutable cache headers.
 - Product: at most **8** pictures; position 0 is the main picture. Category: one picture.
 

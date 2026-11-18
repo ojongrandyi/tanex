@@ -61,12 +61,12 @@
   max-height: 70vh;
   padding: 0.6rem;
   border-radius: 0.75rem;
-  background: var(--ngf-slate-100);
+  background: var(--tx-cream-200);
   scroll-snap-align: start;
 }
 
 .tx-board-column.is-problems {
-  background: var(--ngf-warning-50);
+  background: var(--tx-warning-50);
 }
 
 .tx-board-column h2 {
@@ -78,15 +78,15 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-board-count {
   min-width: 1.6rem;
   padding: 0.05rem 0.45rem;
   border-radius: 999px;
-  background: var(--ngf-white);
-  font-family: var(--ngf-font-mono, monospace);
+  background: var(--tx-white);
+  font-family: var(--tx-font-mono, monospace);
   font-size: 0.75rem;
   text-align: center;
 }
@@ -112,11 +112,11 @@
   gap: 0.3rem;
   width: 100%;
   padding: 0.6rem 0.7rem;
-  border: 1px solid var(--ngf-slate-200);
-  border-left: 4px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
+  border-left: 4px solid var(--tx-choc-100);
   border-radius: 0.6rem;
-  background: var(--ngf-white);
-  color: var(--ngf-ink-900);
+  background: var(--tx-white);
+  color: var(--tx-choc-900);
   font: inherit;
   font-size: 0.8rem;
   text-align: left;
@@ -128,16 +128,16 @@
 }
 
 .tx-board-card:hover {
-  border-color: var(--ngf-slate-400);
+  border-color: var(--tx-choc-300);
 }
 
 .tx-board-card.is-selected {
-  border-color: var(--ngf-ink-900);
-  box-shadow: 0 0 0 1px var(--ngf-ink-900);
+  border-color: var(--tx-choc-900);
+  box-shadow: 0 0 0 1px var(--tx-choc-900);
 }
 
 .tx-board-card:focus-visible {
-  outline: 2px solid var(--ngf-ink-900);
+  outline: 2px solid var(--tx-choc-900);
   outline-offset: 2px;
 }
 
@@ -158,7 +158,7 @@
 }
 
 .tx-board-card-meta {
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 .tx-board-chips {
@@ -174,8 +174,8 @@
   font-size: 0.68rem;
   font-weight: 700;
   white-space: nowrap;
-  background: var(--ngf-slate-100);
-  color: var(--ngf-slate-700);
+  background: var(--tx-cream-200);
+  color: var(--tx-choc-700);
   margin: 0 0.25rem 0.25rem 0;
 }
 
@@ -186,13 +186,13 @@
 }
 
 .tx-board-status.is-delivered {
-  background: var(--ngf-success-50);
-  color: var(--ngf-success-700);
+  background: var(--tx-success-50);
+  color: var(--tx-success-700);
 }
 
 .tx-board-status.is-failed_attempt {
-  background: var(--ngf-warning-50);
-  color: var(--ngf-warning-700);
+  background: var(--tx-warning-50);
+  color: var(--tx-warning-700);
 }
 
 /* Map and couriers */
@@ -207,13 +207,13 @@
 .tx-board-subhead {
   margin: 0 0 0.5rem;
   font-size: 0.9rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-board-map {
   height: 380px;
   border-radius: 0.6rem;
-  background: var(--ngf-slate-100);
+  background: var(--tx-cream-200);
   /* Keeps Leaflet's panes (z-index 400+) under the drawer and dialogs. */
   isolation: isolate;
 }
@@ -226,7 +226,7 @@
   padding: 0;
   list-style: none;
   font-size: 0.75rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 .tx-board-legend li {
@@ -245,8 +245,8 @@
 }
 
 .tx-board-dot.is-stale {
-  background: var(--ngf-slate-400);
-  border-color: var(--ngf-slate-200);
+  background: var(--tx-choc-300);
+  border-color: var(--tx-choc-100);
 }
 
 .tx-board-line {
@@ -264,16 +264,16 @@
   border-radius: 50%;
   background: var(--tx-choc-800);
   border: 3px solid var(--tx-orange-500);
-  color: var(--ngf-white);
+  color: var(--tx-white);
   font-size: 0.65rem;
   font-weight: 700;
   box-sizing: border-box;
 }
 
 .tx-board-courier.is-stale span {
-  background: var(--ngf-slate-400);
-  border-color: var(--ngf-slate-200);
-  color: var(--ngf-ink-900);
+  background: var(--tx-choc-300);
+  border-color: var(--tx-choc-100);
+  color: var(--tx-choc-900);
 }
 
 .tx-board-table-wrap {
@@ -290,14 +290,14 @@
   display: flex;
   flex-direction: column;
   width: min(460px, 100vw);
-  background: var(--ngf-white);
-  border-left: 1px solid var(--ngf-slate-200);
-  box-shadow: var(--ngf-shadow-xl);
+  background: var(--tx-white);
+  border-left: 1px solid var(--tx-choc-100);
+  box-shadow: var(--tx-shadow-xl);
   box-sizing: border-box;
 }
 
 .tx-board-drawer:focus-visible {
-  outline: 2px solid var(--ngf-ink-900);
+  outline: 2px solid var(--tx-choc-900);
   outline-offset: -2px;
 }
 
@@ -307,13 +307,13 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem 1rem 0.5rem;
-  border-bottom: 1px solid var(--ngf-slate-200);
+  border-bottom: 1px solid var(--tx-choc-100);
 }
 
 .tx-board-drawer-head h2 {
   margin: 0 0 0.35rem;
   font-size: 1.1rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-board-icon-btn {
@@ -322,15 +322,15 @@
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 0.5rem;
-  background: var(--ngf-white);
-  color: var(--ngf-ink-900);
+  background: var(--tx-white);
+  color: var(--tx-choc-900);
   cursor: pointer;
 }
 
 .tx-board-icon-btn:focus-visible {
-  outline: 2px solid var(--ngf-ink-900);
+  outline: 2px solid var(--tx-choc-900);
   outline-offset: 2px;
 }
 
@@ -341,7 +341,7 @@
   padding: 1rem;
   overflow-y: auto;
   font-size: 0.85rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-board-drawer-body section p {
@@ -356,7 +356,7 @@
 
 .tx-board-place {
   padding: 0.6rem 0.75rem;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 0.6rem;
 }
 
@@ -364,7 +364,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   font-weight: 600;
 }
 
@@ -381,7 +381,7 @@
 }
 
 .tx-board-dl dt {
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 .tx-board-dl dd {
@@ -399,14 +399,14 @@
 .tx-board-pod img {
   max-width: 100%;
   height: auto;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 0.5rem;
   object-fit: contain;
-  background: var(--ngf-slate-100);
+  background: var(--tx-cream-200);
 }
 
 .tx-board-pod img.is-signature {
-  background: var(--ngf-white);
+  background: var(--tx-white);
 }
 
 .tx-board-timeline,
@@ -424,18 +424,18 @@
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0.5rem;
   padding-left: 0.6rem;
-  border-left: 2px solid var(--ngf-slate-200);
+  border-left: 2px solid var(--tx-choc-100);
 }
 
 .tx-board-timeline time {
   font-size: 0.75rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 .tx-board-reason {
   display: block;
   font-size: 0.78rem;
-  color: var(--ngf-slate-700);
+  color: var(--tx-choc-700);
 }
 
 /* Assign suggestions */
@@ -454,7 +454,7 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.5rem 0.6rem;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 0.6rem;
 }
 
@@ -477,7 +477,7 @@
   gap: 0.7rem;
   margin: 0;
   padding: 0.75rem;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 0.6rem;
   min-width: 0;
 }
@@ -486,7 +486,7 @@
   padding: 0 0.3rem;
   font-weight: 700;
   font-size: 0.85rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-board-fieldset > .tx-iam-btn {

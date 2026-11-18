@@ -68,10 +68,10 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const plausible = isPlausiblePhone(country, national);
 
   return (
-    <div className="ngf-phone-input">
+    <div className="tx-phone-input">
       <select
         aria-label={codeLabel}
-        className={`${className} ngf-phone-code`}
+        className={`${className} tx-phone-code`}
         value={country}
         onChange={(e) => {
           setCountry(e.target.value);
@@ -87,7 +87,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
         type="tel"
         inputMode="tel"
         autoComplete="tel-national"
-        className={`${className} ngf-phone-number`}
+        className={`${className} tx-phone-number`}
         placeholder={placeholder}
         required={required}
         value={national}
@@ -97,7 +97,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
           emit(country, e.target.value);
         }}
       />
-      {!plausible && <small className="ngf-phone-hint">Check the number for {getCountry(country)?.name || country}.</small>}
+      {!plausible && <small className="tx-phone-hint">Check the number for {getCountry(country)?.name || country}.</small>}
     </div>
   );
 };

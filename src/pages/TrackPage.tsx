@@ -11,7 +11,7 @@ import { useAreaT, useLocale } from '../i18n/I18nProvider';
 import './TrackPage.css';
 
 // Track page (CONTENT §6.1, §6.5). Behaviour is unchanged from before E.5: one ID or up to 10,
-// recent searches kept in this browser (ngf_recent_tracking), the not-found banner from App, and
+// recent searches kept in this browser (tx_recent_tracking), the not-found banner from App, and
 // the several-shipments results dialog fed by the same masked public endpoint.
 
 interface TrackPageProps {
@@ -61,7 +61,7 @@ export const TrackPage: React.FC<TrackPageProps> = ({ onTrack, onNavigate, notFo
   // Recent searches from this browser
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('ngf_recent_tracking');
+      const saved = localStorage.getItem('tx_recent_tracking');
       if (saved) setRecentSearches(JSON.parse(saved).slice(0, 4));
     } catch {
       // Storage blocked: no recent list.
@@ -73,7 +73,7 @@ export const TrackPage: React.FC<TrackPageProps> = ({ onTrack, onNavigate, notFo
       const clean = num.trim().toUpperCase();
       const updated = [clean, ...recentSearches.filter((n) => n.toUpperCase() !== clean)].slice(0, 4);
       setRecentSearches(updated);
-      localStorage.setItem('ngf_recent_tracking', JSON.stringify(updated));
+      localStorage.setItem('tx_recent_tracking', JSON.stringify(updated));
     } catch {
       // Storage blocked: the search still runs.
     }

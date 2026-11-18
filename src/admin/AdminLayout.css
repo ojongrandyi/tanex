@@ -4,7 +4,7 @@
    Workspace: cream background, white cards, chocolate text. Tokens only (--tx-*).
    ========================================================================== */
 
-.ngf-admin-root {
+.tx-admin-root {
   display: flex;
   min-height: 100vh;
   width: 100%;
@@ -18,7 +18,7 @@
 /* ==========================================================================
    1. SIDEBAR
    ========================================================================== */
-.ngf-admin-sidebar {
+.tx-admin-sidebar {
   width: 272px;
   min-width: 272px;
   background-color: var(--tx-choc-950);
@@ -312,7 +312,7 @@
 /* ==========================================================================
    2. WORKSPACE AND TOP BAR
    ========================================================================== */
-.ngf-admin-main-wrapper {
+.tx-admin-main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -322,7 +322,7 @@
   background-color: var(--tx-cream-100);
 }
 
-.ngf-admin-page-content {
+.tx-admin-page-content {
   padding: 1.5rem 1.75rem 3rem;
   flex: 1;
   width: 100%;
@@ -331,7 +331,7 @@
   box-sizing: border-box;
 }
 
-.ngf-admin-top-header {
+.tx-admin-top-header {
   height: 64px;
   background: rgb(var(--tx-cream-100-rgb) / 0.92);
   backdrop-filter: saturate(1.2) blur(10px);
@@ -777,7 +777,7 @@
 }
 
 /* A panel that couldn't load its data, with "Try again" (update I.6). */
-.ngf-load-error {
+.tx-load-error {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -790,11 +790,11 @@
   color: var(--tx-danger-700);
 }
 
-.ngf-load-error p {
+.tx-load-error p {
   margin: 0;
 }
 
-.ngf-load-retry {
+.tx-load-retry {
   min-height: 34px;
   padding: 0.35rem 0.9rem;
   border: 1.5px solid var(--tx-danger-700);
@@ -806,12 +806,12 @@
   cursor: pointer;
 }
 
-.ngf-load-retry:hover {
+.tx-load-retry:hover {
   background: var(--tx-danger-700);
   color: var(--tx-white);
 }
 
-.ngf-load-retry:focus-visible {
+.tx-load-retry:focus-visible {
   outline: 2px solid var(--tx-focus);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--tx-focus-offset);
@@ -895,7 +895,7 @@
    4. RESPONSIVE
    ========================================================================== */
 @media (max-width: 900px) {
-  .ngf-admin-sidebar {
+  .tx-admin-sidebar {
     position: fixed;
     left: 0;
     top: 0;
@@ -905,12 +905,12 @@
 
   /* Shadow only while open: on the closed (off-screen) sidebar it showed as a strip along the
      left edge of every console page. */
-  .ngf-admin-sidebar.open {
+  .tx-admin-sidebar.open {
     transform: translateX(0);
     box-shadow: 12px 0 32px rgb(var(--tx-choc-950-rgb) / 0.35);
   }
 
-  .ngf-admin-main-wrapper {
+  .tx-admin-main-wrapper {
     margin-left: 0;
     width: 100%;
   }
@@ -927,11 +927,11 @@
     width: 200px;
   }
 
-  .ngf-admin-top-header {
+  .tx-admin-top-header {
     padding: 0 1.25rem;
   }
 
-  .ngf-admin-page-content {
+  .tx-admin-page-content {
     padding: 1.25rem 1rem 3rem;
   }
 }
@@ -942,7 +942,7 @@
   }
 
   /* Phone: hamburger, title, bell and avatar only, with room to breathe. */
-  .ngf-admin-top-header {
+  .tx-admin-top-header {
     height: 58px;
     padding: 0 1rem;
     gap: 0.5rem;

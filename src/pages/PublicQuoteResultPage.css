@@ -1,5 +1,5 @@
 /* PUBLIC QUOTE RESULT PAGE */
-.ngf-quote-result-page {
+.tx-quote-result-page {
   background-color: #f8fafc;
   min-height: calc(100vh - 200px);
   padding-bottom: 4rem;
@@ -577,7 +577,7 @@
 }
 
 .contact-desk-card {
-  background: var(--ngf-ink-950);
+  background: var(--tx-choc-950);
   color: #ffffff;
   border: none;
 }
@@ -625,8 +625,8 @@
   /* Hide all website navigation, hero bars, and footers */
   header,
   footer,
-  .ngf-header,
-  .ngf-footer,
+  .tx-header,
+  .tx-footer,
   .screen-only-quotation-view,
   .hero-actions-box,
   .btn-print-quote,
@@ -635,9 +635,9 @@
   }
 
   body,
-  .ngf-app-shell,
-  .ngf-main-view,
-  .ngf-quote-result-page {
+  .tx-app-shell,
+  .tx-main-view,
+  .tx-quote-result-page {
     background: #ffffff !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -718,7 +718,7 @@
 
   .print-divider {
     height: 2px;
-    background: var(--ngf-ink-950);
+    background: var(--tx-choc-950);
     margin: 12px 0 16px;
   }
 

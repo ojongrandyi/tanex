@@ -6,7 +6,7 @@ import os from 'os';
 import path from 'path';
 
 // Point UPLOADS_DIR at a throwaway folder before the module reads it.
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ngf-uploads-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tx-uploads-'));
 process.env.UPLOADS_DIR = tmp;
 const { detectImageType, decodeImageUpload, saveImageUpload, resolveUploadPath, deleteUpload, uploadFolders, ensureUploadDirs } =
   await import('../server/uploads.ts');

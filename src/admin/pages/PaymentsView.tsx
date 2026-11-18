@@ -97,7 +97,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenS
   }, []);
 
   return (
-    <div className="ngf-payments-workspace animate-fade-in">
+    <div className="tx-payments-workspace animate-fade-in">
       <div className="payments-toolbar">
         <div className="payments-filters" role="tablist" aria-label="Filter payment proofs">
           {FILTERS.map((f) => (

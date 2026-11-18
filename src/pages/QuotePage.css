@@ -13,30 +13,30 @@
    Zero Freight/Train/Ship · 24/7 Dispatch Desk · Mobile-First
    ============================================================ */
 
-.ngf-page-quote {
+.tx-page-quote {
   display: flex;
   flex-direction: column;
   width: 100%;
   padding-bottom: 6rem;
   background-color: #f8fafc;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 /* ============================================================
    1. CINEMATIC HERO SECTION
    ============================================================ */
-.ngf-quote-hero {
+.tx-quote-hero {
   position: relative;
   /* Self-hosted copy of the Unsplash photo: 1600 here, 1024 on phones. */
   background-size: cover;
   background-position: center 30%;
-  color: var(--ngf-white);
+  color: var(--tx-white);
   padding: 5.5rem 0 6rem;
   overflow: hidden;
 }
 
 @media (max-width: 767px) {
-  .ngf-quote-hero {
+  .tx-quote-hero {
   }
 }
 
@@ -45,8 +45,8 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(var(--ngf-ink-rgb), 0.88) 0%,
-    rgba(var(--ngf-ink-rgb), 0.58) 50%,
+    rgb(var(--tx-choc-950-rgb) / 0.88) 0%,
+    rgb(var(--tx-choc-950-rgb) / 0.58) 50%,
     rgba(15, 34, 56, 0.22) 100%
   );
   z-index: 1;
@@ -62,9 +62,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(var(--ngf-accent-rgb), 0.15);
-  color: var(--ngf-accent-400);
-  border: 1px solid rgba(var(--ngf-accent-rgb), 0.35);
+  background: rgb(var(--tx-orange-500-rgb) / 0.15);
+  color: var(--tx-orange-400);
+  border: 1px solid rgb(var(--tx-orange-500-rgb) / 0.35);
   padding: 0.375rem 0.875rem;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -77,22 +77,22 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--ngf-accent-500);
+  background-color: var(--tx-orange-500);
   animation: pulse-dot 2s infinite ease-in-out;
 }
 
 .quote-hero-title {
-  font-family: var(--ngf-font-display);
+  font-family: var(--tx-font-display);
   font-size: 3.25rem;
   font-weight: 800;
-  color: var(--ngf-white);
+  color: var(--tx-white);
   line-height: 1.15;
   letter-spacing: -0.02em;
   margin-bottom: 1rem;
 }
 
 .quote-highlight-accent {
-  color: var(--ngf-accent-500);
+  color: var(--tx-orange-500);
   font-weight: 800;
 }
 
@@ -106,11 +106,11 @@
 /* ============================================================
    2. MAIN BODY & GRID
    ============================================================ */
-.ngf-quote-body {
+.tx-quote-body {
   margin-top: 3.5rem;
 }
 
-.ngf-quote-grid {
+.tx-quote-grid {
   display: grid;
   grid-template-columns: 1.35fr 1fr;
   gap: 2.5rem;
@@ -119,29 +119,29 @@
 
 /* Form Card */
 .quote-form-card {
-  background: var(--ngf-white);
-  border: 1.5px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-2xl);
+  background: var(--tx-white);
+  border: 1.5px solid var(--tx-choc-100);
+  border-radius: 0;
   padding: 2.5rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 }
 
 .form-head-title {
   padding-bottom: 1.5rem;
-  border-bottom: 1.5px solid var(--ngf-slate-100);
+  border-bottom: 1.5px solid var(--tx-cream-200);
   margin-bottom: 1.75rem;
 }
 
 .form-head-title h3 {
   font-size: 1.375rem;
   font-weight: 800;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   margin-bottom: 0.25rem;
 }
 
 .form-head-title p {
   font-size: 0.875rem;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
   margin: 0;
   line-height: 1.4;
 }
@@ -149,7 +149,7 @@
 .quote-form-error {
   background: #fef2f2;
   border: 1.5px solid #fecaca;
-  border-radius: var(--ngf-radius-md);
+  border-radius: var(--tx-radius-input);
   padding: 0.75rem 1rem;
   color: #991b1b;
   font-size: 0.8125rem;
@@ -167,9 +167,9 @@
   gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 800;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--ngf-slate-200);
+  border-bottom: 1px solid var(--tx-choc-100);
   margin-top: 1.5rem;
   margin-bottom: 1.25rem;
 }
@@ -223,10 +223,10 @@
 .quote-calc-form label {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--ngf-slate-700);
+  color: var(--tx-choc-700);
 }
 
-.quote-calc-form textarea.ngf-input {
+.quote-calc-form textarea.tx-form-input {
   resize: vertical;
   line-height: 1.55;
 }
@@ -248,9 +248,9 @@
 
 /* Side Card */
 .quote-policy-card {
-  background: var(--ngf-white);
-  border: 1.5px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-2xl);
+  background: var(--tx-white);
+  border: 1.5px solid var(--tx-choc-100);
+  border-radius: 0;
   padding: 2.25rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 }
@@ -267,13 +267,13 @@
 .quote-policy-card h2 {
   font-size: 1.375rem;
   font-weight: 800;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   margin-bottom: 0.75rem;
 }
 
 .quote-policy-card p {
   font-size: 0.875rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }
@@ -286,9 +286,9 @@
    3. CONFIRMATION SCREEN
    ============================================================ */
 .quote-confirmation-card {
-  background: var(--ngf-white);
-  border: 1.5px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-2xl);
+  background: var(--tx-white);
+  border: 1.5px solid var(--tx-choc-100);
+  border-radius: 0;
   padding: 3rem 2.5rem;
   max-width: 820px;
   margin: 0 auto;
@@ -299,8 +299,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(var(--ngf-accent-rgb), 0.1);
-  border: 1px solid rgba(var(--ngf-accent-rgb), 0.25);
+  background: rgb(var(--tx-orange-500-rgb) / 0.1);
+  border: 1px solid rgb(var(--tx-orange-500-rgb) / 0.25);
   padding: 0.375rem 0.875rem;
   border-radius: 9999px;
   color: var(--tx-accent-text);
@@ -314,7 +314,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--ngf-accent-500);
+  background-color: var(--tx-orange-500);
   animation: pulse-dot 2s infinite ease-in-out;
 }
 
@@ -334,22 +334,22 @@
 }
 
 .confirm-header h2 {
-  font-family: var(--ngf-font-display);
+  font-family: var(--tx-font-display);
   font-size: 2rem;
   font-weight: 800;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   margin-bottom: 0.5rem;
 }
 
 .confirm-header p {
   font-size: 1rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 .admin-review-info-box {
   background: #f8fafc;
-  border: 1.5px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-xl);
+  border: 1.5px solid var(--tx-choc-100);
+  border-radius: var(--tx-radius-lg);
   padding: 1.5rem;
   margin-bottom: 2rem;
   display: flex;
@@ -366,21 +366,21 @@
 .info-box-head h3 {
   font-size: 1rem;
   font-weight: 800;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   margin: 0;
 }
 
 .admin-review-info-box p {
   font-size: 0.875rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
   line-height: 1.6;
   margin: 0;
 }
 
 .quote-receipt-card {
   background: #f8fafc;
-  border: 1.5px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-xl);
+  border: 1.5px solid var(--tx-choc-100);
+  border-radius: var(--tx-radius-lg);
   padding: 1.75rem;
   margin-bottom: 2rem;
 }
@@ -388,7 +388,7 @@
 .receipt-tag {
   font-size: 0.6875rem;
   font-weight: 800;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
   letter-spacing: 0.06em;
   display: block;
   margin-bottom: 1.25rem;
@@ -409,19 +409,19 @@
 .rec-item.span-full {
   grid-column: span 2;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--ngf-slate-200);
+  border-top: 1px solid var(--tx-choc-100);
 }
 
 .rec-item small {
   font-size: 0.75rem;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
   text-transform: uppercase;
   font-weight: 700;
 }
 
 .rec-item strong {
   font-size: 0.9375rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .quote-confirm-actions {
@@ -435,14 +435,14 @@
    RESPONSIVE DESIGN & MOBILE BREAKPOINTS
    ============================================================ */
 @media (max-width: 1024px) {
-  .ngf-quote-grid {
+  .tx-quote-grid {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
 }
 
 @media (max-width: 768px) {
-  .ngf-quote-hero {
+  .tx-quote-hero {
     padding: 3.5rem 0 3rem;
   }
   .quote-hero-title {
@@ -452,12 +452,12 @@
   .quote-hero-lead {
     font-size: 1rem;
   }
-  .ngf-quote-body {
+  .tx-quote-body {
     margin-top: 2rem;
   }
   .quote-form-card {
     padding: 1.5rem 1.125rem;
-    border-radius: var(--ngf-radius-xl);
+    border-radius: var(--tx-radius-lg);
   }
   .form-row-2,
   .form-row-3 {
@@ -468,17 +468,17 @@
     grid-template-columns: 1fr 1fr 1fr;
     gap: 0.5rem;
   }
-  .ngf-input, select.ngf-input {
+  .tx-form-input, select.tx-form-input {
     font-size: 16px !important;
     min-height: 48px;
   }
   .quote-policy-card {
     padding: 1.5rem 1.125rem;
-    border-radius: var(--ngf-radius-xl);
+    border-radius: var(--tx-radius-lg);
   }
   .quote-confirmation-card {
     padding: 1.75rem 1.125rem;
-    border-radius: var(--ngf-radius-xl);
+    border-radius: var(--tx-radius-lg);
   }
   .receipt-grid {
     grid-template-columns: 1fr;
@@ -514,8 +514,8 @@
 
 /* International address blocks (country first) and the units row (tracker 2.6/2.7) */
 .quote-address-fieldset {
-  border: 1px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-lg);
+  border: 1px solid var(--tx-choc-100);
+  border-radius: var(--tx-radius-card);
   padding: 0.75rem 1rem 0.25rem;
   margin: 0 0 1rem;
   min-width: 0;
@@ -527,7 +527,7 @@
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 .quote-units-row {
@@ -537,7 +537,7 @@
 .quote-units-label {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 /* "What happens next" (CONTENT §7.1) */
@@ -548,25 +548,25 @@
   flex-direction: column;
   gap: 0.375rem;
   font-size: 0.875rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
   line-height: 1.6;
 }
 
 /* The ghost button is styled for dark heroes; on this white card it needs a dark outline. */
 .quote-confirm-actions .btn-corp-ghost {
-  color: var(--ngf-ink-900);
-  background: var(--ngf-white);
-  border: 1px solid var(--ngf-slate-300);
+  color: var(--tx-choc-900);
+  background: var(--tx-white);
+  border: 1px solid var(--tx-choc-200);
 }
 
 .quote-confirm-actions .btn-corp-ghost:hover {
-  border-color: var(--ngf-ink-900);
-  background: var(--ngf-slate-50);
+  border-color: var(--tx-choc-900);
+  background: var(--tx-cream-100);
 }
 
 /* Narrow screens: the text spans the whole hero, so the overlay stays dark edge to edge. */
 @media (max-width: 768px) {
   .quote-hero-bg-overlay {
-    background: rgba(var(--ngf-ink-rgb), 0.85);
+    background: rgb(var(--tx-choc-950-rgb) / 0.85);
   }
 }

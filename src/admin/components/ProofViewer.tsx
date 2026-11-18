@@ -55,18 +55,18 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({ src, title, onClose, c
   }, [onClose]);
 
   return (
-    <div className="ngf-proof-viewer-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div ref={dialogRef} className="ngf-proof-viewer" role="dialog" aria-modal="true" aria-labelledby={titleId}>
-        <div className="ngf-proof-viewer-head">
+    <div className="tx-proof-viewer-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div ref={dialogRef} className="tx-proof-viewer" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+        <div className="tx-proof-viewer-head">
           <h2 id={titleId}>{title}</h2>
-          <button ref={closeRef} type="button" className="ngf-proof-viewer-close" onClick={onClose} aria-label="Close">
+          <button ref={closeRef} type="button" className="tx-proof-viewer-close" onClick={onClose} aria-label="Close">
             <X size={18} aria-hidden="true" />
           </button>
         </div>
-        <div className="ngf-proof-viewer-image">
+        <div className="tx-proof-viewer-image">
           <img src={src} alt={title} />
         </div>
-        {children && <div className="ngf-proof-viewer-body">{children}</div>}
+        {children && <div className="tx-proof-viewer-body">{children}</div>}
       </div>
     </div>
   );

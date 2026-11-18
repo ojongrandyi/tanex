@@ -1,6 +1,6 @@
 /* Shared generated-document parts (CONTENT §11). Plain colours so html2canvas renders them
    the same in the PDF as on screen. */
-.ngf-doc-brand {
+.tx-doc-brand {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -8,31 +8,31 @@
   min-width: 0;
 }
 
-.ngf-doc-legal-name {
+.tx-doc-legal-name {
   font-size: 0.85rem;
   font-weight: 800;
   color: #0f172a;
   margin-top: 0.35rem;
 }
 
-.ngf-doc-contact-line {
+.tx-doc-contact-line {
   font-size: 0.7rem;
   color: #475569;
   overflow-wrap: anywhere;
 }
 
-.ngf-doc-id-line {
+.tx-doc-id-line {
   font-size: 0.8rem;
   color: #334155;
   margin: 0.5rem 0;
 }
 
-.ngf-doc-id-line strong {
+.tx-doc-id-line strong {
   color: #0f172a;
   letter-spacing: 0.02em;
 }
 
-.ngf-doc-pouch-line {
+.tx-doc-pouch-line {
   font-size: 0.75rem;
   color: #334155;
   border: 1px dashed #94a3b8;
@@ -41,7 +41,7 @@
   margin: 0.5rem 0;
 }
 
-.ngf-doc-legal-footer {
+.tx-doc-legal-footer {
   font-size: 0.65rem;
   line-height: 1.5;
   color: #64748b;

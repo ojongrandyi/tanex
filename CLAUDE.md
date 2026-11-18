@@ -60,7 +60,7 @@ Values live in `src/config/brand.ts` (after task A.2). Anything not here or in B
 
 - **Frontend:** React 18 + TypeScript + Vite 6. Custom routing in `src/App.tsx` (**no React Router**): hash routes
   today, path routes + `/fr/` after task D.1.
-- **Styling:** plain CSS per component/page + tokens in `src/styles/tokens.css` (`--tx-*`, legacy `--ngf-*` aliases).
+- **Styling:** plain CSS per component/page + tokens in `src/styles/tokens.css` (`--tx-*`; the legacy `--ngf-*` aliases were removed in I.3).
 - **i18n:** own typed dictionaries `src/i18n/en.ts` (master) / `fr.ts` + `Intl` formatting (from D.3).
 - **Motion:** `gsap` (ScrollTrigger, MotionPath, DrawSVG, SplitText), vanilla `three`, `lenis`, all lazy (from H.1).
 - **Maps:** Leaflet. Geocoding: Nominatim; routing: OSRM (not for live ETAs).
@@ -117,7 +117,7 @@ images/tanex files/  owner's source files (logo, MD portrait, homepage outline, 
 
 ## 7. Conventions
 
-- New CSS tokens `--tx-*`, new classes `tx-`, new storage keys `tx_`. Legacy `ngf` names stay until task I.3.
+- CSS tokens `--tx-*`, classes `tx-`, storage keys `tx_` (the legacy `ngf` names were removed in I.3).
 - Shared logic used by client and server lives in `src/shared/` and stays DOM-free.
 - Tracking IDs come from **one shared function**; the server allocates them.
 - Money: store amount **and** currency; XAF has no decimals. Times: store epoch ms + IANA zone (`Africa/Douala`).

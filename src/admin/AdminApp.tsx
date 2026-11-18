@@ -50,7 +50,7 @@ import {
 } from 'lucide-react';
 
 // Ids of the proofs of payment this browser has already announced (update G.3). null = storage unavailable.
-const SEEN_PROOFS_KEY = 'ngf_seen_proofs';
+const SEEN_PROOFS_KEY = 'tx_seen_proofs';
 function readSeenProofs(): string[] | null {
   try {
     const raw = window.localStorage.getItem(SEEN_PROOFS_KEY);

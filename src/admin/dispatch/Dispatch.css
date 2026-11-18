@@ -15,7 +15,7 @@
 .tx-tariff-tabs {
   display: flex;
   gap: 0.25rem;
-  border-bottom: 1px solid var(--ngf-slate-200);
+  border-bottom: 1px solid var(--tx-choc-100);
   overflow-x: auto;
   scrollbar-width: thin;
 }
@@ -29,17 +29,17 @@
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
   cursor: pointer;
 }
 
 .tx-tariff-tab.is-active {
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   border-bottom-color: var(--tx-orange-500);
 }
 
 .tx-tariff-tab:focus-visible {
-  outline: 2px solid var(--ngf-ink-900);
+  outline: 2px solid var(--tx-choc-900);
   outline-offset: -2px;
 }
 
@@ -60,7 +60,7 @@
 .tx-city-head h2 {
   margin: 0 0.25rem 0 0;
   font-size: 1.15rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-city-head .tx-iam-row-actions {
@@ -86,7 +86,7 @@
 .tx-price-check h4 {
   margin: 0;
   font-size: 0.95rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-tariff-help {
@@ -131,19 +131,19 @@
 }
 
 .tx-tariff-dirty {
-  color: var(--ngf-warning-700);
+  color: var(--tx-warning-700);
 }
 
 /* Rate sheet: scrolls inside its box, never the page. Sticky first row and column. */
 .tx-rate-scroll {
   overflow: auto;
   max-height: 70vh;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 0.5rem;
 }
 
 .tx-rate-scroll:focus-visible {
-  outline: 2px solid var(--ngf-ink-900);
+  outline: 2px solid var(--tx-choc-900);
   outline-offset: 2px;
 }
 
@@ -155,13 +155,13 @@
 
 .tx-rate-grid th {
   position: sticky;
-  background: var(--ngf-slate-50);
-  color: var(--ngf-ink-900);
+  background: var(--tx-cream-100);
+  color: var(--tx-choc-900);
   font-weight: 600;
   text-align: left;
   padding: 0.4rem 0.5rem;
-  border-bottom: 1px solid var(--ngf-slate-200);
-  border-right: 1px solid var(--ngf-slate-100);
+  border-bottom: 1px solid var(--tx-choc-100);
+  border-right: 1px solid var(--tx-cream-200);
   white-space: nowrap;
   z-index: 1;
 }
@@ -180,7 +180,7 @@
   z-index: 3;
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 .tx-rate-corner span {
@@ -198,8 +198,8 @@
 
 .tx-rate-grid td {
   padding: 0.2rem;
-  border-bottom: 1px solid var(--ngf-slate-100);
-  border-right: 1px solid var(--ngf-slate-100);
+  border-bottom: 1px solid var(--tx-cream-200);
+  border-right: 1px solid var(--tx-cream-200);
 }
 
 .tx-rate-grid td.has-price {
@@ -210,26 +210,26 @@
   width: 6.5rem;
   box-sizing: border-box;
   padding: 0.35rem 0.4rem;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 0.35rem;
   font: inherit;
   font-variant-numeric: tabular-nums;
   text-align: right;
-  color: var(--ngf-ink-900);
-  background: var(--ngf-white);
+  color: var(--tx-choc-900);
+  background: var(--tx-white);
 }
 
 .tx-rate-grid input:focus-visible {
-  outline: 2px solid var(--ngf-ink-900);
+  outline: 2px solid var(--tx-choc-900);
   outline-offset: 0;
 }
 
 .tx-rate-grid input[aria-invalid='true'] {
-  border-color: var(--ngf-danger-600);
+  border-color: var(--tx-danger-600);
 }
 
 .tx-rate-grid input:disabled {
-  background: var(--ngf-slate-50);
+  background: var(--tx-cream-100);
 }
 
 .tx-price-check {
@@ -237,7 +237,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--ngf-slate-200);
+  border-top: 1px solid var(--tx-choc-100);
 }
 
 .tx-price-check-express {
@@ -247,7 +247,7 @@
 .tx-price-check-result {
   margin: 0;
   font-weight: 600;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-band-row {
@@ -268,7 +268,7 @@
 }
 
 .tx-pair-list .tx-iam-btn[aria-current='true'] {
-  border-color: var(--ngf-ink-900);
+  border-color: var(--tx-choc-900);
   font-weight: 700;
 }
 
@@ -287,14 +287,14 @@
   padding: 0;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-pin-map {
   height: 220px;
-  border: 1px solid var(--ngf-slate-200);
+  border: 1px solid var(--tx-choc-100);
   border-radius: 0.5rem;
-  background: var(--ngf-slate-50);
+  background: var(--tx-cream-100);
   cursor: crosshair;
 }
 
@@ -312,7 +312,7 @@
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   background: var(--tx-orange-500);
-  border: 2px solid var(--ngf-ink-900);
+  border: 2px solid var(--tx-choc-900);
   box-sizing: border-box;
 }
 
@@ -336,7 +336,7 @@
   justify-content: center;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-courier-photo {
@@ -352,7 +352,7 @@
   padding: 0;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .tx-courier-photo-row {

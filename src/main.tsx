@@ -8,9 +8,13 @@ import { loadLiveChat } from './services/liveChat';
 import { currentLang, startRouter } from './router/navigation';
 import { loadLocale } from './i18n/runtime';
 import { installDomGuard } from './utils/domGuard';
+import { browserLocalStorage, migrateLegacyStorageKeys } from './utils/storageMigration';
 
 // Page translators and extensions must not be able to crash React (see domGuard.ts).
 installDomGuard();
+
+// Browser storage keys from before the tx_ names: moved once (see storageMigration.ts).
+migrateLegacyStorageKeys(browserLocalStorage());
 
 // Path routing: rewrites a legacy /#/… link to its path before the first render.
 startRouter();

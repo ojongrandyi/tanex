@@ -393,7 +393,7 @@ H1 : `Mentions légales`. Onglets : **Politique de confidentialité · Condition
 
 **Politique de cookies**
 1. *Les cookies que nous utilisons.* Nous utilisons un seul cookie essentiel, tx.sid. Il garde le personnel TanEx connecté à notre console d'opérations pendant 12 heures au maximum. Il n'est pas déposé pour les visiteurs du site public. · Nous n'utilisons ni cookies d'analyse ni cookies publicitaires. Si nous ajoutons un outil d'analyse, nous mettrons cette page à jour et demanderons votre consentement lorsque la loi l'exige.
-2. *Choix enregistrés dans votre navigateur.* tx_locale (langue choisie) · ngf_recent_tracking · ngf_units · ngf_live_shipment_stream · tx_motion_paused (animation de l'accueil en pause, ajouté en H.1, **à confirmer**) : texte complet dans `src/data/legalDocs.ts`.
+2. *Choix enregistrés dans votre navigateur.* tx_locale (langue choisie) · tx_recent_tracking · tx_units · tx_live_shipment_stream · tx_motion_paused (animation de l'accueil en pause, ajouté en H.1, **à confirmer**) : texte complet dans `src/data/legalDocs.ts`.
 3. *Autres services utilisés par nos pages.* Nos pages chargent des fonds de carte depuis Esri (ArcGIS) et utilisent OpenStreetMap Nominatim et OSRM pour rechercher des adresses et des itinéraires. Les polices et les photos sont servies depuis notre propre site. Ces services reçoivent votre adresse IP lorsque votre navigateur les contacte.
 
 **Accessibilité**

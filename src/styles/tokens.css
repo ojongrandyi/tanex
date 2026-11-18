@@ -2,8 +2,6 @@
    TanEx design tokens (docs/BRAND_GUIDE.md §4, §5, §9; approved direction design/tx.css)
    Palette: dark chocolate, cream, a small amount of orange (logo orange #F48800).
    - Components use the --tx-* tokens, ideally the role tokens (--tx-bg, --tx-text, --tx-accent …).
-   - The legacy --ngf-* names further down are aliases of --tx-* so existing pages re-skin. They are
-     deleted in tracker task I.3; do not use them in new code.
    - Status colours (success, info, warning, danger) are semantic, never brand colours.
    Contrast rules (BRAND_GUIDE §4.2): text on orange is always chocolate (--tx-on-accent); orange text
    only on dark surfaces; on light surfaces orange-toned text uses --tx-accent-text (Orange 700).
@@ -46,6 +44,7 @@
   --tx-choc-950-rgb: 28 18 14;
   --tx-orange-500-rgb: 244 136 0;
   --tx-cream-100-rgb: 251 246 236;
+  --tx-choc-900-rgb: 42 27 22;
 
   /* ---- Semantic status colours (shipment states; never brand colours) ---- */
   --tx-success-50: #ECFDF5;   /* Delivered */
@@ -145,6 +144,7 @@
   /* ---- Layout ---- */
   --tx-container: 1280px;
   --tx-container-wide: 1440px;
+  --tx-container-1400: 1400px;
   --tx-gutter: 24px;
   --tx-gutter-mobile: 16px;
   --tx-header-h: 72px;
@@ -162,6 +162,10 @@
   --tx-shadow: 0 1px 2px rgb(28 18 14 / 0.06), 0 8px 24px rgb(28 18 14 / 0.08);
   --tx-shadow-md: 0 2px 4px rgb(28 18 14 / 0.06), 0 6px 14px rgb(28 18 14 / 0.07);
   --tx-shadow-lift: 0 24px 48px rgb(28 18 14 / 0.14);
+  --tx-shadow-lg: 0 10px 15px -3px rgb(28 18 14 / 0.08), 0 4px 6px -4px rgb(28 18 14 / 0.04);
+  --tx-shadow-xl: 0 20px 25px -5px rgb(28 18 14 / 0.1), 0 8px 10px -6px rgb(28 18 14 / 0.04);
+  --tx-shadow-raised: 0 2px 8px rgb(28 18 14 / 0.06), 0 1px 2px rgb(28 18 14 / 0.04);
+  --tx-shadow-hero: 0 20px 40px -15px rgb(42 27 22 / 0.15);
 
   /* ---- Motion ---- */
   --tx-ease: cubic-bezier(0.65, 0, 0.35, 1);       /* in-out: state changes */
@@ -170,6 +174,8 @@
   --tx-dur: 200ms;
   --tx-dur-slow: 350ms;
   --tx-dur-reveal: 600ms;
+  --tx-transition: all var(--tx-dur) var(--tx-ease-out);
+  --tx-transition-slow: all var(--tx-dur-slow) var(--tx-ease-out);
 
   /* ---- Focus: 2 px orange ring with a 2 px chocolate offset (BRAND_GUIDE §9) ---- */
   --tx-focus: var(--tx-orange-500);
@@ -217,111 +223,4 @@
   --tx-border-strong: rgb(217 194 181 / 0.32);
   --tx-field-bg: var(--tx-choc-900);
   --tx-icon-bg: var(--tx-choc-800);
-}
-
-/* =========================================================================
-   Legacy aliases (--ngf-*): kept so every existing page re-skins; removed in I.3.
-   Mapping: primary → chocolate, accent → orange, ink → chocolate 950–700,
-   slate (UI neutrals) → chocolate/cream tints of similar lightness, status colours unchanged.
-   ========================================================================= */
-:root {
-  --ngf-primary-50: var(--tx-choc-50);
-  --ngf-primary-100: var(--tx-choc-100);
-  --ngf-primary-200: var(--tx-choc-200);
-  --ngf-primary-300: var(--tx-choc-300);
-  --ngf-primary-400: var(--tx-choc-400);
-  --ngf-primary-500: var(--tx-choc-500);
-  --ngf-primary-600: var(--tx-choc-600);
-  --ngf-primary-700: var(--tx-choc-700);
-  --ngf-primary-800: var(--tx-choc-800);
-  --ngf-primary-900: var(--tx-choc-900);
-
-  --ngf-accent-50: var(--tx-orange-50);
-  --ngf-accent-100: var(--tx-orange-100);
-  --ngf-accent-200: var(--tx-orange-200);
-  --ngf-accent-300: var(--tx-orange-300);
-  --ngf-accent-400: var(--tx-orange-400);
-  --ngf-accent-500: var(--tx-orange-500);
-  --ngf-accent-600: var(--tx-orange-600);
-  --ngf-accent-700: var(--tx-orange-700);
-  --ngf-accent-800: var(--tx-orange-800);
-  --ngf-accent-900: var(--tx-orange-800);
-
-  --ngf-ink-950: var(--tx-choc-950);
-  --ngf-ink-900: var(--tx-choc-900);
-  --ngf-ink-800: var(--tx-choc-800);
-  --ngf-ink-700: var(--tx-choc-700);
-
-  --ngf-accent-rgb: 244, 136, 0;
-  --ngf-ink-rgb: 28, 18, 14;
-  --ngf-primary-rgb: 42, 27, 22;
-
-  --ngf-success-50: var(--tx-success-50);
-  --ngf-success-100: var(--tx-success-100);
-  --ngf-success-500: var(--tx-success-500);
-  --ngf-success-600: var(--tx-success-600);
-  --ngf-success-700: var(--tx-success-700);
-
-  --ngf-warning-50: var(--tx-warning-50);
-  --ngf-warning-100: var(--tx-warning-100);
-  --ngf-warning-200: var(--tx-warning-200);
-  --ngf-warning-500: var(--tx-warning-500);
-  --ngf-warning-600: var(--tx-warning-600);
-  --ngf-warning-700: var(--tx-warning-700);
-
-  --ngf-danger-50: var(--tx-danger-50);
-  --ngf-danger-100: var(--tx-danger-100);
-  --ngf-danger-500: var(--tx-danger-500);
-  --ngf-danger-600: var(--tx-danger-600);
-
-  --ngf-info-50: var(--tx-info-50);
-  --ngf-info-100: var(--tx-info-100);
-  --ngf-info-200: var(--tx-info-200);
-  --ngf-info-500: var(--tx-info-500);
-  --ngf-info-600: var(--tx-info-600);
-  --ngf-info-700: var(--tx-info-700);
-
-  --ngf-slate-900: var(--tx-choc-900);
-  --ngf-slate-800: var(--tx-choc-800);
-  --ngf-slate-700: var(--tx-choc-700);
-  --ngf-slate-600: var(--tx-choc-600);
-  --ngf-slate-500: var(--tx-choc-500);
-  --ngf-slate-400: var(--tx-choc-300);
-  --ngf-slate-300: var(--tx-choc-200);
-  --ngf-slate-200: var(--tx-choc-100);
-  --ngf-slate-100: var(--tx-cream-200);
-  --ngf-slate-50: var(--tx-cream-100);
-  --ngf-white: var(--tx-white);
-
-  --ngf-color-bg: var(--tx-surface);
-  --ngf-color-surface: var(--tx-bg);
-  --ngf-color-text: var(--tx-text);
-  --ngf-color-muted: var(--tx-text-muted);
-  --ngf-color-brand: var(--tx-choc-900);
-  --ngf-color-brand-contrast: var(--tx-cream-100);
-  --ngf-color-accent: var(--tx-accent);
-  --ngf-color-border: var(--tx-border);
-  --ngf-color-focus: var(--tx-focus);
-
-  --ngf-font-sans: var(--tx-font-body);
-  --ngf-font-display: var(--tx-font-display);
-  --ngf-font-mono: var(--tx-font-mono);
-
-  --ngf-container-max: var(--tx-container);
-  --ngf-container-wide: 1400px;
-  --ngf-radius-sm: var(--tx-radius-xs);
-  --ngf-radius-md: var(--tx-radius-input);
-  --ngf-radius-lg: var(--tx-radius-card);
-  --ngf-radius-xl: var(--tx-radius-lg);
-  --ngf-radius-full: var(--tx-radius-pill);
-
-  --ngf-shadow-sm: var(--tx-shadow-sm);
-  --ngf-shadow-md: var(--tx-shadow-md);
-  --ngf-shadow-lg: 0 10px 15px -3px rgb(28 18 14 / 0.08), 0 4px 6px -4px rgb(28 18 14 / 0.04);
-  --ngf-shadow-xl: 0 20px 25px -5px rgb(28 18 14 / 0.1), 0 8px 10px -6px rgb(28 18 14 / 0.04);
-  --ngf-shadow-card: 0 2px 8px rgb(28 18 14 / 0.06), 0 1px 2px rgb(28 18 14 / 0.04);
-  --ngf-shadow-hero: 0 20px 40px -15px rgb(42 27 22 / 0.15);
-
-  --ngf-transition: all var(--tx-dur) var(--tx-ease-out);
-  --ngf-transition-slow: all var(--tx-dur-slow) var(--tx-ease-out);
 }

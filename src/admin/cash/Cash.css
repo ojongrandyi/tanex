@@ -22,12 +22,12 @@
   .tx-cash-table, .tx-cash-table tbody { display: block; width: 100%; }
   .tx-cash-table tr {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 0.25rem 1rem;
-    border: 1px solid var(--ngf-slate-200); border-radius: 0.6rem; padding: 0.5rem 0.75rem; margin-bottom: 0.6rem;
+    border: 1px solid var(--tx-choc-100); border-radius: 0.6rem; padding: 0.5rem 0.75rem; margin-bottom: 0.6rem;
   }
   .tx-cash-table tr.tx-cash-statement-row { display: block; border: 0; padding: 0; }
   .tx-cash-table td { display: block; border: 0; padding: 0.25rem 0; }
   .tx-cash-table td[data-label]::before {
     content: attr(data-label); display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
-    text-transform: uppercase; color: var(--ngf-slate-600);
+    text-transform: uppercase; color: var(--tx-choc-600);
   }
 }

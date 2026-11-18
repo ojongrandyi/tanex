@@ -114,20 +114,20 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
   };
 
   const describedBy = (f: Field, hint?: string) => [hint, errors[f] ? errorId(f) : null].filter(Boolean).join(' ') || undefined;
-  const errorText = (f: Field) => errors[f] && <p id={errorId(f)} className="ngf-proof-error">{paymentTerm(errors[f]!, locale)}</p>;
+  const errorText = (f: Field) => errors[f] && <p id={errorId(f)} className="tx-proof-error">{paymentTerm(errors[f]!, locale)}</p>;
 
   return (
     <form
-      className={`ngf-proof-form${embedded ? ' is-embedded' : ''}`}
+      className={`tx-proof-form${embedded ? ' is-embedded' : ''}`}
       onSubmit={submit}
       noValidate
       {...(embedded ? { 'aria-label': t('section.sendProof') } : { 'aria-labelledby': `${id}-title` })}
     >
-      {!embedded && <h4 id={`${id}-title`} className="ngf-pay-methods-title">{t('section.sendProof')}</h4>}
-      <p className="ngf-pay-methods-sub">{t('proof.intro')}</p>
+      {!embedded && <h4 id={`${id}-title`} className="tx-pay-methods-title">{t('section.sendProof')}</h4>}
+      <p className="tx-pay-methods-sub">{t('proof.intro')}</p>
 
-      <div className="ngf-proof-grid">
-        <div className="ngf-proof-field">
+      <div className="tx-proof-grid">
+        <div className="tx-proof-field">
           <label htmlFor={fieldId('methodId')}>{t('proof.account')}</label>
           <select
             id={fieldId('methodId')}
@@ -142,7 +142,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
           {errorText('methodId')}
         </div>
 
-        <div className="ngf-proof-field">
+        <div className="tx-proof-field">
           <label htmlFor={fieldId('payerName')}>{t('proof.name')}</label>
           <input
             id={fieldId('payerName')}
@@ -154,13 +154,13 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
             aria-invalid={!!errors.payerName}
             aria-describedby={describedBy('payerName', `${id}-payerName-hint`)}
           />
-          <p id={`${id}-payerName-hint`} className="ngf-proof-hint">{t('proof.nameHint')}</p>
+          <p id={`${id}-payerName-hint`} className="tx-proof-hint">{t('proof.nameHint')}</p>
           {errorText('payerName')}
         </div>
 
-        <div className="ngf-proof-field">
+        <div className="tx-proof-field">
           <label htmlFor={fieldId('amountSent')}>{t('proof.amount')}</label>
-          <div className="ngf-proof-amount">
+          <div className="tx-proof-amount">
             <input
               id={fieldId('amountSent')}
               type="number"
@@ -177,7 +177,7 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
           {errorText('amountSent')}
         </div>
 
-        <div className="ngf-proof-field">
+        <div className="tx-proof-field">
           <label htmlFor={fieldId('reference')}>{t('proof.reference')}</label>
           <input
             id={fieldId('reference')}
@@ -188,48 +188,48 @@ export const PaymentProofForm: React.FC<PaymentProofFormProps> = ({ trackingNumb
             aria-invalid={!!errors.reference}
             aria-describedby={describedBy('reference', `${id}-reference-hint`)}
           />
-          <p id={`${id}-reference-hint`} className="ngf-proof-hint">{t('proof.referenceHint')}</p>
+          <p id={`${id}-reference-hint`} className="tx-proof-hint">{t('proof.referenceHint')}</p>
           {errorText('reference')}
         </div>
       </div>
 
-      <div className="ngf-proof-field ngf-proof-image">
-        <span className="ngf-proof-label" id={`${id}-image-label`}>{t('proof.image')}</span>
-        <p id={`${id}-image-hint`} className="ngf-proof-hint">{t('proof.imageHint')}</p>
+      <div className="tx-proof-field tx-proof-image">
+        <span className="tx-proof-label" id={`${id}-image-label`}>{t('proof.image')}</span>
+        <p id={`${id}-image-hint`} className="tx-proof-hint">{t('proof.imageHint')}</p>
         <input
           ref={fileInput}
           id={fieldId('image')}
           type="file"
           accept="image/*,.heic,.heif"
-          className="ngf-sr-only"
+          className="tx-sr-only"
           tabIndex={-1}
           aria-hidden="true"
           onChange={(e) => chooseFile(e.target.files?.[0])}
         />
-        {image && <img className="ngf-proof-preview" src={image.dataUrl} alt={t('proof.imageAlt')} />}
-        <div className="ngf-proof-image-actions">
+        {image && <img className="tx-proof-preview" src={image.dataUrl} alt={t('proof.imageAlt')} />}
+        <div className="tx-proof-image-actions">
           <button
             id={`${id}-image-button`}
             type="button"
-            className="ngf-proof-secondary"
+            className="tx-proof-secondary"
             onClick={() => fileInput.current?.click()}
             disabled={preparing}
             aria-describedby={describedBy('image', `${id}-image-label ${id}-image-hint`)}
           >
-            {preparing ? <Loader2 size={15} className="ngf-proof-spin" aria-hidden="true" /> : <ImagePlus size={15} aria-hidden="true" />}
+            {preparing ? <Loader2 size={15} className="tx-proof-spin" aria-hidden="true" /> : <ImagePlus size={15} aria-hidden="true" />}
             <span>{image ? t('proof.change') : t('proof.choose')}</span>
           </button>
           {image && (
-            <button type="button" className="ngf-proof-link" onClick={() => setImage(null)}>{t('proof.remove')}</button>
+            <button type="button" className="tx-proof-link" onClick={() => setImage(null)}>{t('proof.remove')}</button>
           )}
         </div>
         {errorText('image')}
       </div>
 
-      {formError && <p className="ngf-proof-form-error" role="alert">{formError}</p>}
+      {formError && <p className="tx-proof-form-error" role="alert">{formError}</p>}
 
-      <button type="submit" className="ngf-btn-primary ngf-proof-submit" disabled={sending || preparing}>
-        {sending && <Loader2 size={16} className="ngf-proof-spin" aria-hidden="true" />}
+      <button type="submit" className="tx-btn-primary tx-proof-submit" disabled={sending || preparing}>
+        {sending && <Loader2 size={16} className="tx-proof-spin" aria-hidden="true" />}
         <span>{sending ? t('proof.sending') : t('proof.send')}</span>
       </button>
     </form>

@@ -16,18 +16,18 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
 }
 
 .proof-facts dd {
   margin: 0.15rem 0 0;
   font-size: 0.85rem;
-  color: var(--ngf-slate-900);
+  color: var(--tx-choc-900);
   overflow-wrap: anywhere;
 }
 
 .proof-facts dd.proof-mismatch {
-  color: var(--ngf-warning-700);
+  color: var(--tx-warning-700);
   font-weight: 700;
 }
 
@@ -46,6 +46,6 @@
 .proof-note {
   margin: 0.6rem 0 0;
   font-size: 0.82rem;
-  color: var(--ngf-danger-600);
+  color: var(--tx-danger-600);
   overflow-wrap: anywhere;
 }

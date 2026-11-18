@@ -1,7 +1,7 @@
 /* ==========================================================================
    ENTERPRISE DASHBOARD STYLING
    High-density, professional carrier terminal layout.
-   Palette: Ink (--ngf-ink-900, --ngf-ink-950) · brand red accent (--ngf-accent-500),
+   Palette: Ink (--tx-choc-900, --tx-choc-950) · brand red accent (--tx-orange-500),
    Crisp Slate (var(--tx-choc-800), var(--tx-choc-500)), Pure White (var(--tx-white)).
    ========================================================================== */
 
@@ -146,10 +146,10 @@
   flex-shrink: 0;
 }
 
-.ops-circle-icon.accent { background-color: var(--ngf-accent-500); }
+.ops-circle-icon.accent { background-color: var(--tx-orange-500); }
 .ops-circle-icon.blue { background-color: var(--tx-info-600); }
 .ops-circle-icon.green { background-color: var(--tx-success-500); }
-.ops-circle-icon.amber { background-color: var(--ngf-accent-500); }
+.ops-circle-icon.amber { background-color: var(--tx-orange-500); }
 .ops-circle-icon.red { background-color: var(--tx-danger-500); }
 
 .ops-card-label {
@@ -163,7 +163,7 @@
 .ops-card-number {
   font-size: 2.15rem;
   font-weight: 800;
-  color: var(--ngf-ink-950);
+  color: var(--tx-choc-950);
   line-height: 1.1;
   letter-spacing: -0.025em;
   margin-top: 0.15rem;
@@ -234,7 +234,7 @@
 .ops-section-title {
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--ngf-ink-950);
+  color: var(--tx-choc-950);
   margin: 0;
   letter-spacing: -0.015em;
 }
@@ -292,7 +292,7 @@
 }
 
 .filter-tab-btn.active {
-  background: var(--ngf-ink-950);
+  background: var(--tx-choc-950);
   color: var(--tx-white);
   font-weight: 800;
   box-shadow: 0 1px 3px rgb(var(--tx-choc-950-rgb) / 0.12);
@@ -329,7 +329,7 @@
 .table-search-input:focus {
   background: var(--tx-white);
   border-color: var(--tx-accent-text);
-  box-shadow: 0 0 0 2px rgba(var(--ngf-accent-rgb), 0.12);
+  box-shadow: 0 0 0 2px rgb(var(--tx-orange-500-rgb) / 0.12);
 }
 
 .ops-btn-secondary {
@@ -377,7 +377,7 @@
 }
 
 .ops-btn-primary {
-  background: var(--ngf-accent-500);
+  background: var(--tx-orange-500);
   color: var(--tx-on-accent);
   border: none;
   padding: 0.4rem 0.9rem;
@@ -389,7 +389,7 @@
 }
 
 .ops-btn-primary:hover {
-  background: var(--ngf-accent-600);
+  background: var(--tx-orange-600);
 }
 
 /* ==========================================================================
@@ -415,11 +415,11 @@
 }
 
 .ops-data-table thead tr {
-  background: var(--ngf-ink-950);
+  background: var(--tx-choc-950);
 }
 
 .ops-data-table th {
-  background-color: var(--ngf-ink-950);
+  background-color: var(--tx-choc-950);
   color: var(--tx-white);
   font-weight: 800;
   padding: 0.95rem 1rem;
@@ -512,9 +512,9 @@
 }
 
 .ops-service-pill.express {
-  background: var(--ngf-accent-50);
+  background: var(--tx-orange-50);
   color: var(--tx-accent-text);
-  border: 1px solid var(--ngf-accent-200);
+  border: 1px solid var(--tx-orange-200);
 }
 
 .ops-service-pill.priority {
@@ -631,11 +631,11 @@
 .chip-dot.slate { background: var(--tx-choc-300); }
 
 .ops-status-chip.out-delivery {
-  background: var(--ngf-warning-50);
-  color: var(--ngf-warning-700);
-  border: 1px solid var(--ngf-warning-200);
+  background: var(--tx-warning-50);
+  color: var(--tx-warning-700);
+  border: 1px solid var(--tx-warning-200);
 }
-.chip-dot.amber { background: var(--ngf-warning-500); }
+.chip-dot.amber { background: var(--tx-warning-500); }
 
 .ops-status-chip.delivered {
   background: #f0fdf4;
@@ -687,8 +687,8 @@
   align-items: center;
   gap: 0.2rem;
   padding: 0.28rem 0.58rem;
-  background: var(--ngf-accent-50);
-  border: 1px solid var(--ngf-accent-200);
+  background: var(--tx-orange-50);
+  border: 1px solid var(--tx-orange-200);
   border-radius: 9999px;
   color: var(--tx-accent-text);
   font-size: 0.71rem;
@@ -700,8 +700,8 @@
 }
 
 .ops-control-btn:hover {
-  background: var(--ngf-accent-100);
-  border-color: var(--ngf-accent-300);
+  background: var(--tx-orange-100);
+  border-color: var(--tx-orange-300);
 }
 
 .ops-control-btn.sim-active {

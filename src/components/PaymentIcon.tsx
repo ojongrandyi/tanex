@@ -53,7 +53,7 @@ export const PaymentIcon: React.FC<PaymentIconProps> = ({ type, size = 24, class
   }
   const Fallback = FALLBACKS[iconKey] ?? Wallet;
   return (
-    <span className={className} style={{ display: 'inline-flex', color: 'var(--ngf-slate-700)' }}>
+    <span className={className} style={{ display: 'inline-flex', color: 'var(--tx-choc-700)' }}>
       <Fallback size={size} aria-hidden="true" />
     </span>
   );

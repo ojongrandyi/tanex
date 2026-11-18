@@ -1,10 +1,10 @@
 /* Full-screen viewer for the track page gallery. Loaded with the viewer, on first open. */
 
-.ngf-viewer-backdrop {
+.tx-viewer-backdrop {
   position: fixed;
   inset: 0;
   z-index: 100000;
-  background: rgba(var(--ngf-ink-rgb), 0.97);
+  background: rgb(var(--tx-choc-950-rgb) / 0.97);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,7 +16,7 @@
   to { opacity: 1; }
 }
 
-.ngf-viewer {
+.tx-viewer {
   position: relative;
   width: 100%;
   height: 100%;
@@ -26,7 +26,7 @@
   box-sizing: border-box;
 }
 
-.ngf-viewer-bar {
+.tx-viewer-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -34,13 +34,13 @@
   color: #ffffff;
 }
 
-.ngf-viewer-count {
+.tx-viewer-count {
   font-size: 0.9rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.ngf-viewer-figure {
+.tx-viewer-figure {
   flex: 1;
   min-height: 0;
   margin: 0.5rem 0 0;
@@ -51,7 +51,7 @@
   gap: 0.75rem;
 }
 
-.ngf-viewer-figure img {
+.tx-viewer-figure img {
   max-width: 100%;
   max-height: calc(100% - 3.5rem);
   width: auto;
@@ -60,7 +60,7 @@
   border-radius: 8px;
 }
 
-.ngf-viewer-figure figcaption {
+.tx-viewer-figure figcaption {
   max-width: 60ch;
   color: #ffffff;
   font-size: 1rem;
@@ -70,7 +70,7 @@
   overflow-wrap: anywhere;
 }
 
-.ngf-viewer-btn {
+.tx-viewer-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -83,42 +83,42 @@
   cursor: pointer;
 }
 
-.ngf-viewer-btn:hover {
+.tx-viewer-btn:hover {
   background: rgba(255, 255, 255, 0.24);
 }
 
-.ngf-viewer-btn:focus-visible {
+.tx-viewer-btn:focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 2px;
 }
 
-.ngf-viewer-prev,
-.ngf-viewer-next {
+.tx-viewer-prev,
+.tx-viewer-next {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.ngf-viewer-prev { left: 1rem; }
-.ngf-viewer-next { right: 1rem; }
+.tx-viewer-prev { left: 1rem; }
+.tx-viewer-next { right: 1rem; }
 
 /* Phones: arrows sit at the bottom so they never cover the photo. */
 @media (max-width: 600px) {
-  .ngf-viewer {
+  .tx-viewer {
     padding-bottom: 4.5rem;
   }
-  .ngf-viewer-prev,
-  .ngf-viewer-next {
+  .tx-viewer-prev,
+  .tx-viewer-next {
     top: auto;
     bottom: 1rem;
     transform: none;
   }
-  .ngf-viewer-prev { left: calc(50% - 56px); }
-  .ngf-viewer-next { right: calc(50% - 56px); }
+  .tx-viewer-prev { left: calc(50% - 56px); }
+  .tx-viewer-next { right: calc(50% - 56px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ngf-viewer-backdrop {
+  .tx-viewer-backdrop {
     animation: none;
   }
 }

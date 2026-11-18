@@ -62,7 +62,7 @@
 .batch-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(var(--ngf-ink-rgb), 0.75);
+  background: rgb(var(--tx-choc-950-rgb) / 0.75);
   backdrop-filter: blur(8px);
   z-index: 9999;
   display: flex;
@@ -72,8 +72,8 @@
 }
 
 .batch-modal-dialog {
-  background: var(--ngf-white);
-  border-radius: var(--ngf-radius-2xl);
+  background: var(--tx-white);
+  border-radius: 0;
   max-width: 900px;
   width: 100%;
   max-height: 90vh;
@@ -88,7 +88,7 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 1.5rem 2rem;
-  border-bottom: 1.5px solid var(--ngf-slate-200);
+  border-bottom: 1.5px solid var(--tx-choc-100);
   background: #f8fafc;
 }
 
@@ -102,13 +102,13 @@
 .batch-header-title h3 {
   font-size: 1.375rem;
   font-weight: 800;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   margin: 0;
 }
 
 .batch-modal-header p {
   font-size: 0.875rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
   margin: 0;
 }
 
@@ -116,13 +116,13 @@
   background: transparent;
   border: none;
   font-size: 1.75rem;
-  color: var(--ngf-slate-400);
+  color: var(--tx-choc-300);
   cursor: pointer;
   line-height: 1;
 }
 
 .batch-modal-close:hover {
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .batch-filter-bar {
@@ -130,8 +130,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.875rem 2rem;
-  border-bottom: 1px solid var(--ngf-slate-200);
-  background: var(--ngf-white);
+  border-bottom: 1px solid var(--tx-choc-100);
+  background: var(--tx-white);
   gap: 1rem;
   flex-wrap: wrap;
 }
@@ -145,25 +145,25 @@
 
 .batch-filter-btn {
   background: #f1f5f9;
-  border: 1px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-full);
+  border: 1px solid var(--tx-choc-100);
+  border-radius: var(--tx-radius-pill);
   padding: 0.35rem 0.875rem;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
   cursor: pointer;
-  transition: var(--ngf-transition);
+  transition: var(--tx-transition);
 }
 
 .batch-filter-btn.active {
-  background: var(--ngf-ink-900);
-  color: var(--ngf-white);
-  border-color: var(--ngf-ink-900);
+  background: var(--tx-choc-900);
+  color: var(--tx-white);
+  border-color: var(--tx-choc-900);
 }
 
 .batch-audit-label {
   font-size: 0.75rem;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
 }
 
 .batch-modal-body {
@@ -179,18 +179,18 @@
 }
 
 .batch-shipment-card {
-  background: var(--ngf-white);
-  border: 1.5px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-xl);
+  background: var(--tx-white);
+  border: 1.5px solid var(--tx-choc-100);
+  border-radius: var(--tx-radius-lg);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
-  transition: var(--ngf-transition);
+  transition: var(--tx-transition);
 }
 
 .batch-shipment-card:hover {
-  border-color: var(--ngf-accent-400);
+  border-color: var(--tx-orange-400);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
@@ -199,26 +199,26 @@
   align-items: flex-start;
   justify-content: space-between;
   padding-bottom: 0.625rem;
-  border-bottom: 1px solid var(--ngf-slate-100);
+  border-bottom: 1px solid var(--tx-cream-200);
 }
 
 .batch-tracking-id {
   font-size: 0.9375rem;
   font-weight: 800;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
   display: block;
 }
 
 .batch-service-sub {
   font-size: 0.6875rem;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
 }
 
 .batch-status-pill {
   font-size: 0.6875rem;
   font-weight: 800;
   padding: 0.2rem 0.5rem;
-  border-radius: var(--ngf-radius-sm);
+  border-radius: var(--tx-radius-xs);
   letter-spacing: 0.04em;
 }
 
@@ -232,12 +232,12 @@
   justify-content: space-between;
   background: #f8fafc;
   padding: 0.625rem 0.875rem;
-  border-radius: var(--ngf-radius-md);
+  border-radius: var(--tx-radius-input);
 }
 
 .batch-route-point small {
   font-size: 0.625rem;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
   font-weight: 700;
   text-transform: uppercase;
   display: block;
@@ -245,7 +245,7 @@
 
 .batch-route-point strong {
   font-size: 0.8125rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .batch-route-point.right {
@@ -267,14 +267,14 @@
 
 .batch-metric-box {
   background: #f8fafc;
-  border: 1px solid var(--ngf-slate-200);
-  border-radius: var(--ngf-radius-sm);
+  border: 1px solid var(--tx-choc-100);
+  border-radius: var(--tx-radius-xs);
   padding: 0.5rem 0.625rem;
 }
 
 .batch-metric-box small {
   font-size: 0.625rem;
-  color: var(--ngf-slate-500);
+  color: var(--tx-choc-500);
   font-weight: 700;
   text-transform: uppercase;
   display: block;
@@ -282,7 +282,7 @@
 
 .batch-metric-box strong {
   font-size: 0.75rem;
-  color: var(--ngf-ink-900);
+  color: var(--tx-choc-900);
 }
 
 .btn-inspect-batch-item {
@@ -292,18 +292,18 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  background: var(--ngf-ink-900);
-  color: var(--ngf-white);
+  background: var(--tx-choc-900);
+  color: var(--tx-white);
   border: none;
-  border-radius: var(--ngf-radius-md);
+  border-radius: var(--tx-radius-input);
   font-size: 0.8125rem;
   font-weight: 700;
   cursor: pointer;
-  transition: var(--ngf-transition);
+  transition: var(--tx-transition);
 }
 
 .btn-inspect-batch-item:hover {
-  background: var(--ngf-accent-500);
+  background: var(--tx-orange-500);
 }
 
 .batch-modal-footer {
@@ -311,13 +311,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
-  border-top: 1.5px solid var(--ngf-slate-200);
+  border-top: 1.5px solid var(--tx-choc-100);
   background: #f8fafc;
 }
 
 .batch-footer-count {
   font-size: 0.8125rem;
-  color: var(--ngf-slate-600);
+  color: var(--tx-choc-600);
 }
 
 /* ============================================================
@@ -351,7 +351,7 @@
   }
   .track-terminal-card {
     padding: 1.5rem 1.125rem;
-    border-radius: var(--ngf-radius-xl);
+    border-radius: var(--tx-radius-lg);
   }
   
   /* Segmented 2-tab control on mobile */
@@ -414,7 +414,7 @@
   }
   .track-support-card {
     padding: 2rem 1.25rem;
-    border-radius: var(--ngf-radius-xl);
+    border-radius: var(--tx-radius-lg);
   }
   .support-card-content h2 {
     font-size: 1.5rem;

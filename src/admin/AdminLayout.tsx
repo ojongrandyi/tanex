@@ -198,11 +198,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const currentMeta = VIEW_METADATA[currentView] || VIEW_METADATA['operations-center'];
 
   return (
-    <div className="ngf-admin-root">
+    <div className="tx-admin-root">
       {/* =========================================================================
           SIDEBAR: Chocolate 950, a .tx-dark context for the role tokens (I.1)
           ========================================================================= */}
-      <aside className={`ngf-admin-sidebar tx-dark ${mobileSidebarOpen ? 'open' : ''}`}>
+      <aside className={`tx-admin-sidebar tx-dark ${mobileSidebarOpen ? 'open' : ''}`}>
         {/* Brand Header */}
         <div className="admin-sidebar-header">
           <div className="admin-brand-card" onClick={() => onSelectView(homeView)}>
@@ -525,9 +525,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       {/* =========================================================================
           MAIN WORKSPACE WRAPPER
           ========================================================================= */}
-      <div className="ngf-admin-main-wrapper">
+      <div className="tx-admin-main-wrapper">
         {/* TOP DISPATCH HEADER */}
-        <header className="ngf-admin-top-header">
+        <header className="tx-admin-top-header">
           {/* Left Column: Clean View Title */}
           <div className="header-titles-column">
             <button className="mobile-menu-trigger" onClick={() => setMobileSidebarOpen(true)}>
@@ -700,7 +700,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </header>
 
         {/* DYNAMIC VIEW BODY */}
-        <main className="ngf-admin-page-content">
+        <main className="tx-admin-page-content">
           {children}
         </main>
       </div>

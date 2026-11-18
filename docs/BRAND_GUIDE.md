@@ -93,10 +93,10 @@ works in either section type. **`--tx-accent-text`** is Orange 700 on light and 
 for every orange-toned text or meaningful icon. Where CSS variables can't reach (Leaflet lines, SVG gradient stops,
 canvas) use `BRAND_COLORS` in `src/config/brand.ts`.
 
-**Migration:** the existing `--ngf-*` tokens are kept as **aliases that point at the new `--tx-*` values**
-(e.g. `--ngf-accent-500: var(--tx-orange-500)`), so every existing page re-skins at once without touching
-thousands of lines. Components are then moved to `--tx-*` as they are redesigned; the aliases are deleted at the end
-(tracker I.3). Class prefix for new components: `tx-`. Storage keys for new features: `tx_`.
+**Migration (done):** the old `--ngf-*` tokens were first kept as aliases of the `--tx-*` values so every page
+re-skinned at once; in tracker I.3 every usage moved to its `--tx-*` target and the aliases were deleted, together
+with the `ngf-` classes and `ngf_` storage keys (moved once on load by `src/utils/storageMigration.ts`). Class
+prefix: `tx-`. Storage keys: `tx_`.
 
 **Categorical hues (console only, #186):** `--tx-cat-{violet,indigo,rose,teal,sky}-*` tell *kinds* of things apart
 in the console (document types, cargo presets, tracking-event types). They are not brand colours and carry no status
