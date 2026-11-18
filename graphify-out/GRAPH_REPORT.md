@@ -1,28 +1,28 @@
-# Graph Report - Tanex  (2026-11-17)
+# Graph Report - Tanex  (2026-11-18)
 
 ## Corpus Check
-- 459 files · ~542,106 words
+- 517 files · ~588,244 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 104 file(s) not represented in the graph (top: .css 74, .woff2 24, .glb 2)
+- Unclassified: 106 file(s) not represented in the graph (top: .css 76, .woff2 24, .glb 2)
 
 ## Summary
-- 4289 nodes · 12088 edges · 176 communities (153 shown, 23 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 140 edges (avg confidence: 0.83)
+- 4643 nodes · 13194 edges · 185 communities (160 shown, 25 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 143 edges (avg confidence: 0.83)
 - Token cost: 1,020,933 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `641e3013`
+- Built from commit: `9d0d9a18`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- Server Test Suites
+- console/index.ts
 - API Routes & Middleware
-- Shipment Booking Forms
+- CreateShipmentView.tsx
 - Email Outbox & Templates
-- Brand Config & Site Chrome
+- Header.tsx
 - routes/auth.ts
-- Blog Studio Editor
+- blogApi.ts
 - Public Pages & Blog Views
 - Dispatch Job Engine
 - UI Kit & Services Pages
@@ -32,29 +32,29 @@
 - CouriersView.tsx
 - Permissions & Super Admin
 - Couriers & Users Routes
-- navigation.ts
-- routingEngine.ts
+- UnitControls.tsx
+- shopMedia.test.ts
 - French Site Content
-- Track Result & Documents
+- react
 - Blog API Routes
 - Server Page Meta
 - Dispatch Job Drawer
 - Blog Rendering
-- Admin Data Types
+- api.ts
 - Dispatch Status Machine
 - App Shell
 - stage.test.ts
 - Shop Spec
 - Tariffs Routes
 - City-to-City 3D Scene
-- Payment Proofs Console
+- ProofViewer.tsx
 - Dispatch Spec
-- Payment Requests
+- PaymentsView.tsx
 - Home Page
-- Admin Console Layout
+- AdminApp.tsx
 - Project Tracker: Launch & Owner Items
 - Motion Easing Utils
-- lucide-react
+- routingEngine.ts
 - Brand Image Pipeline
 - outbox.ts
 - shopOrderStatus.ts
@@ -63,56 +63,56 @@
 - Content Deck Overview
 - Public Blog & RSS
 - Stage Rendering Loop
-- Public Payment Section
-- Courier API Routes
+- uploads.ts
+- PaymentSection.tsx
 - Tariffs Console
 - Courier Offline Queue
 - Tracker: Decisions & Dispatch
 - Dispatch & Delivery API Client
-- Network Map & Locations
+- LocationsPage.tsx
 - 3D Hero Globe
 - TrackingEventsView.tsx
 - Public Local Tracking
 - Cash Console
 - Content: Console & Tracking Copy
 - Cash Report Logic
-- Runtime Dependencies
-- i18n Area Dictionaries
+- dependencies
+- i18n.test.ts
 - WhatsApp Job Messages
-- shopProduct.ts
-- PageMotion.tsx
+- ProductEditor.tsx
+- capabilities.ts
 - package.json
 - TipTap Editor Dependencies
 - Tanex Master Plan
 - Design Direction Mocks
-- paymentRequest.ts
+- tariffs.test.ts
 - Dispatch Jobs Tests
 - 3D Hero & Door
 - 3D Label & Parcel
-- HomeNetworkMap.tsx
+- paymentRequest.ts
 - Smooth Scroll & Route Rail
 - Courier App Shell
 - JobDetail.tsx
 - Tracker: Design & Console Phases
-- Roles Routes
+- SmoothScroll.tsx
 - 3D Model Brief
 - Payments Update Spec
-- Tracking IDs
-- shop.test.ts
+- routes/track.ts
+- catalog.ts
 - Content: Home & Blog Copy
 - Tracker: Journey Phase
-- JourneyMap.tsx
+- shipmentStatusLabel
 - TypeScript Config
 - Router Route Table
 - Legal Pages
-- courierApi.ts
+- sheets.tsx
 - Journey Scroll Store
 - Brand Guide
 - Motion & 3D Spec
 - Tracker: Shop Phase M
 - useAuth
 - Password Reset Tests
-- SettingsView.tsx
+- server/index.ts
 - fr/contact.ts
 - Project Rules (CLAUDE.md)
 - Blog Spec
@@ -122,55 +122,55 @@
 - LocalDeliveryPage.tsx
 - i18n Home & Delivery Copy
 - In-Town 3D Scene
-- §13 Mentions légales
+- JobDrawer.tsx
 - cashLedger.test.ts
-- API Error Codes
-- I18nProvider.tsx
+- ContactPage.tsx
+- runtime.ts
 - Server TS Config
 - Company Facts & Launch
 - Notifications Spec
 - Auth Tests
-- Motion Capabilities
-- Journey Controller & QA
+- consoleText.ts
+- dispatchBoard.test.ts
 - shopSettings.ts
 - I18N Spec
 - SQLite Session Store
 - build-globe-dots.mjs
-- routing.test.ts
+- context.ts
 - Deployment Guide
 - Tracker: Routing Phase
 - App Shell HTML
 - npm Scripts
 - Dev Dependencies
 - DocumentCenterView.tsx
-- progress.ts
+- RichEditor.tsx
 - blog.test.ts
 - Stock Image Sources
 - jspdf
 - Vite Build
 - Courier Service Worker
 - Self-hosted Fonts
-- Shop delivery fee calculation
-- AreaMessages
+- brand.ts
+- runtime.ts
 - i18n Help
-- i18n Network
+- types.ts
 - i18n Not Found
 - i18n Quote
 - i18n Services
 - i18n Track
-- i18n Track Result
+- SettingsView.tsx
 - Prompts: IAM Phase
-- PaymentIcon.tsx
-- dotenv
-- paymentProof.ts
-- loadLogoParts
+- Phase E: Public Site Rebuild
+- Phase B: Identity & Access (IAM/RBAC)
+- Shop delivery fee calculation
+- permissions.test.ts
 - GSAP
-- useGsapContext.ts
+- ConsoleLanguage.tsx
 - Nodemailer
-- Approval decisions and open items
-- Palette (Chocolate, Cream, Orange #F48800)
-- JourneyController (ScrollTrigger per chapter)
-- buildBrand
+- PaymentIcon.tsx
+- multipart.ts
+- description.ts
+- chapters/services.ts
 - Sanitizer Types
 - Prompts Pack Intro
 - Prompts: Routing Phase
@@ -183,38 +183,46 @@
 - fr/about.ts
 - fr/payment.ts
 - fr/ship.ts
-- Owner-supplied TanEx files
+- ResponsiveImage.tsx
 - compression
 - cors
-- helmet
-- @types/bcryptjs@^2.4.6
-- @types/express@^5.0.6
+- http-proxy-middleware
+- jsbarcode
+- qrcode
 - @types/leaflet@^1.9.22
 - @types/react@^18.3.18
+- courierApi.ts
+- references.ts
+- fr/blog.ts
+- fr/legal.ts
+- sanitize-html
+- @types/compression@^1.8.1
+- PaymentRequestEditor.text.ts
+- PaymentRequestEditor.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 135 edges
-2. `lucide-react` - 87 edges
-3. `useAreaT()` - 57 edges
-4. `useAuth()` - 51 edges
-5. `MainAppContent()` - 50 edges
+1. `react` - 143 edges
+2. `lucide-react` - 91 edges
+3. `useAuth()` - 58 edges
+4. `useAreaT()` - 57 edges
+5. `MainAppContent()` - 51 edges
 6. `renderEmail()` - 49 edges
 7. `docs/SHOP_SPEC.md` - 46 edges
-8. `express` - 44 edges
-9. `useLocale()` - 44 edges
-10. `docs/DISPATCH_SPEC.md` - 41 edges
+8. `ConsoleTextAreas` - 45 edges
+9. `express` - 45 edges
+10. `useLocale()` - 44 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Ch 2 In town (bike delivery, from 500 FCFA)` --references--> `Company facts (single source of truth)`  [INFERRED]
   design/home.html → CLAUDE.md
+- `startApp()` --indirect_call--> `requireAuth()`  [INFERRED]
+  scripts/auth.test.ts → server/middleware/auth.ts
 - `freshDb()` --calls--> `initIamSchema()`  [EXTRACTED]
   scripts/shop.test.ts → server/auth/schema.ts
 - `Ch 6 Contact (channels + form)` --shares_data_with--> `Company facts (single source of truth)`  [INFERRED]
   design/home.html → CLAUDE.md
 - `Site link www.tanexsarl.com` --shares_data_with--> `Company facts (single source of truth)`  [INFERRED]
   images/tanex files/info.txt → CLAUDE.md
-- `Six service card photos (Unsplash License)` --conceptually_related_to--> `Owner decisions (2026-11-06)`  [INFERRED]
-  images/services/SOURCES.md → docs/TANEX_PLAN.md
 
 ## Import Cycles
 - 2-file cycle: `server/dispatch/jobs.ts -> server/dispatch/notify.ts -> server/dispatch/jobs.ts`
@@ -242,271 +250,271 @@
 - **Local bike delivery lifecycle: booking, dispatch, courier app, live tracking, POD** — docs_content_local_delivery_booking, docs_content_dispatch_board_tariffs, docs_content_courier_app, docs_content_local_tracking, docs_content_proof_of_delivery [INFERRED 0.85]
 - **Per-page meta injection into index.html** — index_tx_head_markers, index_organization_jsonld, server_render_pagemeta, claude_company_facts [INFERRED 0.85]
 
-## Communities (176 total, 23 thin omitted)
+## Communities (185 total, 25 thin omitted)
 
-### Community 0 - "Server Test Suites"
-Cohesion: 0.03
-Nodes (73): bcryptjs@^3.0.3, bcryptjs, doc, app, call(), HASH, now, server (+65 more)
+### Community 0 - "console/index.ts"
+Cohesion: 0.07
+Nodes (38): ConsoleTranslation, Widen, auth, iam, mail, blog, board, createShipmentView (+30 more)
 
 ### Community 1 - "API Routes & Middleware"
 Cohesion: 0.04
-Nodes (93): express, express-rate-limit, startApp(), registerApiRoutes(), audit(), AuditActor, audited(), FromReq (+85 more)
+Nodes (92): express, express-rate-limit, registerApiRoutes(), AuditActor, audited(), FromReq, param(), actorName() (+84 more)
 
-### Community 2 - "Shipment Booking Forms"
-Cohesion: 0.07
-Nodes (77): libphonenumber-js, paymentDraftSummary(), bothUnits(), CreateShipmentView(), PackageItem, ServiceOption, ShipmentTypeOption, CountrySelect() (+69 more)
+### Community 2 - "CreateShipmentView.tsx"
+Cohesion: 0.10
+Nodes (50): libphonenumber-js, paymentDraftSummary(), bothUnits(), CreateShipmentView(), PackageItem, ServiceOption, ShipmentTypeOption, documentTitle() (+42 more)
 
 ### Community 3 - "Email Outbox & Templates"
-Cohesion: 0.10
-Nodes (36): escapeHtml(), MailLocale, Paragraph, paragraphHtml(), paragraphText(), RenderedEmail, renderEmail(), Segment (+28 more)
+Cohesion: 0.11
+Nodes (34): escapeHtml(), MailLocale, Paragraph, paragraphHtml(), paragraphText(), RenderedEmail, renderEmail(), Segment (+26 more)
 
-### Community 4 - "Brand Config & Site Chrome"
-Cohesion: 0.05
-Nodes (59): footerColumns(), FooterProps, POWERED_BY, SOCIAL_LINKS, TRUST_ICONS, TRUST_KEYS, hasMenu(), HeaderProps (+51 more)
+### Community 4 - "Header.tsx"
+Cohesion: 0.11
+Nodes (31): Footer(), footerColumns(), FooterProps, POWERED_BY, SOCIAL_LINKS, TRUST_ICONS, TRUST_KEYS, hasMenu() (+23 more)
 
 ### Community 5 - "routes/auth.ts"
-Cohesion: 0.09
-Nodes (39): consumeResetToken(), createResetToken(), findResetUser(), findValidToken(), hashResetToken(), RESET_REQUESTS_PER_HOUR, RESET_TOKEN_TTL_MS, ResetUser (+31 more)
+Cohesion: 0.08
+Nodes (36): BCRYPT_COST, consumeResetToken(), createResetToken(), findResetUser(), findValidToken(), hashResetToken(), RESET_REQUESTS_PER_HOUR, RESET_TOKEN_TTL_MS (+28 more)
 
-### Community 6 - "Blog Studio Editor"
-Cohesion: 0.07
-Nodes (60): blogApi, BlogCategory, BlogCover, BlogLocale, BlogMedia, BlogPost, BlogPostSummary, DocNode (+52 more)
+### Community 6 - "blogApi.ts"
+Cohesion: 0.09
+Nodes (48): blogApi, BlogCategory, BlogCover, BlogLocale, BlogMedia, BlogPost, BlogPostSummary, POST_STATUSES (+40 more)
 
 ### Community 7 - "Public Pages & Blog Views"
 Cohesion: 0.14
-Nodes (33): articleClick(), BlogCard(), BlogCardProps, formatDate(), useAreaT(), Locale, BlogPage(), BlogPageProps (+25 more)
+Nodes (31): articleClick(), BlogCard(), BlogCardProps, NetworkMapPanelProps, SpeedLines(), Locale, BlogPage(), BlogPageProps (+23 more)
 
 ### Community 8 - "Dispatch Job Engine"
-Cohesion: 0.05
-Nodes (77): Dispatch API, applyTransition(), CASH_METHODS, CashEntryInput, CashMethod, checkJobShape(), CityRow, createJobShipment() (+69 more)
+Cohesion: 0.03
+Nodes (111): Dispatch API, actionTime(), applyTransition(), CASH_METHODS, CashEntryInput, CashMethod, checkJobShape(), CityRow (+103 more)
 
 ### Community 9 - "UI Kit & Services Pages"
-Cohesion: 0.06
-Nodes (42): Button, ButtonAsButton, ButtonAsLink, buttonClass(), ButtonProps, ButtonSize, ButtonVariant, CommonProps (+34 more)
+Cohesion: 0.10
+Nodes (23): PageHero(), PageHeroProps, Em(), SectionHeader(), SectionHeaderProps, CareersPage(), CSR_SECTIONS, CsrPage() (+15 more)
 
 ### Community 10 - "ref_node_assert"
-Cohesion: 0.06
-Nodes (26): app, conn, indexPath, now, render, server, app, baseJob (+18 more)
+Cohesion: 0.03
+Nodes (66): bcryptjs@^3.0.3, bcryptjs, doc, app, baseJob, call(), HASH, now0 (+58 more)
 
 ### Community 11 - "Blender 3D Model Scripts"
 Cohesion: 0.08
 Nodes (36): activate(), arc_band(), box(), decal(), disc(), ellipsoid(), empty(), finish() (+28 more)
 
 ### Community 12 - "Dispatch Board Logic"
-Cohesion: 0.06
-Nodes (48): app, call(), createJob(), HASH, NOW, now0, place(), server (+40 more)
+Cohesion: 0.10
+Nodes (33): dayKey, initials(), minutesAgo(), placeLine(), when(), BOARD_TEXT, BOARD_TEXT_EN, ACTIVE (+25 more)
 
 ### Community 13 - "CouriersView.tsx"
-Cohesion: 0.08
-Nodes (43): EmailSettingsPanel(), OutboxTable(), STATUS_CHIP, when(), deviceLabel(), displayIp(), MySessions(), copyText() (+35 more)
+Cohesion: 0.07
+Nodes (50): EmailSettingsPanel(), OutboxTable(), STATUS_CHIP, when(), deviceLabel(), displayIp(), MySessions(), copyText() (+42 more)
 
 ### Community 14 - "Permissions & Super Admin"
-Cohesion: 0.07
-Nodes (50): ask(), askNewPassword(), confirm(), isTTY, lines, main(), rl, rlInternal (+42 more)
+Cohesion: 0.05
+Nodes (71): ask(), askNewPassword(), confirm(), isTTY, lines, main(), rl, rlInternal (+63 more)
 
 ### Community 15 - "Couriers & Users Routes"
 Cohesion: 0.06
 Nodes (50): loadUserPermissions(), canGrant(), canManageUser(), countOtherActiveSuperAdmins(), generateTempPassword(), holdsSuperAdminRole(), isAllPowerful(), lockedRoleIds() (+42 more)
 
-### Community 16 - "navigation.ts"
-Cohesion: 0.11
-Nodes (23): isAdminPathname(), requestedLocale(), render(), alternateFor(), alternateListeners, alternatesVersion(), AlternateTargets, convertLegacyHash() (+15 more)
+### Community 16 - "UnitControls.tsx"
+Cohesion: 0.12
+Nodes (37): asNumber(), ConvertedNumberInput(), ConvertedNumberInputProps, MeasureInput(), MeasureProps, NumberValue, WeightText(), MultiPieceList() (+29 more)
 
-### Community 17 - "routingEngine.ts"
-Cohesion: 0.13
-Nodes (22): arcPoints(), DISTANCE_FACTOR, draftLeg(), EstimatedPositionResult, fetchOsrmLeg(), inNorthAmerica(), LatLngPoint, LegDraft (+14 more)
+### Community 17 - "shopMedia.test.ts"
+Cohesion: 0.08
+Nodes (50): app, as(), call(), cookies, goodFiles(), HASH, img(), now0 (+42 more)
 
 ### Community 18 - "French Site Content"
-Cohesion: 0.07
-Nodes (39): §8.5 Aide : livraison locale et paiements, §10.3 Application livreur, §2.1 Bandeau principal, §8.2 Aide : base de connaissances, §16 Carrières et Politique RSE, §8 Centre d'aide et Contact, §3.3 Comment ça marche (4 étapes), §3.2 Comparer (tableau des services) (+31 more)
+Cohesion: 0.05
+Nodes (54): Accessibilité (WCAG 2.2 AA), §8.5 Aide : livraison locale et paiements, §10.3 Application livreur, §2.1 Bandeau principal, §8.2 Aide : base de connaissances, §16 Carrières et Politique RSE, §8 Centre d'aide et Contact, Codes d'erreur (BAD_REQUEST, INVALID_TRACKING_ID, RATE_LIMITED...) (+46 more)
 
-### Community 19 - "Track Result & Documents"
+### Community 19 - "react"
 Cohesion: 0.08
-Nodes (38): react, Barcode(), BarcodeProps, UnitToggle(), MultiPieceList(), MultiPieceListProps, GalleryImage, PackageGallery() (+30 more)
+Nodes (48): lucide-react, react, PendingImage, ShipmentImagesPanelProps, JourneyMap(), JourneyMapProps, markerRoleText(), positionAt() (+40 more)
 
 ### Community 20 - "Blog API Routes"
-Cohesion: 0.06
-Nodes (42): cleanTags(), slugTaken(), uniqueSlug(), avifSize(), Box, boxes(), ImageSize, jpegSize() (+34 more)
+Cohesion: 0.08
+Nodes (30): cleanTags(), ADMIN_PAGE_SIZE, ALT_MAX, ANY_POST_ACCESS, BLOG_IMAGE_TYPES, blogAdminRouter, canManageMedia(), canViewPost() (+22 more)
 
 ### Community 21 - "Server Page Meta"
-Cohesion: 0.08
-Nodes (43): blogRender(), POST_META, render(), TEMPLATE, absolute(), BLOG_NAME, blogHead(), BlogPageData (+35 more)
+Cohesion: 0.07
+Nodes (54): blogRender(), POST_META, render(), TEMPLATE, blogFeedsRouter(), FEED_SIZE, MIME, rssXml() (+46 more)
 
 ### Community 22 - "Dispatch Job Drawer"
-Cohesion: 0.12
-Nodes (36): IamDialog(), boardApi, BoardCity, BoardCourier, BoardData, BoardZone, DispatchSummary, JobHistory (+28 more)
+Cohesion: 0.11
+Nodes (30): JobInput, ProfileInput, boardApi, BoardCity, BoardCourier, BoardData, BoardZone, DispatchJob (+22 more)
 
 ### Community 23 - "Blog Rendering"
 Cohesion: 0.08
-Nodes (28): ATTACKS, render(), BLOG_MEDIA_PREFIX, BLOG_MEDIA_SRC, CALLOUT_TONES, countWords(), DocCheck, EMPTY_DOC (+20 more)
+Nodes (26): ATTACKS, render(), BLOG_MEDIA_PREFIX, BLOG_MEDIA_SRC, CALLOUT_TONES, countWords(), DocCheck, EMPTY_DOC (+18 more)
 
-### Community 24 - "Admin Data Types"
-Cohesion: 0.08
-Nodes (41): Filter, FILTERS, formatReceived(), MessagesView(), MessagesViewProps, Draft, Notice, NoticeLine() (+33 more)
+### Community 24 - "api.ts"
+Cohesion: 0.10
+Nodes (34): AdminDataContext, AdminDataContextType, INITIAL_ADMIN_DOCUMENTS, INITIAL_QUOTE_REQUESTS, INITIAL_SHIPMENTS, AuditQuery, PaymentProofBody, requestMethods (+26 more)
 
 ### Community 25 - "Dispatch Status Machine"
 Cohesion: 0.07
-Nodes (40): ACTIONS, ACTORS, EXPECTED, FROMS, FULL_INPUT, RATES, tmpDir, PlaceCard() (+32 more)
+Nodes (34): ACTIONS, ACTORS, EXPECTED, FROMS, FULL_INPUT, RATES, tmpDir, pendingActions() (+26 more)
 
 ### Community 26 - "App Shell"
-Cohesion: 0.09
-Nodes (45): AboutPage, AdminApp, AdminLogin, App(), BlogPage, BlogPostPage, CareersPage, consoleKind() (+37 more)
+Cohesion: 0.10
+Nodes (37): AboutPage, AdminApp, AdminLogin, BlogPage, BlogPostPage, CareersPage, consoleKind(), ContactPage (+29 more)
 
 ### Community 27 - "stage.test.ts"
-Cohesion: 0.08
-Nodes (38): Prim, CAMERA_KEYS, CameraKey, CameraRail, DOOR_METRES, DOOR_REACH, DOOR_VIEW, IDLE_SECONDS (+30 more)
+Cohesion: 0.07
+Nodes (41): Prim, TRACKING_ID_EXAMPLE, CAMERA_KEYS, CameraKey, CameraRail, DOOR_METRES, DOOR_REACH, DOOR_VIEW (+33 more)
 
 ### Community 28 - "Shop Spec"
 Cohesion: 0.10
-Nodes (36): docs/SHOP_SPEC.md, Cart and checkout (/cart, /fr/panier), Footer Legal column (FOOTER_ROWS = 5), Shop features not in version 1, Order number TX-ORD-######, Shop order retention (10 years / 2 years), Shop owner decisions (2026-11-17), Place order transaction (POST /api/shop/orders) (+28 more)
+Nodes (35): docs/SHOP_SPEC.md, Cart and checkout (/cart, /fr/panier), Footer Legal column (FOOTER_ROWS = 5), Shop features not in version 1, Order number TX-ORD-######, Shop order retention (10 years / 2 years), Shop owner decisions (2026-11-17), Place order transaction (POST /api/shop/orders) (+27 more)
 
 ### Community 29 - "Tariffs Routes"
 Cohesion: 0.07
-Nodes (31): ALIASES_MAX, BANDS_MAX, citiesAll(), cityNameTaken(), cityOut(), CityRow, Fail, fail() (+23 more)
+Nodes (28): ALIASES_MAX, BANDS_MAX, citiesAll(), cityNameTaken(), cityOut(), CityRow, Fail, fail() (+20 more)
 
 ### Community 30 - "City-to-City 3D Scene"
 Cohesion: 0.08
 Nodes (27): ARRIVE_METRES, canvas(), CARGO_SPOT, CITY_TIMELINE, cityFocus(), CityInput, CityScene, COLORS (+19 more)
 
-### Community 31 - "Payment Proofs Console"
-Cohesion: 0.21
-Nodes (20): NewProofsPanel(), NewProofsPanelProps, formatProofReceived(), proofAmountMismatch(), ProofFacts(), proofMethodView(), ProofReviewControls(), ProofReviewControlsProps (+12 more)
+### Community 31 - "ProofViewer.tsx"
+Cohesion: 0.50
+Nodes (3): ProofViewerProps, PROOF_VIEWER_TEXT, PROOF_VIEWER_TEXT_EN
 
 ### Community 32 - "Dispatch Spec"
 Cohesion: 0.09
 Nodes (35): Positioning pillars (Door to world, Live visibility, Accountable hands, Local roots), After launch: backups, retention, monitoring, security, Uploads folder (images, proofs, blog, pod, couriers), docs/DISPATCH_SPEC.md, Dispatch board problem and suggestion rules, cash_ledger table (TX-CSH-), COD collection and 7-day cash handover, Company MTN MoMo / Orange Money payments (+27 more)
 
-### Community 33 - "Payment Requests"
-Cohesion: 0.14
-Nodes (24): AccountEditor, accountSummary(), blankDetails(), draftFromPayment(), draftToRequest(), emptyPaymentDraft(), inputType(), newAccount() (+16 more)
+### Community 33 - "PaymentsView.tsx"
+Cohesion: 0.15
+Nodes (28): NewProofsPanel(), NewProofsPanelProps, formatProofReceived(), proofAmountMismatch(), ProofFacts(), proofMethodView(), ProofReviewControls(), ProofReviewControlsProps (+20 more)
 
 ### Community 34 - "Home Page"
-Cohesion: 0.12
-Nodes (33): largest(), ResponsiveImage(), ResponsiveImageProps, srcSet(), SITE_IMAGES, SiteImageInfo, SiteImageName, AboutPage() (+25 more)
+Cohesion: 0.15
+Nodes (28): LOGO_MARK, LOGO_MARK_SIZE, ArrivalDoor(), BikeHero(), HeroGlobe(), JourneySprite(), Mountain(), ParcelLabel() (+20 more)
 
-### Community 35 - "Admin Console Layout"
-Cohesion: 0.11
-Nodes (28): AdminApp(), AdminAppProps, AdminConsole(), BlogPreview, blogPreviewToken(), BlogStudio, CashView, CouriersView (+20 more)
+### Community 35 - "AdminApp.tsx"
+Cohesion: 0.05
+Nodes (67): AdminApp(), AdminAppProps, AdminConsole(), BlogPreview, blogPreviewToken(), BlogStudio, CashView, CouriersView (+59 more)
 
 ### Community 36 - "Project Tracker: Launch & Owner Items"
-Cohesion: 0.06
-Nodes (42): docs/CONTENT_FR.md, FIELD_TEST_G9, A.2 Brand config (brand.ts, references, XAF), A.3 Logo and icons, A.4 Previous-brand sweep, E.1 Homepage journey layout, E.2 Services page, E.3 About and Network pages (+34 more)
+Cohesion: 0.08
+Nodes (36): DEPLOYMENT, A.2 Brand config (brand.ts, references, XAF), A.3 Logo and icons, A.4 Previous-brand sweep, E.1 Homepage journey layout, G.9 Field test in Buea, I.2 Console EN/FR, #101 Vector logo (+28 more)
 
 ### Community 37 - "Motion Easing Utils"
-Cohesion: 0.18
-Nodes (22): gate(), LatePhase, latePhase(), CityPhase, cityPhase(), HeroPhase, heroPhase(), InTownPhase (+14 more)
+Cohesion: 0.15
+Nodes (23): LatePhase, CityPhase, cityPhase(), HeroPhase, heroPhase(), InTownPhase, inTownPhase(), LabelPhase (+15 more)
 
-### Community 38 - "lucide-react"
+### Community 38 - "routingEngine.ts"
 Cohesion: 0.07
-Nodes (57): lucide-react, DeleteShipmentModal(), DeleteShipmentModalProps, EditShipmentModal(), EditShipmentModalProps, RecentlyDeletedModal(), RecentlyDeletedModalProps, ControlAction (+49 more)
+Nodes (56): HONG_KONG, HOUSTON, LAGOS, LONDON, LOS_ANGELES, MANCHESTER, milesBetween(), NEW_YORK (+48 more)
 
 ### Community 39 - "Brand Image Pipeline"
-Cohesion: 0.12
-Nodes (16): TanEx logo and derived assets, BRAND_OUT, buildPhotos(), CARD_STEP_SIZES, CLEAR, CREAM, ICONS, LOGO_PNG (+8 more)
+Cohesion: 0.09
+Nodes (29): TanEx logo and derived assets, BRAND_OUT, buildBrand(), buildIcons(), buildPhotos(), CARD_STEP_SIZES, CLEAR, CREAM (+21 more)
 
 ### Community 40 - "outbox.ts"
-Cohesion: 0.07
-Nodes (49): isAllowedOrigin(), queueJobEmails(), shipmentSenderEmail(), cleanVar(), getTransport(), MailConfig, mailConfig(), mailEnabled() (+41 more)
+Cohesion: 0.10
+Nodes (34): getTransport(), MailConfig, mailConfig(), mailEnabled(), maskEmail(), OutgoingMessage, SendFn, sendMessage() (+26 more)
 
 ### Community 41 - "shopOrderStatus.ts"
-Cohesion: 0.09
-Nodes (22): checkOrderTransition(), checkPaymentChange(), DELIVERY_FEE_STATUSES, DELIVERY_METHODS, DeliveryFeeStatus, DeliveryMethod, FINAL_ORDER_STATUSES, hasText() (+14 more)
+Cohesion: 0.06
+Nodes (38): delivery, freshDb(), pickup, SHOP_TABLES, checkOrderTransition(), checkPaymentChange(), DELIVERY_FEE_STATUSES, DELIVERY_METHODS (+30 more)
 
 ### Community 42 - "three"
-Cohesion: 0.10
-Nodes (22): three, ASSETS, BIKE_MODEL_URL, gltfExtensions(), loadGltf(), StageAsset, TRUCK_MODEL_URL, BIKE_COLORS (+14 more)
+Cohesion: 0.15
+Nodes (14): three, ASSETS, BIKE_MODEL_URL, gltfExtensions(), loadGltf(), StageAsset, TRUCK_MODEL_URL, BIKE_COLORS (+6 more)
 
 ### Community 43 - "Payment Methods & Validation"
 Cohesion: 0.23
 Nodes (22): DetailsValidation, PAYMENT_METHOD_TYPES, PaymentFieldKind, PaymentGroup, PaymentMethodDefinition, validateField(), validatePaymentDetails(), CryptoCoin (+14 more)
 
 ### Community 44 - "Content Deck Overview"
-Cohesion: 0.07
-Nodes (36): CONTENT.md: TanEx Content Deck (English master), 4 About page, 1.4 API error code messages, 2.3 Bike delivery section, 16 Careers and CSR Policy, 7-day claims window [confirm], 8.3 Contact page, Cookie Policy (tx.sid, local storage keys) (+28 more)
+Cohesion: 0.08
+Nodes (30): CONTENT.md: TanEx Content Deck (English master), 4 About page, 1.4 API error code messages, 16 Careers and CSR Policy, 7-day claims window [confirm], 8.3 Contact page, Cookie Policy (tx.sid, local storage keys), Dimensional weight divisor 5000 [confirm] (+22 more)
 
 ### Community 45 - "Public Blog & RSS"
-Cohesion: 0.08
-Nodes (49): avatarUrl(), blogFeedsRouter(), FEED_SIZE, MIME, rssXml(), blogSitemapEntries(), categoryVersions(), listPage() (+41 more)
+Cohesion: 0.09
+Nodes (44): avatarUrl(), blogSitemapEntries(), categoryVersions(), listPage(), postVersions(), publicCount(), resolveBlogPage(), BLOG_LOCALES (+36 more)
 
 ### Community 46 - "Stage Rendering Loop"
-Cohesion: 0.13
-Nodes (6): loadAssets(), readyChapters(), CameraView, LateView, shadowPlane(), Stage
+Cohesion: 0.12
+Nodes (7): loadAssets(), readyChapters(), CameraView, Focus, shadowPlane(), Stage, storyTravel()
 
-### Community 47 - "Public Payment Section"
-Cohesion: 0.13
-Nodes (22): PaymentMethodCard(), Field, FIELD_ORDER, PaymentProofForm(), PaymentProofFormProps, PaymentQr(), PaymentQrProps, formatDueDate() (+14 more)
+### Community 47 - "uploads.ts"
+Cohesion: 0.06
+Nodes (45): dir, entries, SESSION_SECRET_FILE, AVATAR_PREFIX, AVATAR_TYPES, BIO_MAX, checkAvatar(), CheckedAvatar (+37 more)
 
-### Community 48 - "Courier API Routes"
-Cohesion: 0.05
-Nodes (43): dir, entries, resolveSessionSecret(), SESSION_SECRET_FILE, actionTime(), deliveryCodeMatches(), loadJob(), ACTION_KEY_RETENTION_MS (+35 more)
+### Community 48 - "PaymentSection.tsx"
+Cohesion: 0.13
+Nodes (23): PaymentMethodCard(), Field, FIELD_ORDER, PaymentProofForm(), PaymentProofFormProps, PaymentQr(), PaymentQrProps, formatDueDate() (+15 more)
 
 ### Community 49 - "Tariffs Console"
 Cohesion: 0.11
-Nodes (39): PinPicker(), ANY, Cell, CellField, cellKey(), EMPTY, isSymmetricSheet(), mirrorKey() (+31 more)
+Nodes (39): ANY, Cell, CellField, cellKey(), EMPTY, isSymmetricSheet(), mirrorKey(), parseAmount() (+31 more)
 
 ### Community 50 - "Courier Offline Queue"
-Cohesion: 0.07
-Nodes (26): courierUrls, sendRaw(), AppliedListener, cachePut(), CourierSync, isRetryable(), Listener, loadItems() (+18 more)
+Cohesion: 0.09
+Nodes (16): AppliedListener, CourierSync, isRetryable(), Listener, loadItems(), memoryCache, memoryQueue, openDb() (+8 more)
 
 ### Community 51 - "Tracker: Decisions & Dispatch"
-Cohesion: 0.07
-Nodes (33): Audit log (audit()/audited()), B.1 IAM schema, seeded roles, Super Admin bootstrap, B.2 SQLite session store and auth routes, B.3 Route permissions (requirePermission everywhere), B.4 Console auth (AuthContext, forced password change), B.5 Users, Roles and Audit log screens, B.6 Email foundation and password reset, B.7 TOTP 2FA (optional, after launch) (+25 more)
+Cohesion: 0.11
+Nodes (23): B.6 Email foundation and password reset, cash_ledger (courier cash, TX-CSH refs), Decisions log, src/shared/dispatchStatus.ts state machine, email_outbox and mail worker, G.10 Native courier app / WhatsApp Cloud API / MoMo API (later), G.1 Dispatch data model, state machine, pricing, G.2 Tariffs and Couriers admin (+15 more)
 
 ### Community 52 - "Dispatch & Delivery API Client"
 Cohesion: 0.12
-Nodes (22): call(), send(), send(), CourierInput, DeliveryCity, DeliveryZone, dispatchApi, IntercityRateRow (+14 more)
+Nodes (22): call(), send(), send(), DeliveryCity, DeliveryZone, dispatchApi, IntercityRateRow, PinInput (+14 more)
 
-### Community 53 - "Network Map & Locations"
-Cohesion: 0.16
-Nodes (21): HomeNetworkMapProps, NetworkMapLabels, NetworkMapPanel(), NetworkMapPanelProps, useCountryName(), formatGatewayTime(), Gateway, gatewayName() (+13 more)
+### Community 53 - "LocationsPage.tsx"
+Cohesion: 0.08
+Nodes (43): leaflet, formatMessage(), DispatchMap(), esc(), MapCourier, MapRoute, OVERVIEW, OVERVIEW (+35 more)
 
 ### Community 54 - "3D Hero Globe"
 Cohesion: 0.10
-Nodes (24): TANEX_LOCATIONS, TRADE_LANES, WORLD_HUB, WORLD_HUBS, WORLD_TIMELINE, WorldFrame, WorldScene, ARC_HUBS (+16 more)
+Nodes (27): DEPART_METRES, DOOR_Z, HERO_TIMELINE, HeroFrame, LOGO_AT, ORBIT, REST, ROLL_METRES (+19 more)
 
 ### Community 55 - "TrackingEventsView.tsx"
 Cohesion: 0.08
-Nodes (50): SEP_28_2026_1400_UTC, EVENT_TIME_ZONES, formatLocationStr(), getCurrentTimeStr(), getEventColors(), getEventTheme(), getTodayDateStr(), MESSAGE_TEMPLATES (+42 more)
+Nodes (48): SEP_28_2026_1400_UTC, EVENT_TIME_ZONES, formatLocationStr(), getCurrentTimeStr(), getEventColors(), getEventTheme(), getTodayDateStr(), MESSAGE_TEMPLATES (+40 more)
 
 ### Community 56 - "Public Local Tracking"
 Cohesion: 0.13
 Nodes (28): CityRow, CourierRow, point(), publicCourierPhoto(), publicLocalDelivery(), shipmentJob(), ZoneRow, readStoredDispatchSettings() (+20 more)
 
 ### Community 57 - "Cash Console"
-Cohesion: 0.17
-Nodes (22): cashApi, CashBalance, CashCourier, CashEntry, CashOverview, CashReport, reportCsvUrl(), AdjustDialog() (+14 more)
+Cohesion: 0.19
+Nodes (21): cashApi, CashBalance, CashCourier, CashEntry, CashOverview, CashReport, reportCsvUrl(), AdjustDialog() (+13 more)
 
 ### Community 58 - "Content: Console & Tracking Copy"
-Cohesion: 0.16
-Nodes (18): 3.4 Add-ons (Express, COD, delivery code, packing), 10 Admin console strings, 10.4 Blog studio and author profile, Cash & Mobile Money ledger (G.8), Cash on delivery, 10.3 Courier app strings, 4-digit delivery code, 14 Notification templates (+10 more)
+Cohesion: 0.11
+Nodes (25): 3.4 Add-ons (Express, COD, delivery code, packing), 10 Admin console strings, 2.3 Bike delivery section, 10.4 Blog studio and author profile, Cash & Mobile Money ledger (G.8), Cash on delivery, 10.3 Courier app strings, Courier assignment suggestion (on duty, same city, right vehicle, nearest) (+17 more)
 
 ### Community 59 - "Cash Report Logic"
 Cohesion: 0.12
 Nodes (23): balancesFromLines(), CourierBalance, courierCashSummary(), LedgerRow, readCashLines(), toCashLine(), HANDOVER_DEADLINE_DAYS, HANDOVER_METHODS (+15 more)
 
-### Community 60 - "Runtime Dependencies"
+### Community 60 - "dependencies"
 Cohesion: 0.08
-Nodes (24): dependencies, express@^5.2.1, express-rate-limit@^8.7.0, express-session@^1.19.0, http-proxy-middleware@^3.0.7, jsbarcode@^3.11.6, lenis@^1.3.27, libphonenumber-js@^1.13.14 (+16 more)
+Nodes (25): dependencies, dotenv@^17.4.2, express@^5.2.1, express-rate-limit@^8.7.0, express-session@^1.19.0, html2canvas@^1.4.1, leaflet@^1.9.4, lenis@^1.3.27 (+17 more)
 
-### Community 61 - "i18n Area Dictionaries"
-Cohesion: 0.14
-Nodes (14): app, leaves(), PAIRS, SAME_IN_BOTH, server, tmpDir, Tree, blog (+6 more)
+### Community 61 - "i18n.test.ts"
+Cohesion: 0.10
+Nodes (22): app, leaves(), PAIRS, SAME_IN_BOTH, server, tmpDir, Tree, addErrorCodes() (+14 more)
 
 ### Community 62 - "WhatsApp Job Messages"
-Cohesion: 0.11
-Nodes (29): useCourierTextValue(), formatDateTime(), formatTime(), LocalTrackView(), Props, failureReasonLabel(), VEHICLE_LABELS, buildJobMessages() (+21 more)
+Cohesion: 0.15
+Nodes (19): firstName(), isJobMessageTemplate(), isPlannedMessage(), JOB_MESSAGE_TEMPLATES, JobMessage, JobMessageInput, jobMessagePlan(), JobMessageTemplate (+11 more)
 
-### Community 63 - "shopProduct.ts"
-Cohesion: 0.08
-Nodes (24): ShopLang, ShopRuleResult, canEditContent(), editIsProposal(), effectivePrice(), isPublicProductStatus(), isValidPrice(), isValidSalePrice() (+16 more)
+### Community 63 - "ProductEditor.tsx"
+Cohesion: 0.07
+Nodes (59): DocNode, RichEditorProps, CategoriesManager(), CategoryDialog(), EditorPicture, PictureManager(), changes(), EMPTY_DOC (+51 more)
 
-### Community 64 - "PageMotion.tsx"
-Cohesion: 0.21
-Nodes (15): isMotionPaused(), setMotionPaused(), subscribeMotionPaused(), loadedGsap(), findHero(), INNER_REVEAL, InnerPageMotion(), isFirstView() (+7 more)
+### Community 64 - "capabilities.ts"
+Cohesion: 0.16
+Nodes (24): afterLoadIdle(), canAnimate(), canSmoothScroll(), canUseStage(), isMotionPaused(), matches(), pauseListeners, prefersReducedMotion() (+16 more)
 
 ### Community 65 - "package.json"
-Cohesion: 0.09
-Nodes (22): html2canvas@^1.4.1, qrcode@^1.5.4, react-dom@^18.3.1, @types/compression@^1.8.1, @types/cors@^2.8.19, @types/express-session@^1.19.0, @types/qrcode@^1.5.6, @types/react-dom@^18.3.5 (+14 more)
+Cohesion: 0.10
+Nodes (20): helmet@^8.3.0, react-dom@^18.3.1, @tiptap/react@^3.33.1, @types/express@^5.0.6, @types/express-session@^1.19.0, @types/jsbarcode@^3.11.4, @types/three@^0.187.0, engines (+12 more)
 
 ### Community 66 - "TipTap Editor Dependencies"
 Cohesion: 0.09
@@ -517,128 +525,128 @@ Cohesion: 0.12
 Nodes (20): Console at /private-user/ (ADMIN_PATH), Tech stack (React/Vite/Express/node:sqlite), Part 1: Booking at /fr/livraison-locale, Part 5: Failed attempt, G.9 Field test: Buea end-to-end delivery, Part 8: Finance confirmation and daily CSV, Finding report format and severity (Blocker/Major/Minor/Idea), Part 4: On the way and live map (+12 more)
 
 ### Community 68 - "Design Direction Mocks"
-Cohesion: 0.13
-Nodes (17): Camera use per chapter, Components (buttons, track field, chips, cards) light/dark, Homepage mock frames (desktop iframe + phone), Journey storyboard (9 key frames, chapters 0-8), TanEx Design Direction (C.1, approved 7 Nov 2026), design/tx.css + sprite.js (shared mock assets), Type system (Plus Jakarta Sans 800 + italic word, Inter, JetBrains Mono), Bike lane (alternating 3D lane beside content) (+9 more)
+Cohesion: 0.12
+Nodes (20): Camera use per chapter, Approval decisions and open items, Components (buttons, track field, chips, cards) light/dark, Homepage mock frames (desktop iframe + phone), Journey storyboard (9 key frames, chapters 0-8), TanEx Design Direction (C.1, approved 7 Nov 2026), design/tx.css + sprite.js (shared mock assets), Type system (Plus Jakarta Sans 800 + italic word, Inter, JetBrains Mono) (+12 more)
 
-### Community 69 - "paymentRequest.ts"
-Cohesion: 0.13
-Nodes (19): btc, paypal, PaymentMethodCardProps, CustomerMethodView, customerMethodView(), Details, CleanPaymentRequest, DEFAULT_PAYMENT_CURRENCY (+11 more)
+### Community 69 - "tariffs.test.ts"
+Cohesion: 0.15
+Nodes (9): app, call(), HASH, now0, server, signIn(), tmpDir, SUGGESTED_AREAS (+1 more)
 
 ### Community 70 - "Dispatch Jobs Tests"
-Cohesion: 0.08
-Nodes (25): act(), addCourier(), addUser(), app, call(), createJob(), HASH, json() (+17 more)
+Cohesion: 0.12
+Nodes (15): act(), addCourier(), addUser(), app, call(), createJob(), HASH, json() (+7 more)
 
 ### Community 71 - "3D Hero & Door"
-Cohesion: 0.09
-Nodes (19): ArrivalScene, DEPART_METRES, DOOR_Z, HERO_TIMELINE, HeroFrame, HeroScene, LOGO_AT, ORBIT (+11 more)
+Cohesion: 0.16
+Nodes (9): ArrivalScene, HeroScene, buildDoor(), COLORS, Door, fadeTexture(), glowTexture(), linearToSrgb() (+1 more)
 
 ### Community 72 - "3D Label & Parcel"
 Cohesion: 0.12
-Nodes (17): Focus, CENTRE, LABEL_TIMELINE, LabelPose, LabelRig, code128B(), PATTERNS, buildParcel() (+9 more)
+Nodes (16): CENTRE, LABEL_TIMELINE, LabelPose, LabelRig, code128B(), PATTERNS, buildParcel(), COLORS (+8 more)
 
-### Community 73 - "HomeNetworkMap.tsx"
-Cohesion: 0.14
-Nodes (23): leaflet@^1.9.4, leaflet, formatMessage(), DispatchMap(), esc(), MapCourier, MapRoute, OVERVIEW (+15 more)
+### Community 73 - "paymentRequest.ts"
+Cohesion: 0.13
+Nodes (19): btc, paypal, PaymentDraftAccount, PaymentMethodCardProps, CustomerMethodView, Details, PaymentMethodType, CleanPaymentRequest (+11 more)
 
 ### Community 74 - "Smooth Scroll & Route Rail"
-Cohesion: 0.22
-Nodes (12): lenis, useJourneyChapter(), headerOffset(), keepNative(), scrollToSection(), SmoothScroll(), barPercent(), chapterNumbers() (+4 more)
+Cohesion: 0.36
+Nodes (8): useJourneyChapter(), useJourneyStore(), barPercent(), chapterNumbers(), RailChapter, railPosition(), RouteRail(), RouteRailProps
 
 ### Community 75 - "Courier App Shell"
-Cohesion: 0.16
-Nodes (22): ACTIVE, alertNewJob(), CourierApp(), CourierRoot(), CourierShell(), readSeen(), seenKey(), SyncPill() (+14 more)
+Cohesion: 0.14
+Nodes (26): ACTIVE, alertNewJob(), CourierApp(), CourierRoot(), CourierShell(), readSeen(), seenKey(), SyncPill() (+18 more)
 
 ### Community 76 - "JobDetail.tsx"
-Cohesion: 0.13
-Nodes (37): CashScreen(), EMPTY, CourierKey, CourierLang, CourierT, CourierText, CourierTextContext, useCourierText() (+29 more)
+Cohesion: 0.19
+Nodes (23): CourierJob, CourierPlace, JobDetail(), JobMap, MESSAGE_LABEL, MessagesCard(), PlaceCard(), courierActions() (+15 more)
 
 ### Community 77 - "Tracker: Design & Console Phases"
 Cohesion: 0.12
-Nodes (20): BRAND_GUIDE, DEPLOYMENT, TanEx Project Tracker, C.1 Design direction (design/direction.html), C.2 --tx-* tokens with --ngf-* aliases, C.3 Core components, Header, Footer, DB_PATH ignored when set only in .env (db.ts import order), I.1 Console reskin (+12 more)
+Nodes (18): BRAND_GUIDE, FIELD_TEST_G9, TanEx Project Tracker, C.1 Design direction (design/direction.html), C.2 --tx-* tokens with --ngf-* aliases, C.3 Core components, Header, Footer, Change log, DB_PATH ignored when set only in .env (db.ts import order) (+10 more)
 
-### Community 78 - "Roles Routes"
-Cohesion: 0.13
-Nodes (16): CANNOT_GRANT, Fail, fail(), formatRole(), permissionsOf(), permissionsRouter, readRoleInput(), ROLE_DESCRIPTION_MAX (+8 more)
+### Community 78 - "SmoothScroll.tsx"
+Cohesion: 0.20
+Nodes (13): lenis, whenIdle(), loadedGsap(), loadGsap(), GsapKit, JourneyController(), headerOffset(), keepNative() (+5 more)
 
 ### Community 79 - "3D Model Brief"
-Cohesion: 0.16
-Nodes (12): tanex_bike model (bike + rider + top box), Blender blockout scripts (build_tanex_bike.py / build_tanex_truck.py), 3D colour specification (brand palette), Deliverables (.blend + .glb, textures, renders), Milestones M1-M3 and acceptance check, phone_screen 'screen' material (live map), Named pivot hierarchy (front_wheel, handlebar, rider_torso, box_lid, parcel_socket), TanEx 3D Model Brief and RFQ (+4 more)
+Cohesion: 0.13
+Nodes (15): tanex_bike model (bike + rider + top box), Blender blockout scripts (build_tanex_bike.py / build_tanex_truck.py), 3D colour specification (brand palette), Deliverables (.blend + .glb, textures, renders), Milestones M1-M3 and acceptance check, phone_screen 'screen' material (live map), Named pivot hierarchy (front_wheel, handlebar, rider_torso, box_lid, parcel_socket), TanEx 3D Model Brief and RFQ (+7 more)
 
 ### Community 80 - "Payments Update Spec"
 Cohesion: 0.18
 Nodes (12): Dashboard notifications (badge, bell, toast, ngf_seen_proofs), Files & storage requirements (UPLOADS_DIR, magic bytes), Prompt: Package Images, Payment Methods & Proof of Payment, Proof submission rules (POST /api/track/:id/payment-proof), Workflow per task and report back, Public GET /media/:id route, Payment method registry src/shared/paymentMethods.ts, payment_proofs table and review flow (+4 more)
 
-### Community 81 - "Tracking IDs"
-Cohesion: 0.17
-Nodes (15): generateUniqueTrackingId(), TRACKING_PREFIX, generateTrackingId(), ID_LENGTH, isValidTrackingId(), normalizeTrackingInput(), ParsedTrackingInput, parsePieceLabel() (+7 more)
+### Community 81 - "routes/track.ts"
+Cohesion: 0.11
+Nodes (22): logNotification(), NotificationLogInput, NotificationLogRow, readNotificationLog(), latestPublicProof(), maskSignerName(), trackRouter, TRACKING_PREFIX (+14 more)
 
-### Community 82 - "shop.test.ts"
-Cohesion: 0.12
-Nodes (19): delivery, freshDb(), pickup, SHOP_TABLES, createShopTables(), grantShopPermissionsOnce(), initShopSchema(), SHOP_GRANT_MIGRATION_KEY (+11 more)
+### Community 82 - "catalog.ts"
+Cohesion: 0.10
+Nodes (41): applyProductInput(), bad(), CategoryInput, CategoryRow, categorySlugTaken(), checkCategoryImage(), checkParent(), clearPending() (+33 more)
 
 ### Community 83 - "Content: Home & Blog Copy"
 Cohesion: 0.12
-Nodes (19): docs/BLOG_SPEC.md, 15 Blog pages, 2.7 Get in touch, 2.5 Global network section, 2.1 Hero (From your door to the world), 2.8 Home FAQ, 2 Home page (owner's outline), 2.10 The Journey: chapter beats and route rail (+11 more)
+Nodes (18): docs/BLOG_SPEC.md, 15 Blog pages, 2.7 Get in touch, 2.1 Hero (From your door to the world), 2.8 Home FAQ, 2 Home page (owner's outline), 2.10 The Journey: chapter beats and route rail, 2.2 Services photo cards (+10 more)
 
 ### Community 84 - "Tracker: Journey Phase"
-Cohesion: 0.10
-Nodes (24): Change log, ErrorBoundary variants and domGuard.ts, H.0 3D brief for the artist, H.1 Motion foundation (GSAP, Lenis, JourneyController), H.2 The Stage (WebGL canvas) and bike, H.3 Chapters 0-1: hero globe and services road, H.4 Chapters 2-3: in town and city to city truck, H.5 Chapters 4-8: world, label, arrival (+16 more)
+Cohesion: 0.16
+Nodes (16): H.0 3D brief for the artist, H.1 Motion foundation (GSAP, Lenis, JourneyController), H.2 The Stage (WebGL canvas) and bike, H.3 Chapters 0-1: hero globe and services road, H.4 Chapters 2-3: in town and city to city truck, H.5 Chapters 4-8: world, label, arrival, H.6 Final glTF models and posters, H.7 Inner-page motion (+8 more)
 
-### Community 85 - "JourneyMap.tsx"
-Cohesion: 0.22
-Nodes (17): JourneyMap(), JourneyMapProps, markerRoleText(), positionAt(), RoutePoint, splitRouteAt(), assembleRoute(), calculateEstimatedPosition() (+9 more)
+### Community 85 - "shipmentStatusLabel"
+Cohesion: 0.26
+Nodes (17): ControlAction, ShipmentControlModal(), STANDARD_HUBS, ADMIN_ROLE_LABEL, applyDelayState(), applyHoldState(), applyResumeState(), formatDateTime() (+9 more)
 
 ### Community 86 - "TypeScript Config"
 Cohesion: 0.11
 Nodes (17): compilerOptions, allowImportingTsExtensions, isolatedModules, jsx, lib, module, moduleResolution, noEmit (+9 more)
 
 ### Community 87 - "Router Route Table"
-Cohesion: 0.14
-Nodes (22): Shop SEO and Product JSON-LD, app, indexPath, server, tmpDir, BlogPageResult, BlogResolver, IndexRenderer (+14 more)
+Cohesion: 0.17
+Nodes (20): app, indexPath, server, tmpDir, BlogPageResult, BlogResolver, IndexRenderer, publicPages() (+12 more)
 
 ### Community 88 - "Legal Pages"
-Cohesion: 0.15
-Nodes (15): DOMAIN, HQ_ADDRESS_FR, LEGAL_DOC_IDS, LEGAL_LAST_UPDATED, LEGAL_URL, LegalBlock, LegalContact, LegalDoc (+7 more)
-
-### Community 89 - "courierApi.ts"
 Cohesion: 0.17
-Nodes (17): JobInput, ProfileInput, DispatchJob, JobCreateInput, CashBalance, CashEntry, CashInput, CashState (+9 more)
+Nodes (14): HQ_ADDRESS_FR, LEGAL_DOC_IDS, LEGAL_LAST_UPDATED, LEGAL_URL, LegalBlock, LegalContact, LegalDoc, LegalDocId (+6 more)
+
+### Community 89 - "sheets.tsx"
+Cohesion: 0.30
+Nodes (15): CashScreen(), EMPTY, useCourierText(), CashMethod, draftFor(), FailSheet(), PickupSheet(), PodSheet() (+7 more)
 
 ### Community 90 - "Journey Scroll Store"
 Cohesion: 0.17
 Nodes (11): beatOf(), BEATS, clamp01(), headerOffset(), PIN_VH, setBeat(), setupJourney(), STEPS (+3 more)
 
 ### Community 91 - "Brand Guide"
-Cohesion: 0.20
-Nodes (8): TanEx Brand Guide & Design System, Courier app UI rules (56px buttons, one-handed), Name usage (TanEx vs Tanex SARL), Reference formats (TX-TKT, TX-INV, TX-SL, TX-CSH, QR-YYYY), Secondary slogan: Saving Situations, Tagline: From Your Door to the World, Typography (Plus Jakarta Sans, Inter, JetBrains Mono), UI details (grid, radius, elevation, motifs, focus)
+Cohesion: 0.12
+Nodes (12): BRAND_COLORS in brand.ts, TanEx Brand Guide & Design System, Courier app UI rules (56px buttons, one-handed), Name usage (TanEx vs Tanex SARL), Palette (Chocolate, Cream, Orange #F48800), Reference formats (TX-TKT, TX-INV, TX-SL, TX-CSH, QR-YYYY), Secondary slogan: Saving Situations, Tagline: From Your Door to the World (+4 more)
 
 ### Community 92 - "Motion & 3D Spec"
-Cohesion: 0.14
-Nodes (17): TanEx bike + rider model (tanex-bike.glb), capabilities.ts (canAnimate / canUseStage), Journey chapters 0-8, Globe (stage/globe.ts, Natural Earth dots), GSAP (ScrollTrigger, SplitText, CustomEase), Lenis smooth scroll, Motion & 3D Specification: The Journey, Pause motion control (tx_motion_paused) (+9 more)
+Cohesion: 0.10
+Nodes (23): TanEx bike + rider model (tanex-bike.glb), capabilities.ts (canAnimate / canUseStage), Journey chapters 0-8, Globe (stage/globe.ts, Natural Earth dots), GSAP (ScrollTrigger, SplitText, CustomEase), Lenis smooth scroll, Motion & 3D Specification: The Journey, Pause motion control (tx_motion_paused) (+15 more)
 
 ### Community 93 - "Tracker: Shop Phase M"
-Cohesion: 0.13
-Nodes (14): Courier offlineQueue.ts (IndexedDB), G.4 Courier app (PWA, offline queue), #140 Marketplace button, #164 Delivery code rules, #183 Shop order retention (10y / 2y), M.0 Shop spec and Returns & Refunds draft, M.1 Shop schema and permissions, M.2 Square picture pipeline (+6 more)
+Cohesion: 0.12
+Nodes (15): Courier offlineQueue.ts (IndexedDB), G.4 Courier app (PWA, offline queue), #140 Marketplace button, #164 Delivery code rules, #183 Shop order retention (10y / 2y), M.0 Shop spec and Returns & Refunds draft, M.1 Shop schema and permissions, M.2 Square picture pipeline (+7 more)
 
 ### Community 94 - "useAuth"
-Cohesion: 0.12
-Nodes (32): AdminLogin(), AdminLoginProps, AuthCard(), AuthError(), ForgotPassword(), readResetToken(), ResetPassword(), ForcedPasswordChange() (+24 more)
+Cohesion: 0.17
+Nodes (27): AdminLogin(), AdminLoginProps, AuthCard(), AuthError(), ForgotPassword(), LANG_NAMES, readResetToken(), ResetPassword() (+19 more)
 
 ### Community 95 - "Password Reset Tests"
 Cohesion: 0.16
 Nodes (12): app, call(), forgot(), HASH, logged, reset(), sent, server (+4 more)
 
-### Community 96 - "SettingsView.tsx"
-Cohesion: 0.26
-Nodes (14): EmailSettingsPanel, SettingsView(), CURRENCY_NAMES, CurrencySettings, currencySymbol(), DISPLAY_CURRENCIES, DisplayCurrency, formatCurrencyAmount() (+6 more)
+### Community 96 - "server/index.ts"
+Cohesion: 0.07
+Nodes (28): Shop SEO and Product JSON-LD, app, conn, indexPath, now, render, server, resolveSessionSecret() (+20 more)
 
 ### Community 97 - "fr/contact.ts"
 Cohesion: 0.50
 Nodes (3): contact, ContactMessages, contact
 
 ### Community 98 - "Project Rules (CLAUDE.md)"
-Cohesion: 0.22
-Nodes (9): Conventions (tx- tokens, money, times, images, a11y), Definition of done, graphify rules, CLAUDE.md: TanEx Platform rules, Live WCAG contrast table (lum/ratio), Palette scales (chocolate, cream, orange, status), Role tokens (--tx-bg, --tx-text, --tx-accent...), Owner brand colours: dark chocolate, cream, small orange (+1 more)
+Cohesion: 0.14
+Nodes (11): Conventions (tx- tokens, money, times, images, a11y), Definition of done, graphify rules, CLAUDE.md: TanEx Platform rules, Live WCAG contrast table (lum/ratio), Palette scales (chocolate, cream, orange, status), Role tokens (--tx-bg, --tx-text, --tx-accent...), Ch 7 FAQ + Blog (no sample posts) (+3 more)
 
 ### Community 99 - "Blog Spec"
 Cohesion: 0.15
@@ -653,80 +661,84 @@ Cohesion: 0.27
 Nodes (13): clamp01(), easeInOutCubic(), glide(), GLIDE_MS, glideAt(), HERO_PARALLAX_PX, isLongPage(), LONG_PAGE_SCREENS (+5 more)
 
 ### Community 102 - "Cash API Routes"
-Cohesion: 0.17
-Nodes (13): allocateCashRef(), NOTE_MAX, body(), canConfirm, canView, cashRouter, ENTRY_LABEL, entryOut() (+5 more)
+Cohesion: 0.14
+Nodes (16): audit(), stripSecrets(), toJson(), allocateCashRef(), NOTE_MAX, body(), canConfirm, canView (+8 more)
 
 ### Community 103 - "LocalDeliveryPage.tsx"
 Cohesion: 0.07
-Nodes (47): Checkbox(), Choice(), ChoiceProps, FieldShellProps, Input, InputProps, Radio(), Select (+39 more)
+Nodes (46): Button, ButtonAsButton, ButtonAsLink, buttonClass(), ButtonProps, ButtonSize, ButtonVariant, CommonProps (+38 more)
 
 ### Community 104 - "i18n Home & Delivery Copy"
-Cohesion: 0.18
-Nodes (11): AREA_LOADERS_EN, AreaName, courier, CourierMessages, en, home, HomeMessages, Messages (+3 more)
+Cohesion: 0.16
+Nodes (13): AreaMessages, company, CompanyMessages, courier, CourierMessages, home, HomeMessages, localDelivery (+5 more)
 
 ### Community 105 - "In-Town 3D Scene"
-Cohesion: 0.16
-Nodes (10): IN_TOWN_TIMELINE, MAP, mapRoutePoint(), mapTexture(), ON_THE_WAY_METRES, PHONE_FOCUS, PhoneMap, RIDE_OUT_METRES (+2 more)
-
-### Community 106 - "§13 Mentions légales"
 Cohesion: 0.15
-Nodes (15): Accessibilité (WCAG 2.2 AA), Codes d'erreur (BAD_REQUEST, INVALID_TRACKING_ID, RATE_LIMITED...), Conditions d'expédition, Conditions d'utilisation, Engagements (4) du pied de page, §1.2 En-tête et navigation, §1 Global : métadonnées, en-tête, pied de page, §1.4 Langue, messages communs et erreurs (+7 more)
+Nodes (12): IN_TOWN_TIMELINE, inTownDistance(), MAP, mapRoutePoint(), mapTexture(), ON_THE_WAY_METRES, PHONE_FOCUS, PhoneMap (+4 more)
+
+### Community 106 - "JobDrawer.tsx"
+Cohesion: 0.28
+Nodes (18): boardErrorText(), AssignDialog(), boardJobMessages(), CancelDialog(), DialogError(), Field(), JobDrawer(), LiftCodeDialog() (+10 more)
 
 ### Community 107 - "cashLedger.test.ts"
 Cohesion: 0.16
 Nodes (11): act(), addCourier(), addUser(), app, call(), HASH, now0, PNG (+3 more)
 
-### Community 108 - "API Error Codes"
-Cohesion: 0.19
-Nodes (10): addErrorCodes(), common, CommonMessages, errors, common, GENERAL_ERROR_CODES, generalErrorCode(), isPublicErrorCode() (+2 more)
+### Community 108 - "ContactPage.tsx"
+Cohesion: 0.16
+Nodes (15): Chip(), PHONE_2, CONTACT_QUICK_ANSWER_IDS, HELP_ARTICLES, HELP_CATEGORIES, HelpArticle, HelpArticleKey, HelpCategory (+7 more)
 
-### Community 109 - "I18nProvider.tsx"
-Cohesion: 0.10
-Nodes (33): ErrorBoundaryProps, ErrorBoundaryState, fallbackLocale(), isRecoverableByReload(), reloadOnce(), LanguageSwitch(), LanguageSuggestion(), prefersFrench() (+25 more)
+### Community 109 - "runtime.ts"
+Cohesion: 0.06
+Nodes (46): App(), AuthProvider(), ErrorBoundary, ErrorBoundaryProps, ErrorBoundaryState, fallbackLocale(), isRecoverableByReload(), reloadOnce() (+38 more)
 
 ### Community 110 - "Server TS Config"
 Cohesion: 0.14
 Nodes (13): compilerOptions, esModuleInterop, module, moduleResolution, noUnusedLocals, noUnusedParameters, outDir, resolveJsonModule (+5 more)
 
 ### Community 111 - "Company Facts & Launch"
-Cohesion: 0.18
-Nodes (13): Company facts (single source of truth), Ch 6 Contact (channels + form), Blog SEO (hreflang, OG, JSON-LD BlogPosting, sitemap, RSS), Tracking ID format (TX + 6 safe chars), Launch checklist, Owner decisions (2026-11-06), Six service card photos (Unsplash License), Homepage service card photos sources (+5 more)
+Cohesion: 0.16
+Nodes (14): Company facts (single source of truth), Ch 6 Contact (channels + form), Tracking ID format (TX + 6 safe chars), Owner decisions (2026-11-06), Six service card photos (Unsplash License), Homepage service card photos sources, UB Junction, Molyko, Buea photo (Adesolive, CC BY-SA 4.0), Site link www.tanexsarl.com (+6 more)
 
 ### Community 112 - "Notifications Spec"
-Cohesion: 0.28
-Nodes (13): docs/NOTIFICATIONS_SPEC.md, buildWhatsAppLink(phoneE164, templateKey, vars, locale), Notification channels (email, WhatsApp link, in-app), Later upgrade: WhatsApp Cloud API / SMS, SPF / DKIM / DMARC for tanexsarl.com, email_outbox table and send worker, Email templates (server/mail/templates/<key>.<locale>.ts), notification_log table (+5 more)
+Cohesion: 0.23
+Nodes (15): Local delivery booking (/local-delivery), docs/NOTIFICATIONS_SPEC.md, buildWhatsAppLink(phoneE164, templateKey, vars, locale), Notification channels (email, WhatsApp link, in-app), Later upgrade: WhatsApp Cloud API / SMS, SPF / DKIM / DMARC for tanexsarl.com, email_outbox table and send worker, Email templates (server/mail/templates/<key>.<locale>.ts) (+7 more)
 
 ### Community 113 - "Auth Tests"
-Cohesion: 0.17
-Nodes (7): DB_FILE, HASH, login(), openApps, sidCookie(), TestApp, tmpDir
+Cohesion: 0.14
+Nodes (9): DB_FILE, HASH, login(), openApps, sidCookie(), startApp(), TestApp, tmpDir (+1 more)
 
-### Community 114 - "Motion Capabilities"
-Cohesion: 0.32
-Nodes (11): afterLoadIdle(), canAnimate(), canSmoothScroll(), canUseStage(), matches(), pauseListeners, prefersReducedMotion(), saveData() (+3 more)
+### Community 114 - "consoleText.ts"
+Cohesion: 0.05
+Nodes (53): ADMIN_APP_TEXT, ADMIN_APP_TEXT_EN, ADMIN_LAYOUT_TEXT_EN, BLOG_MENU, BLOG_MENU_EN, BLOG_TEXT_EN, CASH_TEXT, CASH_TEXT_EN (+45 more)
 
-### Community 115 - "Journey Controller & QA"
-Cohesion: 0.23
-Nodes (10): whenIdle(), INITIAL, initialState(), JourneyContext, JourneyController(), JourneyControllerProps, JourneyModule, useJourney() (+2 more)
+### Community 115 - "dispatchBoard.test.ts"
+Cohesion: 0.16
+Nodes (12): app, call(), createJob(), HASH, NOW, now0, place(), server (+4 more)
 
 ### Community 116 - "shopSettings.ts"
-Cohesion: 0.18
-Nodes (14): isShopPaymentMethod(), SHOP_PAYMENT_METHODS, ShopPaymentMethod, DEFAULT_SHOP_SETTINGS, idOrNull(), isIntIn(), isValidOrderEmail(), LANDMARK_MAX (+6 more)
+Cohesion: 0.17
+Nodes (15): shopSettings(), isShopPaymentMethod(), SHOP_PAYMENT_METHODS, ShopPaymentMethod, DEFAULT_SHOP_SETTINGS, idOrNull(), isIntIn(), isValidOrderEmail() (+7 more)
 
 ### Community 117 - "I18N Spec"
 Cohesion: 0.25
 Nodes (8): Stable API error codes mapped by the client, Intl formatting format.ts (en-CM / fr-CM, XAF 0 decimals), Languages, Routing & Page Meta Specification (EN/FR), Server page meta injection server/render/pageMeta.ts, Route table src/router/routes.ts, Bilingual sitemap with hreflang alternates, Tracking event title_key / title_vars_json, EN/FR URL scheme (/ and /fr/)
 
+### Community 118 - "SQLite Session Store"
+Cohesion: 0.13
+Nodes (8): Callback, COURIER_SESSION_MS, createSessionMiddleware(), expiryOf(), express-session, SessionData, SqliteSessionStore, STAFF_SESSION_MS
+
 ### Community 119 - "build-globe-dots.mjs"
 Cohesion: 0.18
 Nodes (8): bits, cameroon, cameroonFeature, cm, data, iso(), land, OUT
 
-### Community 120 - "routing.test.ts"
-Cohesion: 0.18
-Nodes (11): HONG_KONG, HOUSTON, LAGOS, LONDON, LOS_ANGELES, MANCHESTER, milesBetween(), NEW_YORK (+3 more)
+### Community 120 - "context.ts"
+Cohesion: 0.21
+Nodes (12): CourierKey, CourierLang, CourierT, CourierText, CourierTextContext, useCourierTextValue(), formatDateTime(), formatTime() (+4 more)
 
 ### Community 121 - "Deployment Guide"
-Cohesion: 0.22
-Nodes (9): Deployment: GitHub to Hostinger, Domain and paths (apex, /private-user/ noindex), Email DNS (MX, SPF, DKIM, DMARC), email_outbox queue with retries, Environment variables (SESSION_SECRET, DB_PATH, UPLOADS_DIR, SMTP_*), Hosting requirements (Node >= 22.5, persistent storage, HTTPS, Hostinger Email), Hostinger app configuration (npm install, npm start), Persistence check (/api/diag/storage) (+1 more)
+Cohesion: 0.18
+Nodes (11): Blog SEO (hreflang, OG, JSON-LD BlogPosting, sitemap, RSS), Deployment: GitHub to Hostinger, Domain and paths (apex, /private-user/ noindex), Email DNS (MX, SPF, DKIM, DMARC), email_outbox queue with retries, Environment variables (SESSION_SECRET, DB_PATH, UPLOADS_DIR, SMTP_*), Hosting requirements (Node >= 22.5, persistent storage, HTTPS, Hostinger Email), Hostinger app configuration (npm install, npm start) (+3 more)
 
 ### Community 122 - "Tracker: Routing Phase"
 Cohesion: 0.22
@@ -745,12 +757,12 @@ Cohesion: 0.22
 Nodes (9): devDependencies, concurrently@^10.0.5, gltfpack@^1.3.0, sharp@^0.35.4, tsx@^4.23.12, concurrently, gltfpack, sharp (+1 more)
 
 ### Community 126 - "DocumentCenterView.tsx"
-Cohesion: 0.12
-Nodes (26): DocumentCenterView(), DocumentCenterViewProps, loadPdfTools(), waitForImagesToLoad(), place(), PodDetails, PodPaper, readDetails() (+18 more)
-
-### Community 127 - "progress.ts"
 Cohesion: 0.19
-Nodes (12): MOVING_STATUSES, PRE_TRANSIT_STATUSES, ProgressRow, addPaymentConfirmedEvent(), usesScheduleProgress(), eventTitleColumns(), eventTitleText(), EventTitleVars (+4 more)
+Nodes (18): DocumentCenterView(), DocumentCenterViewProps, loadPdfTools(), waitForImagesToLoad(), place(), PodDetails, PodPaper, readDetails() (+10 more)
+
+### Community 127 - "RichEditor.tsx"
+Cohesion: 0.36
+Nodes (9): blogExtensions(), safeHref(), ImageDialog(), LinkDialog(), RichEditor(), Toolbar(), ToolButton(), wordsOf() (+1 more)
 
 ### Community 128 - "blog.test.ts"
 Cohesion: 0.13
@@ -768,21 +780,21 @@ Nodes (4): vite@^6.1.0, @vitejs/plugin-react@^4.3.4, vite, @vitejs/plugin-react
 Cohesion: 0.40
 Nodes (5): Inter font licence (SIL OFL 1.1), JetBrains Mono font licence (SIL OFL 1.1), Plus Jakarta Sans font licence (SIL OFL 1.1), Brand fonts (self-hosted) README, Self-hosted WOFF2 Latin/Latin-ext subsets from @fontsource v5
 
-### Community 134 - "Shop delivery fee calculation"
-Cohesion: 0.24
-Nodes (11): delivery_cities table, delivery_zones table, intercity_rates table, Local delivery booking (/local-delivery), Admin-defined local and intercity pricing, Size classes Small / Medium / Large, zone_rates table, Shop delivery fee calculation (+3 more)
+### Community 134 - "brand.ts"
+Cohesion: 0.08
+Nodes (32): ADMIN_CONSOLE_NAME, BRAND_ASSET_VERSION, formatClock(), formatOpeningHours(), HEAD_OF_OPERATIONS_NAME, INTAKE_DESK, LOGO_WHITE, LOGO_WORDMARK (+24 more)
 
-### Community 135 - "AreaMessages"
-Cohesion: 0.21
-Nodes (8): AreaMessages, company, CompanyMessages, localDelivery, LocalDeliveryMessages, company, localDelivery, Translation
+### Community 135 - "runtime.ts"
+Cohesion: 0.13
+Nodes (17): AREA_LOADERS_EN, AreaName, en, Messages, AREA_LOADERS_FR, common, loadFrMessages(), AreaEntry (+9 more)
 
 ### Community 136 - "i18n Help"
 Cohesion: 0.50
 Nodes (3): help, HelpMessages, help
 
-### Community 137 - "i18n Network"
-Cohesion: 0.50
-Nodes (3): network, NetworkMessages, network
+### Community 137 - "types.ts"
+Cohesion: 0.22
+Nodes (7): network, NetworkMessages, courier, localDelivery, network, trackResult, Translation
 
 ### Community 138 - "i18n Not Found"
 Cohesion: 0.50
@@ -800,45 +812,49 @@ Nodes (3): services, ServicesMessages, services
 Cohesion: 0.50
 Nodes (3): track, TrackMessages, track
 
-### Community 142 - "i18n Track Result"
-Cohesion: 0.50
-Nodes (3): trackResult, TrackResultMessages, trackResult
+### Community 142 - "SettingsView.tsx"
+Cohesion: 0.27
+Nodes (12): EmailSettingsPanel, SettingsView(), CURRENCY_NAMES, CurrencySettings, currencySymbol(), DISPLAY_CURRENCIES, DisplayCurrency, formatMoney() (+4 more)
 
 ### Community 143 - "Prompts: IAM Phase"
 Cohesion: 0.67
 Nodes (3): audit() / audit_log, Phase B: Identity & access (IAM/RBAC), SQLite session store (tx.sid cookie)
 
-### Community 144 - "PaymentIcon.tsx"
+### Community 144 - "Phase E: Public Site Rebuild"
+Cohesion: 0.14
+Nodes (14): docs/CONTENT_FR.md, E.2 Services page, E.3 About and Network pages, E.4 Contact, Help, Legal, E.5 Track, Quote and Ship pages, E.6 Payments localisation (MoMo, Orange Money, XAF), E.7 Images, E.8 Public QA EN+FR (+6 more)
+
+### Community 145 - "Phase B: Identity & Access (IAM/RBAC)"
+Cohesion: 0.15
+Nodes (11): Audit log (audit()/audited()), B.1 IAM schema, seeded roles, Super Admin bootstrap, B.2 SQLite session store and auth routes, B.3 Route permissions (requirePermission everywhere), B.4 Console auth (AuthContext, forced password change), B.5 Users, Roles and Audit log screens, B.7 TOTP 2FA (optional, after launch), #122 Seeded role permissions (+3 more)
+
+### Community 146 - "Shop delivery fee calculation"
+Cohesion: 0.27
+Nodes (10): delivery_cities table, delivery_zones table, intercity_rates table, Admin-defined local and intercity pricing, Size classes Small / Medium / Large, zone_rates table, Shop delivery fee calculation, Tracker phase M build order (+2 more)
+
+### Community 147 - "permissions.test.ts"
+Cohesion: 0.17
+Nodes (11): app, call(), cookieFor(), cookies, HASH, now, PermissionKey, Probe (+3 more)
+
+### Community 149 - "ConsoleLanguage.tsx"
+Cohesion: 0.18
+Nodes (15): compare(), SRC, ConsoleLangContext, ConsoleLanguage(), ConsoleLangValue, ConsoleLang, isConsoleLangReady(), loadConsoleLang() (+7 more)
+
+### Community 151 - "PaymentIcon.tsx"
 Cohesion: 0.27
 Nodes (7): dir, LUCIDE_FALLBACKS, PAYMENT_ICON_PATHS, FALLBACKS, ICON_COLORS, PaymentIconProps, PAYMENT_METHODS
 
-### Community 146 - "paymentProof.ts"
-Cohesion: 0.25
-Nodes (7): ids, PROOF_LIMITS, PROOF_STATUSES, ProofStatus, ProofSubmission, ProofValidation, PAYMENT_LIMITS
+### Community 152 - "multipart.ts"
+Cohesion: 0.24
+Nodes (10): malformed, MultipartBody, multipartBoundary(), MultipartFile, MultipartLimits, MultipartResult, parseMultipart(), readBody() (+2 more)
 
-### Community 147 - "loadLogoParts"
-Cohesion: 0.25
-Nodes (8): distanceFrom(), keyOutWhite(), labelParts(), lightness(), loadLogoParts(), selectParts(), toSquare(), trimTransparent()
+### Community 153 - "description.ts"
+Cohesion: 0.24
+Nodes (9): parseDoc(), publishBlocker(), BLOCKS, clean(), DescriptionCheck, DROP, MARKS, MAX_DESCRIPTION_JSON (+1 more)
 
-### Community 149 - "useGsapContext.ts"
-Cohesion: 0.39
-Nodes (4): loadGsap(), GsapKit, GsapSetup, Options
-
-### Community 151 - "Approval decisions and open items"
-Cohesion: 0.29
-Nodes (4): Approval decisions and open items, Ch 7 FAQ + Blog (no sample posts), Ch 4 The world (network map), Security model (bcrypt, SQLite sessions, row-level checks, audit)
-
-### Community 152 - "Palette (Chocolate, Cream, Orange #F48800)"
-Cohesion: 0.33
-Nodes (4): BRAND_COLORS in brand.ts, Palette (Chocolate, Cream, Orange #F48800), .tx-dark context and --tx-accent-text, --tx-* design tokens (tokens.css)
-
-### Community 153 - "JourneyController (ScrollTrigger per chapter)"
-Cohesion: 0.60
-Nodes (4): JourneyController (ScrollTrigger per chapter), Phase H: The Journey (GSAP + Three.js), 3D Stage (src/motion/stage/), H0: 3D models brief
-
-### Community 154 - "buildBrand"
-Cohesion: 0.40
-Nodes (5): buildBrand(), buildIcons(), resizeMark(), toCreamVersion(), writeSized()
+### Community 154 - "chapters/services.ts"
+Cohesion: 0.24
+Nodes (8): bandFrame(), COLORS, endsTexture(), rideProgress(), roadTexture(), ServicesOutput, ServicesPose, ServicesScene
 
 ### Community 165 - "fr/about.ts"
 Cohesion: 0.50
@@ -852,29 +868,49 @@ Nodes (3): payment, PaymentMessages, payment
 Cohesion: 0.50
 Nodes (3): ship, ShipMessages, ship
 
-### Community 168 - "Owner-supplied TanEx files"
-Cohesion: 0.67
-Nodes (3): TanEx logo.png, Managing Director portrait (about-md), Owner-supplied TanEx files
+### Community 168 - "ResponsiveImage.tsx"
+Cohesion: 0.36
+Nodes (7): largest(), ResponsiveImage(), ResponsiveImageProps, srcSet(), SITE_IMAGES, SiteImageInfo, SiteImageName
+
+### Community 176 - "courierApi.ts"
+Cohesion: 0.13
+Nodes (16): CashBalance, CashEntry, CashInput, CashState, courierApi, CourierProfile, courierUrls, RawResult (+8 more)
+
+### Community 177 - "references.ts"
+Cohesion: 0.31
+Nodes (7): REFERENCE_PREFIX, generateReference(), isReferenceOf(), REFERENCE_PATTERN, REFERENCE_PREFIXES, referenceFor(), ReferenceKind
+
+### Community 178 - "fr/blog.ts"
+Cohesion: 0.50
+Nodes (3): blog, BlogMessages, blog
+
+### Community 179 - "fr/legal.ts"
+Cohesion: 0.50
+Nodes (3): legal, LegalMessages, legal
+
+### Community 190 - "PaymentRequestEditor.tsx"
+Cohesion: 0.15
+Nodes (22): AccountEditor, accountSummary(), blankDetails(), draftFromPayment(), draftToRequest(), emptyPaymentDraft(), inputType(), newAccount() (+14 more)
 
 ## Knowledge Gaps
-- **131 isolated node(s):** `Password reset tokens (password_resets)`, `Super Admin bootstrap and npm run create-super-admin`, `Optional TOTP 2FA (B.7)`, `users table (email or phone, bcrypt 12)`, `E.2 Services page` (+126 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1220 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **131 isolated node(s):** `Password reset tokens (password_resets)`, `Super Admin bootstrap and npm run create-super-admin`, `Optional TOTP 2FA (B.7)`, `users table (email or phone, bcrypt 12)`, `Engagements (4) du pied de page` (+126 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1304 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `Track Result & Documents` to `Shipment Booking Forms`, `Brand Config & Site Chrome`, `Blog Studio Editor`, `Public Pages & Blog Views`, `UI Kit & Services Pages`, `Dispatch Board Logic`, `CouriersView.tsx`, `PaymentIcon.tsx`, `navigation.ts`, `useGsapContext.ts`, `Dispatch Job Drawer`, `Admin Data Types`, `App Shell`, `Payment Proofs Console`, `Payment Requests`, `Home Page`, `Admin Console Layout`, `lucide-react`, `Public Payment Section`, `Tariffs Console`, `Courier Offline Queue`, `Network Map & Locations`, `TrackingEventsView.tsx`, `Cash Console`, `Runtime Dependencies`, `WhatsApp Job Messages`, `PageMotion.tsx`, `package.json`, `HomeNetworkMap.tsx`, `Smooth Scroll & Route Rail`, `Courier App Shell`, `JobDetail.tsx`, `JourneyMap.tsx`, `Legal Pages`, `useAuth`, `SettingsView.tsx`, `Glide & Page Progress`, `LocalDeliveryPage.tsx`, `I18nProvider.tsx`, `Motion Capabilities`, `Journey Controller & QA`, `DocumentCenterView.tsx`?**
-  _High betweenness centrality (0.082) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `CreateShipmentView.tsx`, `Header.tsx`, `blogApi.ts`, `Public Pages & Blog Views`, `brand.ts`, `UI Kit & Services Pages`, `Dispatch Board Logic`, `CouriersView.tsx`, `SettingsView.tsx`, `UnitControls.tsx`, `shopMedia.test.ts`, `ConsoleLanguage.tsx`, `Dispatch Job Drawer`, `PaymentIcon.tsx`, `api.ts`, `App Shell`, `ProofViewer.tsx`, `PaymentsView.tsx`, `Home Page`, `AdminApp.tsx`, `ResponsiveImage.tsx`, `PaymentSection.tsx`, `Tariffs Console`, `courierApi.ts`, `LocationsPage.tsx`, `TrackingEventsView.tsx`, `Cash Console`, `dependencies`, `PaymentRequestEditor.tsx`, `ProductEditor.tsx`, `capabilities.ts`, `package.json`, `Smooth Scroll & Route Rail`, `Courier App Shell`, `JobDetail.tsx`, `SmoothScroll.tsx`, `shipmentStatusLabel`, `Legal Pages`, `sheets.tsx`, `Motion & 3D Spec`, `useAuth`, `Glide & Page Progress`, `LocalDeliveryPage.tsx`, `JobDrawer.tsx`, `ContactPage.tsx`, `runtime.ts`, `context.ts`, `DocumentCenterView.tsx`, `RichEditor.tsx`?**
+  _High betweenness centrality (0.086) - this node is a cross-community bridge._
 - **What connects `Password reset tokens (password_resets)`, `Super Admin bootstrap and npm run create-super-admin`, `Optional TOTP 2FA (B.7)` to the rest of the system?**
   _131 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Server Test Suites` be split into smaller, more focused modules?**
-  _Cohesion score 0.02605570530098832 - nodes in this community are weakly interconnected._
-- **Why does `TanEx Project Tracker` connect `Tracker: Design & Console Phases` to `Dispatch Spec`, `Project Tracker: Launch & Owner Items`, `Content: Console & Tracking Copy`, `Content Deck Overview`, `Shop Spec`, `Notifications Spec`, `Content: Home & Blog Copy`, `Tracker: Journey Phase`, `Tracker: Decisions & Dispatch`, `Tracker: Routing Phase`, `Motion & 3D Spec`, `Tracker: Shop Phase M`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+- **Should `console/index.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.07039187227866474 - nodes in this community are weakly interconnected._
+- **Why does `lucide-react` connect `react` to `CreateShipmentView.tsx`, `Header.tsx`, `blogApi.ts`, `brand.ts`, `Public Pages & Blog Views`, `UI Kit & Services Pages`, `Dispatch Board Logic`, `CouriersView.tsx`, `SettingsView.tsx`, `UnitControls.tsx`, `shopMedia.test.ts`, `Dispatch Job Drawer`, `PaymentIcon.tsx`, `api.ts`, `App Shell`, `ProofViewer.tsx`, `PaymentsView.tsx`, `Home Page`, `AdminApp.tsx`, `PaymentSection.tsx`, `Tariffs Console`, `courierApi.ts`, `LocationsPage.tsx`, `TrackingEventsView.tsx`, `Cash Console`, `dependencies`, `PaymentRequestEditor.tsx`, `ProductEditor.tsx`, `capabilities.ts`, `package.json`, `Smooth Scroll & Route Rail`, `Courier App Shell`, `JobDetail.tsx`, `shipmentStatusLabel`, `Legal Pages`, `sheets.tsx`, `useAuth`, `Glide & Page Progress`, `LocalDeliveryPage.tsx`, `JobDrawer.tsx`, `ContactPage.tsx`, `runtime.ts`, `DocumentCenterView.tsx`, `RichEditor.tsx`?**
+  _High betweenness centrality (0.038) - this node is a cross-community bridge._
 - **Should `API Routes & Middleware` be split into smaller, more focused modules?**
-  _Cohesion score 0.03864042933810376 - nodes in this community are weakly interconnected._
-- **Why does `CONTENT.md: TanEx Content Deck (English master)` connect `Content Deck Overview` to `Project Tracker: Launch & Owner Items`, `Tracker: Design & Console Phases`, `French Site Content`, `Content: Home & Blog Copy`, `Content: Console & Tracking Copy`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
-- **Should `Shipment Booking Forms` be split into smaller, more focused modules?**
-  _Cohesion score 0.06741573033707865 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04098649442160893 - nodes in this community are weakly interconnected._
+- **Why does `CONTENT.md: TanEx Content Deck (English master)` connect `Content Deck Overview` to `Tracker: Design & Console Phases`, `Phase E: Public Site Rebuild`, `French Site Content`, `Content: Home & Blog Copy`, `Content: Console & Tracking Copy`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Should `CreateShipmentView.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.0955837870538415 - nodes in this community are weakly interconnected._
