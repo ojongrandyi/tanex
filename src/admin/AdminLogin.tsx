@@ -5,11 +5,31 @@ import { useAuth } from '../auth/AuthContext';
 import { AUTH_TEXT, passwordErrorText } from '../auth/strings';
 import { checkNewPassword } from '../shared/passwordPolicy';
 import { ADMIN_CONSOLE_NAME, LOGO_ALT, LOGO_HEIGHT, LOGO_WHITE, LOGO_WIDTH } from '../config/brand';
+import { useConsoleLang } from './i18n/ConsoleLanguage';
+import type { ConsoleLang } from './i18n/consoleText';
 import './AdminLogin.css';
 
 interface AdminLoginProps {
   onNavigatePublic: (page: string) => void;
 }
+
+const LANG_NAMES: Record<ConsoleLang, string> = { en: 'English', fr: 'Français' }; // each in its own language
+
+/** Language of the screens before sign-in (tracker I.2); once signed in, My account decides. */
+const SignInLanguage: React.FC = () => {
+  const { user } = useAuth();
+  const { lang, chooseSignInLang } = useConsoleLang();
+  if (user) return null;
+  return (
+    <div className="admin-login-lang" role="group" aria-label={AUTH_TEXT.login.language}>
+      {(Object.keys(LANG_NAMES) as ConsoleLang[]).map((l) => (
+        <button key={l} type="button" lang={l} aria-pressed={lang === l} className={lang === l ? 'is-active' : ''} onClick={() => chooseSignInLang(l)}>
+          {LANG_NAMES[l]}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 /** Shared frame for every console screen shown before the console itself (logo + white card). */
 export const AuthCard: React.FC<{ icon?: React.ReactNode; title: string; intro: string; children: React.ReactNode }> = ({
@@ -19,6 +39,7 @@ export const AuthCard: React.FC<{ icon?: React.ReactNode; title: string; intro: 
   children
 }) => (
   <div className="admin-login-shell">
+    <SignInLanguage />
     <img src={LOGO_WHITE} alt={LOGO_ALT} className="admin-login-logo" width={LOGO_WIDTH} height={LOGO_HEIGHT} />
     <div className="admin-login-card">
       <div className="admin-login-badge" aria-hidden="true">

@@ -22,6 +22,7 @@ import type { MapCourier, MapRoute } from './DispatchMap';
 import '../pages/IamViews.css';
 import './Dispatch.css';
 import './DispatchBoard.css';
+import { consoleLang } from '../i18n/consoleText';
 
 // Leaflet and the map code load only when the board is open (and the map is near the screen).
 const DispatchMap = lazy(() => import('./DispatchMap').then((m) => ({ default: m.DispatchMap })));
@@ -38,7 +39,7 @@ const JobCard: React.FC<{ job: DispatchJob; problems: string[]; now: number; sel
       onClick={onOpen} aria-label={T.card.open(job.trackingNumber)} aria-current={selected ? 'true' : undefined}>
       <span className="tx-board-card-top">
         <span className="font-mono tx-board-card-id">{job.trackingNumber}</span>
-        <span className={`tx-board-status is-${job.status.toLowerCase()}`}>{DISPATCH_STATUS_LABELS[job.status].en}</span>
+        <span className={`tx-board-status is-${job.status.toLowerCase()}`}>{DISPATCH_STATUS_LABELS[job.status][consoleLang()]}</span>
       </span>
       <span className="tx-board-card-route">
         <span>{placeLine(job.pickup)}</span>
@@ -46,8 +47,8 @@ const JobCard: React.FC<{ job: DispatchJob; problems: string[]; now: number; sel
         <span>{placeLine(job.dropoff)}</span>
       </span>
       <span className="tx-board-card-meta">
-        {job.sizeClass ? SIZE_CLASS_LABELS[job.sizeClass].en : job.weightKg !== null ? `${job.weightKg} kg` : T.scope[job.scope]}
-        {' · '}{VEHICLE_LABELS[job.vehicleRequired].en}
+        {job.sizeClass ? SIZE_CLASS_LABELS[job.sizeClass][consoleLang()] : job.weightKg !== null ? `${job.weightKg} kg` : T.scope[job.scope]}
+        {' · '}{VEHICLE_LABELS[job.vehicleRequired][consoleLang()]}
         {' · '}{job.price !== null ? money(job.price, job.currency) : T.card.noPrice}
       </span>
       <span className="tx-board-card-meta">
@@ -227,7 +228,7 @@ export const DispatchBoardView: React.FC<{
           <span>{F.vehicle}</span>
           <select value={vehicle} onChange={(e) => setVehicle(e.target.value as VehicleType | '')}>
             <option value="">{F.allVehicles}</option>
-            {VEHICLE_TYPES.map((v) => <option key={v} value={v}>{VEHICLE_LABELS[v].en}</option>)}
+            {VEHICLE_TYPES.map((v) => <option key={v} value={v}>{VEHICLE_LABELS[v][consoleLang()]}</option>)}
           </select>
         </label>
         <label className="tx-iam-field">
@@ -322,7 +323,7 @@ export const DispatchBoardView: React.FC<{
                       <tr key={c.userId} className={c.accountStatus !== 'ACTIVE' ? 'is-disabled' : undefined}>
                         <td data-label={T.couriers.columns.courier}>
                           <strong>{c.displayName}</strong>
-                          <span className="tx-iam-sub">{VEHICLE_LABELS[c.vehicleType]?.en ?? c.vehicleType}{c.phone ? ` · ${c.phone}` : ''}</span>
+                          <span className="tx-iam-sub">{VEHICLE_LABELS[c.vehicleType]?.[consoleLang()] ?? c.vehicleType}{c.phone ? ` · ${c.phone}` : ''}</span>
                         </td>
                         <td data-label={T.couriers.columns.status}>
                           {c.accountStatus !== 'ACTIVE'

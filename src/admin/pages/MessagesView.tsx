@@ -4,6 +4,8 @@ import { api } from '../../services/api';
 import { usePermission } from '../../auth/AuthContext';
 import type { ContactMessage, ContactMessageStatus } from '../../types/admin';
 import './MessagesView.css';
+import { MESSAGES_VIEW_TEXT as TXT } from './MessagesView.text';
+import { consoleIntlLocale } from '../i18n/consoleText';
 
 interface MessagesViewProps {
   searchQuery: string;
@@ -14,14 +16,14 @@ interface MessagesViewProps {
 type Filter = 'ALL' | ContactMessageStatus;
 
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: 'ALL', label: 'All' },
-  { value: 'NEW', label: 'New' },
-  { value: 'READ', label: 'Read' },
-  { value: 'RESOLVED', label: 'Resolved' },
+  { value: 'ALL', get label() { return TXT.all; } },
+  { value: 'NEW', get label() { return TXT.new; } },
+  { value: 'READ', get label() { return TXT.read; } },
+  { value: 'RESOLVED', get label() { return TXT.resolved; } },
 ];
 
 const formatReceived = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  new Date(iso).toLocaleString(consoleIntlLocale(), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessagesChanged }) => {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
@@ -41,7 +43,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
       setMessages(data);
       onMessagesChanged?.(data);
     } catch (err: any) {
-      setError(err?.message || 'Could not load messages.');
+      setError(err?.message || TXT.couldNotLoadMessages);
     } finally {
       setLoading(false);
     }
@@ -59,7 +61,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
       setMessages(next);
       onMessagesChanged?.(next);
     } catch (err: any) {
-      setError(`Could not update ${id}: ${err?.message || 'server error'}`);
+      setError(TXT.couldNotUpdate(id, err?.message || TXT.serverError));
     } finally {
       setBusyId(null);
     }
@@ -92,7 +94,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
   return (
     <div className="tx-messages-workspace animate-fade-in">
       <div className="messages-toolbar">
-        <div className="messages-filters" role="tablist" aria-label="Filter messages">
+        <div className="messages-filters" role="tablist" aria-label={TXT.filterMessages}>
           {FILTERS.map((f) => (
             <button
               key={f.value}
@@ -108,7 +110,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
         </div>
         <button type="button" className="messages-refresh-btn" onClick={load} disabled={loading}>
           <RefreshCw size={14} className={loading ? 'spin' : ''} />
-          <span>Refresh</span>
+          <span>{TXT.refresh}</span>
         </button>
       </div>
 
@@ -122,8 +124,8 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
       {!loading && visible.length === 0 && (
         <div className="messages-empty">
           <Inbox size={28} />
-          <strong>{messages.length === 0 ? 'No messages yet' : 'No messages match'}</strong>
-          <p>{messages.length === 0 ? 'Messages from the Contact page and Home callback requests will appear here.' : 'Try another filter or clear the search.'}</p>
+          <strong>{messages.length === 0 ? TXT.noMessagesYet : TXT.noMessagesMatch}</strong>
+          <p>{messages.length === 0 ? TXT.messagesFromTheContactPage : TXT.tryAnotherFilterOrClear}</p>
         </div>
       )}
 
@@ -164,25 +166,25 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ searchQuery, onMessa
                     {/* Home callback requests carry a phone number and no email. */}
                     {m.email ? (
                       <a className="message-action primary" href={`mailto:${m.email}?subject=${encodeURIComponent(`Re: ${m.subject} [${m.id}]`)}`}>
-                        <Reply size={14} /><span>Reply by email</span>
+                        <Reply size={14} /><span>{TXT.replyByEmail}</span>
                       </a>
                     ) : m.phone && (
                       <a className="message-action primary" href={`tel:${m.phone.replace(/[^\d+]/g, '')}`}>
-                        <Phone size={14} /><span>Call back</span>
+                        <Phone size={14} /><span>{TXT.callBack}</span>
                       </a>
                     )}
                     {canManage && (m.status !== 'RESOLVED' ? (
                       <button type="button" className="message-action" disabled={busyId === m.id} onClick={() => setStatus(m.id, 'RESOLVED')}>
-                        <CheckCircle2 size={14} /><span>Mark resolved</span>
+                        <CheckCircle2 size={14} /><span>{TXT.markResolved}</span>
                       </button>
                     ) : (
                       <button type="button" className="message-action" disabled={busyId === m.id} onClick={() => setStatus(m.id, 'READ')}>
-                        <RotateCcw size={14} /><span>Reopen</span>
+                        <RotateCcw size={14} /><span>{TXT.reopen}</span>
                       </button>
                     ))}
                     {canManage && m.status !== 'NEW' && (
                       <button type="button" className="message-action" disabled={busyId === m.id} onClick={() => setStatus(m.id, 'NEW')}>
-                        <Eye size={14} /><span>Mark unread</span>
+                        <Eye size={14} /><span>{TXT.markUnread}</span>
                       </button>
                     )}
                   </div>

@@ -12,6 +12,7 @@ import { PinPicker, type Pin } from './PinPicker';
 import { boardApi, type BoardCity, type BoardZone, type DispatchJob, type PlaceInput, type QuoteResult } from './boardApi';
 import { BOARD_TEXT, boardErrorText } from './boardStrings';
 import { money } from './boardFormat';
+import { consoleLang } from '../i18n/consoleText';
 
 const T = BOARD_TEXT;
 const C = BOARD_TEXT.create;
@@ -234,7 +235,7 @@ export const CreateJobDialog: React.FC<{
               <span>{C.size}</span>
               <select value={size} required={local} onChange={(e) => setSize(e.target.value as SizeClass | '')}>
                 <option value="">{C.chooseSize}</option>
-                {SIZE_CLASSES.map((s) => <option key={s} value={s}>{SIZE_CLASS_LABELS[s].en}</option>)}
+                {SIZE_CLASSES.map((s) => <option key={s} value={s}>{SIZE_CLASS_LABELS[s][consoleLang()]}</option>)}
               </select>
             </label>
             <label className="tx-iam-field">
@@ -254,8 +255,8 @@ export const CreateJobDialog: React.FC<{
             <label className="tx-iam-field">
               <span>{C.vehicle}</span>
               <select value={vehicle} onChange={(e) => setVehicle(e.target.value as VehicleType | '')}>
-                <option value="">{C.vehicleAuto(VEHICLE_LABELS[auto].en)}</option>
-                {VEHICLE_TYPES.map((v) => <option key={v} value={v}>{VEHICLE_LABELS[v].en}</option>)}
+                <option value="">{C.vehicleAuto(VEHICLE_LABELS[auto][consoleLang()])}</option>
+                {VEHICLE_TYPES.map((v) => <option key={v} value={v}>{VEHICLE_LABELS[v][consoleLang()]}</option>)}
               </select>
             </label>
           </div>

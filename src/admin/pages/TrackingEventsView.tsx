@@ -29,6 +29,7 @@ import { NETWORK_POINTS } from '../../data/gateways';
 import { WeightText } from '../../components/forms/UnitControls';
 import { formatInZone, isValidTimeZone, timeZoneForPlace, utcOffsetLabel, zonedTimeToUtc } from '../../shared/timeZones';
 import { SHIPMENT_STATUS_OPTIONS, knownStatusLabel, shipmentStatusLabel } from '../../shared/shipmentStatus';
+import { TRACKING_EVENTS_VIEW_TEXT as TXT } from './TrackingEventsView.text';
 
 // Preset event locations: TanEx locations and the gateways (CONTENT §9), each with its IANA time
 // zone. TanEx offices and delivery cities are named as TanEx's; gateways keep "City Gateway (CODE)".
@@ -112,30 +113,30 @@ const getEventTheme = (statusStr?: string, title?: string) => {
 const getEventColors = (statusStr?: string, title?: string) => {
   const s = (statusStr || title || '').toUpperCase();
   if (s.includes('DELIVERED')) {
-    return { color: '#16a34a', bg: '#f0fdf4', border: '#86efac', text: '#166534', label: 'DELIVERED', theme: 'theme-delivered' };
+    return { color: '#16a34a', bg: '#f0fdf4', border: '#86efac', text: '#166534', label: TXT.delivered2, theme: 'theme-delivered' };
   }
   if (s.includes('OUT_FOR_DELIVERY') || s.includes('OUT FOR DELIVERY')) {
-    return { color: '#d97706', bg: '#fffbeb', border: '#fde68a', text: '#92400e', label: 'OUT FOR DELIVERY', theme: 'theme-out-for-delivery' };
+    return { color: '#d97706', bg: '#fffbeb', border: '#fde68a', text: '#92400e', label: TXT.outForDelivery2, theme: 'theme-out-for-delivery' };
   }
   if (s.includes('DELAY') || s.includes('EXCEPTION') || s.includes('WEATHER')) {
-    return { color: '#dc2626', bg: '#fef2f2', border: '#fca5a5', text: '#991b1b', label: 'DELAY / EXCEPTION', theme: 'theme-delay' };
+    return { color: '#dc2626', bg: '#fef2f2', border: '#fca5a5', text: '#991b1b', label: TXT.delayException, theme: 'theme-delay' };
   }
   if (s.includes('HOLD') || s.includes('RETURN')) {
-    return { color: '#dc2626', bg: '#fef2f2', border: '#fca5a5', text: '#991b1b', label: 'ON HOLD', theme: 'theme-hold' };
+    return { color: '#dc2626', bg: '#fef2f2', border: '#fca5a5', text: '#991b1b', label: TXT.onHold, theme: 'theme-hold' };
   }
   if (s.includes('PROCESSING') || s.includes('SORT') || s.includes('CUSTOMS')) {
-    return { color: 'var(--tx-cat-violet-600)', bg: 'var(--tx-cat-violet-50)', border: 'var(--tx-cat-violet-200)', text: 'var(--tx-cat-violet-700)', label: 'PROCESSING', theme: 'theme-processing' };
+    return { color: 'var(--tx-cat-violet-600)', bg: 'var(--tx-cat-violet-50)', border: 'var(--tx-cat-violet-200)', text: 'var(--tx-cat-violet-700)', label: TXT.processing, theme: 'theme-processing' };
   }
   if (s.includes('DEPARTED') || s.includes('IN_TRANSIT')) {
-    return { color: 'var(--tx-cat-sky-600)', bg: 'var(--tx-cat-sky-50)', border: 'var(--tx-cat-sky-300)', text: 'var(--tx-cat-sky-700)', label: 'DEPARTED', theme: 'theme-departed' };
+    return { color: 'var(--tx-cat-sky-600)', bg: 'var(--tx-cat-sky-50)', border: 'var(--tx-cat-sky-300)', text: 'var(--tx-cat-sky-700)', label: TXT.departed, theme: 'theme-departed' };
   }
   if (s.includes('ARRIVED')) {
-    return { color: '#2563eb', bg: '#eff6ff', border: '#93c5fd', text: '#1e40af', label: 'ARRIVED', theme: 'theme-arrived' };
+    return { color: '#2563eb', bg: '#eff6ff', border: '#93c5fd', text: '#1e40af', label: TXT.arrived, theme: 'theme-arrived' };
   }
   if (s.includes('RECEIVED')) {
-    return { color: 'var(--tx-cat-teal-600)', bg: 'var(--tx-cat-teal-50)', border: 'var(--tx-cat-teal-200)', text: 'var(--tx-cat-teal-800)', label: 'RECEIVED', theme: 'theme-received' };
+    return { color: 'var(--tx-cat-teal-600)', bg: 'var(--tx-cat-teal-50)', border: 'var(--tx-cat-teal-200)', text: 'var(--tx-cat-teal-800)', label: TXT.received, theme: 'theme-received' };
   }
-  return { color: 'var(--tx-choc-600)', bg: 'var(--tx-cream-100)', border: 'var(--tx-choc-200)', text: 'var(--tx-choc-700)', label: 'SHIPMENT CREATED', theme: 'theme-created' };
+  return { color: 'var(--tx-choc-600)', bg: 'var(--tx-cream-100)', border: 'var(--tx-choc-200)', text: 'var(--tx-choc-700)', label: TXT.shipmentCreated, theme: 'theme-created' };
 };
 
 interface TrackingEventsViewProps {
@@ -316,7 +317,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
 
     setShowAddModal(false);
     setIsSubmittingEvent(false);
-    setSuccessToast(`Tracking event "${newEvent.title}" recorded for ${currentShipment.trackingNumber}. Current location updated to ${locCity}, ${locState}.`);
+    setSuccessToast(TXT.trackingEventRecordedForCurrent(newEvent.title, currentShipment.trackingNumber, locCity, locState));
     setTimeout(() => setSuccessToast(null), 4000);
   };
 
@@ -355,7 +356,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
     });
 
     setCorrectingEvent(null);
-    setSuccessToast(`Event corrected and audit log preserved. Timestamp & location updated.`);
+    setSuccessToast(TXT.eventCorrectedAndAuditLog);
     setTimeout(() => setSuccessToast(null), 4000);
   };
 
@@ -371,8 +372,8 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
       {/* 1. PAGE HEADER */}
       <div className="tracking-page-header">
         <div className="header-title-block">
-          <h2>Tracking Events</h2>
-          <p>Manage shipment status, location, and chronological tracking history.</p>
+          <h2>{TXT.trackingEvents}</h2>
+          <p>{TXT.manageShipmentStatusLocationAnd}</p>
         </div>
 
         {/* Search Input Box */}
@@ -381,7 +382,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
           <input
             type="text"
             className="tracking-search-input font-mono"
-            placeholder="Search tracking #, sender, recipient, city..."
+            placeholder={TXT.searchTrackingSenderRecipientCity}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
@@ -400,10 +401,10 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
             <div className="tev-circle-icon accent">
               <Package size={15} />
             </div>
-            <span className="tev-card-label">TRACKABLE SHIPMENTS</span>
+            <span className="tev-card-label">{TXT.trackableShipments}</span>
           </div>
           <strong className="tev-card-number">{shipments.length}</strong>
-          <span className="tev-card-subtext">Available in the scanner</span>
+          <span className="tev-card-subtext">{TXT.availableInTheScanner}</span>
         </div>
 
         <div className="tev-kpi-card">
@@ -411,10 +412,10 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
             <div className="tev-circle-icon blue">
               <Truck size={15} />
             </div>
-            <span className="tev-card-label">IN TRANSIT NOW</span>
+            <span className="tev-card-label">{TXT.inTransitNow}</span>
           </div>
           <strong className="tev-card-number">{inTransitCount}</strong>
-          <span className="tev-card-subtext">Actively moving</span>
+          <span className="tev-card-subtext">{TXT.activelyMoving}</span>
         </div>
 
         <div className="tev-kpi-card">
@@ -422,10 +423,10 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
             <div className="tev-circle-icon emerald">
               <Radio size={15} />
             </div>
-            <span className="tev-card-label">EVENTS LOGGED</span>
+            <span className="tev-card-label">{TXT.eventsLogged}</span>
           </div>
           <strong className="tev-card-number">{totalEventsLogged}</strong>
-          <span className="tev-card-subtext">Total checkpoint scans</span>
+          <span className="tev-card-subtext">{TXT.totalCheckpointScans}</span>
         </div>
 
         <div className="tev-kpi-card">
@@ -433,19 +434,19 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
             <div className={`tev-circle-icon ${delayedCount > 0 ? 'red' : 'green'}`}>
               <AlertTriangle size={15} />
             </div>
-            <span className="tev-card-label">DELAYED / HELD</span>
+            <span className="tev-card-label">{TXT.delayedHeld}</span>
           </div>
           <strong className="tev-card-number">{delayedCount}</strong>
-          <span className="tev-card-subtext">{delayedCount > 0 ? 'Needs attention' : 'All clear'}</span>
+          <span className="tev-card-subtext">{delayedCount > 0 ? TXT.needsAttention : TXT.allClear}</span>
         </div>
       </div>
 
       {/* 3. QUICK SCENARIO SELECTOR PILLS */}
       {shipments.length > 0 && (
         <div className="shipment-quick-pills-bar">
-          <span className="pills-label">Quick Select:</span>
+          <span className="pills-label">{TXT.quickSelect}</span>
           {filteredShipments.length === 0 ? (
-            <span className="pills-label" style={{ fontStyle: 'italic' }}>No shipments match "{searchQuery}".</span>
+            <span className="pills-label" style={{ fontStyle: 'italic' }}>{TXT.noShipmentsMatch}{searchQuery}".</span>
           ) : (
             filteredShipments.slice(0, 5).map(s => {
               const isSelected = s.trackingNumber.toUpperCase() === selectedTracking.toUpperCase();
@@ -475,14 +476,14 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               <button
                 className="copy-waybill-btn"
                 onClick={() => handleCopyTracking(currentShipment.trackingNumber)}
-                title="Copy tracking number"
+                title={TXT.copyTrackingNumber}
               >
                 {copiedId === currentShipment.trackingNumber ? (
                   <Check size={14} className="text-emerald" />
                 ) : (
                   <Copy size={14} />
                 )}
-                <span>{copiedId === currentShipment.trackingNumber ? 'Copied' : 'Copy'}</span>
+                <span>{copiedId === currentShipment.trackingNumber ? TXT.copied : TXT.copy}</span>
               </button>
             </div>
 
@@ -532,15 +533,15 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
             {/* Shipment Context: Parties, Cargo, Route */}
             <div className="shipment-meta-summary">
               <div className="meta-pair">
-                <span className="m-label">PARTIES</span>
-                <strong>{currentShipment.sender?.name || 'Sender'} → {currentShipment.recipient?.name || 'Recipient'}</strong>
+                <span className="m-label">{TXT.parties}</span>
+                <strong>{currentShipment.sender?.name || TXT.sender} → {currentShipment.recipient?.name || TXT.recipient}</strong>
               </div>
               <div className="meta-pair">
-                <span className="m-label">CARGO</span>
+                <span className="m-label">{TXT.cargo}</span>
                 <strong>{currentShipment.cargoDescription || currentShipment.shipmentType} (<WeightText lbs={currentShipment.totalWeightLbs} />)</strong>
               </div>
               <div className="meta-pair">
-                <span className="m-label">ROUTE</span>
+                <span className="m-label">{TXT.route}</span>
                 <strong>{formatLocationStr(currentShipment.origin)} → {formatLocationStr(currentShipment.destination)}</strong>
               </div>
             </div>
@@ -549,14 +550,14 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
           <div className="identity-panel-right">
             <div className="current-state-card">
               <div className="state-badge-row">
-                <span className="state-tag-label">CURRENT STATUS</span>
+                <span className="state-tag-label">{TXT.currentStatus}</span>
                 <span className={`status-pill ${currentShipment.status.toLowerCase().replace(/_/g, '-')}`}>
                   {shipmentStatusLabel(currentShipment.status)}
                 </span>
               </div>
 
               <div className="state-badge-row">
-                <span className="state-tag-label">CURRENT LOCATION</span>
+                <span className="state-tag-label">{TXT.currentLocation}</span>
                 <strong className="current-loc-val">
                   <MapPin size={15} className="text-blue" />
                   {formatLocationStr(currentShipment.currentLocation)}
@@ -564,7 +565,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               </div>
 
               <div className="state-badge-row">
-                <span className="state-tag-label">LAST RECORDED MILESTONE</span>
+                <span className="state-tag-label">{TXT.lastRecordedMilestone}</span>
                 <span className="last-upd-val font-mono">{currentShipment.lastUpdated}</span>
               </div>
 
@@ -579,7 +580,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                 }}
               >
                 <Plus size={16} />
-                <span>+ Add Tracking Event</span>
+                <span>{TXT.addTrackingEvent}</span>
               </button>
             </div>
           </div>
@@ -587,20 +588,20 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
       ) : shipments.length === 0 ? (
         <div className="no-shipment-selected-card">
           <Package size={32} className="text-slate" />
-          <h3>No Shipments to Scan Yet</h3>
-          <p>Create a shipment first, then come back here to log checkpoints and status updates.</p>
+          <h3>{TXT.noShipmentsToScanYet}</h3>
+          <p>{TXT.createAShipmentFirstThen}</p>
           {onSelectView && (
             <button className="tev-empty-cta" onClick={() => onSelectView('create-shipment')}>
               <Plus size={15} />
-              <span>New Shipment</span>
+              <span>{TXT.newShipment}</span>
             </button>
           )}
         </div>
       ) : (
         <div className="no-shipment-selected-card">
           <AlertCircle size={32} className="text-slate" />
-          <h3>No Shipment Found</h3>
-          <p>Please enter a valid tracking number or select from the quick list above.</p>
+          <h3>{TXT.noShipmentFound}</h3>
+          <p>{TXT.pleaseEnterAValidTracking}</p>
         </div>
       )}
 
@@ -609,14 +610,14 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
         <div className="tracking-timeline-deck">
           <div className="timeline-deck-header">
             <div className="timeline-title-wrap">
-              <h3>Chronological Tracking History</h3>
-              <p>Append-only audit trail. Every event color-coded by milestone category.</p>
+              <h3>{TXT.chronologicalTrackingHistory}</h3>
+              <p>{TXT.appendOnlyAuditTrailEvery}</p>
             </div>
             <div className="timeline-legend-row">
-              <span className="legend-chip color-arrived">● In transit / Arrived</span>
-              <span className="legend-chip color-delivered">● Delivered</span>
-              <span className="legend-chip color-out">● Out for delivery</span>
-              <span className="legend-chip color-delayed">● Delayed / On hold</span>
+              <span className="legend-chip color-arrived">{TXT.inTransitArrived}</span>
+              <span className="legend-chip color-delivered">{TXT.delivered}</span>
+              <span className="legend-chip color-out">{TXT.outForDelivery}</span>
+              <span className="legend-chip color-delayed">{TXT.delayedOnHold}</span>
             </div>
           </div>
 
@@ -678,14 +679,14 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                         <div className="event-actions-group">
                           <button
                             className="event-action-icon-btn"
-                            title="Inspect full details"
+                            title={TXT.inspectFullDetails}
                             onClick={() => setInspectEvent(event)}
                           >
                             <Eye size={14} />
                           </button>
                           <button
                             className="event-action-icon-btn"
-                            title="Edit / Correct this event (Change date, time, location)"
+                            title={TXT.editCorrectThisEventChange}
                             onClick={() => {
                               setCorrectingEvent(event);
                               setCorrectedLocation(`${event.city}, ${event.state}`);
@@ -703,7 +704,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
 
                     {/* Customer-Facing Tracking Message */}
                     <div className="customer-facing-box">
-                      <span className="box-tag-label" style={{ color: theme.text }}>CUSTOMER-FACING MESSAGE</span>
+                      <span className="box-tag-label" style={{ color: theme.text }}>{TXT.customerFacingMessage2}</span>
                       <p className="customer-msg-text">"{event.description}"</p>
                     </div>
 
@@ -712,7 +713,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                       <div className="internal-admin-note-box">
                         <div className="note-head">
                           <Lock size={12} className="text-amber" />
-                          <span className="note-label">INTERNAL OPERATIONAL NOTE (PRIVATE)</span>
+                          <span className="note-label">{TXT.internalOperationalNotePrivate}</span>
                         </div>
                         <p className="note-text">{event.internalNote}</p>
                       </div>
@@ -723,15 +724,15 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                       <div className="correction-audit-banner">
                         <AlertTriangle size={13} className="text-amber" />
                         <span>
-                          <strong>Edited / Corrected:</strong> Formerly {event.correctionAudit.originalLocation} by {displayOperator(event.correctionAudit.operator)}. Reason: {event.correctionAudit.reason}
+                          <strong>{TXT.editedCorrected}</strong> {TXT.formerly} {event.correctionAudit.originalLocation} {TXT.by} {displayOperator(event.correctionAudit.operator)}{TXT.reason} {event.correctionAudit.reason}
                         </span>
                       </div>
                     )}
 
                     {/* Provenance Footer */}
                     <div className="event-provenance-footer">
-                      <span>Recorded by: <strong>{displayOperator(event.recordedBy)}</strong></span>
-                      <span>Audit Milestone ID: <code className="font-mono">{event.id}</code></span>
+                      <span>{TXT.recordedBy} <strong>{displayOperator(event.recordedBy)}</strong></span>
+                      <span>{TXT.auditMilestoneId} <code className="font-mono">{event.id}</code></span>
                     </div>
                   </div>
                 </div>
@@ -749,8 +750,8 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
           <div className="tracking-modal-card animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div className="m-title-block">
-                <h3>Record Tracking Event</h3>
-                <p>Shipment: <strong className="font-mono">{currentShipment.trackingNumber}</strong> ({currentShipment.cargoDescription || currentShipment.shipmentType})</p>
+                <h3>{TXT.recordTrackingEvent}</h3>
+                <p>{TXT.shipment} <strong className="font-mono">{currentShipment.trackingNumber}</strong> ({currentShipment.cargoDescription || currentShipment.shipmentType})</p>
               </div>
               <button className="modal-close-btn" onClick={() => setShowAddModal(false)}>
                 <X size={18} />
@@ -760,7 +761,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
             <form onSubmit={handleAddEventSubmit} className="modal-form-content">
               {/* Event Status Dropdown */}
               <div className="form-group-unit">
-                <label>Event Status *</label>
+                <label>{TXT.eventStatus}</label>
                 <select
                   value={formEventStatus}
                   onChange={e => handleStatusChange(e.target.value)}
@@ -776,11 +777,11 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               <div className="form-group-unit datetime-editor-box">
                 <label className="datetime-box-label">
                   <Calendar size={14} className="text-blue" />
-                  <span>Event Date & Time (Editable) *</span>
+                  <span>{TXT.eventDateTimeEditable}</span>
                 </label>
                 <div className="input-grid-3">
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Date</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>{TXT.date}</label>
                     <input
                       type="date"
                       value={formEventDate}
@@ -790,7 +791,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                     />
                   </div>
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Time</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>{TXT.time}</label>
                     <input
                       type="text"
                       value={formEventTime}
@@ -801,7 +802,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                     />
                   </div>
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Timezone</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>{TXT.timezone}</label>
                     <select
                       value={formTimezone}
                       onChange={e => setFormTimezone(e.target.value)}
@@ -817,7 +818,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
 
               {/* Location Selector */}
               <div className="form-group-unit">
-                <label>Shipment Physical Location *</label>
+                <label>{TXT.shipmentPhysicalLocation}</label>
                 <div className="input-grid-2">
                   <select
                     value={formLocationIndex}
@@ -829,14 +830,14 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                         {loc.city}, {loc.state} ({utcOffsetLabel(loc.timezone)})
                       </option>
                     ))}
-                    <option value={NETWORK_LOCATIONS.length}>Custom Location...</option>
+                    <option value={NETWORK_LOCATIONS.length}>{TXT.customLocation}</option>
                   </select>
 
                   <input
                     type="text"
                     value={formFacility}
                     onChange={e => setFormFacility(e.target.value)}
-                    placeholder="Specific Facility or Hub Name"
+                    placeholder={TXT.specificFacilityOrHubName}
                     className="modal-text-input"
                   />
                 </div>
@@ -847,7 +848,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                     style={{ marginTop: '0.5rem' }}
                     value={formCustomLocation}
                     onChange={e => setFormCustomLocation(e.target.value)}
-                    placeholder="Enter City, State (e.g. Phoenix, AZ)"
+                    placeholder={TXT.enterCityStateEG}
                     className="modal-text-input"
                   />
                 )}
@@ -856,25 +857,25 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               {/* Delay Specifics if Status is Delayed */}
               {formEventStatus === 'DELAYED' && (
                 <div className="form-group-unit delay-highlight-box">
-                  <label>Delay / Exception Reason *</label>
+                  <label>{TXT.delayExceptionReason}</label>
                   <select
                     value={formDelayReason}
                     onChange={e => setFormDelayReason(e.target.value)}
                     className="modal-select-input"
                   >
-                    <option value="Weather-related transportation delay">Weather-related transportation delay</option>
-                    <option value="Intermodal linehaul corridor congestion">Intermodal linehaul corridor congestion</option>
-                    <option value="Mechanical vehicle inspection / maintenance">Mechanical vehicle inspection / maintenance</option>
-                    <option value="Customer appointment delivery requested">Customer appointment delivery requested</option>
-                    <option value="Security / Agricultural inspection clearance">Security / Agricultural inspection clearance</option>
+                    <option value="Weather-related transportation delay">{TXT.weatherRelatedTransportationDelay}</option>
+                    <option value="Intermodal linehaul corridor congestion">{TXT.intermodalLinehaulCorridorCongestion}</option>
+                    <option value="Mechanical vehicle inspection / maintenance">{TXT.mechanicalVehicleInspectionMaintenance}</option>
+                    <option value="Customer appointment delivery requested">{TXT.customerAppointmentDeliveryRequested}</option>
+                    <option value="Security / Agricultural inspection clearance">{TXT.securityAgriculturalInspectionClearance}</option>
                   </select>
                 </div>
               )}
 
               {/* Customer-Facing Message */}
               <div className="form-group-unit">
-                <label>Customer-Facing Message *</label>
-                <p className="field-subtext">This message appears directly on the public customer tracking view.</p>
+                <label>{TXT.customerFacingMessage}</label>
+                <p className="field-subtext">{TXT.thisMessageAppearsDirectlyOn}</p>
                 <textarea
                   rows={3}
                   value={formCustomerMessage}
@@ -886,15 +887,15 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               {/* Internal Operational Note */}
               <div className="form-group-unit">
                 <div className="label-with-private-tag">
-                  <label>Internal Note (Admin Only)</label>
-                  <span className="private-badge">Private</span>
+                  <label>{TXT.internalNoteAdminOnly}</label>
+                  <span className="private-badge">{TXT.private}</span>
                 </div>
-                <p className="field-subtext">Will NEVER appear on public tracking. Stored strictly in the admin audit history.</p>
+                <p className="field-subtext">{TXT.willNeverAppearOnPublic}</p>
                 <input
                   type="text"
                   value={formInternalNote}
                   onChange={e => setFormInternalNote(e.target.value)}
-                  placeholder="e.g. Shipment arrived after scheduled departure. Processing for next movement."
+                  placeholder={TXT.eGShipmentArrivedAfter}
                   className="modal-text-input"
                 />
               </div>
@@ -902,22 +903,22 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               {/* Timestamp & Operator Auto-Stamp */}
               <div className="modal-provenance-strip">
                 <div className="prov-item">
-                  <span className="prov-label">RECORDED BY</span>
+                  <span className="prov-label">{TXT.recordedBy2}</span>
                   <strong>{ADMIN_ROLE_LABEL}</strong>
                 </div>
                 <div className="prov-item">
-                  <span className="prov-label">TIMESTAMP STAMP</span>
+                  <span className="prov-label">{TXT.timestampStamp}</span>
                   <strong className="font-mono">{formEventDate} · {formEventTime} {formTimezone}</strong>
                 </div>
               </div>
 
               <div className="modal-footer-actions">
                 <button type="button" className="btn-cancel" onClick={() => setShowAddModal(false)}>
-                  Cancel
+                  {TXT.cancel}
                 </button>
                 <button type="submit" className="btn-submit-event" disabled={isSubmittingEvent}>
                   <Send size={15} />
-                  <span>{isSubmittingEvent ? 'Verifying Location…' : 'Record Tracking Event'}</span>
+                  <span>{isSubmittingEvent ? TXT.verifyingLocation : TXT.recordTrackingEvent}</span>
                 </button>
               </div>
             </form>
@@ -933,8 +934,8 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
           <div className="tracking-modal-card animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div className="m-title-block">
-                <h3>Edit / Correct Tracking Event</h3>
-                <p>Milestone: <strong>{correctingEvent.title}</strong> (Original: {correctingEvent.displayDate} — {correctingEvent.displayTime})</p>
+                <h3>{TXT.editCorrectTrackingEvent}</h3>
+                <p>{TXT.milestone} <strong>{correctingEvent.title}</strong> {TXT.original} {correctingEvent.displayDate} — {correctingEvent.displayTime})</p>
               </div>
               <button className="modal-close-btn" onClick={() => setCorrectingEvent(null)}>
                 <X size={18} />
@@ -945,8 +946,8 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               <div className="correction-warning-banner">
                 <AlertTriangle size={16} className="text-amber" />
                 <div>
-                  <strong>Audit Trail Preservation</strong>
-                  <p>You can adjust the location, date, time, or message. An audit record of this edit will be saved.</p>
+                  <strong>{TXT.auditTrailPreservation}</strong>
+                  <p>{TXT.youCanAdjustTheLocation}</p>
                 </div>
               </div>
 
@@ -954,22 +955,22 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               <div className="form-group-unit datetime-editor-box">
                 <label className="datetime-box-label">
                   <Calendar size={14} className="text-blue" />
-                  <span>Adjust Date & Time *</span>
+                  <span>{TXT.adjustDateTime}</span>
                 </label>
                 <div className="input-grid-3">
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Date (e.g. August 20, 2026)</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>{TXT.dateEGAugust20}</label>
                     <input
                       type="text"
                       value={correctedEventDate}
                       onChange={e => setCorrectedEventDate(e.target.value)}
-                      placeholder="e.g. August 20, 2026"
+                      placeholder={TXT.eGAugust202026}
                       className="modal-text-input"
                       required
                     />
                   </div>
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Time (e.g. 4:35 PM)</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>{TXT.timeEG435}</label>
                     <input
                       type="text"
                       value={correctedEventTime}
@@ -980,7 +981,7 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
                     />
                   </div>
                   <div className="input-field">
-                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>Timezone</label>
+                    <label style={{ fontSize: '0.68rem', color: 'var(--tx-choc-600)' }}>{TXT.timezone}</label>
                     <select
                       value={correctedTimezone}
                       onChange={e => setCorrectedTimezone(e.target.value)}
@@ -995,31 +996,31 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
               </div>
 
               <div className="form-group-unit">
-                <label>Corrected Location (City, State) *</label>
+                <label>{TXT.correctedLocationCityState}</label>
                 <input
                   type="text"
                   value={correctedLocation}
                   onChange={e => setCorrectedLocation(e.target.value)}
-                  placeholder="e.g. Detroit, MI"
+                  placeholder={TXT.eGDetroitMi}
                   className="modal-text-input"
                   required
                 />
               </div>
 
               <div className="form-group-unit">
-                <label>Reason for Edit / Correction *</label>
+                <label>{TXT.reasonForEditCorrection}</label>
                 <input
                   type="text"
                   value={correctionReason}
                   onChange={e => setCorrectionReason(e.target.value)}
-                  placeholder="e.g. Timestamp and location adjusted to reflect actual physical arrival."
+                  placeholder={TXT.eGTimestampAndLocation}
                   className="modal-text-input"
                   required
                 />
               </div>
 
               <div className="form-group-unit">
-                <label>Customer Message (Adjust wording if needed)</label>
+                <label>{TXT.customerMessageAdjustWordingIf}</label>
                 <textarea
                   rows={2}
                   value={correctedCustomerMessage}
@@ -1030,11 +1031,11 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
 
               <div className="modal-footer-actions">
                 <button type="button" className="btn-cancel" onClick={() => setCorrectingEvent(null)}>
-                  Cancel
+                  {TXT.cancel}
                 </button>
                 <button type="submit" className="btn-submit-event">
                   <CheckCircle2 size={15} />
-                  <span>Save Changes & Log Audit</span>
+                  <span>{TXT.saveChangesLogAudit}</span>
                 </button>
               </div>
             </form>
@@ -1050,8 +1051,8 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
           <div className="tracking-modal-card animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div className="m-title-block">
-                <h3>Event Metadata Inspection</h3>
-                <p>Audit ID: <strong className="font-mono">{inspectEvent.id}</strong></p>
+                <h3>{TXT.eventMetadataInspection}</h3>
+                <p>{TXT.auditId} <strong className="font-mono">{inspectEvent.id}</strong></p>
               </div>
               <button className="modal-close-btn" onClick={() => setInspectEvent(null)}>
                 <X size={18} />
@@ -1061,54 +1062,54 @@ export const TrackingEventsView: React.FC<TrackingEventsViewProps> = ({ onSelect
             <div className="inspect-details-body">
               <div className="inspect-grid-2">
                 <div className="inspect-item">
-                  <span className="i-label">MILESTONE</span>
+                  <span className="i-label">{TXT.milestone2}</span>
                   <strong>{inspectEvent.title}</strong>
                 </div>
                 <div className="inspect-item">
-                  <span className="i-label">EVENT STATUS</span>
+                  <span className="i-label">{TXT.eventStatus2}</span>
                   <span className="font-mono">{shipmentStatusLabel(inspectEvent.eventStatus || inspectEvent.status)}</span>
                 </div>
                 <div className="inspect-item">
-                  <span className="i-label">RECORDED LOCATION</span>
+                  <span className="i-label">{TXT.recordedLocation}</span>
                   <strong>{inspectEvent.city}, {inspectEvent.state}</strong>
                 </div>
                 <div className="inspect-item">
-                  <span className="i-label">FACILITY / HUB</span>
+                  <span className="i-label">{TXT.facilityHub}</span>
                   <span>{inspectEvent.facility}</span>
                 </div>
                 <div className="inspect-item">
-                  <span className="i-label">TIMESTAMP</span>
+                  <span className="i-label">{TXT.timestamp}</span>
                   <span className="font-mono">{inspectEvent.displayDate} — {inspectEvent.displayTime}</span>
                 </div>
                 <div className="inspect-item">
-                  <span className="i-label">OPERATOR PROVENANCE</span>
+                  <span className="i-label">{TXT.operatorProvenance}</span>
                   <strong>{displayOperator(inspectEvent.recordedBy)}</strong>
                 </div>
               </div>
 
               <div className="inspect-box">
-                <span className="i-label">CUSTOMER-FACING MESSAGE</span>
+                <span className="i-label">{TXT.customerFacingMessage2}</span>
                 <p>"{inspectEvent.description}"</p>
               </div>
 
               {inspectEvent.internalNote && (
                 <div className="inspect-box private">
-                  <span className="i-label">INTERNAL OPERATIONAL NOTE</span>
+                  <span className="i-label">{TXT.internalOperationalNote}</span>
                   <p>{inspectEvent.internalNote}</p>
                 </div>
               )}
 
               {inspectEvent.correctionAudit && (
                 <div className="inspect-box correction">
-                  <span className="i-label">AUDIT EDIT LOG</span>
-                  <p>Edited by {displayOperator(inspectEvent.correctionAudit.operator)} at {inspectEvent.correctionAudit.correctedAt}: {inspectEvent.correctionAudit.reason}</p>
+                  <span className="i-label">{TXT.auditEditLog}</span>
+                  <p>{TXT.editedBy} {displayOperator(inspectEvent.correctionAudit.operator)} {TXT.at} {inspectEvent.correctionAudit.correctedAt}: {inspectEvent.correctionAudit.reason}</p>
                 </div>
               )}
             </div>
 
             <div className="modal-footer-actions">
               <button type="button" className="btn-cancel" onClick={() => setInspectEvent(null)}>
-                Close
+                {TXT.close}
               </button>
             </div>
           </div>

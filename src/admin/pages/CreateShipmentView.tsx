@@ -32,7 +32,6 @@ import { formatDimensions, formatLength, formatWeight } from '../../shared/units
 
 // Weight text saved into event descriptions: kg first with lb alongside, readable in either system.
 const bothUnits = (lbs: unknown) => `${formatWeight(lbs, 'metric')} (${formatWeight(lbs, 'imperial')})`;
-import { TRANSPORT_LEG_LABELS } from '../../shared/transportMode';
 import { useCurrency } from '../../utils/useCurrency';
 import { calculateRouteGeometry, inferTransportMode, type TransportMode } from '../../services/routingEngine';
 import { generateShipmentPlan } from '../../services/planningEngine';
@@ -51,6 +50,8 @@ import {
 } from '../components/PaymentRequestEditor';
 import { api } from '../../services/api';
 import { documentTitle } from '../../components/DocumentBrand';
+import { CREATE_SHIPMENT_VIEW_TEXT as TXT } from './CreateShipmentView.text';
+import { consoleIntlLocale } from '../i18n/consoleText';
 
 interface CreateShipmentViewProps {
   onSelectView: (view: AdminViewType) => void;
@@ -245,11 +246,11 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   };
   const senderStateWarning = React.useMemo(() => {
     if (senderCountry !== 'US' || isRecognizedState(senderState)) return null;
-    return `"${senderState}" isn't a recognized US state — did you mean the state, not a city or county? Unrecognized states silently route to the middle of the country on the map.`;
+    return TXT.unknownUsState(senderState);
   }, [senderState, senderCountry]);
   const recipientStateWarning = React.useMemo(() => {
     if (recipientCountry !== 'US' || isRecognizedState(recipientState)) return null;
-    return `"${recipientState}" isn't a recognized US state — did you mean the state, not a city or county? Unrecognized states silently route to the middle of the country on the map.`;
+    return TXT.unknownUsState(recipientState);
   }, [recipientState, recipientCountry]);
 
   // ----------------------------------------------------
@@ -287,7 +288,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
     const delivery = new Date(expectedDeliveryDate);
     if (isNaN(pickup.getTime()) || isNaN(delivery.getTime())) return null;
     if (delivery.getTime() < pickup.getTime()) {
-      return `Expected delivery date is before the pickup date (${pickup.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}).`;
+      return TXT.deliveryBeforePickup(pickup.toLocaleDateString(consoleIntlLocale(), { month: 'long', day: 'numeric', year: 'numeric' }));
     }
     return null;
   }, [pickupDate, expectedDeliveryDate]);
@@ -548,10 +549,10 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
     };
     try {
       localStorage.setItem('tx_admin_shipment_draft', JSON.stringify(draftData));
-      setDraftSavedToast('Draft manifest saved to local session.');
+      setDraftSavedToast(TXT.draftManifestSavedToLocal);
       setTimeout(() => setDraftSavedToast(null), 3000);
     } catch {
-      setDraftSavedToast('Draft saved.');
+      setDraftSavedToast(TXT.draftSaved);
       setTimeout(() => setDraftSavedToast(null), 3000);
     }
   };
@@ -580,7 +581,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
       setPaymentSaveState('saved');
     } catch (err: any) {
       setPaymentSaveState('failed');
-      setPaymentSaveError(err?.message || 'The server did not respond.');
+      setPaymentSaveError(err?.message || TXT.theServerDidNotRespond);
     }
   };
 
@@ -588,29 +589,29 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
   // messages show on step 1 (description) and step 3 (cargo details).
   const cargoDraftErrors = (): Record<string, string> => {
     const e: Record<string, string> = {};
-    if (!shipmentDescription.trim()) e.shipmentDescription = 'Describe the cargo.';
+    if (!shipmentDescription.trim()) e.shipmentDescription = TXT.describeTheCargo;
     const missing: string[] = [];
     if (shipmentType === 'Vehicle') {
-      if (!vehMake.trim()) e.vehMake = 'Enter the make.';
-      if (!vehModel.trim()) e.vehModel = 'Enter the model.';
-      if (!/^\d{4}$/.test(vehYear.trim())) missing.push('the vehicle year (4 digits)');
-      if (!(parseFloat(vehWeightLbs) > 0)) missing.push('the vehicle weight');
+      if (!vehMake.trim()) e.vehMake = TXT.enterTheMake;
+      if (!vehModel.trim()) e.vehModel = TXT.enterTheModel;
+      if (!/^\d{4}$/.test(vehYear.trim())) missing.push(TXT.theVehicleYear4Digits);
+      if (!(parseFloat(vehWeightLbs) > 0)) missing.push(TXT.theVehicleWeight);
     } else if (shipmentType === 'Pallet') {
-      if (!(palletCount >= 1)) missing.push('the number of pallets');
-      if (!(palletWeightPerSkid > 0)) missing.push('the weight per pallet');
+      if (!(palletCount >= 1)) missing.push(TXT.theNumberOfPallets);
+      if (!(palletWeightPerSkid > 0)) missing.push(TXT.theWeightPerPallet);
     } else if (shipmentType === 'Container') {
-      if (!containerNumber.trim()) missing.push('the container number');
-      if (!(parseFloat(containerVgmWeight) > 0)) missing.push('the verified gross mass (VGM)');
+      if (!containerNumber.trim()) missing.push(TXT.theContainerNumber);
+      if (!(parseFloat(containerVgmWeight) > 0)) missing.push(TXT.theVerifiedGrossMassVgm);
     } else if (shipmentType === 'Freight') {
-      if (!(freightTotalWeightLbs > 0)) missing.push('the total freight weight');
+      if (!(freightTotalWeightLbs > 0)) missing.push(TXT.theTotalFreightWeight);
     } else if (shipmentType === 'Pets') {
-      if (!petName.trim()) missing.push("the animal's name");
-      if (!(petWeightLbs > 0)) missing.push("the animal's weight");
+      if (!petName.trim()) missing.push(TXT.theAnimalSName);
+      if (!(petWeightLbs > 0)) missing.push(TXT.theAnimalSWeight);
     } else if (shipmentType !== 'Document' && (packagesList.length === 0 || packagesList.some((p) => !(p.weightLbs > 0)))) {
-      missing.push('a weight for every package');
+      missing.push(TXT.aWeightForEveryPackage);
     }
-    if (missing.length) e.cargo = `Still needed: ${missing.join(', ')}.`;
-    if (Object.keys(e).length) e.submit = 'Some cargo details are missing: check steps 1 and 3.';
+    if (missing.length) e.cargo = TXT.stillNeeded(missing.join(', '));
+    if (Object.keys(e).length) e.submit = TXT.someCargoDetailsAreMissing;
     return e;
   };
 
@@ -761,7 +762,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
     // U.S. metros and asks the live geocoder (restricted to that country) for anything else.
     // An address that can't be placed stops here instead of landing somewhere made up.
     if (!senderCountry || !recipientCountry || !senderCity.trim() || !recipientCity.trim()) {
-      setErrors({ submit: 'Choose the country and enter the city for both the sender and the recipient (step 2).' });
+      setErrors({ submit: TXT.chooseCountryAndCity });
       setIsCreatingShipment(false);
       return;
     }
@@ -771,7 +772,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
     ]);
     if (!originGeo || !destGeo) {
       const missing = !originGeo ? `${senderCity}, ${getCountry(senderCountry)?.name}` : `${recipientCity}, ${getCountry(recipientCountry)?.name}`;
-      setErrors({ submit: `Couldn't locate ${missing}. Check the city and country (step 2) and try again.` });
+      setErrors({ submit: TXT.couldNotLocate(missing) });
       setIsCreatingShipment(false);
       return;
     }
@@ -1020,7 +1021,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
     try {
       created = await createShipment(newShipmentRecord);
     } catch (err: any) {
-      setErrors({ submit: `Could not register the shipment: ${err?.message || 'the server did not respond'}. Nothing was saved; please try again.` });
+      setErrors({ submit: TXT.registerFailed(err?.message || TXT.serverDidNotRespond) });
       setIsCreatingShipment(false);
       return;
     }
@@ -1101,22 +1102,22 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
             <div className="success-icon-wrap">
               <CheckCircle2 size={32} className="text-emerald" />
             </div>
-            <h2>Shipment Created Successfully</h2>
-            <p>The shipment record and its unique tracking identity have been generated and registered in the system.</p>
+            <h2>{TXT.shipmentCreatedSuccessfully}</h2>
+            <p>{TXT.theShipmentRecordAndIts}</p>
           </div>
 
           {/* Tracking Identity Section */}
           <div className="success-identity-box">
-            <span className="identity-label">OFFICIAL TRACKING NUMBER</span>
+            <span className="identity-label">{TXT.officialTrackingNumber}</span>
             <div className="identity-code-row">
               <strong className="tracking-val font-mono">{generatedTrackingNumber}</strong>
               <button
                 className="identity-copy-btn"
                 onClick={handleCopySuccessTracking}
-                title="Copy tracking number"
+                title={TXT.copyTrackingNumber}
               >
                 {isCopied ? <Check size={16} className="text-emerald" /> : <Copy size={16} />}
-                <span>{isCopied ? 'Copied' : 'Copy'}</span>
+                <span>{isCopied ? TXT.copied : TXT.copy}</span>
               </button>
             </div>
 
@@ -1129,7 +1130,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {/* Route Summary */}
           <div className="success-route-grid">
             <div className="route-node">
-              <span className="r-label">ORIGIN</span>
+              <span className="r-label">{TXT.origin2}</span>
               <strong>{senderCity}, {senderState}</strong>
               <small>{senderName}</small>
             </div>
@@ -1137,7 +1138,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
               <ArrowRight size={20} className="text-blue" />
             </div>
             <div className="route-node">
-              <span className="r-label">DESTINATION</span>
+              <span className="r-label">{TXT.destination2}</span>
               <strong>{recipientCity}, {recipientState}</strong>
               <small>{recipientName}</small>
             </div>
@@ -1146,19 +1147,19 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {/* Key Specs Row */}
           <div className="success-specs-strip">
             <div className="spec-item">
-              <span className="s-label">TYPE</span>
-              <strong>{shipmentType}</strong>
+              <span className="s-label">{TXT.type2}</span>
+              <strong>{TXT.shipmentTypes[shipmentType]}</strong>
             </div>
             <div className="spec-item">
-              <span className="s-label">CARGO</span>
+              <span className="s-label">{TXT.cargo}</span>
               <strong className="truncate-cargo">{shipmentDescription}</strong>
             </div>
             <div className="spec-item">
-              <span className="s-label">SERVICE</span>
+              <span className="s-label">{TXT.service2}</span>
               <strong>{service}</strong>
             </div>
             <div className="spec-item">
-              <span className="s-label">TOTAL WEIGHT</span>
+              <span className="s-label">{TXT.totalWeight2}</span>
               <strong>{formatWeight(totalWeight, units.system)}</strong>
             </div>
           </div>
@@ -1166,18 +1167,17 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {/* Payment request from step 5, saved once the tracking ID existed (update D.2). */}
           {paymentSaveState !== 'idle' && (
             <div className={`success-payment-status is-${paymentSaveState}`} role="status" aria-live="polite">
-              {paymentSaveState === 'saving' && <span>Saving the payment request…</span>}
+              {paymentSaveState === 'saving' && <span>{TXT.savingThePaymentRequest}</span>}
               {paymentSaveState === 'saved' && (
-                <span>Payment request saved: {paymentDraftSummary(paymentDraft)}. The customer sees it on the track page.</span>
+                <span>{TXT.paymentRequestSaved} {paymentDraftSummary(paymentDraft)}{TXT.theCustomerSeesItOn}</span>
               )}
               {paymentSaveState === 'failed' && (
                 <>
                   <span>
-                    The shipment was created, but its payment request was not saved ({paymentSaveError}).
-                    Try again, or add it later from Edit Shipment.
+                    {TXT.theShipmentWasCreatedBut}{paymentSaveError}{TXT.tryAgainOrAddIt}
                   </span>
                   <button type="button" className="success-payment-retry" onClick={() => savePaymentRequest(generatedTrackingNumber)}>
-                    Try again
+                    {TXT.tryAgain}
                   </button>
                 </>
               )}
@@ -1198,21 +1198,21 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
               onClick={() => onOpenShipmentDetail(generatedTrackingNumber)}
             >
               <FileText size={16} />
-              <span>View Shipment Record</span>
+              <span>{TXT.viewShipmentRecord}</span>
             </button>
             <button
               className="action-btn secondary"
               onClick={() => window.print()}
             >
               <Printer size={16} />
-              <span>Print Waybill / Label</span>
+              <span>{TXT.printWaybillLabel}</span>
             </button>
             <button
               className="action-btn secondary"
               onClick={() => onSelectView('document-center')}
             >
               <FileCheck size={16} />
-              <span>Generate Documents</span>
+              <span>{TXT.generateDocuments}</span>
             </button>
             <button
               className="action-btn secondary"
@@ -1228,7 +1228,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
               }}
             >
               <Plus size={16} />
-              <span>Create Another Shipment</span>
+              <span>{TXT.createAnotherShipment}</span>
             </button>
           </div>
         </div>
@@ -1253,49 +1253,49 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
         <div className="bar-left">
           <button className="back-link-btn" onClick={() => onSelectView('all-shipments')}>
             <ArrowLeft size={14} />
-            <span>All Shipments</span>
+            <span>{TXT.allShipments}</span>
           </button>
           <div className="page-heading-wrap">
-            <h2>Book Master Consignment</h2>
-            <p>Register freight, vehicles, parcels, or documents and issue validated tracking credentials.</p>
+            <h2>{TXT.bookMasterConsignment}</h2>
+            <p>{TXT.registerFreightVehiclesParcelsOr}</p>
           </div>
         </div>
 
         <div className="bar-right">
           <div className="preset-quick-pills">
-            <span className="preset-caption">QUICK PRESETS:</span>
+            <span className="preset-caption">{TXT.quickPresets2}</span>
             <button type="button" className="preset-pill" onClick={() => handleLoadPreset('vehicle_suv')}>
               <Car size={13} className="preset-icon-car" />
-              <span>Vehicle</span>
+              <span>{TXT.vehicle}</span>
             </button>
             <button type="button" className="preset-pill" onClick={() => handleLoadPreset('live_pet')}>
               <PawPrint size={13} className="preset-icon-pet" />
-              <span>Live Pet</span>
+              <span>{TXT.livePet}</span>
             </button>
             <button type="button" className="preset-pill" onClick={() => handleLoadPreset('skid_pallet')}>
               <Layers size={13} className="preset-icon-pallet" />
-              <span>Pallet Skids</span>
+              <span>{TXT.palletSkids}</span>
             </button>
             <button type="button" className="preset-pill" onClick={() => handleLoadPreset('ocean_container')}>
               <Container size={13} className="preset-icon-container" />
-              <span>Container</span>
+              <span>{TXT.container}</span>
             </button>
             <button type="button" className="preset-pill" onClick={() => handleLoadPreset('heavy_freight')}>
               <Truck size={13} className="preset-icon-freight" />
-              <span>Heavy Freight</span>
+              <span>{TXT.heavyFreight}</span>
             </button>
             <button type="button" className="preset-pill" onClick={() => handleLoadPreset('legal_doc')}>
               <FileText size={13} className="preset-icon-doc" />
-              <span>Legal Doc</span>
+              <span>{TXT.legalDoc}</span>
             </button>
             <button type="button" className="preset-pill" onClick={() => handleLoadPreset('parts_parcel')}>
               <Package size={13} className="preset-icon-pkg" />
-              <span>Parcel</span>
+              <span>{TXT.parcel}</span>
             </button>
           </div>
           <button type="button" className="save-draft-btn" onClick={handleSaveDraft}>
             <Save size={14} />
-            <span>Save Draft</span>
+            <span>{TXT.saveDraft}</span>
           </button>
         </div>
       </div>
@@ -1303,28 +1303,28 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
       {/* 2. PROGRESS STEP WIDGET (01 to 06) */}
       <div className="step-progress-container">
         {[
-          { num: 1, label: 'Shipment', desc: 'Type & Refs' },
-          { num: 2, label: 'Parties', desc: 'Shipper & Consignee' },
+          { num: 1, label: TXT.shipment, desc: TXT.typeRefs },
+          { num: 2, label: TXT.parties, desc: TXT.shipperConsignee },
           {
             num: 3,
-            label: shipmentType === 'Vehicle' ? 'Vehicle Cargo'
-                 : shipmentType === 'Pallet' ? 'Pallet Deck'
-                 : shipmentType === 'Container' ? 'Container Deck'
-                 : shipmentType === 'Freight' ? 'Freight Deck'
-                 : shipmentType === 'Document' ? 'Document Deck'
-                 : shipmentType === 'Pets' ? 'Live Animal Deck'
-                 : 'Packages',
-            desc: shipmentType === 'Vehicle' ? 'Specs & Inspection'
-                : shipmentType === 'Pallet' ? 'Skids & Stackability'
-                : shipmentType === 'Container' ? 'ISO & Bolt Seal'
-                : shipmentType === 'Freight' ? 'Class & Dock Access'
-                : shipmentType === 'Document' ? 'Security & Custody'
-                : shipmentType === 'Pets' ? 'Health, Crate & Care'
-                : 'Item Manifest'
+            label: shipmentType === 'Vehicle' ? TXT.vehicleCargo
+                 : shipmentType === 'Pallet' ? TXT.palletDeck
+                 : shipmentType === 'Container' ? TXT.containerDeck
+                 : shipmentType === 'Freight' ? TXT.freightDeck
+                 : shipmentType === 'Document' ? TXT.documentDeck
+                 : shipmentType === 'Pets' ? TXT.liveAnimalDeck
+                 : TXT.packages,
+            desc: shipmentType === 'Vehicle' ? TXT.specsInspection
+                : shipmentType === 'Pallet' ? TXT.skidsStackability
+                : shipmentType === 'Container' ? TXT.isoBoltSeal
+                : shipmentType === 'Freight' ? TXT.classDockAccess
+                : shipmentType === 'Document' ? TXT.securityCustody
+                : shipmentType === 'Pets' ? TXT.healthCrateCare
+                : TXT.itemManifest
           },
-          { num: 4, label: 'Service', desc: 'Tier & Handling' },
-          { num: 5, label: 'Pricing', desc: 'Tariff Rating' },
-          { num: 6, label: 'Review & Create', desc: 'Issue Waybill' }
+          { num: 4, label: TXT.service, desc: TXT.tierHandling },
+          { num: 5, label: TXT.pricing, desc: TXT.tariffRating },
+          { num: 6, label: TXT.reviewCreate, desc: TXT.issueWaybill }
         ].map((s) => {
           const isCompleted = currentStep > s.num;
           const isCurrent = currentStep === s.num;
@@ -1357,24 +1357,24 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {currentStep === 1 && (
             <div className="step-inner-content animate-fade-in">
               <div className="step-section-heading">
-                <div className="step-heading-badge">STEP 01</div>
-                <h3>Shipment Classification & Identifiers</h3>
-                <p>Establish what the cargo is, operational handling requirements, and commercial reference codes.</p>
+                <div className="step-heading-badge">{TXT.step01}</div>
+                <h3>{TXT.shipmentClassificationIdentifiers}</h3>
+                <p>{TXT.establishWhatTheCargoIs}</p>
               </div>
 
               {/* Shipment Type Big Visual Selection */}
               <div className="form-group-block">
-                <label className="section-field-label">Cargo Handling Category</label>
+                <label className="section-field-label">{TXT.cargoHandlingCategory}</label>
                 <div className="shipment-type-tiles-grid">
                   {[
-                    { id: 'Parcel', label: 'Parcel', icon: <Package size={19} />, colorClass: 'accent', desc: 'Boxed goods & parts' },
-                    { id: 'Vehicle', label: 'Vehicle', icon: <Car size={19} />, colorClass: 'blue', desc: 'Cars, trucks & autos' },
-                    { id: 'Pets', label: 'Live Pets', icon: <PawPrint size={19} />, colorClass: 'rose', desc: 'Live animal transport' },
-                    { id: 'Document', label: 'Document', icon: <FileText size={19} />, colorClass: 'green', desc: 'Envelopes & contracts' },
-                    { id: 'Freight', label: 'Freight', icon: <Truck size={19} />, colorClass: 'purple', desc: 'Heavy oversized linehaul' },
-                    { id: 'Pallet', label: 'Pallet', icon: <Layers size={19} />, colorClass: 'amber', desc: 'Skidded palletized cargo' },
-                    { id: 'Container', label: 'Container', icon: <Container size={19} />, colorClass: 'navy', desc: 'Sealed 20ft/40ft container' },
-                    { id: 'Multi-piece', label: 'Multi-piece', icon: <Box size={19} />, colorClass: 'indigo', desc: 'Grouped parcel manifest' }
+                    { id: 'Parcel', label: TXT.parcel, icon: <Package size={19} />, colorClass: 'accent', desc: TXT.boxedGoodsParts },
+                    { id: 'Vehicle', label: TXT.vehicle, icon: <Car size={19} />, colorClass: 'blue', desc: TXT.carsTrucksAutos },
+                    { id: 'Pets', label: TXT.livePets, icon: <PawPrint size={19} />, colorClass: 'rose', desc: TXT.liveAnimalTransport },
+                    { id: 'Document', label: TXT.document, icon: <FileText size={19} />, colorClass: 'green', desc: TXT.envelopesContracts },
+                    { id: 'Freight', label: TXT.freight, icon: <Truck size={19} />, colorClass: 'purple', desc: TXT.heavyOversizedLinehaul },
+                    { id: 'Pallet', label: TXT.pallet, icon: <Layers size={19} />, colorClass: 'amber', desc: TXT.skiddedPalletizedCargo },
+                    { id: 'Container', label: TXT.container, icon: <Container size={19} />, colorClass: 'navy', desc: TXT.sealed20ft40ftContainer },
+                    { id: 'Multi-piece', label: TXT.multiPiece, icon: <Box size={19} />, colorClass: 'indigo', desc: TXT.groupedParcelManifest }
                   ].map(t => {
                     const isSelected = shipmentType === t.id;
                     return (
@@ -1401,35 +1401,35 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
               {/* Cargo Category & Free-form Description */}
               <div className="form-group-block">
-                <label className="section-field-label">Cargo Content & Description</label>
-                <p className="field-hint-txt">Describe the items, commodities, or cargo being shipped.</p>
+                <label className="section-field-label">{TXT.cargoContentDescription}</label>
+                <p className="field-hint-txt">{TXT.describeTheItemsCommoditiesOr}</p>
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label>Cargo Category</label>
+                    <label>{TXT.cargoCategory}</label>
                     <select
                       value={cargoCategory}
                       onChange={e => setCargoCategory(e.target.value)}
                     >
-                      <option value="Automotive & Parts">Automotive & Parts</option>
-                      <option value="Live Animals & Pets (USDA / IPATA Regulated)">Live Animals & Pets (USDA / IPATA Regulated)</option>
-                      <option value="General Cargo">General Cargo</option>
-                      <option value="Electronics & Tech">Electronics & Tech</option>
-                      <option value="Industrial Machinery">Industrial Machinery</option>
-                      <option value="Medical & BioTech">Medical & BioTech</option>
-                      <option value="Apparel & Textiles">Apparel & Textiles</option>
-                      <option value="Legal & Documents">Legal & Documents</option>
-                      <option value="Furniture & Fixtures">Furniture & Fixtures</option>
-                      <option value="Personal Effects">Personal Effects</option>
-                      <option value="Other">Other</option>
+                      <option value="Automotive & Parts">{TXT.automotiveParts}</option>
+                      <option value="Live Animals & Pets (USDA / IPATA Regulated)">{TXT.liveAnimalsPetsUsdaIpata}</option>
+                      <option value="General Cargo">{TXT.generalCargo}</option>
+                      <option value="Electronics & Tech">{TXT.electronicsTech}</option>
+                      <option value="Industrial Machinery">{TXT.industrialMachinery}</option>
+                      <option value="Medical & BioTech">{TXT.medicalBiotech}</option>
+                      <option value="Apparel & Textiles">{TXT.apparelTextiles}</option>
+                      <option value="Legal & Documents">{TXT.legalDocuments}</option>
+                      <option value="Furniture & Fixtures">{TXT.furnitureFixtures}</option>
+                      <option value="Personal Effects">{TXT.personalEffects}</option>
+                      <option value="Other">{TXT.other}</option>
                     </select>
                   </div>
                   <div className="input-field">
-                    <label>Content / Cargo Description</label>
+                    <label>{TXT.contentCargoDescription}</label>
                     <input
                       type="text"
                       value={shipmentDescription}
                       onChange={e => setShipmentDescription(e.target.value)}
-                      placeholder="Cargo or consignment description"
+                      placeholder={TXT.cargoOrConsignmentDescription}
                     />
                     {errors.shipmentDescription && <span className="field-error-msg">{errors.shipmentDescription}</span>}
                   </div>
@@ -1438,33 +1438,33 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
               {/* References Section */}
               <div className="form-group-block">
-                <label className="section-field-label">Reference Identifiers (Optional)</label>
+                <label className="section-field-label">{TXT.referenceIdentifiersOptional}</label>
                 <div className="input-grid-3">
                   <div className="input-field">
-                    <label>Customer Reference</label>
+                    <label>{TXT.customerReference}</label>
                     <input
                       type="text"
                       value={customerRef}
                       onChange={e => setCustomerRef(e.target.value)}
-                      placeholder="PO Number / Ref"
+                      placeholder={TXT.poNumberRef}
                     />
                   </div>
                   <div className="input-field">
-                    <label>Invoice Reference</label>
+                    <label>{TXT.invoiceReference}</label>
                     <input
                       type="text"
                       value={invoiceRef}
                       onChange={e => setInvoiceRef(e.target.value)}
-                      placeholder="Invoice Number"
+                      placeholder={TXT.invoiceNumber}
                     />
                   </div>
                   <div className="input-field">
-                    <label>Internal Reference</label>
+                    <label>{TXT.internalReference}</label>
                     <input
                       type="text"
                       value={internalRef}
                       onChange={e => setInternalRef(e.target.value)}
-                      placeholder="Internal Ref Code"
+                      placeholder={TXT.internalRefCode}
                     />
                   </div>
                 </div>
@@ -1480,15 +1480,15 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
               <div className="step-section-heading">
                 <div className="heading-with-action">
                   <div>
-                    <h3>02. Sender & Recipient</h3>
-                    <p>Enter the shipment parties. This information attaches directly to this shipment.</p>
+                    <h3>{TXT.t02SenderRecipient}</h3>
+                    <p>{TXT.enterTheShipmentPartiesThis}</p>
                   </div>
                   <button
                     type="button"
                     className="copy-parties-btn"
                     onClick={handleCopySenderToRecipient}
                   >
-                    Copy Sender → Recipient
+                    {TXT.copySenderRecipient}
                   </button>
                 </div>
               </div>
@@ -1504,41 +1504,41 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
               {/* Sender Box */}
               <div className="parties-box sender">
                 <div className="parties-box-head">
-                  <span className="party-tag blue">SENDER (PICKUP LOCATION)</span>
+                  <span className="party-tag blue">{TXT.senderPickupLocation}</span>
                 </div>
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label>Full Name</label>
+                    <label>{TXT.fullName}</label>
                     <input
                       type="text"
                       value={senderName}
                       onChange={e => setSenderName(e.target.value)}
-                      placeholder="Shipper Full Name"
+                      placeholder={TXT.shipperFullName}
                     />
                   </div>
                   <div className="input-field">
-                    <label>Company (Optional)</label>
+                    <label>{TXT.companyOptional}</label>
                     <input
                       type="text"
                       value={senderCompany}
                       onChange={e => setSenderCompany(e.target.value)}
-                      placeholder="Company Name (Optional)"
+                      placeholder={TXT.companyNameOptional}
                     />
                   </div>
                 </div>
 
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label>Email (Optional)</label>
+                    <label>{TXT.emailOptional}</label>
                     <input
                       type="email"
                       value={senderEmail}
                       onChange={e => setSenderEmail(e.target.value)}
-                      placeholder="shipper@company.com"
+                      placeholder={TXT.shipperCompanyCom}
                     />
                   </div>
                   <div className="input-field">
-                    <label htmlFor="sender-phone">Phone (Optional)</label>
+                    <label htmlFor="sender-phone">{TXT.phoneOptional}</label>
                     <PhoneInput
                       id="sender-phone"
                       value={senderPhone}
@@ -1550,45 +1550,45 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label htmlFor="sender-locale">Customer language</label>
+                    <label htmlFor="sender-locale">{TXT.customerLanguage}</label>
                     <select id="sender-locale" value={notifyLocale} onChange={e => setNotifyLocale(e.target.value === 'fr' ? 'fr' : 'en')}>
-                      <option value="en">English</option>
-                      <option value="fr">French</option>
+                      <option value="en">{TXT.english}</option>
+                      <option value="fr">{TXT.french}</option>
                     </select>
-                    <small className="tx-iam-hint">Language of the emails the sender receives (booking and payment confirmations).</small>
+                    <small className="tx-iam-hint">{TXT.languageOfTheEmailsThe}</small>
                   </div>
                 </div>
 
                 <div className="input-field full-width">
-                  <label>Pickup Street Address</label>
+                  <label>{TXT.pickupStreetAddress}</label>
                   <input
                     type="text"
                     value={senderAddress}
                     onChange={e => setSenderAddress(e.target.value)}
-                    placeholder="Street Address, Suite / Unit"
+                    placeholder={TXT.streetAddressSuiteUnit}
                   />
                 </div>
 
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label htmlFor="sender-country">Country *</label>
+                    <label htmlFor="sender-country">{TXT.country}</label>
                     <CountrySelect id="sender-country" value={senderCountry} onChange={setSenderCountry} />
                   </div>
                   <div className="input-field">
-                    <label htmlFor="sender-city">City *</label>
+                    <label htmlFor="sender-city">{TXT.city}</label>
                     <input
                       id="sender-city"
                       type="text"
                       value={senderCity}
                       onChange={e => setSenderCity(e.target.value)}
-                      placeholder="e.g. Lagos"
+                      placeholder={TXT.eGLagos}
                     />
                   </div>
                 </div>
 
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label htmlFor="sender-region">{regionLabel(senderCountry)} (Optional)</label>
+                    <label htmlFor="sender-region">{regionLabel(senderCountry)} {TXT.optional}</label>
                     <input
                       id="sender-region"
                       type="text"
@@ -1604,7 +1604,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     )}
                   </div>
                   <div className="input-field">
-                    <label htmlFor="sender-postcode">{postcodeLabel(senderCountry)} (Optional)</label>
+                    <label htmlFor="sender-postcode">{postcodeLabel(senderCountry)} {TXT.optional}</label>
                     <input
                       id="sender-postcode"
                       type="text"
@@ -1618,41 +1618,41 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
               {/* Recipient Box */}
               <div className="parties-box recipient">
                 <div className="parties-box-head">
-                  <span className="party-tag purple">RECIPIENT (DELIVERY DESTINATION)</span>
+                  <span className="party-tag purple">{TXT.recipientDeliveryDestination}</span>
                 </div>
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label>Full Name</label>
+                    <label>{TXT.fullName}</label>
                     <input
                       type="text"
                       value={recipientName}
                       onChange={e => setRecipientName(e.target.value)}
-                      placeholder="Recipient Full Name"
+                      placeholder={TXT.recipientFullName}
                     />
                   </div>
                   <div className="input-field">
-                    <label>Company (Optional)</label>
+                    <label>{TXT.companyOptional}</label>
                     <input
                       type="text"
                       value={recipientCompany}
                       onChange={e => setRecipientCompany(e.target.value)}
-                      placeholder="Company Name (Optional)"
+                      placeholder={TXT.companyNameOptional}
                     />
                   </div>
                 </div>
 
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label>Email (Optional)</label>
+                    <label>{TXT.emailOptional}</label>
                     <input
                       type="email"
                       value={recipientEmail}
                       onChange={e => setRecipientEmail(e.target.value)}
-                      placeholder="recipient@company.com"
+                      placeholder={TXT.recipientCompanyCom}
                     />
                   </div>
                   <div className="input-field">
-                    <label htmlFor="recipient-phone">Phone (Optional)</label>
+                    <label htmlFor="recipient-phone">{TXT.phoneOptional}</label>
                     <PhoneInput
                       id="recipient-phone"
                       value={recipientPhone}
@@ -1663,35 +1663,35 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 </div>
 
                 <div className="input-field full-width">
-                  <label>Delivery Street Address</label>
+                  <label>{TXT.deliveryStreetAddress}</label>
                   <input
                     type="text"
                     value={recipientAddress}
                     onChange={e => setRecipientAddress(e.target.value)}
-                    placeholder="Street Address, Suite / Unit"
+                    placeholder={TXT.streetAddressSuiteUnit}
                   />
                 </div>
 
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label htmlFor="recipient-country">Country *</label>
+                    <label htmlFor="recipient-country">{TXT.country}</label>
                     <CountrySelect id="recipient-country" value={recipientCountry} onChange={setRecipientCountry} />
                   </div>
                   <div className="input-field">
-                    <label htmlFor="recipient-city">City *</label>
+                    <label htmlFor="recipient-city">{TXT.city}</label>
                     <input
                       id="recipient-city"
                       type="text"
                       value={recipientCity}
                       onChange={e => setRecipientCity(e.target.value)}
-                      placeholder="e.g. London"
+                      placeholder={TXT.eGLondon}
                     />
                   </div>
                 </div>
 
                 <div className="input-grid-2">
                   <div className="input-field">
-                    <label htmlFor="recipient-region">{regionLabel(recipientCountry)} (Optional)</label>
+                    <label htmlFor="recipient-region">{regionLabel(recipientCountry)} {TXT.optional}</label>
                     <input
                       id="recipient-region"
                       type="text"
@@ -1707,7 +1707,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     )}
                   </div>
                   <div className="input-field">
-                    <label htmlFor="recipient-postcode">{postcodeLabel(recipientCountry)} (Optional)</label>
+                    <label htmlFor="recipient-postcode">{postcodeLabel(recipientCountry)} {TXT.optional}</label>
                     <input
                       id="recipient-postcode"
                       type="text"
@@ -1726,7 +1726,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {currentStep === 3 && (
             <div className="step-inner-content animate-fade-in">
               <div className="tx-heading-with-units admin-units-bar">
-                <span className="dim-label">Weights and dimensions in</span>
+                <span className="dim-label">{TXT.weightsAndDimensionsIn}</span>
                 <UnitToggle />
               </div>
               {errors.cargo && <p className="field-error-msg" role="alert">{errors.cargo}</p>}
@@ -1736,38 +1736,38 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   <div className="step-section-heading">
                     <div className="heading-with-action">
                       <div>
-                        <h3>03. Vehicle Cargo Specifications</h3>
-                        <p>Vehicle shipping details, VIN identification, operability, and intake inspection.</p>
+                        <h3>{TXT.t03VehicleCargoSpecifications}</h3>
+                        <p>{TXT.vehicleShippingDetailsVinIdentification}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Vehicle Identity Details */}
                   <div className="vehicle-form-deck">
-                    <span className="deck-sub-title">1. Vehicle Identification</span>
+                    <span className="deck-sub-title">{TXT.t1VehicleIdentification}</span>
                     <div className="input-grid-3">
                       <div className="input-field">
-                        <label>Make *</label>
+                        <label>{TXT.make}</label>
                         <input
                           type="text"
                           value={vehMake}
                           onChange={e => setVehMake(e.target.value)}
-                          placeholder="e.g. Toyota"
+                          placeholder={TXT.eGToyota}
                         />
                         {errors.vehMake && <span className="field-error-msg">{errors.vehMake}</span>}
                       </div>
                       <div className="input-field">
-                        <label>Model *</label>
+                        <label>{TXT.model}</label>
                         <input
                           type="text"
                           value={vehModel}
                           onChange={e => setVehModel(e.target.value)}
-                          placeholder="e.g. Land Cruiser"
+                          placeholder={TXT.eGLandCruiser}
                         />
                         {errors.vehModel && <span className="field-error-msg">{errors.vehModel}</span>}
                       </div>
                       <div className="input-field">
-                        <label>Year *</label>
+                        <label>{TXT.year}</label>
                         <input
                           type="number"
                           value={vehYear}
@@ -1779,45 +1779,45 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                     <div className="input-grid-3">
                       <div className="input-field">
-                        <label>VIN (17-Character Number) *</label>
+                        <label>{TXT.vin17CharacterNumber}</label>
                         <input
                           type="text"
                           className="font-mono"
                           value={vehVin}
                           onChange={e => setVehVin(e.target.value.toUpperCase())}
-                          placeholder="17-character VIN"
+                          placeholder={TXT.t17CharacterVin}
                         />
                         {errors.vehVin && <span className="field-error-msg">{errors.vehVin}</span>}
                       </div>
                       <div className="input-field">
-                        <label>Color</label>
+                        <label>{TXT.color}</label>
                         <input
                           type="text"
                           value={vehColor}
                           onChange={e => setVehColor(e.target.value)}
-                          placeholder="White"
+                          placeholder={TXT.white}
                         />
                       </div>
                       <div className="input-field">
-                        <label>Vehicle Body Type</label>
+                        <label>{TXT.vehicleBodyType}</label>
                         <select
                           value={vehBodyType}
                           onChange={e => setVehBodyType(e.target.value)}
                         >
-                          <option value="Pickup Truck">Pickup Truck</option>
-                          <option value="Sedan">Sedan</option>
-                          <option value="SUV / Crossover">SUV / Crossover</option>
-                          <option value="Coupe">Coupe</option>
-                          <option value="Van / Minivan">Van / Minivan</option>
-                          <option value="Motorcycle">Motorcycle</option>
-                          <option value="Commercial / Heavy">Commercial / Heavy</option>
+                          <option value="Pickup Truck">{TXT.pickupTruck}</option>
+                          <option value="Sedan">{TXT.sedan}</option>
+                          <option value="SUV / Crossover">{TXT.suvCrossover}</option>
+                          <option value="Coupe">{TXT.coupe}</option>
+                          <option value="Van / Minivan">{TXT.vanMinivan}</option>
+                          <option value="Motorcycle">{TXT.motorcycle}</option>
+                          <option value="Commercial / Heavy">{TXT.commercialHeavy}</option>
                         </select>
                       </div>
                     </div>
 
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>License Plate (Optional)</label>
+                        <label>{TXT.licensePlateOptional}</label>
                         <input
                           type="text"
                           value={vehPlate}
@@ -1826,7 +1826,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                       </div>
                       <div className="input-field">
-                        <label>Title / Registration # (Optional)</label>
+                        <label>{TXT.titleRegistrationOptional}</label>
                         <input
                           type="text"
                           value={vehTitleNumber}
@@ -1839,7 +1839,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                   {/* Operability & Dimensions */}
                   <div className="vehicle-form-deck">
-                    <span className="deck-sub-title">2. Operability & Physical Dimensions</span>
+                    <span className="deck-sub-title">{TXT.t2OperabilityPhysicalDimensions}</span>
                     <div className="operability-toggle-row">
                       <label className={`operable-option-card ${vehOperable ? 'active operable-yes' : ''}`}>
                         <input
@@ -1850,10 +1850,10 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                         <div className="operable-card-body">
                           <div className="operable-head-row">
-                            <strong>Operable (Drivable)</strong>
-                            <span className="operable-status-tag success">Runs & Drives</span>
+                            <strong>{TXT.operableDrivable}</strong>
+                            <span className="operable-status-tag success">{TXT.runsDrives}</span>
                           </div>
-                          <small>Vehicle starts, steers, brakes, and drives under its own power directly onto the car hauler or transport trailer ramp.</small>
+                          <small>{TXT.vehicleStartsSteersBrakesAnd}</small>
                         </div>
                       </label>
 
@@ -1866,71 +1866,71 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                         <div className="operable-card-body">
                           <div className="operable-head-row">
-                            <strong>Inoperable (Non-Running)</strong>
-                            <span className="operable-status-tag warning">Requires Winch</span>
+                            <strong>{TXT.inoperableNonRunning}</strong>
+                            <span className="operable-status-tag warning">{TXT.requiresWinch}</span>
                           </div>
-                          <small>Vehicle cannot start or drive (dead engine, flat battery, crash damage, or missing keys). Carrier driver must load via winch or rollback.</small>
+                          <small>{TXT.vehicleCannotStartOrDrive}</small>
                         </div>
                       </label>
                     </div>
 
                     <div className="dim-row-group" style={{ marginTop: '0.75rem' }}>
-                      <span className="dim-label">Dimensions ({units.length}):</span>
+                      <span className="dim-label">{TXT.dimensions}{units.length}):</span>
                       <div className="dim-input-group">
                         <MeasureInput
                           kind="length"
                           value={vehLengthIn}
                           onChange={val => setVehLengthIn(val === '' ? '' : String(val))}
-                          placeholder="Length"
+                          placeholder={TXT.length}
                         />
                         <span className="dim-x">×</span>
                         <MeasureInput
                           kind="length"
                           value={vehWidthIn}
                           onChange={val => setVehWidthIn(val === '' ? '' : String(val))}
-                          placeholder="Width"
+                          placeholder={TXT.width}
                         />
                         <span className="dim-x">×</span>
                         <MeasureInput
                           kind="length"
                           value={vehHeightIn}
                           onChange={val => setVehHeightIn(val === '' ? '' : String(val))}
-                          placeholder="Height"
+                          placeholder={TXT.height}
                         />
-                        <span className="dim-label" style={{ marginLeft: '0.5rem' }}>in</span>
+                        <span className="dim-label" style={{ marginLeft: '0.5rem' }}>{TXT.in}</span>
                       </div>
 
                       <div className="dim-input-group" style={{ marginLeft: '1rem' }}>
-                        <span className="dim-label">Curb Weight ({units.weight}):</span>
+                        <span className="dim-label">{TXT.curbWeight}{units.weight}):</span>
                         <MeasureInput
                           kind="weight"
                           style={{ width: '80px' }}
                           value={vehWeightLbs}
                           onChange={val => setVehWeightLbs(val === '' ? '' : String(val))}
                         />
-                        <span className="dim-label">lb</span>
+                        <span className="dim-label">{TXT.lb}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Condition & Inspection */}
                   <div className="vehicle-form-deck">
-                    <span className="deck-sub-title">3. Condition & Pre-Trip Inspection</span>
+                    <span className="deck-sub-title">{TXT.t3ConditionPreTripInspection}</span>
                     <div className="input-grid-2">
                       <div className="input-field">
                         <div className="field-label-split">
-                          <label>Overall Condition</label>
-                          <span className="field-type-tag">Custom Admin Entry</span>
+                          <label>{TXT.overallCondition}</label>
+                          <span className="field-type-tag">{TXT.customAdminEntry}</span>
                         </div>
                         <input
                           type="text"
                           value={vehCondition}
                           onChange={e => setVehCondition(e.target.value)}
-                          placeholder="e.g. Clean daily driver, minor cosmetic scuffs, mechanically sound"
+                          placeholder={TXT.eGCleanDailyDriver}
                           className="condition-custom-input"
                         />
                         <div className="condition-quick-chips">
-                          <span className="chips-hint-text">Quick Presets:</span>
+                          <span className="chips-hint-text">{TXT.quickPresets}</span>
                           {[
                             'Showroom / Pristine',
                             'Clean / Minor Wear',
@@ -1953,7 +1953,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     </div>
 
                     <div className="damage-checklist-wrap">
-                      <label className="section-field-label" style={{ fontSize: '0.72rem' }}>Existing Damage Noted at Intake:</label>
+                      <label className="section-field-label" style={{ fontSize: '0.72rem' }}>{TXT.existingDamageNotedAtIntake}</label>
                       <div className="damage-pills-grid">
                         {[
                           'No major visible damage',
@@ -1979,18 +1979,18 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     </div>
 
                     <div className="input-field full-width">
-                      <label>Inspection Remarks</label>
+                      <label>{TXT.inspectionRemarks}</label>
                       <input
                         type="text"
                         value={inspectionNotes}
                         onChange={e => setInspectionNotes(e.target.value)}
-                        placeholder="e.g. Minor 1-inch clearcoat mark on rear tailgate."
+                        placeholder={TXT.eGMinor1Inch}
                       />
                     </div>
 
                     {/* Keys & Documents Received */}
                     <div className="keys-docs-wrap">
-                      <label className="section-field-label" style={{ fontSize: '0.72rem' }}>Items & Documents Received with Vehicle:</label>
+                      <label className="section-field-label" style={{ fontSize: '0.72rem' }}>{TXT.itemsDocumentsReceivedWithVehicle}</label>
                       <div className="keys-grid">
                         {[
                           'Vehicle',
@@ -2020,46 +2020,46 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   <div className="step-section-heading">
                     <div className="heading-with-action">
                       <div>
-                        <h3>03. Palletized Cargo & Skid Configuration</h3>
-                        <p>Configure standard pallet geometry, skid count, forklift entry, and double-stack directives.</p>
+                        <h3>{TXT.t03PalletizedCargoSkidConfiguration}</h3>
+                        <p>{TXT.configureStandardPalletGeometrySkid}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Section 1: Standard & Physical Specs */}
                   <div className="vehicle-form-deck pallet-deck-panel">
-                    <span className="deck-sub-title">1. Skid Geometry & Quantity</span>
+                    <span className="deck-sub-title">{TXT.t1SkidGeometryQuantity}</span>
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>Pallet Standard / Base Type</label>
+                        <label>{TXT.palletStandardBaseType}</label>
                         <select
                           value={palletStandard}
                           onChange={e => setPalletStandard(e.target.value)}
                         >
-                          <option value="GMA Standard 48×40 in (US Wood)">GMA Standard 48×40 in (US Wood 4-Way)</option>
-                          <option value="ISO Euro Pallet EUR-1 (1200×800 mm)">ISO Euro Pallet EUR-1 (1200×800 mm / 47.2×31.5 in)</option>
-                          <option value="ISO Euro Pallet EUR-2 (1200×1000 mm)">ISO Euro Pallet EUR-2 (1200×1000 mm / 47.2×39.4 in)</option>
-                          <option value="Heavy Duty Industrial Skid 48×48 in">Heavy Duty Industrial Skid 48×48 in</option>
-                          <option value="Half-Pallet Retail Display 40×24 in">Half-Pallet Retail Display 40×24 in</option>
-                          <option value="Custom Engineered Machinery Runner">Custom Engineered Machinery Runner Base</option>
+                          <option value="GMA Standard 48×40 in (US Wood)">{TXT.gmaStandard4840In}</option>
+                          <option value="ISO Euro Pallet EUR-1 (1200×800 mm)">{TXT.isoEuroPalletEur1}</option>
+                          <option value="ISO Euro Pallet EUR-2 (1200×1000 mm)">{TXT.isoEuroPalletEur2}</option>
+                          <option value="Heavy Duty Industrial Skid 48×48 in">{TXT.heavyDutyIndustrialSkid48}</option>
+                          <option value="Half-Pallet Retail Display 40×24 in">{TXT.halfPalletRetailDisplay40}</option>
+                          <option value="Custom Engineered Machinery Runner">{TXT.customEngineeredMachineryRunnerBase}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>Forklift & Pallet Jack Entry</label>
+                        <label>{TXT.forkliftPalletJackEntry}</label>
                         <select
                           value={palletForkliftAccess}
                           onChange={e => setPalletForkliftAccess(e.target.value)}
                         >
-                          <option value="4-Way Forklift Entry">4-Way Forklift Entry (Universal Access)</option>
-                          <option value="2-Way Entry (Stringer Block)">2-Way Entry (Stringer Block Pallet)</option>
-                          <option value="Hydraulic Jack Friendly">Hydraulic Pallet Jack Friendly (Bottom Chamfer)</option>
+                          <option value="4-Way Forklift Entry">{TXT.t4WayForkliftEntryUniversal}</option>
+                          <option value="2-Way Entry (Stringer Block)">{TXT.t2WayEntryStringerBlock}</option>
+                          <option value="Hydraulic Jack Friendly">{TXT.hydraulicPalletJackFriendlyBottom}</option>
                         </select>
                       </div>
                     </div>
 
                     <div className="input-grid-3">
                       <div className="input-field">
-                        <label>Skid Count (Quantity) *</label>
+                        <label>{TXT.skidCountQuantity}</label>
                         <input
                           type="number"
                           min="1"
@@ -2069,7 +2069,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                       </div>
                       <div className="input-field">
-                        <label>Weight Per Skid ({units.weight}) *</label>
+                        <label>{TXT.weightPerSkid}{units.weight}) *</label>
                         <MeasureInput
                           kind="weight"
                           min="10"
@@ -2079,7 +2079,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                       </div>
                       <div className="input-field">
-                        <label>Total Skid Height ({units.length}) *</label>
+                        <label>{TXT.totalSkidHeight}{units.length}) *</label>
                         <MeasureInput
                           kind="length"
                           min="12"
@@ -2092,25 +2092,25 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                     <div className="pallet-live-calc-strip">
                       <div className="calc-metric-pill">
-                        <span>TOTAL PAYLOAD WEIGHT:</span>
+                        <span>{TXT.totalPayloadWeight}</span>
                         <strong className="font-mono text-emerald">{formatWeight(palletCount * palletWeightPerSkid, units.system)}</strong>
                       </div>
                       <div className="calc-metric-pill">
-                        <span>ESTIMATED CUBIC VOLUME:</span>
-                        <strong className="font-mono">{(((48 * 40 * palletHeightIn) / 1728) * palletCount).toFixed(1)} cu ft</strong>
+                        <span>{TXT.estimatedCubicVolume}</span>
+                        <strong className="font-mono">{(((48 * 40 * palletHeightIn) / 1728) * palletCount).toFixed(1)} {TXT.cuFt}</strong>
                       </div>
                       <div className="calc-metric-pill">
-                        <span>TRAILER LINEHAUL SLOTS:</span>
-                        <strong className="font-mono">{palletStackable ? Math.ceil(palletCount / 2) : palletCount} Floor Positions</strong>
+                        <span>{TXT.trailerLinehaulSlots}</span>
+                        <strong className="font-mono">{palletStackable ? Math.ceil(palletCount / 2) : palletCount} {TXT.floorPositions}</strong>
                       </div>
                     </div>
                   </div>
 
                   {/* Section 2: Stackability Directive */}
                   <div className="vehicle-form-deck pallet-deck-panel">
-                    <span className="deck-sub-title">2. Trailer Consolidation & Stackability Directive</span>
+                    <span className="deck-sub-title">{TXT.t2TrailerConsolidationStackabilityDirective}</span>
                     <p className="field-hint-txt" style={{ marginTop: '-0.2rem', marginBottom: '0.65rem' }}>
-                      Carrier linehaul dispatchers must know whether top freight can be double-tiered during linehaul transit.
+                      {TXT.carrierLinehaulDispatchersMustKnow}
                     </p>
                     <div className="operability-toggle-row">
                       <button
@@ -2120,15 +2120,15 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       >
                         <div className="opt-top">
                           <div className="opt-title-group">
-                            <span className="opt-title">Do Not Double Stack (Top-Tier Only)</span>
-                            <span className="opt-badge-pill inoperable-badge">TOP-TIER MANDATE</span>
+                            <span className="opt-title">{TXT.doNotDoubleStackTop}</span>
+                            <span className="opt-badge-pill inoperable-badge">{TXT.topTierMandate}</span>
                           </div>
                           <div className="opt-radio-circle">
                             {!palletStackable && <span className="opt-radio-dot" />}
                           </div>
                         </div>
                         <p className="opt-desc">
-                          Top surface is fragile, pyramid-stacked, or lacks structural load-bearing capacity. Carrier must stow on top tier with ZERO cargo stacked above.
+                          {TXT.topSurfaceIsFragilePyramid}
                         </p>
                       </button>
 
@@ -2139,7 +2139,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       >
                         <div className="opt-top">
                           <div className="opt-title-group">
-                            <span className="opt-title">Stackable (Double-Stack Certified)</span>
+                            <span className="opt-title">{TXT.stackableDoubleStackCertified}</span>
                             <span className="opt-badge-pill operable-badge">2-TIER APPROVED</span>
                           </div>
                           <div className="opt-radio-circle">
@@ -2147,7 +2147,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           </div>
                         </div>
                         <p className="opt-desc">
-                          Skid has a uniform flat top deck capable of supporting equivalent weight (up to 1,500 lbs). Allows trailer 2-tier cube consolidation.
+                          {TXT.skidHasAUniformFlat}
                         </p>
                       </button>
                     </div>
@@ -2155,7 +2155,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                   {/* Section 3: Pallet Securing & ISPM-15 Compliance */}
                   <div className="vehicle-form-deck pallet-deck-panel">
-                    <span className="deck-sub-title">3. Unit Securing & Regulatory Compliance</span>
+                    <span className="deck-sub-title">{TXT.t3UnitSecuringRegulatoryCompliance}</span>
                     <div className="damage-pills-grid">
                       {[
                         'Heat-Treated (ISPM-15 Certified)',
@@ -2183,18 +2183,18 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   <div className="step-section-heading">
                     <div className="heading-with-action">
                       <div>
-                        <h3>03. Intermodal FCL Container Specifications</h3>
-                        <p>SOLAS Verified Gross Mass (VGM), ISO 6346 unit number, ISO 17712 bolt seal, and interchange terminal.</p>
+                        <h3>{TXT.t03IntermodalFclContainerSpecifications}</h3>
+                        <p>{TXT.solasVerifiedGrossMassVgm}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Section 1: Container Unit Identification & ISO Type */}
                   <div className="vehicle-form-deck container-deck-panel">
-                    <span className="deck-sub-title">1. Container Equipment & Identification</span>
+                    <span className="deck-sub-title">{TXT.t1ContainerEquipmentIdentification}</span>
                     <div className="input-grid-3">
                       <div className="input-field">
-                        <label>Container Unit Number (ISO 6346) *</label>
+                        <label>{TXT.containerUnitNumberIso6346}</label>
                         <input
                           type="text"
                           className="font-mono"
@@ -2202,24 +2202,24 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           onChange={e => setContainerNumber(e.target.value.toUpperCase())}
                           placeholder="MSCU-749102-3"
                         />
-                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>4-letter prefix + 6 digits + 1 check digit</span>
+                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>{TXT.t4LetterPrefix6Digits}</span>
                       </div>
                       <div className="input-field">
-                        <label>ISO Container Equipment Size</label>
+                        <label>{TXT.isoContainerEquipmentSize}</label>
                         <select
                           value={containerIsoSize}
                           onChange={e => setContainerIsoSize(e.target.value)}
                         >
-                          <option value="40ft High-Cube Dry Van (40HC / 9ft 6in)">40ft High-Cube Dry Van (40HC / 9ft 6in)</option>
-                          <option value="20ft General Purpose Standard (20GP / 8ft 6in)">20ft Standard GP Dry Van (20GP / 8ft 6in)</option>
-                          <option value="40ft General Purpose Standard (40GP / 8ft 6in)">40ft Standard GP Dry Van (40GP / 8ft 6in)</option>
-                          <option value="45ft High-Cube Pallet Wide (45HCPW)">45ft High-Cube Pallet Wide (45HCPW)</option>
-                          <option value="40ft High-Cube Refrigerated Reefer (40HR)">40ft High-Cube Refrigerated Reefer (40HR)</option>
-                          <option value="20ft Open Top / Flat Rack Special">20ft Open Top / Flat Rack Special Equipment</option>
+                          <option value="40ft High-Cube Dry Van (40HC / 9ft 6in)">{TXT.t40ftHighCubeDryVan}</option>
+                          <option value="20ft General Purpose Standard (20GP / 8ft 6in)">{TXT.t20ftStandardGpDryVan}</option>
+                          <option value="40ft General Purpose Standard (40GP / 8ft 6in)">{TXT.t40ftStandardGpDryVan}</option>
+                          <option value="45ft High-Cube Pallet Wide (45HCPW)">{TXT.t45ftHighCubePalletWide}</option>
+                          <option value="40ft High-Cube Refrigerated Reefer (40HR)">{TXT.t40ftHighCubeRefrigeratedReefer}</option>
+                          <option value="20ft Open Top / Flat Rack Special">{TXT.t20ftOpenTopFlatRack}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>ISO 17712 High-Security Bolt Seal # *</label>
+                        <label>{TXT.iso17712HighSecurityBolt}</label>
                         <input
                           type="text"
                           className="font-mono"
@@ -2227,42 +2227,42 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           onChange={e => setContainerBoltSeal(e.target.value.toUpperCase())}
                           placeholder="HSS-NY-984021"
                         />
-                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>Tamper-evident bolt seal (C-TPAT compliant)</span>
+                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>{TXT.tamperEvidentBoltSealC}</span>
                       </div>
                     </div>
 
                     <div className="input-grid-3">
                       <div className="input-field">
-                        <label>Verified Gross Mass (VGM, {units.weight}) *</label>
+                        <label>{TXT.verifiedGrossMassVgm} {units.weight}) *</label>
                         <MeasureInput
                           kind="weight"
                           className="font-mono"
                           value={containerVgmWeight}
                           onChange={val => setContainerVgmWeight(val === '' ? '' : String(val))}
                         />
-                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>Total certified scale weight (SOLAS VGM)</span>
+                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>{TXT.totalCertifiedScaleWeightSolas}</span>
                       </div>
                       <div className="input-field">
-                        <label>Port / Rail Ramp Terminal</label>
+                        <label>{TXT.portRailRampTerminal}</label>
                         <select
                           value={containerTerminal}
                           onChange={e => setContainerTerminal(e.target.value)}
                         >
-                          <option value="Port of New York / Newark Container Terminal (PNCT)">Port of New York / Newark Container Terminal (PNCT)</option>
-                          <option value="Port of Los Angeles - Pier 400 APM">Port of Los Angeles - Pier 400 APM</option>
-                          <option value="Port of Long Beach - Pier T (TTI)">Port of Long Beach - Pier T (TTI)</option>
-                          <option value="BNSF Logistics Park Chicago (LPC)">BNSF Logistics Park Chicago (LPC)</option>
-                          <option value="Georgia Ports Authority - Savannah Ocean Terminal">Georgia Ports Authority - Savannah Ocean Terminal</option>
-                          <option value="Union Pacific Global IV Intermodal Terminal">Union Pacific Global IV Intermodal Terminal</option>
+                          <option value="Port of New York / Newark Container Terminal (PNCT)">{TXT.portOfNewYorkNewark}</option>
+                          <option value="Port of Los Angeles - Pier 400 APM">{TXT.portOfLosAngelesPier}</option>
+                          <option value="Port of Long Beach - Pier T (TTI)">{TXT.portOfLongBeachPier}</option>
+                          <option value="BNSF Logistics Park Chicago (LPC)">{TXT.bnsfLogisticsParkChicagoLpc}</option>
+                          <option value="Georgia Ports Authority - Savannah Ocean Terminal">{TXT.georgiaPortsAuthoritySavannahOcean}</option>
+                          <option value="Union Pacific Global IV Intermodal Terminal">{TXT.unionPacificGlobalIvIntermodal}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>Intermodal Chassis #</label>
+                        <label>{TXT.intermodalChassis}</label>
                         <input
                           type="text"
                           value={containerChassisNumber}
                           onChange={e => setContainerChassisNumber(e.target.value)}
-                          placeholder="CHAS-8812 (Tri-axle)"
+                          placeholder={TXT.chas8812TriAxle}
                         />
                       </div>
                     </div>
@@ -2270,31 +2270,31 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                   {/* Section 2: Atmosphere & Customs Status */}
                   <div className="vehicle-form-deck container-deck-panel">
-                    <span className="deck-sub-title">2. Environmental & Customs Control</span>
+                    <span className="deck-sub-title">{TXT.t2EnvironmentalCustomsControl}</span>
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>Atmosphere / Reefer Temperature</label>
+                        <label>{TXT.atmosphereReeferTemperature}</label>
                         <select
                           value={containerTemperature}
                           onChange={e => setContainerTemperature(e.target.value)}
                         >
-                          <option value="Ambient / Dry Cargo">Ambient / Standard Dry Cargo</option>
-                          <option value="Chilled Fresh (+2°C to +4°C / 36°F to 39°F)">Chilled Fresh (+2°C to +4°C / 36°F to 39°F)</option>
-                          <option value="Deep Frozen (-20°C / -4°F)">Deep Frozen (-20°C / -4°F)</option>
-                          <option value="Ultra-Low Cryo (-60°C)">Ultra-Low Cryo (-60°C)</option>
+                          <option value="Ambient / Dry Cargo">{TXT.ambientStandardDryCargo}</option>
+                          <option value="Chilled Fresh (+2°C to +4°C / 36°F to 39°F)">{TXT.chilledFresh2CTo}</option>
+                          <option value="Deep Frozen (-20°C / -4°F)">{TXT.deepFrozen20C4}</option>
+                          <option value="Ultra-Low Cryo (-60°C)">{TXT.ultraLowCryo60C}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>Customs & Terminal Pre-Gate Status</label>
+                        <label>{TXT.customsTerminalPreGateStatus}</label>
                         <select
                           value={containerCustomsStatus}
                           onChange={e => setContainerCustomsStatus(e.target.value)}
                         >
-                          <option value="">Not set</option>
-                          <option value="Pre-Cleared / Manifest Approved">Pre-Cleared / AMS Manifest Approved</option>
-                          <option value="In-Bond Transit (IT 7512 Authorized)">In-Bond Transit (IT 7512 Authorized)</option>
-                          <option value="Customs Hold / Pending Physical Inspection">Customs Hold / Pending Physical Inspection</option>
-                          <option value="Gate-In Complete / Staged for Vessel">Gate-In Complete / Staged for Vessel</option>
+                          <option value="">{TXT.notSet}</option>
+                          <option value="Pre-Cleared / Manifest Approved">{TXT.preClearedAmsManifestApproved}</option>
+                          <option value="In-Bond Transit (IT 7512 Authorized)">{TXT.inBondTransitIt7512}</option>
+                          <option value="Customs Hold / Pending Physical Inspection">{TXT.customsHoldPendingPhysicalInspection}</option>
+                          <option value="Gate-In Complete / Staged for Vessel">{TXT.gateInCompleteStagedFor}</option>
                         </select>
                       </div>
                     </div>
@@ -2305,50 +2305,50 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   <div className="step-section-heading">
                     <div className="heading-with-action">
                       <div>
-                        <h3>03. Heavy Freight & LTL Linehaul Specifications</h3>
-                        <p>National Motor Freight Classification (NMFC), freight class rating, dock access, and liftgate requirements.</p>
+                        <h3>{TXT.t03HeavyFreightLtlLinehaul}</h3>
+                        <p>{TXT.nationalMotorFreightClassificationNmfc}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Section 1: Freight Rating & NMFC Code */}
                   <div className="vehicle-form-deck freight-deck-panel">
-                    <span className="deck-sub-title">1. Rating & Classification</span>
+                    <span className="deck-sub-title">{TXT.t1RatingClassification}</span>
                     <div className="input-grid-3">
                       <div className="input-field">
-                        <label>Freight Class Rating *</label>
+                        <label>{TXT.freightClassRating}</label>
                         <select
                           value={freightClass}
                           onChange={e => setFreightClass(e.target.value)}
                         >
-                          <option value="Class 50 (Clean dense freight)">Class 50 (Clean dense freight / over 50 lbs/cu ft)</option>
-                          <option value="Class 55">Class 55 (35-50 lbs/cu ft)</option>
-                          <option value="Class 60">Class 60 (30-35 lbs/cu ft)</option>
-                          <option value="Class 65">Class 65 (22.5-30 lbs/cu ft)</option>
-                          <option value="Class 70 (Machinery, auto parts)">Class 70 (Machinery, auto parts / 15-22.5 lbs/cu ft)</option>
-                          <option value="Class 77.5">Class 77.5 (Tires, parts / 13.5-15 lbs/cu ft)</option>
-                          <option value="Class 85">Class 85 (Crated machinery / 12-13.5 lbs/cu ft)</option>
-                          <option value="Class 92.5">Class 92.5 (10.5-12 lbs/cu ft)</option>
-                          <option value="Class 100">Class 100 (9-10.5 lbs/cu ft)</option>
-                          <option value="Class 125">Class 125 (8-9 lbs/cu ft)</option>
-                          <option value="Class 150">Class 150 (6-8 lbs/cu ft)</option>
-                          <option value="Class 200">Class 200 (4-6 lbs/cu ft)</option>
-                          <option value="Class 300">Class 300 (2-4 lbs/cu ft)</option>
-                          <option value="Class 500 (Low density / high value)">Class 500 (Low density / high value / under 1 lb/cu ft)</option>
+                          <option value="Class 50 (Clean dense freight)">{TXT.class50CleanDenseFreight}</option>
+                          <option value="Class 55">{TXT.class553550Lbs}</option>
+                          <option value="Class 60">{TXT.class603035Lbs}</option>
+                          <option value="Class 65">{TXT.class6522530}</option>
+                          <option value="Class 70 (Machinery, auto parts)">{TXT.class70MachineryAutoParts}</option>
+                          <option value="Class 77.5">{TXT.class775TiresParts}</option>
+                          <option value="Class 85">{TXT.class85CratedMachinery12}</option>
+                          <option value="Class 92.5">{TXT.class925105}</option>
+                          <option value="Class 100">{TXT.class1009105}</option>
+                          <option value="Class 125">{TXT.class12589Lbs}</option>
+                          <option value="Class 150">{TXT.class15068Lbs}</option>
+                          <option value="Class 200">{TXT.class20046Lbs}</option>
+                          <option value="Class 300">{TXT.class30024Lbs}</option>
+                          <option value="Class 500 (Low density / high value)">{TXT.class500LowDensityHigh}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>NMFC Code *</label>
+                        <label>{TXT.nmfcCode}</label>
                         <input
                           type="text"
                           className="font-mono"
                           value={freightNmfcCode}
                           onChange={e => setFreightNmfcCode(e.target.value)}
-                          placeholder="NMFC 18260-Sub 2"
+                          placeholder={TXT.nmfc18260Sub2}
                         />
                       </div>
                       <div className="input-field">
-                        <label>Total Scale Weight ({units.weight}) *</label>
+                        <label>{TXT.totalScaleWeight}{units.weight}) *</label>
                         <MeasureInput
                           kind="weight"
                           step="10"
@@ -2360,7 +2360,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>Pieces / Crates Quantity</label>
+                        <label>{TXT.piecesCratesQuantity}</label>
                         <input
                           type="number"
                           min="1"
@@ -2369,15 +2369,15 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                       </div>
                       <div className="input-field">
-                        <label>Facility Loading Method</label>
+                        <label>{TXT.facilityLoadingMethod}</label>
                         <select
                           value={freightLoadingMethod}
                           onChange={e => setFreightLoadingMethod(e.target.value)}
                         >
-                          <option value='Standard Raised Commercial Loading Dock (48" Dock Height)'>Standard Raised Commercial Loading Dock (48" Height)</option>
-                          <option value="Ground Level Facility (Forklift from Yard)">Ground Level Facility (Forklift from Yard)</option>
-                          <option value="Construction Site / Industrial Yard">Construction Site / Industrial Yard</option>
-                          <option value="Residential / Limited Access Facility">Residential / Limited Access Facility</option>
+                          <option value='Standard Raised Commercial Loading Dock (48" Dock Height)'>{TXT.standardRaisedCommercialLoadingDock}</option>
+                          <option value="Ground Level Facility (Forklift from Yard)">{TXT.groundLevelFacilityForkliftFrom}</option>
+                          <option value="Construction Site / Industrial Yard">{TXT.constructionSiteIndustrialYard}</option>
+                          <option value="Residential / Limited Access Facility">{TXT.residentialLimitedAccessFacility}</option>
                         </select>
                       </div>
                     </div>
@@ -2385,7 +2385,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                   {/* Section 2: Liftgate Requirements (Essential in Freight Dispatch) */}
                   <div className="vehicle-form-deck freight-deck-panel">
-                    <span className="deck-sub-title">2. Specialized Hydraulic Liftgate Directives</span>
+                    <span className="deck-sub-title">{TXT.t2SpecializedHydraulicLiftgateDirectives}</span>
                     <div className="operability-toggle-row">
                       <button
                         type="button"
@@ -2394,9 +2394,9 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       >
                         <div className="opt-top">
                           <div className="opt-title-group">
-                            <span className="opt-title">Liftgate Required at Pickup</span>
+                            <span className="opt-title">{TXT.liftgateRequiredAtPickup}</span>
                             <span className={`opt-badge-pill ${freightLiftgatePickup ? 'operable-badge' : 'neutral-badge'}`}>
-                              {freightLiftgatePickup ? 'REQUIRED' : 'NOT REQUIRED'}
+                              {freightLiftgatePickup ? TXT.required : TXT.notRequired}
                             </span>
                           </div>
                           <div className="opt-radio-circle">
@@ -2404,7 +2404,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           </div>
                         </div>
                         <p className="opt-desc">
-                          Origin shipper lacks a 48" raised loading dock. Linehaul carrier must dispatch a truck with hydraulic liftgate to hoist freight from ground level.
+                          {TXT.originShipperLacksA48}
                         </p>
                       </button>
 
@@ -2415,9 +2415,9 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       >
                         <div className="opt-top">
                           <div className="opt-title-group">
-                            <span className="opt-title">Liftgate Required at Delivery</span>
+                            <span className="opt-title">{TXT.liftgateRequiredAtDelivery}</span>
                             <span className={`opt-badge-pill ${freightLiftgateDelivery ? 'operable-badge' : 'neutral-badge'}`}>
-                              {freightLiftgateDelivery ? 'REQUIRED' : 'NOT REQUIRED'}
+                              {freightLiftgateDelivery ? TXT.required : TXT.notRequired}
                             </span>
                           </div>
                           <div className="opt-radio-circle">
@@ -2425,7 +2425,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           </div>
                         </div>
                         <p className="opt-desc">
-                          Destination consignee location lacks a raised dock. Linehaul driver must lower heavy freight safely to pavement level.
+                          {TXT.destinationConsigneeLocationLacksA}
                         </p>
                       </button>
                     </div>
@@ -2433,38 +2433,38 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                   {/* Section 3: HazMat Declaration */}
                   <div className="vehicle-form-deck freight-deck-panel">
-                    <span className="deck-sub-title">3. Hazardous Materials (HazMat) Declaration</span>
+                    <span className="deck-sub-title">{TXT.t3HazardousMaterialsHazmatDeclaration}</span>
                     <label className="save-address-checkbox" style={{ margin: '0.25rem 0 0.5rem' }}>
                       <input
                         type="checkbox"
                         checked={freightHazMat}
                         onChange={e => setFreightHazMat(e.target.checked)}
                       />
-                      <span>Consignment contains Hazardous Materials (HazMat Regulated Cargo)</span>
+                      <span>{TXT.consignmentContainsHazardousMaterialsHazmat}</span>
                     </label>
 
                     {freightHazMat && (
                       <div className="hazmat-alert-box animate-fade-in">
                         <div className="hazmat-badge">
                           <AlertTriangle size={15} />
-                          <span>HAZMAT DECLARATION REQUIRED (49 CFR / IMDG)</span>
+                          <span>{TXT.hazmatDeclarationRequired49Cfr}</span>
                         </div>
                         <div className="input-grid-2" style={{ marginTop: '0.65rem' }}>
                           <div className="input-field">
-                            <label>UN / NA Identification Number *</label>
+                            <label>{TXT.unNaIdentificationNumber}</label>
                             <input
                               type="text"
                               className="font-mono"
                               value={freightUnNumber}
                               onChange={e => setFreightUnNumber(e.target.value)}
-                              placeholder="e.g. UN 3480 (Lithium Ion Batteries)"
+                              placeholder={TXT.eGUn3480Lithium}
                             />
                           </div>
                           <div className="input-field">
-                            <label>Emergency Response Contact</label>
+                            <label>{TXT.emergencyResponseContact}</label>
                             <input
                               type="text"
-                              placeholder="24-hour emergency response number"
+                              placeholder={TXT.t24HourEmergencyResponseNumber}
                             />
                           </div>
                         </div>
@@ -2477,31 +2477,31 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   <div className="step-section-heading">
                     <div className="heading-with-action">
                       <div>
-                        <h3>03. Secure Document & Courier Pouch Deck</h3>
-                        <p>Chain-of-custody tracking, tamper-evident security seal, direct consignee signature mandate, and urgent delivery window.</p>
+                        <h3>{TXT.t03SecureDocumentCourierPouch}</h3>
+                        <p>{TXT.chainOfCustodyTrackingTamper}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Section 1: Pouch Format & Numbered Security Seal */}
                   <div className="vehicle-form-deck doc-deck-panel">
-                    <span className="deck-sub-title">1. Courier Packaging & Security Seal</span>
+                    <span className="deck-sub-title">{TXT.t1CourierPackagingSecuritySeal}</span>
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>Packaging / Envelope Format</label>
+                        <label>{TXT.packagingEnvelopeFormat}</label>
                         <select
                           value={docEnvelopeType}
                           onChange={e => setDocEnvelopeType(e.target.value)}
                         >
-                          <option value={`${COMPANY_SHORT} Waterproof Legal Pouch (12×16 in)`}>{COMPANY_SHORT} Waterproof Legal Pouch (12×16 in)</option>
-                          <option value="Rigid Cardboard Stay-Flat Mailer (9.5×12.5 in)">Rigid Cardboard Stay-Flat Mailer (9.5×12.5 in)</option>
-                          <option value="Heavy Duty Tyvek Courier Envelope (10×13 in)">Heavy Duty Tyvek Courier Envelope (10×13 in)</option>
-                          <option value="Tamper-Evident Bank Deposit Polybag">Tamper-Evident Bank Deposit / Evidence Polybag</option>
-                          <option value="Archival Box / Legal Binder Folder">Archival Box / Legal Binder Folder</option>
+                          <option value={`${COMPANY_SHORT} Waterproof Legal Pouch (12×16 in)`}>{COMPANY_SHORT} {TXT.waterproofLegalPouch1216}</option>
+                          <option value="Rigid Cardboard Stay-Flat Mailer (9.5×12.5 in)">{TXT.rigidCardboardStayFlatMailer}</option>
+                          <option value="Heavy Duty Tyvek Courier Envelope (10×13 in)">{TXT.heavyDutyTyvekCourierEnvelope}</option>
+                          <option value="Tamper-Evident Bank Deposit Polybag">{TXT.tamperEvidentBankDepositEvidence}</option>
+                          <option value="Archival Box / Legal Binder Folder">{TXT.archivalBoxLegalBinderFolder}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>Numbered Security Seal ID *</label>
+                        <label>{TXT.numberedSecuritySealId}</label>
                         <input
                           type="text"
                           className="font-mono"
@@ -2509,30 +2509,30 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           onChange={e => setDocSealNumber(e.target.value.toUpperCase())}
                           placeholder={`${REFERENCE_PREFIX}-SL-892401`}
                         />
-                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>Sequential tamper-evident barcode seal</span>
+                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>{TXT.sequentialTamperEvidentBarcodeSeal}</span>
                       </div>
                     </div>
 
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>Target Delivery Commitment Window</label>
+                        <label>{TXT.targetDeliveryCommitmentWindow}</label>
                         <select
                           value={docUrgentDeadline}
                           onChange={e => setDocUrgentDeadline(e.target.value)}
                         >
-                          <option value="By 10:30 AM Next Business Day (Priority Legal)">By 10:30 AM Next Business Day (Priority Legal)</option>
-                          <option value="End of Business Day (5:00 PM)">End of Business Day (5:00 PM)</option>
-                          <option value="Same-Day Hotshot Courier (Within 4 Hours)">Same-Day Hotshot Courier (Within 4 Hours)</option>
-                          <option value="Saturday Courier Handover">Saturday Courier Handover</option>
+                          <option value="By 10:30 AM Next Business Day (Priority Legal)">{TXT.by1030AmNext}</option>
+                          <option value="End of Business Day (5:00 PM)">{TXT.endOfBusinessDay5}</option>
+                          <option value="Same-Day Hotshot Courier (Within 4 Hours)">{TXT.sameDayHotshotCourierWithin}</option>
+                          <option value="Saturday Courier Handover">{TXT.saturdayCourierHandover}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>Court Case / Escrow / Notary Filing Reference</label>
+                        <label>{TXT.courtCaseEscrowNotaryFiling}</label>
                         <input
                           type="text"
                           value={docFilingCourtRef}
                           onChange={e => setDocFilingCourtRef(e.target.value)}
-                          placeholder="e.g. CASE-2026-NY-4481 or ESCROW-TX-9021"
+                          placeholder={TXT.eGCase2026Ny}
                         />
                       </div>
                     </div>
@@ -2540,7 +2540,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                   {/* Section 2: Chain of Custody Directive */}
                   <div className="vehicle-form-deck doc-deck-panel">
-                    <span className="deck-sub-title">2. Chain of Custody & Signature Directives</span>
+                    <span className="deck-sub-title">{TXT.t2ChainOfCustodySignature}</span>
                     <div className="operability-toggle-row">
                       <button
                         type="button"
@@ -2549,26 +2549,26 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       >
                         <div className="opt-top">
                           <div className="opt-title-group">
-                            <span className="opt-title">Direct In-Person Consignee Signature Required</span>
-                            <span className="opt-badge-pill operable-badge">STRICT NO-WAIVER</span>
+                            <span className="opt-title">{TXT.directInPersonConsigneeSignature}</span>
+                            <span className="opt-badge-pill operable-badge">{TXT.strictNoWaiver}</span>
                           </div>
                           <div className="opt-radio-circle">
                             {docDirectSignOnly && <span className="opt-radio-dot" />}
                           </div>
                         </div>
                         <p className="opt-desc">
-                          The courier must hand the envelope directly to the named individual with government photo ID verification. Indirect delivery, mailbox drop, or front-porch waivers are strictly prohibited.
+                          {TXT.theCourierMustHandThe}
                         </p>
                       </button>
                     </div>
 
                     <div className="input-field full-width" style={{ marginTop: '0.75rem' }}>
-                      <label>Contents Description & Document Inventory</label>
+                      <label>{TXT.contentsDescriptionDocumentInventory}</label>
                       <input
                         type="text"
                         value={docContentsDescription}
                         onChange={e => setDocContentsDescription(e.target.value)}
-                        placeholder="e.g. Executed Commercial Vehicle Titles & Sales Contracts (35 Pages)"
+                        placeholder={TXT.eGExecutedCommercialVehicle}
                       />
                     </div>
                   </div>
@@ -2579,73 +2579,73 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   <div className="step-section-heading">
                     <div className="heading-with-action">
                       <div>
-                        <h3>03. Live Animal & Pet Transport Deck (IATA LAR / USDA Regulated)</h3>
-                        <p>Individual animal identity, 15-digit RFID microchip verification, certified CR-82 travel crate, USDA health certificates, and in-transit welfare protocols.</p>
+                        <h3>{TXT.t03LiveAnimalPetTransport}</h3>
+                        <p>{TXT.individualAnimalIdentity15Digit}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Section 1: Pet Identification & Biometrics */}
                   <div className="vehicle-form-deck pet-deck-panel">
-                    <span className="deck-sub-title">1. Animal Identification & Biometrics</span>
+                    <span className="deck-sub-title">{TXT.t1AnimalIdentificationBiometrics}</span>
                     <div className="input-grid-3">
                       <div className="input-field">
-                        <label>Pet / Animal Name *</label>
+                        <label>{TXT.petAnimalName}</label>
                         <input
                           type="text"
                           value={petName}
                           onChange={e => setPetName(e.target.value)}
-                          placeholder="e.g. Barnaby"
+                          placeholder={TXT.eGBarnaby}
                         />
                       </div>
                       <div className="input-field">
-                        <label>Species *</label>
+                        <label>{TXT.species}</label>
                         <select
                           value={petSpecies}
                           onChange={e => setPetSpecies(e.target.value)}
                         >
-                          <option value="Canine (Dog)">Canine (Dog)</option>
-                          <option value="Feline (Cat)">Feline (Cat)</option>
-                          <option value="Avian (Bird)">Avian (Bird)</option>
-                          <option value="Small Mammal (Rabbit/Ferret)">Small Mammal (Rabbit / Ferret)</option>
-                          <option value="Equine (Horse / Pony)">Equine (Horse / Pony)</option>
+                          <option value="Canine (Dog)">{TXT.canineDog}</option>
+                          <option value="Feline (Cat)">{TXT.felineCat}</option>
+                          <option value="Avian (Bird)">{TXT.avianBird}</option>
+                          <option value="Small Mammal (Rabbit/Ferret)">{TXT.smallMammalRabbitFerret}</option>
+                          <option value="Equine (Horse / Pony)">{TXT.equineHorsePony}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>Breed *</label>
+                        <label>{TXT.breed}</label>
                         <input
                           type="text"
                           value={petBreed}
                           onChange={e => setPetBreed(e.target.value)}
-                          placeholder="e.g. Golden Retriever"
+                          placeholder={TXT.eGGoldenRetriever}
                         />
                       </div>
                     </div>
 
                     <div className="input-grid-4" style={{ marginTop: '0.75rem' }}>
                       <div className="input-field">
-                        <label>Age / DOB</label>
+                        <label>{TXT.ageDob}</label>
                         <input
                           type="text"
                           value={petAge}
                           onChange={e => setPetAge(e.target.value)}
-                          placeholder="e.g. 3 Years"
+                          placeholder={TXT.eG3Years}
                         />
                       </div>
                       <div className="input-field">
-                        <label>Gender & Status</label>
+                        <label>{TXT.genderStatus}</label>
                         <select
                           value={petGender}
                           onChange={e => setPetGender(e.target.value)}
                         >
-                          <option value="Male (Neutered)">Male (Neutered)</option>
-                          <option value="Male (Intact)">Male (Intact)</option>
-                          <option value="Female (Spayed)">Female (Spayed)</option>
-                          <option value="Female (Intact)">Female (Intact)</option>
+                          <option value="Male (Neutered)">{TXT.maleNeutered}</option>
+                          <option value="Male (Intact)">{TXT.maleIntact}</option>
+                          <option value="Female (Spayed)">{TXT.femaleSpayed}</option>
+                          <option value="Female (Intact)">{TXT.femaleIntact}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>Pet Net Weight ({units.weight}) *</label>
+                        <label>{TXT.petNetWeight}{units.weight}) *</label>
                         <MeasureInput
                           kind="weight"
                           step="0.5"
@@ -2654,15 +2654,15 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                       </div>
                       <div className="input-field">
-                        <label>Microchip RFID # *</label>
+                        <label>{TXT.microchipRfid}</label>
                         <input
                           type="text"
                           className="font-mono"
                           value={petMicrochip}
                           onChange={e => setPetMicrochip(e.target.value)}
-                          placeholder="985141002849102 (15-digit ISO)"
+                          placeholder={TXT.t98514100284910215DigitIso}
                         />
-                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>ISO 11784/11785 Compliant</span>
+                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>{TXT.iso1178411785Compliant}</span>
                       </div>
                     </div>
 
@@ -2675,9 +2675,9 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       >
                         <div className="opt-top">
                           <div className="opt-title-group">
-                            <span className="opt-title">Brachycephalic / Snub-Nosed Breed Protocol</span>
+                            <span className="opt-title">{TXT.brachycephalicSnubNosedBreedProtocol}</span>
                             <span className={`opt-badge-pill ${petIsBrachycephalic ? 'brachy-badge active' : 'brachy-badge'}`}>
-                              {petIsBrachycephalic ? '⚠️ RESTRICTIVE AIRWAY ACTIVE' : 'STANDARD AIRWAY'}
+                              {petIsBrachycephalic ? '⚠️ RESTRICTIVE AIRWAY ACTIVE' : TXT.standardAirway}
                             </span>
                           </div>
                           <div className="opt-radio-circle">
@@ -2685,7 +2685,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           </div>
                         </div>
                         <p className="opt-desc">
-                          Pugs, French Bulldogs, Persian cats, and other short-muzzle breeds have restricted airways. When active, strict ambient temperature thresholds (under 75°F / 24°C) and expedited non-stop flight routes are automatically enforced.
+                          {TXT.pugsFrenchBulldogsPersianCats}
                         </p>
                       </button>
                     </div>
@@ -2693,10 +2693,10 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                   {/* Section 2: IATA LAR Certified Travel Crate & Dimensions */}
                   <div className="vehicle-form-deck pet-deck-panel">
-                    <span className="deck-sub-title">2. IATA LAR Certified Travel Kennel & Scaled Dimensions</span>
+                    <span className="deck-sub-title">{TXT.t2IataLarCertifiedTravel}</span>
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>Travel Kennel Specification *</label>
+                        <label>{TXT.travelKennelSpecification}</label>
                         <select
                           value={petCrateType}
                           onChange={e => {
@@ -2713,15 +2713,15 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                             }
                           }}
                         >
-                          <option value="IATA LAR Certified Series 400 (Large Rigid Kennel - 36×25×27 in)">IATA LAR Series 400 (Large Dog - 36×25×27 in)</option>
-                          <option value="IATA LAR Certified Series 500 (X-Large Rigid Kennel - 40×27×30 in)">IATA LAR Series 500 (X-Large Dog - 40×27×30 in)</option>
-                          <option value="IATA LAR Certified Series 200 (Medium Rigid Kennel - 26×18×19 in)">IATA LAR Series 200 (Medium Dog/Cat - 26×18×19 in)</option>
-                          <option value="IATA LAR Certified Series 100 (Small Rigid Kennel - 21×16×15 in)">IATA LAR Series 100 (Small Cat/Toy Dog - 21×16×15 in)</option>
-                          <option value="Custom Reinforced Wooden Sky Crate (IATA CR-82 Heavy Duty)">Custom Reinforced Wooden Sky Crate (CR-82 Heavy Duty)</option>
+                          <option value="IATA LAR Certified Series 400 (Large Rigid Kennel - 36×25×27 in)">{TXT.iataLarSeries400Large}</option>
+                          <option value="IATA LAR Certified Series 500 (X-Large Rigid Kennel - 40×27×30 in)">{TXT.iataLarSeries500X}</option>
+                          <option value="IATA LAR Certified Series 200 (Medium Rigid Kennel - 26×18×19 in)">{TXT.iataLarSeries200Medium}</option>
+                          <option value="IATA LAR Certified Series 100 (Small Rigid Kennel - 21×16×15 in)">{TXT.iataLarSeries100Small}</option>
+                          <option value="Custom Reinforced Wooden Sky Crate (IATA CR-82 Heavy Duty)">{TXT.customReinforcedWoodenSkyCrate}</option>
                         </select>
                       </div>
                       <div className="input-field">
-                        <label>Kennel Tare Weight ({units.weight}) *</label>
+                        <label>{TXT.kennelTareWeight}{units.weight}) *</label>
                         <MeasureInput
                           kind="weight"
                           step="0.5"
@@ -2733,7 +2733,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                     <div className="input-grid-3" style={{ marginTop: '0.75rem' }}>
                       <div className="input-field">
-                        <label>Crate Length ({units.length}) *</label>
+                        <label>{TXT.crateLength}{units.length}) *</label>
                         <MeasureInput
                           kind="length"
                           value={petCrateLength}
@@ -2741,7 +2741,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                       </div>
                       <div className="input-field">
-                        <label>Crate Width ({units.length}) *</label>
+                        <label>{TXT.crateWidth}{units.length}) *</label>
                         <MeasureInput
                           kind="length"
                           value={petCrateWidth}
@@ -2749,7 +2749,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         />
                       </div>
                       <div className="input-field">
-                        <label>Crate Height ({units.length}) *</label>
+                        <label>{TXT.crateHeight}{units.length}) *</label>
                         <MeasureInput
                           kind="length"
                           value={petCrateHeight}
@@ -2762,17 +2762,17 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     <div className="pet-weight-calc-pill">
                       <PawPrint size={14} className="text-rose" />
                       <span>
-                        Live Scaled Manifest Weight: <strong>{formatWeight(petWeightLbs, units.system)} (Pet Net)</strong> + <strong>{formatWeight(petCrateWeightLbs, units.system)} (Crate Tare)</strong> = <strong className="font-mono text-emerald">{totalWeight.toFixed(1)} lbs Total Scaled Weight</strong>
+                        {TXT.liveScaledManifestWeight} <strong>{formatWeight(petWeightLbs, units.system)} {TXT.petNet}</strong> + <strong>{formatWeight(petCrateWeightLbs, units.system)} {TXT.crateTare}</strong> = <strong className="font-mono text-emerald">{totalWeight.toFixed(1)} {TXT.lbsTotalScaledWeight}</strong>
                       </span>
                     </div>
                   </div>
 
                   {/* Section 3: Veterinary Health & USDA APHIS Certification */}
                   <div className="vehicle-form-deck pet-deck-panel">
-                    <span className="deck-sub-title">3. Veterinary Health & Regulatory Documentation (USDA / CVI)</span>
+                    <span className="deck-sub-title">{TXT.t3VeterinaryHealthRegulatoryDocumentation}</span>
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>Certificate of Veterinary Inspection (CVI #) *</label>
+                        <label>{TXT.certificateOfVeterinaryInspectionCvi}</label>
                         <input
                           type="text"
                           className="font-mono"
@@ -2780,32 +2780,32 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                           onChange={e => setPetHealthCertNumber(e.target.value)}
                           placeholder="e.g. CVI-NY-2026-88194"
                         />
-                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>Valid within 10 days of travel</span>
+                        <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>{TXT.validWithin10DaysOf}</span>
                       </div>
                       <div className="input-field">
-                        <label>Rabies Vaccination Tag # & Clinic *</label>
+                        <label>{TXT.rabiesVaccinationTagClinic}</label>
                         <input
                           type="text"
                           className="font-mono"
                           value={petRabiesTag}
                           onChange={e => setPetRabiesTag(e.target.value)}
-                          placeholder="e.g. RAB-2027-11-04 (NY Dept of Health)"
+                          placeholder={TXT.eGRab202711}
                         />
                       </div>
                     </div>
 
                     <div className="input-grid-2" style={{ marginTop: '0.75rem' }}>
                       <div className="input-field">
-                        <label>Attending Veterinary Hospital / Clinic</label>
+                        <label>{TXT.attendingVeterinaryHospitalClinic}</label>
                         <input
                           type="text"
                           value={petVetClinic}
                           onChange={e => setPetVetClinic(e.target.value)}
-                          placeholder="e.g. Manhattan Animal Health Hospital"
+                          placeholder={TXT.eGManhattanAnimalHealth}
                         />
                       </div>
                       <div className="input-field">
-                        <label>24/7 Emergency Attending Vet Phone #</label>
+                        <label>{TXT.t247EmergencyAttendingVet}</label>
                         <input
                           type="text"
                           value={petVetPhone}
@@ -2823,15 +2823,15 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       >
                         <div className="opt-top">
                           <div className="opt-title-group">
-                            <span className="opt-title">USDA Acclimation Certificate Attached</span>
-                            <span className="opt-badge-pill operable-badge">VET ENDORSED</span>
+                            <span className="opt-title">{TXT.usdaAcclimationCertificateAttached}</span>
+                            <span className="opt-badge-pill operable-badge">{TXT.vetEndorsed}</span>
                           </div>
                           <div className="opt-radio-circle">
                             {petAcclimationCert && <span className="opt-radio-dot" />}
                           </div>
                         </div>
                         <p className="opt-desc">
-                          Licensed veterinarian certifies the animal has acclimated to temperature ranges down to 45°F (7°C) or up to 85°F (29°C), ensuring compliant ground and tarmac operations.
+                          {TXT.licensedVeterinarianCertifiesTheAnimal}
                         </p>
                       </button>
                     </div>
@@ -2839,40 +2839,40 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                   {/* Section 4: Welfare, Feeding & Hydration Protocols */}
                   <div className="vehicle-form-deck pet-deck-panel">
-                    <span className="deck-sub-title">4. Animal Welfare, Nutrition & Hydration Directives</span>
+                    <span className="deck-sub-title">{TXT.t4AnimalWelfareNutritionHydration}</span>
                     <div className="input-grid-2">
                       <div className="input-field">
-                        <label>Pre-Departure Feeding Timestamp</label>
+                        <label>{TXT.preDepartureFeedingTimestamp}</label>
                         <input
                           type="text"
                           value={petLastFed}
                           onChange={e => setPetLastFed(e.target.value)}
-                          placeholder="e.g. 4 Hours Prior to Tender (Light Meal)"
+                          placeholder={TXT.eG4HoursPrior}
                         />
                       </div>
                       <div className="input-field">
-                        <label>Hydration & Water Protocol</label>
+                        <label>{TXT.hydrationWaterProtocol}</label>
                         <input
                           type="text"
                           value={petWaterProtocol}
                           onChange={e => setPetWaterProtocol(e.target.value)}
-                          placeholder="e.g. Fresh spring water refreshed at every terminal transfer"
+                          placeholder={TXT.eGFreshSpringWater}
                         />
                       </div>
                     </div>
 
                     <div className="input-field full-width" style={{ marginTop: '0.75rem' }}>
-                      <label>Special Welfare Instructions & Calming Protocol</label>
+                      <label>{TXT.specialWelfareInstructionsCalmingProtocol}</label>
                       <textarea
                         rows={2}
                         value={petSpecialInstructions}
                         onChange={e => setPetSpecialInstructions(e.target.value)}
-                        placeholder="e.g. Favorite blanket inside kennel. No sedation per AVMA rules. Keep away from excessive noise or vehicle exhaust."
+                        placeholder={TXT.eGFavoriteBlanketInside}
                       />
                     </div>
 
                     <div className="cargo-checklist-block" style={{ marginTop: '1rem' }}>
-                      <label className="section-field-label">Mandatory Live Animal Welfare Directives</label>
+                      <label className="section-field-label">{TXT.mandatoryLiveAnimalWelfareDirectives}</label>
                       <div className="checklist-grid-2">
                         {[
                           'Dual Door-Accessible Food/Water Dishes Attached',
@@ -2907,15 +2907,15 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   <div className="step-section-heading">
                     <div className="heading-with-action">
                       <div>
-                        <h3>03. Packages & Pieces</h3>
-                        <p>Configure single-piece or multi-piece cargo payload. Traditional Code 128 barcodes will be generated.</p>
+                        <h3>{TXT.t03PackagesPieces}</h3>
+                        <p>{TXT.configureSinglePieceOrMulti}</p>
                       </div>
                       <button
                         type="button"
                         className="add-package-btn"
                         onClick={handleAddPackage}
                       >
-                        <Plus size={14} /> Add Another Package
+                        <Plus size={14} /> {TXT.addAnotherPackage}
                       </button>
                     </div>
                   </div>
@@ -2926,7 +2926,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       <div key={pkg.id} className="package-editor-card">
                         <div className="pkg-card-head">
                           <div className="pkg-head-left">
-                            <span className="pkg-num-badge">PIECE 0{idx + 1}</span>
+                            <span className="pkg-num-badge">{TXT.piece0}{idx + 1}</span>
                             <span className="pkg-preview-meta">{[formatWeight(pkg.weightLbs, units.system), formatDimensions(pkg, units.system)].filter(Boolean).join(' • ')}</span>
                           </div>
                           {packagesList.length > 1 && (
@@ -2935,7 +2935,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                               className="pkg-remove-btn"
                               onClick={() => handleRemovePackage(pkg.id)}
                             >
-                              <Trash2 size={14} /> Remove
+                              <Trash2 size={14} /> {TXT.remove}
                             </button>
                           )}
                         </div>
@@ -2943,20 +2943,20 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         <div className="pkg-card-body">
                           <div className="input-grid-3">
                             <div className="input-field">
-                              <label>Package Type</label>
+                              <label>{TXT.packageType}</label>
                               <select
                                 value={pkg.type}
                                 onChange={e => handleUpdatePackage(pkg.id, 'type', e.target.value)}
                               >
-                                <option value="Box">Box</option>
-                                <option value="Envelope">Envelope</option>
-                                <option value="Pallet">Pallet</option>
-                                <option value="Crate">Crate</option>
-                                <option value="Tube">Tube</option>
+                                <option value="Box">{TXT.box}</option>
+                                <option value="Envelope">{TXT.envelope}</option>
+                                <option value="Pallet">{TXT.pallet}</option>
+                                <option value="Crate">{TXT.crate}</option>
+                                <option value="Tube">{TXT.tube}</option>
                               </select>
                             </div>
                             <div className="input-field">
-                              <label>Weight ({units.weight}) *</label>
+                              <label>{TXT.weight}{units.weight}) *</label>
                               <MeasureInput
                                 kind="weight"
                                 step="0.1"
@@ -2966,48 +2966,48 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                               />
                             </div>
                             <div className="input-field">
-                              <label>Piece Content Description</label>
+                              <label>{TXT.pieceContentDescription}</label>
                               <input
                                 type="text"
                                 value={pkg.description}
                                 onChange={e => handleUpdatePackage(pkg.id, 'description', e.target.value)}
-                                placeholder="Piece content description"
+                                placeholder={TXT.pieceContentDescription2}
                               />
                             </div>
                           </div>
 
                           <div className="dim-row-group">
-                            <span className="dim-label">Dimensions ({units.length}):</span>
+                            <span className="dim-label">{TXT.dimensions}{units.length}):</span>
                             <div className="dim-input-group">
                               <MeasureInput
                                 kind="length"
                                 min="0"
-                                aria-label={`Length (${units.length})`}
+                                aria-label={TXT.length2(units.length)}
                                 value={pkg.length}
                                 onChange={v => handleUpdatePackage(pkg.id, 'length', v === '' ? 0 : v)}
-                                placeholder="Length"
+                                placeholder={TXT.length}
                               />
                               <span className="dim-x">×</span>
                               <MeasureInput
                                 kind="length"
                                 min="0"
-                                aria-label={`Width (${units.length})`}
+                                aria-label={TXT.width2(units.length)}
                                 value={pkg.width}
                                 onChange={v => handleUpdatePackage(pkg.id, 'width', v === '' ? 0 : v)}
-                                placeholder="Width"
+                                placeholder={TXT.width}
                               />
                               <span className="dim-x">×</span>
                               <MeasureInput
                                 kind="length"
                                 min="0"
-                                aria-label={`Height (${units.length})`}
+                                aria-label={TXT.height2(units.length)}
                                 value={pkg.height}
                                 onChange={v => handleUpdatePackage(pkg.id, 'height', v === '' ? 0 : v)}
-                                placeholder="Height"
+                                placeholder={TXT.height}
                               />
                             </div>
                             <span className="dim-calc-tag font-mono">
-                              {formatWeight((pkg.length * pkg.width * pkg.height) / 139, units.system)} dim.
+                              {formatWeight((pkg.length * pkg.width * pkg.height) / 139, units.system)} {TXT.dim}
                             </span>
                           </div>
                         </div>
@@ -3018,11 +3018,11 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   {/* Total Aggregate Strip */}
                   <div className="packages-total-bar">
                     <div className="total-stat-unit">
-                      <span>Total Packages:</span>
+                      <span>{TXT.totalPackages}</span>
                       <strong>{totalPieces}</strong>
                     </div>
                     <div className="total-stat-unit">
-                      <span>Total Scale Weight:</span>
+                      <span>{TXT.totalScaleWeight2}</span>
                       <strong>{formatWeight(totalWeight, units.system)}</strong>
                     </div>
                   </div>
@@ -3037,14 +3037,14 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {currentStep === 4 && (
             <div className="step-inner-content animate-fade-in">
               <div className="step-section-heading">
-                <h3>04. Service & Operational Requirements</h3>
-                <p>Specify service speed tier, pickup window, and operational cargo directives.</p>
+                <h3>{TXT.t04ServiceOperationalRequirements}</h3>
+                <p>{TXT.specifyServiceSpeedTierPickup}</p>
               </div>
 
               {/* Integrated Transit Corridor Overview Strip */}
               <div className="step-corridor-strip">
                 <div className="corridor-endpoint">
-                  <span className="corridor-role">ORIGIN</span>
+                  <span className="corridor-role">{TXT.origin2}</span>
                   <strong>{senderCity || 'New York'}, {senderState || 'NY'}</strong>
                   <span className="corridor-zip font-mono">ZIP {senderZip || '10005'}</span>
                 </div>
@@ -3052,12 +3052,12 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   <span className="bridge-line" />
                   <div className="bridge-pill">
                     <Truck size={13} />
-                    <span>Direct Transit Corridor</span>
+                    <span>{TXT.directTransitCorridor}</span>
                   </div>
                   <span className="bridge-line" />
                 </div>
                 <div className="corridor-endpoint dest">
-                  <span className="corridor-role">DESTINATION</span>
+                  <span className="corridor-role">{TXT.destination2}</span>
                   <strong className="text-accent">{recipientCity || 'Los Angeles'}, {recipientState || 'CA'}</strong>
                   <span className="corridor-zip font-mono">ZIP {recipientZip || '90071'}</span>
                 </div>
@@ -3065,13 +3065,13 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
               {/* Service Level Radio Pills */}
               <div className="form-group-block">
-                <label className="section-field-label">Service Level</label>
+                <label className="section-field-label">{TXT.serviceLevel}</label>
                 <div className="service-radio-grid">
                   {[
-                    { id: 'Standard', label: 'Standard', desc: '3-5 business days transit' },
-                    { id: 'Express', label: 'Express', desc: '1-2 business days guaranteed' },
-                    { id: 'Priority', label: 'Priority', desc: 'Time-critical expedited' },
-                    { id: 'Freight', label: 'Freight', desc: 'Heavy transport corridor' }
+                    { id: 'Standard', label: TXT.standard, desc: TXT.t35BusinessDaysTransit },
+                    { id: 'Express', label: TXT.express, desc: TXT.t12BusinessDaysGuaranteed },
+                    { id: 'Priority', label: TXT.priority, desc: TXT.timeCriticalExpedited },
+                    { id: 'Freight', label: TXT.freight, desc: TXT.heavyTransportCorridor }
                   ].map(s => (
                     <label
                       key={s.id}
@@ -3094,13 +3094,13 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
               {/* Transport Mode (main leg) */}
               <div className="form-group-block">
-                <label className="section-field-label">Transport Mode</label>
+                <label className="section-field-label">{TXT.transportMode}</label>
                 <div className="service-radio-grid">
                   {([
-                    { id: 'Auto', label: 'Auto', desc: 'Chosen from distance and cargo' },
-                    { id: 'Road', label: TRANSPORT_LEG_LABELS.Road, desc: 'Truck on real roads' },
-                    { id: 'Air', label: TRANSPORT_LEG_LABELS.Air, desc: 'Flight between gateways' },
-                    { id: 'Sea', label: TRANSPORT_LEG_LABELS.Sea, desc: 'Ocean freight between ports' }
+                    { id: 'Auto', label: TXT.auto, desc: TXT.chosenFromDistanceAndCargo },
+                    { id: 'Road', label: TXT.legRoad, desc: TXT.truckOnRealRoads },
+                    { id: 'Air', label: TXT.legAir, desc: TXT.flightBetweenGateways },
+                    { id: 'Sea', label: TXT.legSea, desc: TXT.oceanFreightBetweenPorts }
                   ] as const).map(m => (
                     <label
                       key={m.id}
@@ -3123,10 +3123,10 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
               {/* Pickup & Delivery Windows */}
               <div className="form-group-block">
-                <label className="section-field-label">Schedule & Controlled Delivery Window</label>
+                <label className="section-field-label">{TXT.scheduleControlledDeliveryWindow}</label>
                 <div className="input-grid-3">
                   <div className="input-field">
-                    <label>Preferred Pickup Date</label>
+                    <label>{TXT.preferredPickupDate}</label>
                     <input
                       type="date"
                       value={pickupDate}
@@ -3134,7 +3134,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     />
                   </div>
                   <div className="input-field">
-                    <label>Pickup Time Window</label>
+                    <label>{TXT.pickupTimeWindow}</label>
                     <input
                       type="text"
                       value={pickupWindow}
@@ -3143,26 +3143,26 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     />
                   </div>
                   <div className="input-field">
-                    <label>Expected Delivery Date (ETA)</label>
+                    <label>{TXT.expectedDeliveryDateEta}</label>
                     <input
                       type="text"
                       value={expectedDeliveryDate}
                       onChange={e => { setExpectedDeliveryDate(e.target.value); setExpectedDeliveryDateTouched(true); }}
-                      placeholder="e.g. August 22, 2026"
+                      placeholder={TXT.eGAugust222026}
                     />
                     {expectedDeliveryDateTouched ? (
                       <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>
-                        Manual override.{' '}
+                        {TXT.manualOverride}{' '}
                         <button
                           type="button"
                           onClick={() => setExpectedDeliveryDateTouched(false)}
                           style={{ background: 'none', border: 'none', padding: 0, color: '#2563eb', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}
                         >
-                          Use calculated ETA
+                          {TXT.useCalculatedEta}
                         </button>
                       </span>
                     ) : (
-                      <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>Auto-calculated from route, service &amp; pickup date.</span>
+                      <span className="field-hint-txt" style={{ fontSize: '0.65rem' }}>{TXT.autoCalculatedFromRouteService}</span>
                     )}
                     {dateOrderWarning && (
                       <span className="field-hint-txt" style={{ fontSize: '0.65rem', color: '#dc2626', display: 'block', marginTop: '0.2rem' }}>
@@ -3175,7 +3175,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
               {/* Special Handling Checkboxes */}
               <div className="form-group-block">
-                <label className="section-field-label">Special Handling Directives</label>
+                <label className="section-field-label">{TXT.specialHandlingDirectives}</label>
                 <div className="handling-checkbox-grid">
                   <label className="handling-chk">
                     <input
@@ -3183,7 +3183,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       checked={isFragile}
                       onChange={e => setIsFragile(e.target.checked)}
                     />
-                    <span>Fragile Cargo</span>
+                    <span>{TXT.fragileCargo}</span>
                   </label>
                   <label className="handling-chk">
                     <input
@@ -3191,7 +3191,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       checked={isOversized}
                       onChange={e => setIsOversized(e.target.checked)}
                     />
-                    <span>Oversized Item</span>
+                    <span>{TXT.oversizedItem}</span>
                   </label>
                   <label className="handling-chk">
                     <input
@@ -3199,7 +3199,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       checked={isSpecialHandling}
                       onChange={e => setIsSpecialHandling(e.target.checked)}
                     />
-                    <span>Special Handling</span>
+                    <span>{TXT.specialHandling}</span>
                   </label>
                   <label className="handling-chk">
                     <input
@@ -3207,7 +3207,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       checked={isSignatureRequired}
                       onChange={e => setIsSignatureRequired(e.target.checked)}
                     />
-                    <span>Signature Required</span>
+                    <span>{TXT.signatureRequired}</span>
                   </label>
                   <label className="handling-chk">
                     <input
@@ -3215,18 +3215,18 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       checked={isOtherHandling}
                       onChange={e => setIsOtherHandling(e.target.checked)}
                     />
-                    <span>Other Requirements</span>
+                    <span>{TXT.otherRequirements}</span>
                   </label>
                 </div>
 
                 {isOtherHandling && (
                   <div className="input-field full-width" style={{ marginTop: '0.75rem' }}>
-                    <label>Additional Instructions</label>
+                    <label>{TXT.additionalInstructions}</label>
                     <textarea
                       rows={2}
                       value={otherHandlingInstructions}
                       onChange={e => setOtherHandlingInstructions(e.target.value)}
-                      placeholder="Specify unique handling or custody requirements..."
+                      placeholder={TXT.specifyUniqueHandlingOrCustody}
                     />
                   </div>
                 )}
@@ -3240,14 +3240,14 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {currentStep === 5 && (
             <div className="step-inner-content animate-fade-in">
               <div className="step-section-heading">
-                <h3>05. Shipment Pricing (Administrator only)</h3>
-                <p>Internal rate calculation. Pricing is PRIVATE and never automatically displayed to customers.</p>
+                <h3>{TXT.t05ShipmentPricingAdministratorOnly}</h3>
+                <p>{TXT.internalRateCalculationPricingIs}</p>
               </div>
 
               {/* Pricing Line Items */}
               <div className="pricing-calculator-card">
                 <div className="pricing-row-input">
-                  <label>Base Linehaul Rate ({money.symbol})</label>
+                  <label>{TXT.baseLinehaulRate}{money.symbol})</label>
                   <MoneyInput
                     step="0.01"
                     value={baseRate}
@@ -3255,7 +3255,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   />
                 </div>
                 <div className="pricing-row-input">
-                  <label>Additional Charges / Handling ({money.symbol})</label>
+                  <label>{TXT.additionalChargesHandling}{money.symbol})</label>
                   <MoneyInput
                     step="0.01"
                     value={additionalCharges}
@@ -3263,7 +3263,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   />
                 </div>
                 <div className="pricing-row-input">
-                  <label>Distance / Fuel Surcharges ({money.symbol})</label>
+                  <label>{TXT.distanceFuelSurcharges}{money.symbol})</label>
                   <MoneyInput
                     step="0.01"
                     value={surcharges}
@@ -3271,7 +3271,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   />
                 </div>
                 <div className="pricing-row-input">
-                  <label>Discount ({money.symbol})</label>
+                  <label>{TXT.discount}{money.symbol})</label>
                   <MoneyInput
                     step="0.01"
                     value={discount}
@@ -3279,7 +3279,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   />
                 </div>
                 <div className="pricing-row-input">
-                  <label>Manual Adjustment ({money.symbol})</label>
+                  <label>{TXT.manualAdjustment}{money.symbol})</label>
                   <MoneyInput
                     step="0.01"
                     value={manualAdjustment}
@@ -3288,19 +3288,19 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 </div>
 
                 <div className="final-price-strip">
-                  <span>FINAL SHIPPING PRICE</span>
+                  <span>{TXT.finalShippingPrice}</span>
                   <strong className="font-mono text-blue">{money.format(finalPrice)} {money.currency}</strong>
                 </div>
               </div>
 
               <div className="form-group-block">
-                <label className="section-field-label">Private Internal Pricing Note</label>
+                <label className="section-field-label">{TXT.privateInternalPricingNote}</label>
                 <div className="input-field full-width">
                   <input
                     type="text"
                     value={internalPricingNotes}
                     onChange={e => setInternalPricingNotes(e.target.value)}
-                    placeholder="e.g. Special negotiated rate for this shipment"
+                    placeholder={TXT.eGSpecialNegotiatedRate}
                   />
                 </div>
               </div>
@@ -3318,16 +3318,14 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                       if (!e.target.checked) setPaymentErrors({});
                     }}
                   />
-                  <span>Add a payment request for the customer (optional)</span>
+                  <span>{TXT.addAPaymentRequestFor}</span>
                 </label>
                 <p className="create-payment-hint">
-                  Unlike the pricing above, this <strong>is shown to the customer</strong> on the track page: the amount,
-                  what it is for, and the payment accounts you add for this shipment. It is saved as soon as the tracking
-                  ID is issued, and can be edited or deleted later from Edit Shipment.
+                  {TXT.unlikeThePricingAboveThis} <strong>{TXT.isShownToTheCustomer}</strong> {TXT.onTheTrackPageThe}
                 </p>
                 {paymentEnabled && Object.keys(paymentErrors).length > 0 && (
                   <p className="create-payment-alert" role="alert">
-                    Fix the highlighted payment details, then create the shipment.
+                    {TXT.fixTheHighlightedPaymentDetails}
                   </p>
                 )}
                 {paymentEnabled && (
@@ -3353,33 +3351,33 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
           {currentStep === 6 && (
             <div className="step-inner-content animate-fade-in">
               <div className="step-section-heading">
-                <h3>06. Review & Create</h3>
-                <p>Carefully verify all shipment specifications before generating tracking identity.</p>
+                <h3>{TXT.t06ReviewCreate}</h3>
+                <p>{TXT.carefullyVerifyAllShipmentSpecifications}</p>
               </div>
 
               <div className="review-summary-container">
                 {/* Review: customer payment request (step 5), public on the track page */}
                 <div className="review-segment">
-                  <span className="seg-title">CUSTOMER PAYMENT REQUEST</span>
+                  <span className="seg-title">{TXT.customerPaymentRequest}</span>
                   <div>
                     {paymentEnabled ? (
                       <strong>{paymentDraftSummary(paymentDraft)}</strong>
                     ) : (
-                      <span>None. You can add one later from Edit Shipment.</span>
+                      <span>{TXT.noneYouCanAddOne}</span>
                     )}
                   </div>
                 </div>
 
                 {/* Review: Shipment & Cargo */}
                 <div className="review-segment">
-                  <span className="seg-title">SHIPMENT & CARGO</span>
+                  <span className="seg-title">{TXT.shipmentCargo}</span>
                   <div className="seg-grid-2">
                     <div>
-                      <small>Type:</small>
-                      <strong>{shipmentType}</strong>
+                      <small>{TXT.type}</small>
+                      <strong>{TXT.shipmentTypes[shipmentType]}</strong>
                     </div>
                     <div>
-                      <small>Cargo Description:</small>
+                      <small>{TXT.cargoDescription}</small>
                       <strong className="text-blue">{shipmentDescription}</strong>
                     </div>
                   </div>
@@ -3388,24 +3386,24 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 {/* If Vehicle, Show Specific Identity */}
                 {shipmentType === 'Vehicle' && (
                   <div className="review-segment vehicle-highlight">
-                    <span className="seg-title">VEHICLE CARGO IDENTIFIERS</span>
+                    <span className="seg-title">{TXT.vehicleCargoIdentifiers}</span>
                     <div className="seg-grid-2">
                       <div>
-                        <small>Vehicle:</small>
+                        <small>{TXT.vehicle2}</small>
                         <strong>{vehYear} {vehMake} {vehModel} ({vehColor})</strong>
                       </div>
                       <div>
-                        <small>VIN Number:</small>
+                        <small>{TXT.vinNumber}</small>
                         <strong className="font-mono">{vehVin}</strong>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>Operability:</small>
-                        <span>{vehOperable ? 'Operable (Runs & Drives)' : 'Inoperable'}</span>
+                        <small>{TXT.operability}</small>
+                        <span>{vehOperable ? TXT.operableRunsDrives : TXT.inoperable}</span>
                       </div>
                       <div>
-                        <small>Documents & Keys:</small>
+                        <small>{TXT.documentsKeys}</small>
                         <span>{itemsReceived.join(', ')}</span>
                       </div>
                     </div>
@@ -3415,27 +3413,27 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 {/* If Pallet, Show Skid Configuration */}
                 {shipmentType === 'Pallet' && (
                   <div className="review-segment pallet-highlight">
-                    <span className="seg-title">PALLET & SKID SPECIFICATIONS</span>
+                    <span className="seg-title">{TXT.palletSkidSpecifications}</span>
                     <div className="seg-grid-2">
                       <div>
-                        <small>Pallet Standard:</small>
+                        <small>{TXT.palletStandard}</small>
                         <strong>{palletStandard}</strong>
                       </div>
                       <div>
-                        <small>Skids / Units:</small>
-                        <strong>{palletCount} Skids ({formatWeight(palletWeightPerSkid, units.system)}/skid • {formatLength(palletHeightIn, units.system)} high)</strong>
+                        <small>{TXT.skidsUnits}</small>
+                        <strong>{palletCount} {TXT.skids}{formatWeight(palletWeightPerSkid, units.system)}{TXT.skid} {formatLength(palletHeightIn, units.system)} {TXT.high}</strong>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>Stackability Directive:</small>
+                        <small>{TXT.stackabilityDirective}</small>
                         <span className={palletStackable ? 'text-emerald font-bold' : 'text-accent font-bold'}>
-                          {palletStackable ? 'Stackable (Double-Stack Certified)' : 'Do Not Double Stack (Top-Tier Only)'}
+                          {palletStackable ? TXT.stackableDoubleStackCertified : TXT.doNotDoubleStackTop}
                         </span>
                       </div>
                       <div>
-                        <small>Securing Compliance:</small>
-                        <span>{palletSecuringChecks.join(', ') || 'Standard wrap'}</span>
+                        <small>{TXT.securingCompliance}</small>
+                        <span>{palletSecuringChecks.join(', ') || TXT.standardWrap}</span>
                       </div>
                     </div>
                   </div>
@@ -3444,34 +3442,34 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 {/* If Container, Show Intermodal FCL Details */}
                 {shipmentType === 'Container' && (
                   <div className="review-segment container-highlight">
-                    <span className="seg-title">INTERMODAL FCL CONTAINER IDENTIFIERS</span>
+                    <span className="seg-title">{TXT.intermodalFclContainerIdentifiers}</span>
                     <div className="seg-grid-2">
                       <div>
-                        <small>Container Unit # (ISO 6346):</small>
+                        <small>{TXT.containerUnitIso6346}</small>
                         <strong className="font-mono text-blue">{containerNumber}</strong>
                       </div>
                       <div>
-                        <small>ISO Equipment Size:</small>
+                        <small>{TXT.isoEquipmentSize}</small>
                         <strong>{containerIsoSize}</strong>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>High-Security Bolt Seal #:</small>
+                        <small>{TXT.highSecurityBoltSeal}</small>
                         <strong className="font-mono text-emerald">{containerBoltSeal}</strong>
                       </div>
                       <div>
-                        <small>SOLAS VGM Scale Weight:</small>
+                        <small>{TXT.solasVgmScaleWeight}</small>
                         <strong className="font-mono">{formatWeight(containerVgmWeight, units.system)}</strong>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>Terminal Interchange:</small>
+                        <small>{TXT.terminalInterchange}</small>
                         <span>{containerTerminal}</span>
                       </div>
                       <div>
-                        <small>Customs Pre-Gate:</small>
+                        <small>{TXT.customsPreGate}</small>
                         <span>{containerCustomsStatus}</span>
                       </div>
                     </div>
@@ -3481,33 +3479,33 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 {/* If Freight, Show LTL Rating & Dock Directives */}
                 {shipmentType === 'Freight' && (
                   <div className="review-segment freight-highlight">
-                    <span className="seg-title">HEAVY FREIGHT & LTL RATING</span>
+                    <span className="seg-title">{TXT.heavyFreightLtlRating}</span>
                     <div className="seg-grid-2">
                       <div>
-                        <small>Freight Class:</small>
+                        <small>{TXT.freightClass}</small>
                         <strong className="text-blue">{freightClass}</strong>
                       </div>
                       <div>
-                        <small>NMFC Classification:</small>
+                        <small>{TXT.nmfcClassification}</small>
                         <strong className="font-mono">{freightNmfcCode}</strong>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>Loading Facility Dock:</small>
+                        <small>{TXT.loadingFacilityDock}</small>
                         <span>{freightLoadingMethod}</span>
                       </div>
                       <div>
-                        <small>Liftgate Required:</small>
+                        <small>{TXT.liftgateRequired}</small>
                         <span>
-                          Pickup: {freightLiftgatePickup ? 'Yes' : 'No'} • Delivery: {freightLiftgateDelivery ? 'Yes' : 'No'}
+                          {TXT.pickup} {freightLiftgatePickup ? TXT.yes : 'No'} {TXT.delivery} {freightLiftgateDelivery ? TXT.yes : 'No'}
                         </span>
                       </div>
                     </div>
                     {freightHazMat && (
                       <div style={{ marginTop: '0.4rem' }}>
-                        <small>Hazardous Materials (HazMat):</small>
-                        <strong className="text-accent">{freightUnNumber || 'HazMat Regulated'}</strong>
+                        <small>{TXT.hazardousMaterialsHazmat}</small>
+                        <strong className="text-accent">{freightUnNumber || TXT.hazmatRegulated}</strong>
                       </div>
                     )}
                   </div>
@@ -3516,32 +3514,32 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 {/* If Document, Show Custody & Security Seal */}
                 {shipmentType === 'Document' && (
                   <div className="review-segment doc-highlight">
-                    <span className="seg-title">SECURE DOCUMENT & CUSTODY SPECIFICATIONS</span>
+                    <span className="seg-title">{TXT.secureDocumentCustodySpecifications}</span>
                     <div className="seg-grid-2">
                       <div>
-                        <small>Courier Pouch Format:</small>
+                        <small>{TXT.courierPouchFormat}</small>
                         <strong>{docEnvelopeType}</strong>
                       </div>
                       <div>
-                        <small>Tamper-Evident Seal #:</small>
+                        <small>{TXT.tamperEvidentSeal}</small>
                         <strong className="font-mono text-emerald">{docSealNumber}</strong>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>Signature Mandate:</small>
+                        <small>{TXT.signatureMandate}</small>
                         <strong className="text-emerald">
-                          {docDirectSignOnly ? 'Direct In-Person Photo ID Signature Required' : 'Standard Delivery'}
+                          {docDirectSignOnly ? TXT.directInPersonPhotoId : TXT.standardDelivery}
                         </strong>
                       </div>
                       <div>
-                        <small>Delivery Commitment:</small>
+                        <small>{TXT.deliveryCommitment}</small>
                         <span>{docUrgentDeadline}</span>
                       </div>
                     </div>
                     {docFilingCourtRef && (
                       <div style={{ marginTop: '0.4rem' }}>
-                        <small>Filing Reference / Court Ref:</small>
+                        <small>{TXT.filingReferenceCourtRef}</small>
                         <strong className="font-mono">{docFilingCourtRef}</strong>
                       </div>
                     )}
@@ -3551,62 +3549,62 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 {/* If Pet, Show Live Animal & Veterinary Care Highlights */}
                 {shipmentType === 'Pets' && (
                   <div className="review-segment pet-highlight">
-                    <span className="seg-title">LIVE ANIMAL (AVI) & VETERINARY CARE SPECIFICATIONS</span>
+                    <span className="seg-title">{TXT.liveAnimalAviVeterinaryCare}</span>
                     <div className="seg-grid-2">
                       <div>
-                        <small>Pet Identity:</small>
+                        <small>{TXT.petIdentity}</small>
                         <strong>{petName} ({petSpecies} • {petBreed})</strong>
                       </div>
                       <div>
-                        <small>RFID Microchip #:</small>
+                        <small>{TXT.rfidMicrochip}</small>
                         <strong className="font-mono text-emerald">{petMicrochip}</strong>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>Travel Kennel / Crate:</small>
-                        <span>{petCrateType} ({formatDimensions({ length: petCrateLength, width: petCrateWidth, height: petCrateHeight }, units.system)} • Tare {formatWeight(petCrateWeightLbs, units.system)})</span>
+                        <small>{TXT.travelKennelCrate}</small>
+                        <span>{petCrateType} ({formatDimensions({ length: petCrateLength, width: petCrateWidth, height: petCrateHeight }, units.system)} {TXT.tare} {formatWeight(petCrateWeightLbs, units.system)})</span>
                       </div>
                       <div>
-                        <small>Total Live Scaled Weight:</small>
-                        <strong className="font-mono">{formatWeight(totalWeight, units.system)} (Pet: {formatWeight(petWeightLbs, units.system)} + Crate: {formatWeight(petCrateWeightLbs, units.system)})</strong>
+                        <small>{TXT.totalLiveScaledWeight}</small>
+                        <strong className="font-mono">{formatWeight(totalWeight, units.system)} {TXT.pet} {formatWeight(petWeightLbs, units.system)} {TXT.crate2} {formatWeight(petCrateWeightLbs, units.system)})</strong>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>Veterinary CVI Health Cert:</small>
+                        <small>{TXT.veterinaryCviHealthCert}</small>
                         <strong className="font-mono text-blue">{petHealthCertNumber}</strong>
                       </div>
                       <div>
-                        <small>Rabies Tag # & Clinic:</small>
+                        <small>{TXT.rabiesTagClinic}</small>
                         <span>{petRabiesTag} ({petVetClinic})</span>
                       </div>
                     </div>
                     <div className="seg-grid-2" style={{ marginTop: '0.4rem' }}>
                       <div>
-                        <small>Brachycephalic (Snub-Nosed):</small>
+                        <small>{TXT.brachycephalicSnubNosed}</small>
                         <span className={petIsBrachycephalic ? 'text-accent font-bold' : 'text-slate-300'}>
-                          {petIsBrachycephalic ? '⚠️ YES - Snub Nosed (Strict Temp Directives Active)' : 'No (Standard Airway)'}
+                          {petIsBrachycephalic ? TXT.yesSnubNosedStrictTemp : TXT.noStandardAirway}
                         </span>
                       </div>
                       <div>
-                        <small>Acclimation Certification:</small>
+                        <small>{TXT.acclimationCertification}</small>
                         <span className={petAcclimationCert ? 'text-emerald font-bold' : 'text-slate-400'}>
-                          {petAcclimationCert ? 'Certified 45°F to 85°F Range' : 'Standard Cabin/Hold'}
+                          {petAcclimationCert ? TXT.certified45FTo85 : TXT.standardCabinHold}
                         </span>
                       </div>
                     </div>
                     {petCareDirectives.length > 0 && (
                       <div style={{ marginTop: '0.4rem' }}>
-                        <small>Active Animal Welfare Protocols:</small>
+                        <small>{TXT.activeAnimalWelfareProtocols}</small>
                         <span>{petCareDirectives.join(' • ')}</span>
                       </div>
                     )}
                     {petSpecialInstructions && (
                       <div style={{ marginTop: '0.4rem' }}>
-                        <small>Care & Feeding Directives:</small>
+                        <small>{TXT.careFeedingDirectives}</small>
                         <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: 'var(--tx-choc-200)' }}>
-                          Last Fed: {petLastFed} | Hydration: {petWaterProtocol} | Notes: {petSpecialInstructions}
+                          {TXT.lastFed} {petLastFed} {TXT.hydration} {petWaterProtocol} {TXT.notes} {petSpecialInstructions}
                         </p>
                       </div>
                     )}
@@ -3615,16 +3613,16 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                 {/* Review: Route */}
                 <div className="review-segment">
-                  <span className="seg-title">ROUTING</span>
+                  <span className="seg-title">{TXT.routing}</span>
                   <div className="review-route-display">
                     <div className="r-box">
-                      <span className="r-tag">ORIGIN</span>
+                      <span className="r-tag">{TXT.origin2}</span>
                       <strong>{senderCity}, {senderState} {senderZip}</strong>
                       <p>{senderName} • {senderCompany}</p>
                     </div>
                     <div className="r-arrow">↓</div>
                     <div className="r-box">
-                      <span className="r-tag">DESTINATION</span>
+                      <span className="r-tag">{TXT.destination2}</span>
                       <strong>{recipientCity}, {recipientState} {recipientZip}</strong>
                       <p>{recipientName} • {recipientCompany}</p>
                     </div>
@@ -3633,34 +3631,34 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
 
                 {/* Review: Payload */}
                 <div className="review-segment">
-                  <span className="seg-title">PAYLOAD SPECIFICATIONS</span>
+                  <span className="seg-title">{TXT.payloadSpecifications}</span>
                   <div className="seg-grid-2">
                     <div>
-                      <small>Total Units:</small>
-                      <strong>{totalPieces} {shipmentType === 'Vehicle' ? 'Vehicle' : shipmentType === 'Pets' ? 'Live Pet' : 'Pieces'}</strong>
+                      <small>{TXT.totalUnits}</small>
+                      <strong>{totalPieces} {shipmentType === 'Vehicle' ? TXT.vehicle : shipmentType === 'Pets' ? TXT.livePet : TXT.pieces}</strong>
                     </div>
                     <div>
-                      <small>Total Weight:</small>
-                      <strong>{formatWeight(totalWeight, units.system)} total</strong>
+                      <small>{TXT.totalWeight}</small>
+                      <strong>{formatWeight(totalWeight, units.system)} {TXT.total}</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Review: Operational Requirements */}
                 <div className="review-segment">
-                  <span className="seg-title">OPERATIONAL REQUIREMENTS</span>
+                  <span className="seg-title">{TXT.operationalRequirements}</span>
                   <div className="seg-grid-2">
                     <div>
-                      <small>Pickup Window:</small>
+                      <small>{TXT.pickupWindow}</small>
                       <strong>{pickupDate} · {pickupWindow}</strong>
                     </div>
                     <div>
-                      <small>Expected Delivery (ETA):</small>
-                      <strong>{expectedDeliveryDate}{expectedDeliveryDateTouched ? ' (manual override)' : ''}</strong>
+                      <small>{TXT.expectedDeliveryEta}</small>
+                      <strong>{expectedDeliveryDate}{expectedDeliveryDateTouched ? TXT.manualOverride2 : ''}</strong>
                     </div>
                   </div>
                   <div style={{ marginTop: '0.4rem' }}>
-                    <small>Special Handling:</small>
+                    <small>{TXT.specialHandling2}</small>
                     <span>
                       {[
                         isFragile && 'Fragile',
@@ -3668,21 +3666,21 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                         isSpecialHandling && 'Special Handling',
                         isSignatureRequired && 'Signature Required',
                         isOtherHandling && (otherHandlingInstructions || 'Other')
-                      ].filter(Boolean).join(', ') || 'None'}
+                      ].filter(Boolean).join(', ') || TXT.none}
                     </span>
                   </div>
                 </div>
 
                 {/* Review: Pricing */}
                 <div className="review-segment">
-                  <span className="seg-title">ADMINISTRATIVE PRICING</span>
+                  <span className="seg-title">{TXT.administrativePricing}</span>
                   <div className="seg-grid-2">
                     <div>
-                      <small>Internal Final Price:</small>
+                      <small>{TXT.internalFinalPrice}</small>
                       <strong className="text-emerald font-mono">{money.format(finalPrice)} {money.currency}</strong>
                     </div>
                     <div>
-                      <small>Service Level:</small>
+                      <small>{TXT.serviceLevel2}</small>
                       <span>{service}</span>
                     </div>
                   </div>
@@ -3737,7 +3735,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                     </svg>
                   </div>
                   <small className="identity-notice">
-                    Creating this shipment will generate its unique tracking identity and make the consignment available across the live tracking portal.
+                    {TXT.creatingThisShipmentWillGenerate}
                   </small>
                 </div>
               </div>
@@ -3754,20 +3752,20 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   onClick={handlePrevStep}
                 >
                   <ArrowLeft size={14} />
-                  <span>Previous Step</span>
+                  <span>{TXT.previousStep}</span>
                 </button>
               )}
             </div>
 
             <div className="step-footer-right">
-              <span className="step-count-badge">STAGE {currentStep} OF 6</span>
+              <span className="step-count-badge">{TXT.stage} {currentStep} OF 6</span>
               {currentStep < 6 ? (
                 <button
                   type="button"
                   className="step-continue-btn"
                   onClick={handleNextStep}
                 >
-                  <span>Continue</span>
+                  <span>{TXT.continue}</span>
                   <ArrowRight size={14} />
                 </button>
               ) : (
@@ -3778,7 +3776,7 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                   disabled={isCreatingShipment}
                 >
                   <CheckCircle2 size={17} />
-                  <span>{isCreatingShipment ? 'Verifying Route & Registering…' : 'Register Master Consignment'}</span>
+                  <span>{isCreatingShipment ? TXT.verifyingRouteRegistering : TXT.registerMasterConsignment}</span>
                 </button>
               )}
             </div>
@@ -3793,41 +3791,41 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
                 <span className="summary-carrier-tag">{COMPANY.toUpperCase()}</span>
                 <span className="summary-live-badge">
                   <span className="summary-live-dot" />
-                  <span>LIVE MANIFEST</span>
+                  <span>{TXT.liveManifest}</span>
                 </span>
               </div>
-              <h4 className="summary-passport-title">Consignment Passport</h4>
+              <h4 className="summary-passport-title">{TXT.consignmentPassport}</h4>
             </div>
 
             {/* Visual Route Corridor */}
             <div className="summary-route-corridor">
               <div className="corridor-city origin">
-                <span className="corridor-label">ORIGIN</span>
-                <strong className="corridor-name">{senderCity || 'Origin'}{senderState ? `, ${senderState}` : ''}</strong>
+                <span className="corridor-label">{TXT.origin2}</span>
+                <strong className="corridor-name">{senderCity || TXT.origin}{senderState ? `, ${senderState}` : ''}</strong>
               </div>
               <div className="corridor-arrow-wrap">
                 <span className="corridor-line" />
                 <span className="corridor-arrow">→</span>
               </div>
               <div className="corridor-city dest">
-                <span className="corridor-label">DESTINATION</span>
-                <strong className="corridor-name text-accent">{recipientCity || 'Destination'}{recipientState ? `, ${recipientState}` : ''}</strong>
+                <span className="corridor-label">{TXT.destination2}</span>
+                <strong className="corridor-name text-accent">{recipientCity || TXT.destination}{recipientState ? `, ${recipientState}` : ''}</strong>
               </div>
             </div>
 
             <div className="summary-specs-list">
               <div className="summary-line-item">
-                <span className="s-prop">Handling Mode</span>
-                <strong className="s-val">{shipmentType}</strong>
+                <span className="s-prop">{TXT.handlingMode}</span>
+                <strong className="s-val">{TXT.shipmentTypes[shipmentType]}</strong>
               </div>
 
               <div className="summary-line-item">
-                <span className="s-prop">Cargo Description</span>
-                <strong className="s-val truncate-summary" title={shipmentDescription}>{shipmentDescription || 'Commercial Freight'}</strong>
+                <span className="s-prop">{TXT.cargoDescription2}</span>
+                <strong className="s-val truncate-summary" title={shipmentDescription}>{shipmentDescription || TXT.commercialFreight}</strong>
               </div>
 
               <div className="summary-line-item">
-                <span className="s-prop">Service Class</span>
+                <span className="s-prop">{TXT.serviceClass}</span>
                 <span className={`summary-service-pill ${(service || 'standard').toLowerCase().replace(/\s+/g, '-')}`}>
                   {service}
                 </span>
@@ -3836,33 +3834,33 @@ export const CreateShipmentView: React.FC<CreateShipmentViewProps> = ({
               <div className="summary-divider" />
 
               <div className="summary-line-item">
-                <span className="s-prop">Payload Units</span>
+                <span className="s-prop">{TXT.payloadUnits}</span>
                 <strong className="s-val">
                   {shipmentType === 'Vehicle'
-                    ? `1 Vehicle (${vehMake} ${vehModel})`
+                    ? TXT.t1Vehicle(vehMake, vehModel)
                     : shipmentType === 'Pallet'
-                    ? `${palletCount} Skids (${palletStandard.split(' ')[0]})`
+                    ? TXT.skids2(palletCount, palletStandard.split(' ')[0])
                     : shipmentType === 'Container'
-                    ? `1 FCL Container (${containerIsoSize.split(' ')[0]})`
+                    ? TXT.t1FclContainer(containerIsoSize.split(' ')[0])
                     : shipmentType === 'Freight'
-                    ? `${freightPiecesCount} Heavy Units (${freightClass.split(' ')[0]})`
+                    ? TXT.heavyUnits(freightPiecesCount, freightClass.split(' ')[0])
                     : shipmentType === 'Document'
-                    ? `1 Secure Pouch (${docEnvelopeType.split(' ')[0]})`
+                    ? TXT.t1SecurePouch(docEnvelopeType.split(' ')[0])
                     : shipmentType === 'Pets'
-                    ? `1 Live Pet (${petName || 'Pet'} • ${petBreed || petSpecies})`
-                    : `${totalPieces} ${totalPieces === 1 ? 'Package' : 'Packages'}`}
+                    ? TXT.t1LivePet(petName || TXT.petFallback, petBreed || petSpecies)
+                    : TXT.packagesCount(totalPieces)}
                 </strong>
               </div>
 
               <div className="summary-line-item">
-                <span className="s-prop">Scale Weight</span>
+                <span className="s-prop">{TXT.scaleWeight}</span>
                 <strong className="s-val font-mono">{formatWeight(totalWeight, units.system)}</strong>
               </div>
             </div>
 
             <div className="summary-price-box">
               <div className="price-label-row">
-                <span className="price-lead-label">COMMERCIAL TARIFF TOTAL</span>
+                <span className="price-lead-label">{TXT.commercialTariffTotal}</span>
                 <span className="price-currency-tag">{money.currency}</span>
               </div>
               <div className="price-big-amount">

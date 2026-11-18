@@ -38,6 +38,7 @@ import { LOGO_ALT, LOGO_WORDMARK_HEIGHT, LOGO_WORDMARK_WHITE, LOGO_WORDMARK_WIDT
 import { Button } from '../components/ui';
 import { canOpenView, firstAllowedView, type AdminViewType } from './views';
 import './AdminLayout.css';
+import { ADMIN_LAYOUT_TEXT as TXT } from './AdminLayout.text';
 
 export type { AdminViewType };
 
@@ -61,104 +62,6 @@ interface AdminLayoutProps {
   dispatchAttentionCount?: number;
   children: React.ReactNode;
 }
-
-const VIEW_METADATA: Record<AdminViewType, { title: string; category: string; description: string }> = {
-  'operations-center': {
-    title: 'Dashboard',
-    category: 'Fleet Operations',
-    description: 'Overview of active shipments, inbound quotes, and milestone checkpoints.'
-  },
-  'all-shipments': {
-    title: 'Shipments',
-    category: 'Fleet Operations',
-    description: 'Master list of all shipments.'
-  },
-  'create-shipment': {
-    title: 'New Shipment',
-    category: 'Fleet Operations',
-    description: 'Book a new shipment and generate documentation.'
-  },
-  'tracking-events': {
-    title: 'Scanner',
-    category: 'Fleet Operations',
-    description: 'Log milestone events and update statuses.'
-  },
-  'quote-requests': {
-    title: 'Quote Requests',
-    category: 'Commercial Tariffs',
-    description: 'Review and certify customer quote requests.'
-  },
-  'messages': {
-    title: 'Messages',
-    category: 'Commercial Tariffs',
-    description: 'Messages sent from the Contact page.'
-  },
-  'payments': {
-    title: 'Payments',
-    category: 'Commercial Tariffs',
-    description: 'Proofs of payment sent from the track page.'
-  },
-  'dispatch': {
-    title: DISPATCH_MENU.dispatch.menu,
-    category: 'Delivery',
-    description: DISPATCH_MENU.dispatch.description
-  },
-  'tariffs': {
-    title: DISPATCH_MENU.tariffs.menu,
-    category: 'Delivery',
-    description: DISPATCH_MENU.tariffs.description
-  },
-  'couriers': {
-    title: DISPATCH_MENU.couriers.menu,
-    category: 'Delivery',
-    description: DISPATCH_MENU.couriers.description
-  },
-  'cash': {
-    title: DISPATCH_MENU.cash.menu,
-    category: 'Delivery',
-    description: DISPATCH_MENU.cash.description
-  },
-  'document-center': {
-    title: 'Documents',
-    category: 'Compliance & Governance',
-    description: 'Bills of Lading, Proof of Delivery, and shipping labels.'
-  },
-  'blog': {
-    title: BLOG_MENU.menu,
-    category: 'Content',
-    description: BLOG_MENU.description
-  },
-  'shop': {
-    title: SHOP_MENU.menu,
-    category: 'Content',
-    description: SHOP_MENU.description
-  },
-  'settings': {
-    title: 'Settings',
-    category: 'Compliance & Governance',
-    description: 'Carrier configuration and system preferences.'
-  },
-  'users': {
-    title: IAM_TEXT.users.title,
-    category: 'Administration',
-    description: 'Staff accounts, their roles and sign-in.'
-  },
-  'roles': {
-    title: IAM_TEXT.roles.title,
-    category: 'Administration',
-    description: 'Roles and the permissions they grant.'
-  },
-  'audit': {
-    title: IAM_TEXT.audit.title,
-    category: 'Administration',
-    description: 'Who changed what, and when.'
-  },
-  'account': {
-    title: AUTH_TEXT.account.title,
-    category: 'Account',
-    description: 'Your name, language and password.'
-  }
-};
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
   currentView,
@@ -202,7 +105,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const unreadCount = visibleNotifications.filter(n => !n.read).length + newProofsCount;
   const pendingQuotesCount = quoteRequests.filter(q => q.status === 'NEW' || q.status === 'UNDER_REVIEW').length;
 
-  const currentMeta = VIEW_METADATA[currentView] || VIEW_METADATA['operations-center'];
+  const currentMeta = TXT.views[currentView] || TXT.views['operations-center'];
 
   return (
     <div className="tx-admin-root">
@@ -224,9 +127,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
-            <span className="admin-brand-console">Operations Console</span>
+            <span className="admin-brand-console">{TXT.operationsConsole}</span>
           </div>
-          <button className="mobile-close-btn" onClick={() => setMobileSidebarOpen(false)} aria-label="Close menu">
+          <button className="mobile-close-btn" onClick={() => setMobileSidebarOpen(false)} aria-label={TXT.closeMenu}>
             <X size={20} />
           </button>
         </div>
@@ -236,7 +139,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           {/* SECTION 1: OPERATIONS */}
           {(['operations-center', 'all-shipments', 'create-shipment', 'tracking-events'] as const).some(allowed) && (
           <div className="admin-nav-section">
-            <span className="section-label">OPERATIONS</span>
+            <span className="section-label">{TXT.sections.operations}</span>
 
             {/* Dashboard */}
             {allowed('operations-center') && (
@@ -247,7 +150,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <Compass size={18} />
                 </div>
-                <span className="nav-title">Dashboard</span>
+                <span className="nav-title">{TXT.dashboard}</span>
               </button>
             )}
 
@@ -260,7 +163,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <Package size={18} />
                 </div>
-                <span className="nav-title">Shipments</span>
+                <span className="nav-title">{TXT.shipments}</span>
                 <span className="nav-count-badge font-mono">{shipments.length}</span>
               </button>
             )}
@@ -274,7 +177,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <PlusCircle size={18} />
                 </div>
-                <span className="nav-title">New Shipment</span>
+                <span className="nav-title">{TXT.newShipment}</span>
               </button>
             )}
 
@@ -287,7 +190,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <QrCode size={18} />
                 </div>
-                <span className="nav-title">Scanner</span>
+                <span className="nav-title">{TXT.scanner}</span>
               </button>
             )}
           </div>
@@ -297,7 +200,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           {/* SECTION 2: COMMERCIAL */}
           {(['quote-requests', 'messages', 'payments'] as const).some(allowed) && (
           <div className="admin-nav-section">
-            <span className="section-label">COMMERCIAL</span>
+            <span className="section-label">{TXT.sections.commercial}</span>
 
             {/* Quote Requests */}
             {allowed('quote-requests') && (
@@ -308,9 +211,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <Calculator size={18} />
                 </div>
-                <span className="nav-title">Quote Requests</span>
+                <span className="nav-title">{TXT.quoteRequests}</span>
                 {pendingQuotesCount > 0 ? (
-                  <span className="nav-badge-amber font-mono">{pendingQuotesCount} NEW</span>
+                  <span className="nav-badge-amber font-mono">{TXT.newBadge(pendingQuotesCount)}</span>
                 ) : (
                   <span className="nav-count-badge muted font-mono">{quoteRequests.length}</span>
                 )}
@@ -326,9 +229,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <Inbox size={18} />
                 </div>
-                <span className="nav-title">Messages</span>
+                <span className="nav-title">{TXT.messages}</span>
                 {newMessagesCount > 0 && (
-                  <span className="nav-badge-amber font-mono">{newMessagesCount} NEW</span>
+                  <span className="nav-badge-amber font-mono">{TXT.newBadge(newMessagesCount)}</span>
                 )}
               </button>
             )}
@@ -342,9 +245,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <Wallet size={18} />
                 </div>
-                <span className="nav-title">Payments</span>
+                <span className="nav-title">{TXT.payments}</span>
                 {newProofsCount > 0 && (
-                  <span className="nav-badge-amber font-mono" aria-label={`${newProofsCount} to review`}>{newProofsCount} NEW</span>
+                  <span className="nav-badge-amber font-mono" aria-label={TXT.toReview(newProofsCount)}>{TXT.newBadge(newProofsCount)}</span>
                 )}
               </button>
             )}
@@ -408,7 +311,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
           {/* SECTION 3: SYSTEM */}
           <div className="admin-nav-section">
-            <span className="section-label">SYSTEM</span>
+            <span className="section-label">{TXT.sections.system}</span>
 
             {/* Documents */}
             {allowed('document-center') && (
@@ -419,7 +322,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <FileText size={18} />
                 </div>
-                <span className="nav-title">Documents</span>
+                <span className="nav-title">{TXT.documents}</span>
               </button>
             )}
 
@@ -458,7 +361,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="nav-btn-icon-wrap">
                   <Settings size={18} />
                 </div>
-                <span className="nav-title">Settings</span>
+                <span className="nav-title">{TXT.settings}</span>
               </button>
             )}
 
@@ -518,10 +421,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             block
             className="admin-sidebar-site-link"
             onClick={() => onNavigatePublic('home')}
-            title="Switch to public customer view"
+            title={TXT.switchToPublicCustomerView}
             iconEnd={<ArrowUpRight size={16} />}
           >
-            View Public Website
+            {TXT.viewPublicWebsite}
           </Button>
 
           <div className="sidebar-operator-card">
@@ -550,7 +453,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         <header className="tx-admin-top-header">
           {/* Left Column: Clean View Title */}
           <div className="header-titles-column">
-            <button className="mobile-menu-trigger" onClick={() => setMobileSidebarOpen(true)}>
+            <button className="mobile-menu-trigger" onClick={() => setMobileSidebarOpen(true)} aria-label={TXT.openMenu}>
               <Menu size={20} />
             </button>
             <h1 className="header-view-title">{currentMeta.title}</h1>
@@ -566,7 +469,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search tracking, quote ID, customer..."
+                placeholder={TXT.searchTrackingQuoteIdCustomer}
                 className="universal-search-input"
               />
               {searchQuery ? (
@@ -574,12 +477,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   type="button"
                   className="search-clear-btn"
                   onClick={() => onSearchChange('')}
-                  aria-label="Clear search query"
+                  aria-label={TXT.clearSearchQuery}
                 >
                   <X size={13} />
                 </button>
               ) : (
-                <span className="search-shortcut-badge font-mono" title="Keyboard shortcut: Ctrl+K or ⌘K">
+                <span className="search-shortcut-badge font-mono" title={TXT.keyboardShortcutCtrlKOr}>
                   ⌘K
                 </span>
               )}
@@ -591,7 +494,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 type="button"
                 className={`btn-notification-trigger ${unreadCount > 0 ? 'has-unread' : ''}`}
                 onClick={() => setShowNotifications(!showNotifications)}
-                title="Operational Alerts"
+                title={TXT.operationalAlerts}
               >
                 <Bell size={17} />
                 {unreadCount > 0 && <span className="notification-count-badge font-mono">{unreadCount}</span>}
@@ -602,8 +505,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <div className="admin-notification-popover animate-scale-in">
                   <div className="popover-header">
                     <div>
-                      <strong>Operational Alerts</strong>
-                      <small>{unreadCount} unread items</small>
+                      <strong>{TXT.operationalAlerts}</strong>
+                      <small>{unreadCount} {TXT.unreadItems}</small>
                     </div>
                     <button className="popover-close" onClick={() => setShowNotifications(false)}>
                       <X size={14} />
@@ -627,15 +530,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                       >
                         <div className="item-dot payment" />
                         <div className="item-content">
-                          <strong>{newProofsCount === 1 ? 'New payment proof' : 'New payment proofs'}</strong>
-                          <p>{newProofsCount === 1 ? '1 proof of payment is' : `${newProofsCount} proofs of payment are`} waiting for review.</p>
+                          <strong>{TXT.newProofs(newProofsCount)}</strong>
+                          <p>{TXT.proofsWaiting(newProofsCount)}</p>
                         </div>
                       </div>
                     )}
                     {visibleNotifications.length === 0 && newProofsCount === 0 ? (
                       <div className="popover-empty">
                         <CheckCircle2 size={24} className="text-emerald" />
-                        <span>All corridors operating nominally</span>
+                        <span>{TXT.allCorridorsOperatingNominally}</span>
                       </div>
                     ) : (
                       visibleNotifications.slice(0, 6).map((notif) => (
@@ -691,19 +594,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                     {allowed('settings') && (
                       <button onClick={() => { onSelectView('settings'); setShowUserMenu(false); }}>
                         <Settings size={15} />
-                        <span>Settings</span>
+                        <span>{TXT.settings}</span>
                       </button>
                     )}
                     {allowed('document-center') && (
                       <button onClick={() => { onSelectView('document-center'); setShowUserMenu(false); }}>
                         <FileText size={15} />
-                        <span>Document Center</span>
+                        <span>{TXT.documentCenter}</span>
                       </button>
                     )}
                     <div className="menu-divider" />
                     <button className="menu-exit-link" onClick={() => onNavigatePublic('home')}>
                       <ExternalLink size={15} />
-                      <span>View Public Website</span>
+                      <span>{TXT.viewPublicWebsite}</span>
                     </button>
                     <button
                       className="menu-exit-link"

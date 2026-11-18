@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { AlertTriangle, Trash2, X, ArrowRight } from 'lucide-react';
 import { Shipment } from '../../types/shipment';
 import './DeleteShipmentModal.css';
+import { DELETE_SHIPMENT_MODAL_TEXT as TXT } from './DeleteShipmentModal.text';
 
 interface DeleteShipmentModalProps {
   shipment: Shipment;
@@ -37,32 +38,32 @@ export const DeleteShipmentModal: React.FC<DeleteShipmentModalProps> = ({
           <div className="delete-warning-halo">
             <AlertTriangle size={24} className="text-crimson" />
           </div>
-          <button type="button" className="delete-close-btn" onClick={onClose} title="Cancel (Esc)">
+          <button type="button" className="delete-close-btn" onClick={onClose} title={TXT.cancelEsc}>
             <X size={18} />
           </button>
         </div>
 
         {/* Content */}
         <div className="delete-modal-content">
-          <h3 className="delete-modal-title">Delete Consignment?</h3>
+          <h3 className="delete-modal-title">{TXT.deleteConsignment}</h3>
           <p className="delete-modal-desc">
-            Are you sure you want to permanently delete consignment <strong className="font-mono text-dark">{shipment.trackingNumber}</strong>? This action cannot be undone and will purge all associated milestone logs.
+            {TXT.areYouSureYouWant} <strong className="font-mono text-dark">{shipment.trackingNumber}</strong>{TXT.thisActionCannotBeUndone}
           </p>
 
           {/* Consignment summary preview */}
           <div className="delete-preview-card">
             <div className="preview-row">
-              <span className="preview-label">WAYBILL</span>
+              <span className="preview-label">{TXT.waybill}</span>
               <strong className="preview-val font-mono">{shipment.trackingNumber}</strong>
             </div>
             <div className="preview-row">
-              <span className="preview-label">ROUTE</span>
+              <span className="preview-label">{TXT.route}</span>
               <span className="preview-val">
                 {originCity}, {originState} <ArrowRight size={11} className="inline-arrow" /> {destCity}, {destState}
               </span>
             </div>
             <div className="preview-row">
-              <span className="preview-label">PARTIES</span>
+              <span className="preview-label">{TXT.parties}</span>
               <span className="preview-val truncate">{senderName} → {recipientName}</span>
             </div>
           </div>
@@ -71,7 +72,7 @@ export const DeleteShipmentModal: React.FC<DeleteShipmentModalProps> = ({
         {/* Action Buttons */}
         <div className="delete-modal-footer">
           <button type="button" className="btn-cancel-delete" onClick={onClose}>
-            Cancel
+            {TXT.cancel}
           </button>
           <button
             type="button"
@@ -79,7 +80,7 @@ export const DeleteShipmentModal: React.FC<DeleteShipmentModalProps> = ({
             onClick={() => onConfirmDelete(shipment.trackingNumber)}
           >
             <Trash2 size={15} />
-            <span>Delete Consignment</span>
+            <span>{TXT.deleteConsignment2}</span>
           </button>
         </div>
       </div>

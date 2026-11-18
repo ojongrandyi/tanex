@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
 import './ProofViewer.css';
+import { PROOF_VIEWER_TEXT as TXT } from './ProofViewer.text';
 
 interface ProofViewerProps {
   src: string;
@@ -59,7 +60,7 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({ src, title, onClose, c
       <div ref={dialogRef} className="tx-proof-viewer" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="tx-proof-viewer-head">
           <h2 id={titleId}>{title}</h2>
-          <button ref={closeRef} type="button" className="tx-proof-viewer-close" onClick={onClose} aria-label="Close">
+          <button ref={closeRef} type="button" className="tx-proof-viewer-close" onClick={onClose} aria-label={TXT.close}>
             <X size={18} aria-hidden="true" />
           </button>
         </div>

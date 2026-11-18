@@ -6,6 +6,9 @@ import { ProofViewer } from '../components/ProofViewer';
 import { ProofReviewControls } from '../components/ProofReviewControls';
 import { ProofFacts, formatProofReceived, proofMethodView } from '../components/ProofFacts';
 import './PaymentsView.css';
+import { PAYMENTS_VIEW_TEXT as TXT } from './PaymentsView.text';
+import { consoleLang } from '../i18n/consoleText';
+import { PAYMENT_STATUS_LABELS } from '../../shared/paymentRequest';
 
 interface PaymentsViewProps {
   searchQuery: string;
@@ -17,24 +20,21 @@ interface PaymentsViewProps {
 type Filter = 'ALL' | ProofStatus;
 
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: 'SUBMITTED', label: 'Submitted' },
-  { value: 'APPROVED', label: 'Approved' },
-  { value: 'REJECTED', label: 'Rejected' },
-  { value: 'ALL', label: 'All' },
+  { value: 'SUBMITTED', get label() { return TXT.submitted; } },
+  { value: 'APPROVED', get label() { return TXT.approved; } },
+  { value: 'REJECTED', get label() { return TXT.rejected2; } },
+  { value: 'ALL', get label() { return TXT.all; } },
 ];
 
 const PROOF_STATUS_LABELS: Record<ProofStatus, string> = {
-  SUBMITTED: 'Submitted',
-  APPROVED: 'Approved',
-  REJECTED: 'Rejected',
+  get SUBMITTED() { return TXT.submitted; },
+  get APPROVED() { return TXT.approved; },
+  get REJECTED() { return TXT.rejected2; },
 };
 
-const REQUEST_STATUS_LABELS: Record<string, string> = {
-  AWAITING_PAYMENT: 'Awaiting payment',
-  UNDER_REVIEW: 'Under review',
-  PAID: 'Paid',
-  CANCELLED: 'Cancelled',
-};
+// Payment request status names, shared with the track page (CONTENT §6.8).
+const requestStatusLabel = (status: string) =>
+  (PAYMENT_STATUS_LABELS as Record<string, { en: string; fr: string }>)[status]?.[consoleLang()] ?? status;
 
 /** Admin Payments page (docs/update.md F.5): proofs of payment sent from the track page. */
 export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenShipmentDetail, onProofsChanged }) => {
@@ -52,7 +52,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenS
       setProofs(await api.getPaymentProofs());
       onProofsChanged?.();
     } catch (err: any) {
-      setError(err?.message || 'Could not load payment proofs.');
+      setError(err?.message || TXT.couldNotLoadPaymentProofs);
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenS
   return (
     <div className="tx-payments-workspace animate-fade-in">
       <div className="payments-toolbar">
-        <div className="payments-filters" role="tablist" aria-label="Filter payment proofs">
+        <div className="payments-filters" role="tablist" aria-label={TXT.filterPaymentProofs}>
           {FILTERS.map((f) => (
             <button
               key={f.value}
@@ -115,7 +115,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenS
         </div>
         <button type="button" className="payments-refresh-btn" onClick={load} disabled={loading}>
           <RefreshCw size={14} className={loading ? 'spin' : ''} />
-          <span>Refresh</span>
+          <span>{TXT.refresh}</span>
         </button>
       </div>
 
@@ -129,8 +129,8 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenS
       {!loading && visible.length === 0 && (
         <div className="payments-empty">
           <Wallet size={28} />
-          <strong>{proofs.length === 0 ? 'No payment proofs yet' : 'No proofs match'}</strong>
-          <p>{proofs.length === 0 ? 'Proofs customers send from the track page will appear here.' : 'Try another filter or clear the search.'}</p>
+          <strong>{proofs.length === 0 ? TXT.noPaymentProofsYet : TXT.noProofsMatch}</strong>
+          <p>{proofs.length === 0 ? TXT.proofsCustomersSendFromThe : TXT.tryAnotherFilterOrClear}</p>
         </div>
       )}
 
@@ -141,7 +141,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenS
               type="button"
               className="proof-thumb"
               onClick={(e) => openViewer(p, e.currentTarget)}
-              aria-label={`Open the screenshot sent for ${p.trackingNumber}`}
+              aria-label={TXT.openTheScreenshotSentFor(p.trackingNumber)}
             >
               <img src={p.fileUrl} alt="" loading="lazy" />
               <span className="proof-thumb-zoom" aria-hidden="true"><Maximize2 size={14} /></span>
@@ -151,17 +151,17 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenS
               <div className="proof-head">
                 <strong className="font-mono">{p.trackingNumber}</strong>
                 <span className={`proof-badge ${p.status.toLowerCase()}`}>{PROOF_STATUS_LABELS[p.status]}</span>
-                {p.payment && <span className="proof-request-status">Request: {REQUEST_STATUS_LABELS[p.payment.status] ?? p.payment.status}</span>}
-                <small className="proof-time">Received {formatProofReceived(p.createdAt)}</small>
+                {p.payment && <span className="proof-request-status">{TXT.request} {requestStatusLabel(p.payment.status)}</span>}
+                <small className="proof-time">{TXT.received} {formatProofReceived(p.createdAt)}</small>
               </div>
               <ProofFacts proof={p} />
-              {p.status === 'REJECTED' && p.adminNote && <p className="proof-note">Rejected: {p.adminNote}</p>}
+              {p.status === 'REJECTED' && p.adminNote && <p className="proof-note">{TXT.rejected} {p.adminNote}</p>}
               <div className="proof-actions">
                 <button type="button" className="proof-action" onClick={(e) => openViewer(p, e.currentTarget)}>
-                  <Maximize2 size={14} /><span>View screenshot</span>
+                  <Maximize2 size={14} /><span>{TXT.viewScreenshot}</span>
                 </button>
                 <button type="button" className="proof-action" onClick={() => onOpenShipmentDetail(p.trackingNumber)}>
-                  <ExternalLink size={14} /><span>View shipment</span>
+                  <ExternalLink size={14} /><span>{TXT.viewShipment}</span>
                 </button>
               </div>
               <ProofReviewControls proof={p} onReviewed={handleReviewed} />
@@ -171,9 +171,9 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({ searchQuery, onOpenS
       </div>
 
       {viewing && (
-        <ProofViewer src={viewing.fileUrl} title={`Payment screenshot Â· ${viewing.trackingNumber}`} onClose={closeViewer}>
+        <ProofViewer src={viewing.fileUrl} title={TXT.paymentScreenshot(viewing.trackingNumber)} onClose={closeViewer}>
           <ProofFacts proof={viewing} />
-          {viewing.status === 'REJECTED' && viewing.adminNote && <p className="proof-note">Rejected: {viewing.adminNote}</p>}
+          {viewing.status === 'REJECTED' && viewing.adminNote && <p className="proof-note">{TXT.rejected} {viewing.adminNote}</p>}
           <ProofReviewControls proof={viewing} onReviewed={handleReviewed} />
         </ProofViewer>
       )}

@@ -1,10 +1,10 @@
-// Tariffs and Couriers copy (docs/CONTENT.md §10.2; additions from G.2 marked owner to confirm). The
-// console is English until phase I moves its text into the dictionaries; kept in one object, like
-// IAM_TEXT and BLOG_TEXT, so that move is a straight copy. Size and vehicle names come from the
+// Tariffs and Couriers copy (docs/CONTENT.md §10.2; additions from G.2 marked owner to confirm).
+// English master; the French is in src/i18n/fr/console/dispatch.ts. Size and vehicle names come from the
 // shared modules (SIZE_CLASS_LABELS, VEHICLE_LABELS) so the console and the public site agree.
-import { IAM_TEXT } from '../../auth/strings';
+import { IAM_TEXT, IAM_TEXT_EN } from '../../auth/strings';
+import { consoleText } from '../i18n/consoleText';
 
-export const DISPATCH_TEXT = {
+export const DISPATCH_TEXT_EN = {
   loading: 'Loading…',
   saving: 'Saving…',
   saved: 'Saved.',
@@ -160,7 +160,7 @@ export const DISPATCH_TEXT = {
     viewOnly: 'You can view couriers. Changing them needs the permission to manage couriers.',
   },
   errors: {
-    ...IAM_TEXT.errors,
+    ...IAM_TEXT_EN.errors,
     INVALID_NAME: 'Enter a name.',
     CITY_EXISTS: 'A city with this name already exists.',
     CITY_IN_USE: 'This city has areas, rates, couriers or jobs. Turn it off instead.',
@@ -183,8 +183,9 @@ export const DISPATCH_TEXT = {
     COURIER_ROLE_MISSING: 'No role gives only the courier app. Ask a Super Admin to restore the Courier role.',
   } as Record<string, string>,
 } as const;
+export const DISPATCH_TEXT = consoleText('dispatch', DISPATCH_TEXT_EN);
 
 export function dispatchErrorText(err: unknown): string {
   const e = err as { message?: string; code?: string } | null;
-  return (e?.code && DISPATCH_TEXT.errors[e.code]) || e?.message || 'Something went wrong. Please try again.';
+  return (e?.code && DISPATCH_TEXT.errors[e.code]) || e?.message || IAM_TEXT.genericError;
 }

@@ -16,6 +16,7 @@ import { ALERT_KEYS, SPEED_MAX_KMH, SPEED_MIN_KMH, isValidAlertMinutes } from '.
 import { SUGGESTED_AREAS } from '../../shared/suggestedAreas';
 import '../pages/IamViews.css';
 import './Dispatch.css';
+import { consoleIntlLocale, consoleLang } from '../i18n/consoleText';
 
 const D = DISPATCH_TEXT;
 const T = DISPATCH_TEXT.tariffs;
@@ -33,7 +34,7 @@ const NoticeLine: React.FC<{ notice: Notice }> = ({ notice }) =>
 
 export function formatMoney(amount: number, currency: string): string {
   try {
-    return new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: currency === 'XAF' || currency === 'XOF' ? 0 : 2 }).format(amount);
+    return new Intl.NumberFormat(consoleIntlLocale(), { style: 'currency', currency, maximumFractionDigits: currency === 'XAF' || currency === 'XOF' ? 0 : 2 }).format(amount);
   } catch {
     return `${amount} ${currency}`;
   }
@@ -368,7 +369,7 @@ const RatesPanel: React.FC<{
         <label className="tx-iam-field">
           <span>{T.size}</span>
           <select value={size} onChange={(e) => changeSize(e.target.value as SizeClass)}>
-            {SIZE_CLASSES.map((s) => <option key={s} value={s}>{SIZE_CLASS_LABELS[s].en}</option>)}
+            {SIZE_CLASSES.map((s) => <option key={s} value={s}>{SIZE_CLASS_LABELS[s][consoleLang()]}</option>)}
           </select>
         </label>
         <label className="tx-iam-field tx-tariff-currency">
@@ -397,7 +398,7 @@ const RatesPanel: React.FC<{
         </div>
       )}
 
-      <div className="tx-rate-scroll" tabIndex={0} role="region" aria-label={`${T.tabs.rates}: ${city.name}, ${SIZE_CLASS_LABELS[size].en}`}>
+      <div className="tx-rate-scroll" tabIndex={0} role="region" aria-label={`${T.tabs.rates}: ${city.name}, ${SIZE_CLASS_LABELS[size][consoleLang()]}`}>
         <table className="tx-rate-grid">
           <thead>
             <tr>
@@ -464,7 +465,7 @@ const PriceCheck: React.FC<{ state: TariffState; city: DeliveryCity; zones: Deli
         <label className="tx-iam-field">
           <span>{T.size}</span>
           <select value={size} onChange={(e) => setSize(e.target.value as SizeClass)}>
-            {SIZE_CLASSES.map((s) => <option key={s} value={s}>{SIZE_CLASS_LABELS[s].en}</option>)}
+            {SIZE_CLASSES.map((s) => <option key={s} value={s}>{SIZE_CLASS_LABELS[s][consoleLang()]}</option>)}
           </select>
         </label>
         <label className="tx-iam-check tx-price-check-express">
@@ -653,7 +654,7 @@ const SpeedsPanel: React.FC<{ state: TariffState; onState: (s: TariffState, msg?
       <div className="tx-tariff-controls">
         {VEHICLE_TYPES.map((v) => (
           <label key={v} className="tx-iam-field">
-            <span>{VEHICLE_LABELS[v].en} ({T.kmh})</span>
+            <span>{VEHICLE_LABELS[v][consoleLang()]} ({T.kmh})</span>
             <input type="text" inputMode="decimal" value={speeds[v]} onChange={(e) => { setSpeeds((s) => ({ ...s, [v]: e.target.value })); setError(null); }} />
           </label>
         ))}

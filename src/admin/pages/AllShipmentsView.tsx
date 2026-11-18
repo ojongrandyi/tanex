@@ -25,6 +25,8 @@ import './AllShipmentsView.css';
 import { WeightText } from '../../components/forms/UnitControls';
 import { canonicalStatus, shipmentStatusLabel, shipmentStatusTone, type StatusTone } from '../../shared/shipmentStatus';
 import { BRAND_COLORS } from '../../config/brand';
+import { ALL_SHIPMENTS_VIEW_TEXT as TXT } from './AllShipmentsView.text';
+import { consoleLang } from '../i18n/consoleText';
 
 // Badge colours per status family (names come from CONTENT §6.3).
 const STATUS_CHIP: Record<StatusTone, { className: string; dot: string }> = {
@@ -93,14 +95,14 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
     const chip = STATUS_CHIP[shipmentStatusTone(status)];
     return (
       <span className={`ship-status-chip ${chip.className}`}>
-        <span className={`chip-dot ${chip.dot}`} /> {shipmentStatusLabel(status)}
+        <span className={`chip-dot ${chip.dot}`} /> {shipmentStatusLabel(status, consoleLang())}
       </span>
     );
   };
 
   const formatEtaDate = (est: any) => {
-    if (!est) return 'Scheduled';
-    let dateStr = typeof est === 'string' ? est : (est?.date || 'Scheduled');
+    if (!est) return TXT.scheduled;
+    let dateStr = typeof est === 'string' ? est : (est?.date || TXT.scheduled);
     return dateStr
       .replace('January', 'Jan')
       .replace('February', 'Feb')
@@ -150,12 +152,12 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
         statusText: shipmentStatusLabel('BOOKED')
       });
     } catch (err: any) {
-      setSuccessToast(`Could not register the shipment: ${err?.message || 'the server did not respond'}. Nothing was saved.`);
+      setSuccessToast(TXT.couldNotRegisterTheShipment(err?.message || TXT.serverNoResponse));
       setTimeout(() => setSuccessToast(null), 6000);
       return;
     }
 
-    setSuccessToast(`Master Consignment ${newShip.trackingNumber} registered successfully!`);
+    setSuccessToast(TXT.masterConsignmentRegisteredSuccessfully(newShip.trackingNumber));
     setShowCreateModal(false);
     setTimeout(() => setSuccessToast(null), 4000);
   };
@@ -181,8 +183,8 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
       <div className="shipments-top-header">
         <div className="header-info">
           <div className="header-title-row">
-            <h2>Shipments Ledger</h2>
-            <span className="shipments-count-pill">{filteredShipments.length} Active</span>
+            <h2>{TXT.shipmentsLedger}</h2>
+            <span className="shipments-count-pill">{filteredShipments.length} {TXT.active}</span>
           </div>
         </div>
 
@@ -192,10 +194,10 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
               type="button"
               className="recently-deleted-btn"
               onClick={() => setShowTrashModal(true)}
-              title="View and restore deleted shipments"
+              title={TXT.viewAndRestoreDeletedShipments}
             >
               <Trash2 size={15} />
-              <span>Recently Deleted</span>
+              <span>{TXT.recentlyDeleted}</span>
             </button>
           )}
           {can('shipments.create') && (
@@ -205,7 +207,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
               onClick={() => setShowCreateModal(true)}
             >
               <Plus size={16} />
-              <span>Book Consignment</span>
+              <span>{TXT.bookConsignment}</span>
             </button>
           )}
         </div>
@@ -224,10 +226,10 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             <div className="stat-circle-icon accent">
               <Package size={15} />
             </div>
-            <span className="stat-label">TOTAL CONSIGNMENTS</span>
+            <span className="stat-label">{TXT.totalConsignments}</span>
           </div>
           <strong className="stat-number">{totalCount}</strong>
-          <span className="stat-subtext">Active Master Fleet</span>
+          <span className="stat-subtext">{TXT.activeMasterFleet}</span>
 
           <div className="stat-sparkline-wrap">
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
@@ -263,10 +265,10 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             <div className="stat-circle-icon blue">
               <Truck size={15} />
             </div>
-            <span className="stat-label">IN TRANSIT</span>
+            <span className="stat-label">{TXT.inTransit}</span>
           </div>
           <strong className="stat-number">{inTransitCount}</strong>
-          <span className="stat-subtext">Active Linehaul</span>
+          <span className="stat-subtext">{TXT.activeLinehaul}</span>
 
           <div className="stat-sparkline-wrap">
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
@@ -302,10 +304,10 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             <div className="stat-circle-icon green">
               <MapPin size={15} />
             </div>
-            <span className="stat-label">OUT FOR DELIVERY</span>
+            <span className="stat-label">{TXT.outForDelivery}</span>
           </div>
           <strong className="stat-number">{outDeliveryCount}</strong>
-          <span className="stat-subtext">Final Mile Delivery</span>
+          <span className="stat-subtext">{TXT.finalMileDelivery}</span>
 
           <div className="stat-sparkline-wrap">
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
@@ -341,10 +343,10 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             <div className="stat-circle-icon red">
               <AlertCircle size={15} />
             </div>
-            <span className="stat-label">DELAYED & ON HOLD</span>
+            <span className="stat-label">{TXT.delayedOnHold}</span>
           </div>
           <strong className="stat-number">{delayedCount}</strong>
-          <span className="stat-subtext">{delayedCount === 0 ? 'Zero Holds' : 'Requires Intervention'}</span>
+          <span className="stat-subtext">{delayedCount === 0 ? TXT.zeroHolds : TXT.requiresIntervention}</span>
 
           <div className="stat-sparkline-wrap">
             <svg viewBox="0 0 160 48" preserveAspectRatio="none" className="kpi-sparkline-svg">
@@ -378,7 +380,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search tracking #, shipper, consi..."
+            placeholder={TXT.searchTrackingShipperConsi}
             className="search-input-field font-mono"
           />
           {searchTerm && (
@@ -394,35 +396,35 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             className={`tab-btn ${statusFilter === 'ALL' ? 'active' : ''}`}
             onClick={() => setStatusFilter('ALL')}
           >
-            All <span className="tab-count-badge">{totalCount}</span>
+            {TXT.all} <span className="tab-count-badge">{totalCount}</span>
           </button>
           <button
             type="button"
             className={`tab-btn ${statusFilter === 'IN_TRANSIT' ? 'active' : ''}`}
             onClick={() => setStatusFilter('IN_TRANSIT')}
           >
-            {shipmentStatusLabel('IN_TRANSIT')} <span className="tab-count-badge">{inTransitCount}</span>
+            {shipmentStatusLabel('IN_TRANSIT', consoleLang())} <span className="tab-count-badge">{inTransitCount}</span>
           </button>
           <button
             type="button"
             className={`tab-btn ${statusFilter === 'DESTINATION_PROCESSING' ? 'active' : ''}`}
             onClick={() => setStatusFilter('DESTINATION_PROCESSING')}
           >
-            {shipmentStatusLabel('DESTINATION_PROCESSING')} <span className="tab-count-badge">{arrivedCount}</span>
+            {shipmentStatusLabel('DESTINATION_PROCESSING', consoleLang())} <span className="tab-count-badge">{arrivedCount}</span>
           </button>
           <button
             type="button"
             className={`tab-btn ${statusFilter === 'OUT_FOR_DELIVERY' ? 'active' : ''}`}
             onClick={() => setStatusFilter('OUT_FOR_DELIVERY')}
           >
-            {shipmentStatusLabel('OUT_FOR_DELIVERY')} <span className="tab-count-badge">{outDeliveryCount}</span>
+            {shipmentStatusLabel('OUT_FOR_DELIVERY', consoleLang())} <span className="tab-count-badge">{outDeliveryCount}</span>
           </button>
           <button
             type="button"
             className={`tab-btn ${statusFilter === 'DELIVERED' ? 'active' : ''}`}
             onClick={() => setStatusFilter('DELIVERED')}
           >
-            Delivered <span className="tab-count-badge">{deliveredCount}</span>
+            {TXT.delivered} <span className="tab-count-badge">{deliveredCount}</span>
           </button>
         </div>
 
@@ -432,11 +434,11 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             onChange={e => setServiceFilter(e.target.value)}
             className="service-dropdown"
           >
-            <option value="ALL">All Services</option>
-            <option value="Express">Express</option>
-            <option value="Priority">Priority</option>
-            <option value="Standard">Standard</option>
-            <option value="Freight LTL">Freight LTL</option>
+            <option value="ALL">{TXT.allServices}</option>
+            <option value="Express">{TXT.express}</option>
+            <option value="Priority">{TXT.priority}</option>
+            <option value="Standard">{TXT.standard}</option>
+            <option value="Freight LTL">{TXT.freightLtl}</option>
           </select>
         </div>
       </div>
@@ -456,13 +458,13 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             </colgroup>
             <thead>
               <tr>
-                <th>CONSIGNMENT</th>
-                <th>SERVICE</th>
-                <th>ROUTE</th>
-                <th>CUSTOMER</th>
-                <th>STATUS</th>
-                <th>EST. DELIVERY</th>
-                <th style={{ textAlign: 'right' }}>ACTIONS</th>
+                <th>{TXT.consignment}</th>
+                <th>{TXT.service}</th>
+                <th>{TXT.route}</th>
+                <th>{TXT.customer}</th>
+                <th>{TXT.status}</th>
+                <th>{TXT.estDelivery}</th>
+                <th style={{ textAlign: 'right' }}>{TXT.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -471,8 +473,8 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                   <td colSpan={7} className="empty-table-cell">
                     <div className="empty-state-box">
                       <AlertCircle size={28} className="text-slate" />
-                      <strong>No consignments match your filter criteria</strong>
-                      <p>Try resetting the search or status filter</p>
+                      <strong>{TXT.noConsignmentsMatchYourFilter}</strong>
+                      <p>{TXT.tryResettingTheSearchOr}</p>
                     </div>
                   </td>
                 </tr>
@@ -528,8 +530,8 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                           <span className="route-origin">{originCity}{originState ? `, ${originState}` : ''}</span>
                           <span className="route-arrow-down">→</span>
                           <span className="route-dest">{destCity}{destState ? `, ${destState}` : ''}</span>
-                          <span className="route-cargo-desc truncate" title={s.cargoDescription || s.shipmentType || 'Commercial Freight'}>
-                            {s.cargoDescription || s.shipmentType || 'Commercial Freight'}
+                          <span className="route-cargo-desc truncate" title={s.cargoDescription || s.shipmentType || TXT.commercialFreight}>
+                            {s.cargoDescription || s.shipmentType || TXT.commercialFreight}
                           </span>
                         </div>
                       </td>
@@ -538,7 +540,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                       <td>
                         <div className="customer-col-cell">
                           <strong className="customer-name truncate" title={senderName}>{senderName}</strong>
-                          <span className="customer-consignee truncate" title={`to ${recipientName}`}>to {recipientName}</span>
+                          <span className="customer-consignee truncate" title={TXT.to2(recipientName)}>{TXT.to} {recipientName}</span>
                         </div>
                       </td>
 
@@ -552,7 +554,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                         <div className="eta-col-cell">
                           <strong className="eta-date">{formatEtaDate(s.estimatedDelivery)}</strong>
                           <span className="eta-subtext">
-                            {typeof s.lastUpdated === 'string' && s.lastUpdated ? s.lastUpdated : 'Just now'}
+                            {typeof s.lastUpdated === 'string' && s.lastUpdated ? s.lastUpdated : TXT.justNow}
                           </span>
                         </div>
                       </td>
@@ -564,11 +566,11 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                             <button
                               type="button"
                               className={`control-pill-btn ${isSimulating ? 'sim-active' : ''}`}
-                              title="Operations Control"
+                              title={TXT.operationsControl}
                               onClick={() => onQuickUpdateStatus(s)}
                             >
                               <SlidersHorizontal size={12} className="control-dash" aria-hidden="true" />
-                              <span>{isSimulating ? 'Moving' : 'Control'}</span>
+                              <span>{isSimulating ? TXT.moving : TXT.control}</span>
                             </button>
                           )}
 
@@ -576,7 +578,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                             <button
                               type="button"
                               className="action-icon-btn edit"
-                              title="Edit Consignment"
+                              title={TXT.editConsignment}
                               onClick={() => setEditModalShipment(s)}
                             >
                               <Edit3 size={13} />
@@ -586,7 +588,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                           <button
                             type="button"
                             className="action-icon-btn view"
-                            title="View Full Shipment Manifest"
+                            title={TXT.viewFullShipmentManifest}
                             onClick={() => onOpenShipmentDetail(s.trackingNumber)}
                           >
                             <Eye size={13} />
@@ -596,7 +598,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                             <button
                               type="button"
                               className="action-icon-btn delete"
-                              title="Delete Consignment"
+                              title={TXT.deleteConsignment}
                               onClick={() => setDeleteModalShipment(s)}
                             >
                               <Trash2 size={13} />
@@ -614,7 +616,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
 
         {/* Table Footer Stats */}
         <div className="table-card-footer">
-          <span>Showing <strong>{filteredShipments.length}</strong> of <strong>{shipments.length}</strong> consignments</span>
+          <span>{TXT.showing} <strong>{filteredShipments.length}</strong> {TXT.of} <strong>{shipments.length}</strong> {TXT.consignments}</span>
         </div>
       </div>
 
@@ -626,8 +628,8 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
               <div className="modal-title-wrap">
                 <Package size={20} className="text-blue" />
                 <div>
-                  <h4>Provision New Master Consignment</h4>
-                  <p>Register new physical waybill and issue tracking barcode</p>
+                  <h4>{TXT.provisionNewMasterConsignment}</h4>
+                  <p>{TXT.registerNewPhysicalWaybillAnd}</p>
                 </div>
               </div>
               <button className="modal-close-btn" onClick={() => setShowCreateModal(false)}>
@@ -638,30 +640,30 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             <form onSubmit={handleCreateSubmit} className="create-shipment-form">
               {/* Section 1: Shipper */}
               <div className="modal-form-section">
-                <span className="section-title">1. Shipper / Origin Information</span>
+                <span className="section-title">{TXT.t1ShipperOriginInformation}</span>
                 <div className="form-grid-3">
                   <div className="form-field">
-                    <label>Shipper Name *</label>
+                    <label>{TXT.shipperName}</label>
                     <input
                       type="text"
                       required
                       value={senderName}
                       onChange={e => setSenderName(e.target.value)}
-                      placeholder="Shipper Full Name"
+                      placeholder={TXT.shipperFullName}
                     />
                   </div>
                   <div className="form-field">
-                    <label>Origin City *</label>
+                    <label>{TXT.originCity}</label>
                     <input
                       type="text"
                       required
                       value={senderCity}
                       onChange={e => setSenderCity(e.target.value)}
-                      placeholder="New York"
+                      placeholder={TXT.newYork}
                     />
                   </div>
                   <div className="form-field">
-                    <label>Origin State *</label>
+                    <label>{TXT.originState}</label>
                     <input
                       type="text"
                       required
@@ -672,43 +674,43 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                   </div>
                 </div>
                 <div className="form-field full-width">
-                  <label>Physical Street Address *</label>
+                  <label>{TXT.physicalStreetAddress}</label>
                   <input
                     type="text"
                     required
                     value={senderAddress}
                     onChange={e => setSenderAddress(e.target.value)}
-                    placeholder="100 Broadway, Suite 400"
+                    placeholder={TXT.t100BroadwaySuite400}
                   />
                 </div>
               </div>
 
               {/* Section 2: Consignee */}
               <div className="modal-form-section">
-                <span className="section-title">2. Consignee / Destination Information</span>
+                <span className="section-title">{TXT.t2ConsigneeDestinationInformation}</span>
                 <div className="form-grid-3">
                   <div className="form-field">
-                    <label>Consignee Name *</label>
+                    <label>{TXT.consigneeName}</label>
                     <input
                       type="text"
                       required
                       value={recipientName}
                       onChange={e => setRecipientName(e.target.value)}
-                      placeholder="e.g. Daniel Miller"
+                      placeholder={TXT.eGDanielMiller}
                     />
                   </div>
                   <div className="form-field">
-                    <label>Destination City *</label>
+                    <label>{TXT.destinationCity}</label>
                     <input
                       type="text"
                       required
                       value={recipientCity}
                       onChange={e => setRecipientCity(e.target.value)}
-                      placeholder="Los Angeles"
+                      placeholder={TXT.losAngeles}
                     />
                   </div>
                   <div className="form-field">
-                    <label>Destination State *</label>
+                    <label>{TXT.destinationState}</label>
                     <input
                       type="text"
                       required
@@ -719,42 +721,42 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                   </div>
                 </div>
                 <div className="form-field full-width">
-                  <label>Delivery Street Address *</label>
+                  <label>{TXT.deliveryStreetAddress}</label>
                   <input
                     type="text"
                     required
                     value={recipientAddress}
                     onChange={e => setRecipientAddress(e.target.value)}
-                    placeholder="500 Grand Ave, Floor 12"
+                    placeholder={TXT.t500GrandAveFloor12}
                   />
                 </div>
               </div>
 
               {/* Section 3: Package Payload */}
               <div className="modal-form-section">
-                <span className="section-title">3. Consignment Cargo & Service</span>
+                <span className="section-title">{TXT.t3ConsignmentCargoService}</span>
                 <div className="form-grid-4">
                   <div className="form-field">
-                    <label>Service Level</label>
+                    <label>{TXT.serviceLevel}</label>
                     <select value={service} onChange={e => setService(e.target.value as any)}>
-                      <option value="Express">Express</option>
-                      <option value="Priority">Priority</option>
-                      <option value="Standard">Standard</option>
-                      <option value="Freight LTL">Freight LTL</option>
+                      <option value="Express">{TXT.express}</option>
+                      <option value="Priority">{TXT.priority}</option>
+                      <option value="Standard">{TXT.standard}</option>
+                      <option value="Freight LTL">{TXT.freightLtl}</option>
                     </select>
                   </div>
 
                   <div className="form-field">
-                    <label>Cargo Type</label>
+                    <label>{TXT.cargoType}</label>
                     <select value={shipmentType} onChange={e => setShipmentType(e.target.value as any)}>
-                      <option value="Parcel">Parcel</option>
-                      <option value="Document">Document</option>
-                      <option value="Freight">Freight</option>
+                      <option value="Parcel">{TXT.parcel}</option>
+                      <option value="Document">{TXT.document}</option>
+                      <option value="Freight">{TXT.freight}</option>
                     </select>
                   </div>
 
                   <div className="form-field">
-                    <label>Total Scale Weight (lbs)</label>
+                    <label>{TXT.totalScaleWeightLbs}</label>
                     <input
                       type="number"
                       step="0.1"
@@ -766,7 +768,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                   </div>
 
                   <div className="form-field">
-                    <label>Pieces Count</label>
+                    <label>{TXT.piecesCount}</label>
                     <input
                       type="number"
                       min="1"
@@ -785,11 +787,11 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
                   className="cancel-btn"
                   onClick={() => setShowCreateModal(false)}
                 >
-                  Cancel
+                  {TXT.cancel}
                 </button>
                 <button type="submit" className="submit-btn">
                   <CheckCircle2 size={16} />
-                  <span>Provision Master Consignment</span>
+                  <span>{TXT.provisionMasterConsignment}</span>
                 </button>
               </div>
             </form>
@@ -807,7 +809,7 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             // A failure is shown inside the edit form, which stays open (update I.5).
             if (result.success) {
               setToastIsError(false);
-              setSuccessToast(`Consignment ${updated.trackingNumber} specifications updated.`);
+              setSuccessToast(TXT.consignmentSpecificationsUpdated(updated.trackingNumber));
               setTimeout(() => setSuccessToast(null), 4000);
             }
             return result;
@@ -825,8 +827,8 @@ export const AllShipmentsView: React.FC<AllShipmentsViewProps> = ({
             setDeleteModalShipment(null);
             setToastIsError(!result.success);
             setSuccessToast(result.success
-              ? `Consignment ${trackingNumber} moved to Recently Deleted — restorable anytime.`
-              : `Failed to delete ${trackingNumber}: ${result.error || 'server rejected the request'}. It has been restored.`);
+              ? TXT.consignmentMovedToRecentlyDeleted(trackingNumber)
+              : TXT.failedToDeleteItHas(trackingNumber, result.error || TXT.serverRejected));
             setTimeout(() => setSuccessToast(null), 6000);
           }}
         />

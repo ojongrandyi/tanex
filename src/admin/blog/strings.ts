@@ -1,11 +1,11 @@
-// Blog studio copy (docs/CONTENT.md §10.4, owner to confirm). The console is English until phase I
-// moves its text into the dictionaries; kept in one object, like AUTH_TEXT and IAM_TEXT, so that
-// move is a straight copy.
-import { BLOG_MENU } from './menuText';
+// Blog studio copy (docs/CONTENT.md §10.4, owner to confirm). English master; the French is in
+// src/i18n/fr/console/blog.ts.
+import { BLOG_MENU_EN } from './menuText';
+import { consoleText } from '../i18n/consoleText';
 
-export const BLOG_TEXT = {
-  menu: BLOG_MENU.menu,
-  description: BLOG_MENU.description,
+export const BLOG_TEXT_EN = {
+  menu: BLOG_MENU_EN.menu,
+  description: BLOG_MENU_EN.description,
   tabs: { posts: 'Posts', categories: 'Categories', media: 'Media' },
   status: {
     ALL: 'All',
@@ -192,6 +192,7 @@ export const BLOG_TEXT = {
     by: 'By {author}'
   }
 };
+export const BLOG_TEXT = consoleText('blog', BLOG_TEXT_EN);
 
 /** Replaces {name} placeholders. */
 export function fill(template: string, values: Record<string, string | number>): string {

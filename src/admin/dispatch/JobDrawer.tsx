@@ -14,6 +14,7 @@ import { money, when } from './boardFormat';
 import { buildJobMessages, type JobMessage } from '../../shared/jobMessages';
 import { pagePath } from '../../router/routes';
 import { logWhatsAppTap } from '../../services/whatsappLog';
+import { consoleLang } from '../i18n/consoleText';
 
 const T = BOARD_TEXT;
 const D = BOARD_TEXT.drawer;
@@ -92,7 +93,7 @@ const AssignDialog: React.FC<{
         <div className="tx-board-suggest-main">
           <strong>{name}</strong>
           <span className="tx-iam-muted">
-            {VEHICLE_LABELS[c.vehicleType]?.en ?? c.vehicleType}
+            {VEHICLE_LABELS[c.vehicleType]?.[consoleLang()] ?? c.vehicleType}
             {' · '}{T.assign.load(c.activeJobs)}
             {' · '}{s.distanceKm !== null && s.positionAgeMs !== null
               ? `${T.assign.distance(s.distanceKm)} (${T.assign.positionAge(Math.floor(s.positionAgeMs / 60_000))})`
@@ -379,7 +380,7 @@ export const JobDrawer: React.FC<{
     }
   };
 
-  const vehicle = (v: string) => VEHICLE_LABELS[v as keyof typeof VEHICLE_LABELS]?.en ?? v;
+  const vehicle = (v: string) => VEHICLE_LABELS[v as keyof typeof VEHICLE_LABELS]?.[consoleLang()] ?? v;
 
   return (
     <aside className="tx-board-drawer" aria-labelledby={titleId} tabIndex={-1} ref={ref}>
@@ -387,7 +388,7 @@ export const JobDrawer: React.FC<{
         <div>
           <h2 id={titleId} className="font-mono">{job.trackingNumber}</h2>
           <p className="tx-board-chips">
-            <span className={`tx-board-status is-${job.status.toLowerCase()}`}>{DISPATCH_STATUS_LABELS[job.status].en}</span>
+            <span className={`tx-board-status is-${job.status.toLowerCase()}`}>{DISPATCH_STATUS_LABELS[job.status][consoleLang()]}</span>
             <span className="tx-iam-chip">{T.scope[job.scope]}</span>
             <span className="tx-iam-chip">{vehicle(job.vehicleRequired)}</span>
             {job.isExpress && <span className="tx-iam-chip warn">{T.card.express}</span>}
@@ -437,7 +438,7 @@ export const JobDrawer: React.FC<{
         <section aria-label={D.parcel}>
           <h3>{D.parcel}</h3>
           <dl className="tx-board-dl">
-            {job.sizeClass && <Field label={D.size}>{SIZE_CLASS_LABELS[job.sizeClass].en}</Field>}
+            {job.sizeClass && <Field label={D.size}>{SIZE_CLASS_LABELS[job.sizeClass][consoleLang()]}</Field>}
             {job.weightKg !== null && <Field label={D.weight}>{D.weightKg(job.weightKg)}</Field>}
             {job.itemDescription && <Field label={D.item}>{job.itemDescription}</Field>}
             <Field label={D.vehicle}>{vehicle(job.vehicleRequired)}</Field>
@@ -466,7 +467,7 @@ export const JobDrawer: React.FC<{
         {job.failureReason && (
           <section aria-label={D.failure}>
             <h3>{D.failure}</h3>
-            <p>{failureReasonLabel(job.failureReason)}{job.failureNote ? `: ${job.failureNote}` : ''}</p>
+            <p>{failureReasonLabel(job.failureReason, consoleLang())}{job.failureNote ? `: ${job.failureNote}` : ''}</p>
             <p className="tx-iam-muted">{D.attempts(job.attempts)}</p>
           </section>
         )}

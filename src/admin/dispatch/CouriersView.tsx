@@ -15,6 +15,7 @@ import { dispatchApi, type Courier, type CourierInput } from './dispatchApi';
 import { DISPATCH_TEXT, dispatchErrorText } from './strings';
 import '../pages/IamViews.css';
 import './Dispatch.css';
+import { consoleLang } from '../i18n/consoleText';
 
 const D = DISPATCH_TEXT;
 const T = DISPATCH_TEXT.couriers;
@@ -143,7 +144,7 @@ const CourierEditor: React.FC<{
           <label className="tx-iam-field">
             <span>{T.fields.vehicle}</span>
             <select value={vehicle} onChange={(e) => setVehicle(e.target.value as VehicleType)}>
-              {VEHICLE_TYPES.map((v) => <option key={v} value={v}>{VEHICLE_LABELS[v].en}</option>)}
+              {VEHICLE_TYPES.map((v) => <option key={v} value={v}>{VEHICLE_LABELS[v][consoleLang()]}</option>)}
             </select>
           </label>
           <label className="tx-iam-field">
@@ -325,7 +326,7 @@ export const CouriersView: React.FC<{ searchQuery?: string }> = ({ searchQuery =
                       {c.user.email && <span className="tx-iam-sub">{c.user.email}</span>}
                     </td>
                     <td data-label={T.columns.vehicle}>
-                      {VEHICLE_LABELS[c.vehicleType]?.en ?? c.vehicleType}
+                      {VEHICLE_LABELS[c.vehicleType]?.[consoleLang()] ?? c.vehicleType}
                       {c.plateNumber && <span className="tx-iam-sub">{c.plateNumber}</span>}
                     </td>
                     <td data-label={T.columns.city}>{c.homeCityName ?? <span className="tx-iam-muted">{T.fields.noCity}</span>}</td>

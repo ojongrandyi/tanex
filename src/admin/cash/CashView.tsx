@@ -11,12 +11,13 @@ import { cashApi, reportCsvUrl, type CashCourier, type CashEntry, type CashOverv
 import { CASH_TEXT, cashErrorText } from './strings';
 import '../pages/IamViews.css';
 import './Cash.css';
+import { consoleIntlLocale } from '../i18n/consoleText';
 
 const T = CASH_TEXT;
 type Tab = 'pending' | 'couriers' | 'report';
 type Notice = { kind: 'ok' | 'error'; text: string } | null;
 
-const dateFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Douala', day: 'numeric', month: 'short' });
+const dateFmt = { format: (ts: number) => new Intl.DateTimeFormat(consoleIntlLocale(), { timeZone: 'Africa/Douala', day: 'numeric', month: 'short' }).format(ts) };
 
 const NoticeLine: React.FC<{ notice: Notice }> = ({ notice }) =>
   notice ? (

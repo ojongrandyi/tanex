@@ -21,6 +21,8 @@ import { shipmentStatusLabel } from '../../shared/shipmentStatus';
 import { useAdminData } from '../../context/AdminDataContext';
 import { resolveLocation } from '../../services/geocodingService';
 import './ShipmentControlModal.css';
+import { SHIPMENT_CONTROL_MODAL_TEXT as TXT } from './ShipmentControlModal.text';
+import { consoleLang } from '../i18n/consoleText';
 
 interface ShipmentControlModalProps {
   shipment: Shipment;
@@ -119,10 +121,10 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
       const result = await initiateReturn(shipment.trackingNumber, returnReason);
       setIsSubmittingReturn(false);
       if (!result.success) {
-        setToastMsg(`Return not saved: ${result.error}`);
+        setToastMsg(TXT.returnNotSaved(result.error));
         return;
       }
-      setToastMsg(`Return registered as ${result.returnTrackingNumber}`);
+      setToastMsg(TXT.returnRegistered(result.returnTrackingNumber));
       setTimeout(() => onClose(), 1200);
       return;
     }
@@ -293,7 +295,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
     }
 
     onUpdateShipment(updated);
-    setToastMsg('Status updated successfully');
+    setToastMsg(TXT.statusUpdated);
     setTimeout(() => onClose(), 600);
   };
 
@@ -308,7 +310,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
         {/* Header */}
         <div className="control-modal-top">
           <div className="modal-title-group">
-            <span className="control-modal-tag">Operations Control</span>
+            <span className="control-modal-tag">{TXT.operationsControl}</span>
             <div className="waybill-route-title">
               <strong className="tracking-id-text font-mono">{shipment.trackingNumber}</strong>
               <span className="bullet-dot">·</span>
@@ -317,7 +319,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
               </span>
             </div>
           </div>
-          <button type="button" className="close-x-btn" onClick={onClose} title="Close (Esc)">
+          <button type="button" className="close-x-btn" onClick={onClose} title={TXT.closeEsc}>
             <X size={18} />
           </button>
         </div>
@@ -329,7 +331,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
               it only becomes real once submitted below via "Update Status". */}
           <div className="compact-progress-box">
             <div className="progress-top-row">
-              <span className="progress-label">Corridor Transit Progress</span>
+              <span className="progress-label">{TXT.corridorTransitProgress}</span>
               <div className="progress-value-group">
                 <span className="progress-pct-num font-mono">{Math.round(scrubValue)}%</span>
               </div>
@@ -344,14 +346,13 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
               className="compact-slider"
             />
             <p className="scrub-hint-text">
-              Drag to preview any point along the route — this shipment is already moving on
-              its own in real time. To actually pause or delay it, use the status actions below.
+              {TXT.dragToPreviewAnyPoint}
             </p>
           </div>
 
           {/* Status Selection Pill Grid */}
           <div className="action-selection-section">
-            <label className="section-label">Select Operational Status</label>
+            <label className="section-label">{TXT.selectOperationalStatus}</label>
             <div className="status-pills-grid">
               <button
                 type="button"
@@ -362,7 +363,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
                 {/* Relabeled when the shipment is currently on hold so resuming it is an
                     obvious, unambiguous single action instead of looking like just another
                     generic status option — this is the actual "remove from hold" control. */}
-                <span>{shipment.status === 'ON_HOLD' ? 'Resume Movement' : shipmentStatusLabel('IN_TRANSIT')}</span>
+                <span>{shipment.status === 'ON_HOLD' ? TXT.resumeMovement : shipmentStatusLabel('IN_TRANSIT', consoleLang())}</span>
               </button>
 
               <button
@@ -371,7 +372,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
                 onClick={() => setTargetAction('AT_FACILITY')}
               >
                 <MapPin size={14} />
-                <span>Hub scan</span>
+                <span>{TXT.hubScan}</span>
               </button>
 
               <button
@@ -380,7 +381,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
                 onClick={() => setTargetAction('OUT_FOR_DELIVERY')}
               >
                 <Truck size={14} />
-                <span>{shipmentStatusLabel('OUT_FOR_DELIVERY')}</span>
+                <span>{shipmentStatusLabel('OUT_FOR_DELIVERY', consoleLang())}</span>
               </button>
 
               <button
@@ -389,7 +390,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
                 onClick={() => setTargetAction('DELIVERED')}
               >
                 <CheckCircle2 size={14} />
-                <span>{shipmentStatusLabel('DELIVERED')}</span>
+                <span>{shipmentStatusLabel('DELIVERED', consoleLang())}</span>
               </button>
 
               <button
@@ -398,7 +399,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
                 onClick={() => setTargetAction('ON_HOLD')}
               >
                 <Clock size={14} />
-                <span>{shipmentStatusLabel('ON_HOLD')}</span>
+                <span>{shipmentStatusLabel('ON_HOLD', consoleLang())}</span>
               </button>
 
               <button
@@ -407,7 +408,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
                 onClick={() => setTargetAction('DELAY')}
               >
                 <AlertTriangle size={14} />
-                <span>{shipmentStatusLabel('DELAYED')}</span>
+                <span>{shipmentStatusLabel('DELAYED', consoleLang())}</span>
               </button>
 
               <button
@@ -416,7 +417,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
                 onClick={() => setTargetAction('RETURN')}
               >
                 <Undo2 size={14} />
-                <span>{shipmentStatusLabel('RETURNED')}</span>
+                <span>{shipmentStatusLabel('RETURNED', consoleLang())}</span>
               </button>
             </div>
           </div>
@@ -424,7 +425,7 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
           {/* Contextual Input Fields */}
           {targetAction === 'AT_FACILITY' && (
             <div className="contextual-field-box animate-fade-in">
-              <label>Select Facility / Terminal Hub</label>
+              <label>{TXT.selectFacilityTerminalHub}</label>
               <select
                 className="clean-select"
                 value={selectedHub}
@@ -447,42 +448,42 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
             <div className="contextual-field-box animate-fade-in">
               <div className="fields-row">
                 <div className="sub-field">
-                  <label>Hold Reason</label>
+                  <label>{TXT.holdReason}</label>
                   <select
                     className="clean-select"
                     value={holdReason}
                     onChange={(e) => setHoldReason(e.target.value)}
                   >
-                    <option value="Severe Weather Condition">Severe Weather</option>
-                    <option value="Customer Request">Customer Request</option>
-                    <option value="Documentation Pending">Documentation Review</option>
-                    <option value="Vehicle Inspection">Maintenance Inspection</option>
-                    <option value="OTHER">Other (specify reason)</option>
+                    <option value="Severe Weather Condition">{TXT.severeWeather}</option>
+                    <option value="Customer Request">{TXT.customerRequest}</option>
+                    <option value="Documentation Pending">{TXT.documentationReview}</option>
+                    <option value="Vehicle Inspection">{TXT.maintenanceInspection}</option>
+                    <option value="OTHER">{TXT.otherSpecifyReason}</option>
                   </select>
                 </div>
                 <div className="sub-field">
-                  <label>Hold Duration</label>
+                  <label>{TXT.holdDuration}</label>
                   <select
                     className="clean-select"
                     value={holdHours}
                     onChange={(e) => setHoldHours(parseInt(e.target.value, 10))}
                   >
-                    <option value={2}>+2 Hours</option>
-                    <option value={4}>+4 Hours</option>
-                    <option value={8}>+8 Hours</option>
-                    <option value={24}>+24 Hours</option>
+                    <option value={2}>{TXT.t2Hours}</option>
+                    <option value={4}>{TXT.t4Hours}</option>
+                    <option value={8}>{TXT.t8Hours}</option>
+                    <option value={24}>{TXT.t24Hours}</option>
                   </select>
                 </div>
               </div>
               {holdReason === 'OTHER' && (
                 <div className="sub-field">
-                  <label>Custom Hold Reason</label>
+                  <label>{TXT.customHoldReason}</label>
                   <input
                     type="text"
                     className="clean-input"
                     value={customHoldReason}
                     onChange={(e) => setCustomHoldReason(e.target.value)}
-                    placeholder="e.g. Awaiting customs clearance"
+                    placeholder={TXT.eGAwaitingCustomsClearance}
                     maxLength={120}
                     required
                   />
@@ -495,28 +496,28 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
             <div className="contextual-field-box animate-fade-in">
               <div className="fields-row">
                 <div className="sub-field">
-                  <label>Delay Cause</label>
+                  <label>{TXT.delayCause}</label>
                   <select
                     className="clean-select"
                     value={delayReason}
                     onChange={(e) => setDelayReason(e.target.value)}
                   >
-                    <option value="Road Congestion">Road Congestion</option>
-                    <option value="Weather Routing Deviation">Weather Highway Reroute</option>
-                    <option value="Mechanical Maintenance">Vehicle Maintenance</option>
+                    <option value="Road Congestion">{TXT.roadCongestion}</option>
+                    <option value="Weather Routing Deviation">{TXT.weatherHighwayReroute}</option>
+                    <option value="Mechanical Maintenance">{TXT.vehicleMaintenance}</option>
                   </select>
                 </div>
                 <div className="sub-field">
-                  <label>Schedule Shift</label>
+                  <label>{TXT.scheduleShift}</label>
                   <select
                     className="clean-select"
                     value={delayHours}
                     onChange={(e) => setDelayHours(parseInt(e.target.value, 10))}
                   >
-                    <option value={2}>+2 Hours</option>
-                    <option value={4}>+4 Hours</option>
-                    <option value={6}>+6 Hours</option>
-                    <option value={12}>+12 Hours</option>
+                    <option value={2}>{TXT.t2Hours}</option>
+                    <option value={4}>{TXT.t4Hours}</option>
+                    <option value={6}>{TXT.t6Hours}</option>
+                    <option value={12}>{TXT.t12Hours}</option>
                   </select>
                 </div>
               </div>
@@ -525,30 +526,30 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
 
           {targetAction === 'RETURN' && (
             <div className="contextual-field-box animate-fade-in">
-              <label>Return Reason</label>
+              <label>{TXT.returnReason}</label>
               <select
                 className="clean-select"
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
               >
-                <option value="Delivery Refused / Recipient Unavailable">Delivery Refused / Recipient Unavailable</option>
-                <option value="Undeliverable Address">Undeliverable Address</option>
-                <option value="Customer Requested Cancellation">Customer Requested Cancellation</option>
-                <option value="Damaged in Transit">Damaged in Transit</option>
-                <option value="Customs / Regulatory Hold">Customs / Regulatory Hold</option>
+                <option value="Delivery Refused / Recipient Unavailable">{TXT.deliveryRefusedRecipientUnavailable}</option>
+                <option value="Undeliverable Address">{TXT.undeliverableAddress}</option>
+                <option value="Customer Requested Cancellation">{TXT.customerRequestedCancellation}</option>
+                <option value="Damaged in Transit">{TXT.damagedInTransit}</option>
+                <option value="Customs / Regulatory Hold">{TXT.customsRegulatoryHold}</option>
               </select>
             </div>
           )}
 
           {targetAction === 'DELIVERED' && (
             <div className="contextual-field-box animate-fade-in">
-              <label>Signed by Recipient</label>
+              <label>{TXT.signedByRecipient}</label>
               <input
                 type="text"
                 className="clean-input"
                 value={signedBy}
                 onChange={(e) => setSignedBy(e.target.value)}
-                placeholder="e.g. John Anderson"
+                placeholder={TXT.eGJohnAnderson}
                 required
               />
             </div>
@@ -559,10 +560,10 @@ export const ShipmentControlModal: React.FC<ShipmentControlModalProps> = ({
             {toastMsg && <span className="action-toast-inline font-mono">{toastMsg}</span>}
             <div className="footer-btns-cluster">
               <button type="button" className="btn-cancel" onClick={onClose}>
-                Cancel
+                {TXT.cancel}
               </button>
               <button type="submit" className="btn-save-update">
-                Update Status
+                {TXT.updateStatus}
               </button>
             </div>
           </div>

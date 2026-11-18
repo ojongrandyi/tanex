@@ -33,6 +33,7 @@ import { useUnitSystem } from '../../utils/useUnitSystem';
 import { formatDimensions, formatWeight } from '../../shared/units';
 import { TRANSPORT_MODE_LABELS } from '../../shared/transportMode';
 import { SERVICE_OPTIONS } from '../../data/serviceOptions';
+import { QUOTE_REQUESTS_VIEW_TEXT as TXT } from './QuoteRequestsView.text';
 
 export const QuoteRequestsView: React.FC = () => {
   const { quoteRequests, publishQuote, updateQuoteStatus, convertQuoteToShipment, settings } = useAdminData();
@@ -119,7 +120,7 @@ export const QuoteRequestsView: React.FC = () => {
 
     publishQuote(selectedQuote.id, pricing, internalNotes);
     setShowPublishConfirmModal(false);
-    setSuccessToast(`Quote ${selectedQuote.id} published successfully for ${money.format(finalPrice)}!`);
+    setSuccessToast(TXT.quotePublishedSuccessfullyFor(selectedQuote.id, money.format(finalPrice)));
     setTimeout(() => setSuccessToast(null), 4000);
   };
 
@@ -130,8 +131,8 @@ export const QuoteRequestsView: React.FC = () => {
     try {
       const createdShipment = await convertQuoteToShipment(quoteId);
       setSuccessToast(createdShipment
-        ? `Accepted quote ${quoteId} converted directly to master shipment ${createdShipment.trackingNumber}!`
-        : `Quote ${quoteId} could not be converted: the server did not confirm a tracking ID. Nothing was created; please try again.`);
+        ? TXT.acceptedQuoteConvertedDirectlyTo(quoteId, createdShipment.trackingNumber)
+        : TXT.quoteCouldNotBeConverted(quoteId));
       setTimeout(() => setSuccessToast(null), 5000);
     } finally {
       setIsConverting(false);
@@ -144,19 +145,19 @@ export const QuoteRequestsView: React.FC = () => {
       case 'NEW':
         return <span className="quote-status-badge badge-new">NEW</span>;
       case 'UNDER_REVIEW':
-        return <span className="quote-status-badge badge-review">UNDER REVIEW</span>;
+        return <span className="quote-status-badge badge-review">{TXT.underReview2}</span>;
       case 'QUOTE_PUBLISHED':
-        return <span className="quote-status-badge badge-published">QUOTE PUBLISHED</span>;
+        return <span className="quote-status-badge badge-published">{TXT.quotePublished3}</span>;
       case 'RATE_PUBLISHED':
-        return <span className="quote-status-badge badge-published">RATE PUBLISHED</span>;
+        return <span className="quote-status-badge badge-published">{TXT.ratePublished2}</span>;
       case 'ACCEPTED':
-        return <span className="quote-status-badge badge-accepted">ACCEPTED</span>;
+        return <span className="quote-status-badge badge-accepted">{TXT.accepted2}</span>;
       case 'DECLINED':
-        return <span className="quote-status-badge badge-declined">DECLINED</span>;
+        return <span className="quote-status-badge badge-declined">{TXT.declined2}</span>;
       case 'EXPIRED':
-        return <span className="quote-status-badge badge-expired">EXPIRED</span>;
+        return <span className="quote-status-badge badge-expired">{TXT.expired2}</span>;
       case 'CONVERTED':
-        return <span className="quote-status-badge badge-converted">CONVERTED</span>;
+        return <span className="quote-status-badge badge-converted">{TXT.converted2}</span>;
       default:
         // Defensive fallback for any status value outside the known set (e.g. stale/legacy
         // data) — still renders a properly styled pill instead of unstyled plain text.
@@ -191,7 +192,7 @@ export const QuoteRequestsView: React.FC = () => {
           <div className="detail-top-nav">
             <button className="back-to-list-btn" onClick={() => setSelectedQuoteId(null)}>
               <ArrowLeft size={16} />
-              <span>Back to Quote Requests</span>
+              <span>{TXT.backToQuoteRequests}</span>
             </button>
             <div className="detail-id-cluster">
               <span className="detail-quote-id font-mono">{selectedQuote.id}</span>
@@ -205,15 +206,15 @@ export const QuoteRequestsView: React.FC = () => {
               <div className="card-section-head">
                 <FileText size={18} className="text-blue" />
                 <div>
-                  <h3>Customer Shipping Inquiry Details</h3>
-                  <p>Inquiry submitted on {selectedQuote.submittedDate} via website portal.</p>
+                  <h3>{TXT.customerShippingInquiryDetails}</h3>
+                  <p>{TXT.inquirySubmittedOn} {selectedQuote.submittedDate} {TXT.viaWebsitePortal}</p>
                 </div>
               </div>
 
               {/* Visual Route Header */}
               <div className="route-visual-banner">
                 <div className="route-node origin">
-                  <span className="r-tag">ORIGIN</span>
+                  <span className="r-tag">{TXT.origin}</span>
                   <strong>{selectedQuote.originCity}, {selectedQuote.originState}</strong>
                   <small className="font-mono">{selectedQuote.originZip || '10001'}</small>
                 </div>
@@ -223,7 +224,7 @@ export const QuoteRequestsView: React.FC = () => {
                   <div className="line" />
                 </div>
                 <div className="route-node dest">
-                  <span className="r-tag">DESTINATION</span>
+                  <span className="r-tag">{TXT.destination}</span>
                   <strong>{selectedQuote.destCity}, {selectedQuote.destState}</strong>
                   <small className="font-mono">{selectedQuote.destZip || '90071'}</small>
                 </div>
@@ -234,7 +235,7 @@ export const QuoteRequestsView: React.FC = () => {
                 <div className="party-box">
                   <div className="p-header">
                     <User size={15} className="text-blue" />
-                    <span className="p-role">REQUESTER / SENDER</span>
+                    <span className="p-role">{TXT.requesterSender}</span>
                   </div>
                   <strong className="party-name">{selectedQuote.requesterName}</strong>
                   {selectedQuote.requesterCompany && (
@@ -262,7 +263,7 @@ export const QuoteRequestsView: React.FC = () => {
                 <div className="party-box">
                   <div className="p-header">
                     <User size={15} className="text-emerald" />
-                    <span className="p-role">DESTINATION RECIPIENT</span>
+                    <span className="p-role">{TXT.destinationRecipient}</span>
                   </div>
                   <strong className="party-name">{selectedQuote.recipientName}</strong>
                   {selectedQuote.recipientEmail && (
@@ -290,7 +291,7 @@ export const QuoteRequestsView: React.FC = () => {
               <div className="cargo-spec-section">
                 <div className="spec-section-head">
                   <Package size={15} className="text-blue" />
-                  <h4>Cargo Description & Payload Specifications</h4>
+                  <h4>{TXT.cargoDescriptionPayloadSpecifications}</h4>
                 </div>
 
                 <div className="cargo-main-summary">
@@ -301,20 +302,20 @@ export const QuoteRequestsView: React.FC = () => {
 
                   <div className="cargo-metrics-strip">
                     <div className="metric-cell">
-                      <span className="m-lbl">QUANTITY</span>
-                      <strong>{selectedQuote.quantity} {selectedQuote.quantity === 1 ? 'Unit' : 'Units'}</strong>
+                      <span className="m-lbl">{TXT.quantity}</span>
+                      <strong>{selectedQuote.quantity} {selectedQuote.quantity === 1 ? TXT.unit : TXT.units}</strong>
                     </div>
                     <div className="metric-cell">
-                      <span className="m-lbl">SCALE WEIGHT</span>
+                      <span className="m-lbl">{TXT.scaleWeight}</span>
                       <strong>{formatWeight(selectedQuote.totalWeightLbs, units) || '—'}</strong>
                     </div>
                     <div className="metric-cell">
-                      <span className="m-lbl">DIMENSIONS</span>
+                      <span className="m-lbl">{TXT.dimensions}</span>
                       <strong className="font-mono">{formatDims(selectedQuote.dimensions, selectedQuote.dimensionsIn)}</strong>
                     </div>
                     <div className="metric-cell">
-                      <span className="m-lbl">SERVICE TIER</span>
-                      <strong className="text-blue">{selectedQuote.requestedService}{selectedQuote.transportMode ? ` · ${TRANSPORT_MODE_LABELS[selectedQuote.transportMode]}` : ''}</strong>
+                      <span className="m-lbl">{TXT.serviceTier}</span>
+                      <strong className="text-blue">{selectedQuote.requestedService}{selectedQuote.transportMode ? ` · ${TXT.transportModes[selectedQuote.transportMode]}` : ''}</strong>
                     </div>
                   </div>
                 </div>
@@ -323,9 +324,9 @@ export const QuoteRequestsView: React.FC = () => {
 
               {/* Special Requirements */}
               <div className="special-req-box">
-                <span className="req-label">SPECIAL HANDLING & INSTRUCTIONS</span>
+                <span className="req-label">{TXT.specialHandlingInstructions}</span>
                 <p className="req-text">
-                  {selectedQuote.specialRequirements || 'None provided.'}
+                  {selectedQuote.specialRequirements || TXT.noneProvided}
                 </p>
               </div>
             </div>
@@ -335,15 +336,15 @@ export const QuoteRequestsView: React.FC = () => {
               <div className="card-section-head pricing-head">
                 <DollarSign size={18} className="text-emerald" />
                 <div>
-                  <h3>Set Shipping Price</h3>
-                  <p>Determine the total price for this customer and set how long it is valid.</p>
+                  <h3>{TXT.setShippingPrice}</h3>
+                  <p>{TXT.determineTheTotalPriceFor}</p>
                 </div>
               </div>
 
               <div className="pricing-body">
                 {/* Single Simple Price Input */}
                 <div className="single-price-box">
-                  <label className="price-box-label">TOTAL QUOTE PRICE ({money.currency})</label>
+                  <label className="price-box-label">{TXT.totalQuotePrice}{money.currency})</label>
                   <div className="single-price-input-wrap">
                     <span className="price-dollar-sign">{money.symbol}</span>
                     <MoneyInput
@@ -353,36 +354,36 @@ export const QuoteRequestsView: React.FC = () => {
                       className="single-price-input font-mono"
                     />
                   </div>
-                  <small className="price-help-text">The exact all-inclusive amount the customer will pay.</small>
+                  <small className="price-help-text">{TXT.theExactAllInclusiveAmount}</small>
                 </div>
 
                 {/* Validity Date */}
                 <div className="validity-input-box">
                   <label className="validity-label">
                     <Calendar size={13} className="text-blue" />
-                    <span>QUOTE VALID UNTIL (EXPIRATION DATE)</span>
+                    <span>{TXT.quoteValidUntilExpirationDate}</span>
                   </label>
                   <input
                     type="text"
                     value={validUntilDate}
                     onChange={e => setValidUntilDate(e.target.value)}
-                    placeholder="e.g. September 2, 2026"
+                    placeholder={TXT.eGSeptember22026}
                     className="validity-date-input"
                   />
-                  <small className="validity-help-text">Guarantees this price until the selected date.</small>
+                  <small className="validity-help-text">{TXT.guaranteesThisPriceUntilThe}</small>
                 </div>
 
                 {/* Internal Admin Notes (Private) */}
                 <div className="internal-notes-area">
                   <div className="notes-head">
                     <Lock size={12} className="text-amber" />
-                    <span>INTERNAL NOTES (PRIVATE TO ADMIN)</span>
+                    <span>{TXT.internalNotesPrivateToAdmin}</span>
                   </div>
                   <textarea
                     rows={3}
                     value={internalNotes}
                     onChange={e => setInternalNotes(e.target.value)}
-                    placeholder="Private remarks for operations..."
+                    placeholder={TXT.privateRemarksForOperations}
                     className="internal-notes-textarea"
                   />
                 </div>
@@ -397,19 +398,19 @@ export const QuoteRequestsView: React.FC = () => {
                           onClick={() => setShowPublishConfirmModal(true)}
                         >
                           <Send size={16} />
-                          <span>Publish Final Quote ({money.format(finalPrice)})</span>
+                          <span>{TXT.publishFinalQuote}{money.format(finalPrice)})</span>
                         </button>
                         {selectedQuote.status === 'NEW' && (
                           <button
                             className="btn-review-status-secondary"
                             onClick={() => {
                               updateQuoteStatus(selectedQuote.id, 'UNDER_REVIEW');
-                              setSuccessToast(`Quote ${selectedQuote.id} marked as Under Review.`);
+                              setSuccessToast(TXT.quoteMarkedAsUnderReview(selectedQuote.id));
                               setTimeout(() => setSuccessToast(null), 3000);
                             }}
                           >
                             <Clock size={14} />
-                            <span>Mark as Under Review</span>
+                            <span>{TXT.markAsUnderReview}</span>
                           </button>
                         )}
                       </div>
@@ -419,8 +420,8 @@ export const QuoteRequestsView: React.FC = () => {
                       <div className="pub-status-alert">
                         <CheckCircle2 size={16} className="text-emerald" />
                         <div>
-                          <strong>Quote Published: {money.format(selectedQuote.pricing?.finalPrice)}</strong>
-                          <p>Valid until {selectedQuote.pricing?.validUntil}. Awaiting customer decision.</p>
+                          <strong>{TXT.quotePublished} {money.format(selectedQuote.pricing?.finalPrice)}</strong>
+                          <p>{TXT.validUntil} {selectedQuote.pricing?.validUntil}{TXT.awaitingCustomerDecision}</p>
                         </div>
                       </div>
 
@@ -430,23 +431,23 @@ export const QuoteRequestsView: React.FC = () => {
                             className="btn-record-accept"
                             onClick={() => {
                               updateQuoteStatus(selectedQuote.id, 'ACCEPTED');
-                              setSuccessToast(`Recorded customer acceptance for quote ${selectedQuote.id}!`);
+                              setSuccessToast(TXT.recordedCustomerAcceptanceForQuote(selectedQuote.id));
                               setTimeout(() => setSuccessToast(null), 3000);
                             }}
                           >
                             <Check size={14} />
-                            <span>Record Customer Acceptance</span>
+                            <span>{TXT.recordCustomerAcceptance}</span>
                           </button>
                           <button
                             className="btn-record-decline"
                             onClick={() => {
                               updateQuoteStatus(selectedQuote.id, 'DECLINED');
-                              setSuccessToast(`Recorded quote ${selectedQuote.id} as declined.`);
+                              setSuccessToast(TXT.recordedQuoteAsDeclined(selectedQuote.id));
                               setTimeout(() => setSuccessToast(null), 3000);
                             }}
                           >
                             <XCircle size={14} />
-                            <span>Record Declined</span>
+                            <span>{TXT.recordDeclined}</span>
                           </button>
                         </div>
                       )}
@@ -456,8 +457,8 @@ export const QuoteRequestsView: React.FC = () => {
                       <div className="accept-banner">
                         <CheckCircle2 size={18} className="text-emerald" />
                         <div>
-                          <strong>Quote Accepted by Customer ({money.format(selectedQuote.pricing?.finalPrice)})</strong>
-                          <p>Ready for physical shipment provisioning.</p>
+                          <strong>{TXT.quoteAcceptedByCustomer}{money.format(selectedQuote.pricing?.finalPrice)})</strong>
+                          <p>{TXT.readyForPhysicalShipmentProvisioning}</p>
                         </div>
                       </div>
 
@@ -468,7 +469,7 @@ export const QuoteRequestsView: React.FC = () => {
                           disabled={isConverting}
                         >
                           <Truck size={17} />
-                          <span>{isConverting ? 'Verifying Route & Converting…' : 'Create Shipment from Quote'}</span>
+                          <span>{isConverting ? TXT.verifyingRouteConverting : TXT.createShipmentFromQuote}</span>
                         </button>
                       )}
                     </div>
@@ -476,20 +477,20 @@ export const QuoteRequestsView: React.FC = () => {
                     <div className="converted-state-box">
                       <ShieldCheck size={20} className="text-blue" />
                       <div>
-                        <strong>Consignment Active: <span className="font-mono text-blue">{selectedQuote.convertedShipmentId || selectedQuote.id}</span></strong>
-                        <p>This quote was converted into an active master shipment.</p>
+                        <strong>{TXT.consignmentActive} <span className="font-mono text-blue">{selectedQuote.convertedShipmentId || selectedQuote.id}</span></strong>
+                        <p>{TXT.thisQuoteWasConvertedInto}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="closed-state-box">
-                      <span>Status: <strong>{selectedQuote.status}</strong></span>
+                      <span>{TXT.status} <strong>{selectedQuote.status}</strong></span>
                       {canManageQuotes && (
                         <button
                           className="btn-reopen-quote"
                           onClick={() => updateQuoteStatus(selectedQuote.id, 'UNDER_REVIEW')}
                         >
                           <RotateCcw size={13} />
-                          <span>Re-open Quote</span>
+                          <span>{TXT.reOpenQuote}</span>
                         </button>
                       )}
                     </div>
@@ -507,8 +508,8 @@ export const QuoteRequestsView: React.FC = () => {
           {/* Header */}
           <div className="quotes-page-header">
             <div className="header-title-block">
-              <h2>Quote Requests</h2>
-              <p>Review shipping inquiries, determine pricing, and manage customer quote requests.</p>
+              <h2>{TXT.quoteRequests}</h2>
+              <p>{TXT.reviewShippingInquiriesDeterminePricing}</p>
             </div>
           </div>
 
@@ -519,10 +520,10 @@ export const QuoteRequestsView: React.FC = () => {
                 <div className="qr-circle-icon accent">
                   <Package size={15} />
                 </div>
-                <span className="qr-card-label">TOTAL REQUESTS</span>
+                <span className="qr-card-label">{TXT.totalRequests}</span>
               </div>
               <strong className="qr-card-number">{quoteRequests.length}</strong>
-              <span className="qr-card-subtext">All-time inquiries</span>
+              <span className="qr-card-subtext">{TXT.allTimeInquiries}</span>
             </div>
 
             <div className="qr-kpi-card">
@@ -530,10 +531,10 @@ export const QuoteRequestsView: React.FC = () => {
                 <div className={`qr-circle-icon ${newPendingCount > 0 ? 'amber' : 'green'}`}>
                   <Clock size={15} />
                 </div>
-                <span className="qr-card-label">NEW / PENDING</span>
+                <span className="qr-card-label">{TXT.newPending}</span>
               </div>
               <strong className="qr-card-number">{newPendingCount}</strong>
-              <span className="qr-card-subtext">Awaiting review</span>
+              <span className="qr-card-subtext">{TXT.awaitingReview}</span>
             </div>
 
             <div className="qr-kpi-card">
@@ -541,10 +542,10 @@ export const QuoteRequestsView: React.FC = () => {
                 <div className="qr-circle-icon blue">
                   <Send size={15} />
                 </div>
-                <span className="qr-card-label">RATE PUBLISHED</span>
+                <span className="qr-card-label">{TXT.ratePublished2}</span>
               </div>
               <strong className="qr-card-number">{awaitingResponseCount}</strong>
-              <span className="qr-card-subtext">Awaiting customer</span>
+              <span className="qr-card-subtext">{TXT.awaitingCustomer}</span>
             </div>
 
             <div className="qr-kpi-card">
@@ -552,10 +553,10 @@ export const QuoteRequestsView: React.FC = () => {
                 <div className="qr-circle-icon emerald">
                   <CheckCircle2 size={15} />
                 </div>
-                <span className="qr-card-label">ACCEPTED</span>
+                <span className="qr-card-label">{TXT.accepted2}</span>
               </div>
               <strong className="qr-card-number">{acceptedCount}</strong>
-              <span className="qr-card-subtext">Ready to convert</span>
+              <span className="qr-card-subtext">{TXT.readyToConvert}</span>
             </div>
           </div>
 
@@ -566,7 +567,7 @@ export const QuoteRequestsView: React.FC = () => {
               <input
                 type="text"
                 className="quote-search-input font-mono"
-                placeholder="Search quote ID, applicant name, cargo, city, or route..."
+                placeholder={TXT.searchQuoteIdApplicantName}
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -574,32 +575,32 @@ export const QuoteRequestsView: React.FC = () => {
 
             <div className="filter-selects-cluster">
               <div className="filter-unit">
-                <label>Status:</label>
+                <label>{TXT.status}</label>
                 <select
                   value={statusFilter}
                   onChange={e => setStatusFilter(e.target.value)}
                   className="filter-select"
                 >
-                  <option value="ALL">All Statuses</option>
-                  <option value="NEW">New</option>
-                  <option value="UNDER_REVIEW">Under Review</option>
-                  <option value="QUOTE_PUBLISHED">Quote Published</option>
-                  <option value="RATE_PUBLISHED">Rate Published</option>
-                  <option value="ACCEPTED">Accepted</option>
-                  <option value="DECLINED">Declined</option>
-                  <option value="EXPIRED">Expired</option>
-                  <option value="CONVERTED">Converted</option>
+                  <option value="ALL">{TXT.allStatuses}</option>
+                  <option value="NEW">{TXT.new}</option>
+                  <option value="UNDER_REVIEW">{TXT.underReview}</option>
+                  <option value="QUOTE_PUBLISHED">{TXT.quotePublished2}</option>
+                  <option value="RATE_PUBLISHED">{TXT.ratePublished}</option>
+                  <option value="ACCEPTED">{TXT.accepted}</option>
+                  <option value="DECLINED">{TXT.declined}</option>
+                  <option value="EXPIRED">{TXT.expired}</option>
+                  <option value="CONVERTED">{TXT.converted}</option>
                 </select>
               </div>
 
               <div className="filter-unit">
-                <label>Service:</label>
+                <label>{TXT.service}</label>
                 <select
                   value={serviceFilter}
                   onChange={e => setServiceFilter(e.target.value)}
                   className="filter-select"
                 >
-                  <option value="ALL">All Services</option>
+                  <option value="ALL">{TXT.allServices}</option>
                   {SERVICE_OPTIONS.map(s => (
                     <option key={s.id} value={s.name}>{s.name}</option>
                   ))}
@@ -613,21 +614,21 @@ export const QuoteRequestsView: React.FC = () => {
             <table className="quotes-master-table">
               <thead>
                 <tr>
-                  <th>QUOTE ID</th>
-                  <th>PARTIES</th>
-                  <th>CARGO DESCRIPTION</th>
-                  <th>ROUTE</th>
-                  <th>SPECS</th>
-                  <th>STATUS</th>
-                  <th>SUBMITTED</th>
-                  <th className="text-right">ACTION</th>
+                  <th>{TXT.quoteId}</th>
+                  <th>{TXT.parties}</th>
+                  <th>{TXT.cargoDescription}</th>
+                  <th>{TXT.route}</th>
+                  <th>{TXT.specs}</th>
+                  <th>{TXT.status2}</th>
+                  <th>{TXT.submitted}</th>
+                  <th className="text-right">{TXT.action}</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredQuotes.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="empty-table-cell">
-                      No quote requests match your current search and filter criteria.
+                      {TXT.noQuoteRequestsMatchYour}
                     </td>
                   </tr>
                 ) : (
@@ -641,7 +642,7 @@ export const QuoteRequestsView: React.FC = () => {
                       <td>
                         <div className="id-cell">
                           <strong className="quote-id-txt font-mono">{quote.id}</strong>
-                          {quote.id === 'QR-2026-00124' && <span className="flagship-pill">SAMPLE</span>}
+                          {quote.id === 'QR-2026-00124' && <span className="flagship-pill">{TXT.sample}</span>}
                         </div>
                       </td>
 
@@ -695,7 +696,7 @@ export const QuoteRequestsView: React.FC = () => {
                           onClick={() => handleSelectQuote(quote)}
                         >
                           <Eye size={13} />
-                          <span>Review</span>
+                          <span>{TXT.review}</span>
                         </button>
                       </td>
                     </tr>
@@ -706,7 +707,7 @@ export const QuoteRequestsView: React.FC = () => {
 
             {/* Table Footer */}
             <div className="quotes-table-footer">
-              <span>Showing <strong>{filteredQuotes.length}</strong> of <strong>{quoteRequests.length}</strong> quote inquiries</span>
+              <span>{TXT.showing} <strong>{filteredQuotes.length}</strong> {TXT.of} <strong>{quoteRequests.length}</strong> {TXT.quoteInquiries}</span>
             </div>
           </div>
         </div>
@@ -719,7 +720,7 @@ export const QuoteRequestsView: React.FC = () => {
         <div className="quote-modal-backdrop" onClick={() => setShowPublishConfirmModal(false)}>
           <div className="quote-modal-card animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Publish Quote?</h3>
+              <h3>{TXT.publishQuote}</h3>
               <button className="modal-close-btn" onClick={() => setShowPublishConfirmModal(false)}>
                 <XCircle size={18} />
               </button>
@@ -728,35 +729,35 @@ export const QuoteRequestsView: React.FC = () => {
             <div className="publish-confirm-body">
               <div className="confirm-summary-box">
                 <div className="c-row">
-                  <span>Quote Reference:</span>
+                  <span>{TXT.quoteReference}</span>
                   <strong className="font-mono">{selectedQuote.id}</strong>
                 </div>
                 <div className="c-row">
-                  <span>Customer:</span>
+                  <span>{TXT.customer}</span>
                   <strong>{selectedQuote.requesterName} ({selectedQuote.originCity} → {selectedQuote.destCity})</strong>
                 </div>
                 <div className="c-row highlight">
-                  <span>Final Amount:</span>
+                  <span>{TXT.finalAmount}</span>
                   <strong className="font-mono text-emerald">{money.format(finalPrice)} {money.currency}</strong>
                 </div>
                 <div className="c-row">
-                  <span>Valid Until:</span>
+                  <span>{TXT.validUntil2}</span>
                   <strong>{validUntilDate}</strong>
                 </div>
               </div>
 
               <p className="publish-disclaimer">
-                Once published, this quote will be available for customer acceptance through the company's chosen communication process.
+                {TXT.oncePublishedThisQuoteWill}
               </p>
             </div>
 
             <div className="modal-actions-footer">
               <button className="btn-cancel" onClick={() => setShowPublishConfirmModal(false)}>
-                Cancel
+                {TXT.cancel}
               </button>
               <button className="btn-confirm-publish" onClick={handleConfirmPublish}>
                 <Send size={15} />
-                <span>Publish Quote</span>
+                <span>{TXT.publishQuote2}</span>
               </button>
             </div>
           </div>

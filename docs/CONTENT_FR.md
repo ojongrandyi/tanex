@@ -549,6 +549,18 @@ un changement de statut sans titre affiche le nom du statut (§6.3). La descript
 - **Succès :** **Livraison réservée.** `Votre numéro de suivi est {ID}.` · `Suivre cette livraison` · `Envoyer le suivi au destinataire sur WhatsApp` · `Réserver une autre livraison`
 - *Ajouté avec G.6 (17/11/2026, **à confirmer**, #171, relecture native #108) :* `Livraison à moto` · `Choisissez une ville` · `Choisissez un quartier` · `Mon quartier n'est pas dans la liste` · `(facultatif)` · `Laissez vide pour un enlèvement dès que possible.` · `Ajouter un repère` · `Retirer le repère` · `Touchez la carte à l'endroit où le livreur doit aller. Vous pouvez déplacer le repère.` · `Repère ajouté.` · `Carte du point d'enlèvement` / `Carte du point de livraison` · `Vérification du prix…` · `Choisissez la ville, les quartiers et la taille du colis pour voir le prix.` · gros colis : `Les gros colis voyagent en fourgonnette. Nous vous confirmerons le prix avant l'enlèvement.` · `La réservation en ligne n'est pas encore ouverte. Appelez-nous ou écrivez-nous sur WhatsApp et nous réserverons votre livraison.` · `Nous n'avons pas pu charger les zones de livraison. Vérifiez votre connexion et réessayez.` · `Réessayer` · erreurs : `Choisissez une ville.` · `Choisissez le quartier ou décrivez un point de repère.` · `Saisissez le nom du contact.` · `Saisissez un numéro de téléphone valide.` · `Saisissez le nom du destinataire.` · `Saisissez le numéro de téléphone du destinataire.` · `Choisissez la taille du colis.` · `Saisissez le montant à encaisser.` · `Choisissez une heure entre maintenant et 30 jours d'ici.` · `Saisissez une adresse e-mail valide, ou laissez le champ vide.` · `Vérifiez les champs signalés.` · `Nous n'avons pas pu réserver votre livraison. Vérifiez votre connexion et réessayez.` (texte complet : `src/i18n/fr/localDelivery.ts`)
 
+## 10. Console (ajouté le 18/11/2026 avec I.2, **à confirmer**, #189, relecture native #108)
+- La console s'affiche dans la langue du membre du personnel (**Mon compte → Langue**) ; avant la connexion, un
+  sélecteur `English` · `Français` en haut de l'écran de connexion.
+- **Texte complet :** `src/i18n/fr/console/` (un fichier par groupe d'écrans ; mêmes clés que l'anglais, vérifiées
+  par la compilation). Ce n'est pas recopié ici pour éviter deux sources ; la relecture se fait dans ces fichiers.
+- **Vocabulaire retenu** (aligné sur l'application livreur approuvée) : shipment → `envoi` · consignment → `envoi` ·
+  tracking ID → `numéro de suivi` · courier → `livreur` · job → `course` · pickup → `enlèvement` · drop-off →
+  `livraison` · dispatch → `Répartition` · area → `quartier` · tariffs/rates → `Tarifs` / `tarifs` · quote →
+  `devis` · proof of payment → `preuve de paiement` · handover → `remise` · waybill → `lettre de transport` ·
+  bill of lading → `connaissement` · audit log → `Journal d'audit` · hold → `retenue` · scanner → `Scanner`.
+- Les documents imprimés et les valeurs enregistrées sur les envois restent en anglais (#189).
+
 ## 10.3 Application livreur
 - `Courses du jour` · `En service` / `Hors service` · `Aucune course pour l'instant. Les nouvelles courses s'affichent ici.` · `Nouvelle course assignée`
 - `Enlèvement` · `Livraison` · `Appeler` · `WhatsApp` · `Ouvrir dans Maps` · `Montant à encaisser : {montant}` · `Express`

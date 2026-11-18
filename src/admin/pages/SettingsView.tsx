@@ -25,6 +25,7 @@ import './SettingsView.css';
 const EmailSettingsPanel = lazy(() => import('../components/EmailSettingsPanel'));
 import { CURRENCY_NAMES, DISPLAY_CURRENCIES, formatMoney, resolveCurrency, type DisplayCurrency } from '../../shared/currency';
 import { MeasureInput, useUnitLabels } from '../../components/forms/UnitControls';
+import { SETTINGS_VIEW_TEXT as TXT } from './SettingsView.text';
 
 export const SettingsView: React.FC = () => {
   const { settings, updateSettings } = useAdminData();
@@ -93,17 +94,17 @@ export const SettingsView: React.FC = () => {
     setStampError(null);
 
     if (!file.type.startsWith('image/')) {
-      setStampError('Please upload an image file (PNG, JPG, or SVG).');
+      setStampError(TXT.pleaseUploadAnImageFile);
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      setStampError('Image is too large. Please use a file under 2MB.');
+      setStampError(TXT.imageIsTooLargePlease);
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => setSignatureStampUrl(reader.result as string);
-    reader.onerror = () => setStampError('Could not read that file. Please try again.');
+    reader.onerror = () => setStampError(TXT.couldNotReadThatFile);
     reader.readAsDataURL(file);
   };
 
@@ -147,8 +148,8 @@ export const SettingsView: React.FC = () => {
     });
     setToastIsError(!result.success);
     setToastMessage(result.success
-      ? 'System settings saved successfully!'
-      : `Failed to save settings: ${result.error || 'server rejected the request'}. Your changes were not persisted.`);
+      ? TXT.systemSettingsSavedSuccessfully
+      : TXT.failedToSaveSettingsYour(result.error || TXT.serverRejected));
     setTimeout(() => setToastMessage(null), result.success ? 3500 : 6000);
   };
 
@@ -173,7 +174,7 @@ export const SettingsView: React.FC = () => {
     setSignatoryTitle('');
     setHubSortStatus({ JFK: 'NORMAL', EWR: 'NORMAL', ORD: 'NORMAL', DFW: 'NORMAL', LAX: 'NORMAL' });
     setStampError(null);
-    setToastMessage('Settings restored to default configuration.');
+    setToastMessage(TXT.settingsRestoredToDefaultConfiguration);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
@@ -190,8 +191,8 @@ export const SettingsView: React.FC = () => {
       {/* Page Header */}
       <div className="settings-page-header">
         <div>
-          <h2>System Settings & Configuration</h2>
-          <p>Manage company identity, public tracking privacy, pricing defaults, and document rules.</p>
+          <h2>{TXT.systemSettingsConfiguration}</h2>
+          <p>{TXT.manageCompanyIdentityPublicTracking}</p>
         </div>
 
         {canManageSettings && activeTab !== 'EMAIL' && (
@@ -202,7 +203,7 @@ export const SettingsView: React.FC = () => {
               onClick={handleResetDefaults}
             >
               <RotateCcw size={15} />
-              <span>Reset Defaults</span>
+              <span>{TXT.resetDefaults}</span>
             </button>
             <button
               type="button"
@@ -210,7 +211,7 @@ export const SettingsView: React.FC = () => {
               onClick={handleSaveAll}
             >
               <Save size={15} />
-              <span>Save All Settings</span>
+              <span>{TXT.saveAllSettings}</span>
             </button>
           </div>
         )}
@@ -223,7 +224,7 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveTab('GENERAL')}
         >
           <Building size={16} />
-          <span>Company Profile</span>
+          <span>{TXT.companyProfile}</span>
         </button>
 
         <button
@@ -231,7 +232,7 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveTab('PRIVACY')}
         >
           <Shield size={16} />
-          <span>Public Tracking & Privacy</span>
+          <span>{TXT.publicTrackingPrivacy}</span>
         </button>
 
         <button
@@ -239,7 +240,7 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveTab('TARIFF')}
         >
           <DollarSign size={16} />
-          <span>Tariff & Pricing Defaults</span>
+          <span>{TXT.tariffPricingDefaults}</span>
         </button>
 
         <button
@@ -247,7 +248,7 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveTab('DOCUMENTS')}
         >
           <FileText size={16} />
-          <span>Barcode & Documents</span>
+          <span>{TXT.barcodeDocuments}</span>
         </button>
 
         <button
@@ -255,7 +256,7 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveTab('HUBS')}
         >
           <Server size={16} />
-          <span>Gateway Hub Telemetry</span>
+          <span>{TXT.gatewayHubTelemetry}</span>
         </button>
 
         <button
@@ -287,27 +288,27 @@ export const SettingsView: React.FC = () => {
                 <Building size={20} />
               </div>
               <div>
-                <h3>Company & Carrier Identity</h3>
-                <p>Official organization information displayed on Waybills, Bills of Lading, and Invoices.</p>
+                <h3>{TXT.companyCarrierIdentity}</h3>
+                <p>{TXT.officialOrganizationInformationDisplayedOn}</p>
               </div>
             </div>
 
             <div className="settings-card-body">
               <div className="form-row-2">
                 <div className="settings-field">
-                  <label>Legal Company Name</label>
+                  <label>{TXT.legalCompanyName}</label>
                   <input
                     type="text"
                     value={companyName}
                     onChange={e => setCompanyName(e.target.value)}
                     className="settings-input"
                   />
-                  <small>Appears as the registered commercial carrier on all transport documents.</small>
+                  <small>{TXT.appearsAsTheRegisteredCommercial}</small>
                 </div>
 
                 <div className="settings-field">
                   {/* Stored under the existing key `dotNumber` (no renamed settings, CLAUDE.md rule 10). */}
-                  <label htmlFor="settings-registration">Business registration (RCCM / NIU)</label>
+                  <label htmlFor="settings-registration">{TXT.businessRegistrationRccmNiu}</label>
                   <input
                     id="settings-registration"
                     type="text"
@@ -316,13 +317,13 @@ export const SettingsView: React.FC = () => {
                     className="settings-input font-mono"
                     placeholder="RCCM … · NIU …"
                   />
-                  <small>Optional. Shown on the public Contact page when filled in.</small>
+                  <small>{TXT.optionalShownOnThePublic}</small>
                 </div>
               </div>
 
               <div className="form-row-2">
                 <div className="settings-field">
-                  <label>Central Dispatch & Support Phone</label>
+                  <label>{TXT.centralDispatchSupportPhone}</label>
                   <div className="input-with-icon">
                     <Phone size={15} className="input-icon" />
                     <input
@@ -332,11 +333,11 @@ export const SettingsView: React.FC = () => {
                       className="settings-input with-icon"
                     />
                   </div>
-                  <small>Toll-free customer inquiry hotline printed on receipts.</small>
+                  <small>{TXT.tollFreeCustomerInquiryHotline}</small>
                 </div>
 
                 <div className="settings-field">
-                  <label>Operations & Dispatch Email</label>
+                  <label>{TXT.operationsDispatchEmail}</label>
                   <div className="input-with-icon">
                     <Mail size={15} className="input-icon" />
                     <input
@@ -346,12 +347,12 @@ export const SettingsView: React.FC = () => {
                       className="settings-input with-icon"
                     />
                   </div>
-                  <small>Primary contact email for quotes and waybill notices.</small>
+                  <small>{TXT.primaryContactEmailForQuotes}</small>
                 </div>
               </div>
 
               <div className="settings-field">
-                <label>Primary Terminal & Headquarters Address</label>
+                <label>{TXT.primaryTerminalHeadquartersAddress}</label>
                 <div className="input-with-icon">
                   <MapPin size={15} className="input-icon" />
                   <input
@@ -361,11 +362,11 @@ export const SettingsView: React.FC = () => {
                     className="settings-input with-icon"
                   />
                 </div>
-                <small>Main administrative facility and origin billing hub.</small>
+                <small>{TXT.mainAdministrativeFacilityAndOrigin}</small>
               </div>
 
               <div className="settings-field">
-                <label htmlFor="settings-admin-url">Admin console address</label>
+                <label htmlFor="settings-admin-url">{TXT.adminConsoleAddress}</label>
                 <div className="input-with-icon">
                   <Lock size={15} className="input-icon" />
                   <input
@@ -376,7 +377,7 @@ export const SettingsView: React.FC = () => {
                     className="settings-input with-icon disabled-bg font-mono"
                   />
                 </div>
-                <small>Bookmark this address. It isn't linked from the public site.</small>
+                <small>{TXT.bookmarkThisAddressItIsn}</small>
               </div>
             </div>
           </div>
@@ -392,8 +393,8 @@ export const SettingsView: React.FC = () => {
                 <Shield size={20} />
               </div>
               <div>
-                <h3>Public Tracking & Customer Privacy Controls</h3>
-                <p>Configure what information is visible to the public on unauthenticated tracking screens.</p>
+                <h3>{TXT.publicTrackingCustomerPrivacyControls}</h3>
+                <p>{TXT.configureWhatInformationIsVisible}</p>
               </div>
             </div>
 
@@ -401,9 +402,9 @@ export const SettingsView: React.FC = () => {
               {/* PII Masking Toggle Card */}
               <div className="toggle-setting-row">
                 <div className="toggle-info">
-                  <strong>Strict Customer PII Masking (Recommended)</strong>
+                  <strong>{TXT.strictCustomerPiiMaskingRecommended}</strong>
                   <p>
-                    Masks customer phone numbers and physical street addresses on the public website (e.g. <code>(310) •••-0892</code> and <code>D***** M***** · Los Angeles, CA</code>).
+                    {TXT.masksCustomerPhoneNumbersAnd} <code>(310) •••-0892</code> {TXT.and} <code>{TXT.dMLosAngelesCa}</code>).
                   </p>
                 </div>
                 <label className="switch-toggle">
@@ -419,9 +420,9 @@ export const SettingsView: React.FC = () => {
               {/* Internal Notes Cloaking */}
               <div className="toggle-setting-row">
                 <div className="toggle-info">
-                  <strong>Cloak Internal Operations Notes</strong>
+                  <strong>{TXT.cloakInternalOperationsNotes}</strong>
                   <p>
-                    Strictly prevents internal admin remarks (e.g. <i>"Customer requested morning dispatch"</i>) from appearing on the customer's tracking timeline.
+                    {TXT.strictlyPreventsInternalAdminRemarks} <i>{TXT.customerRequestedMorningDispatch}</i>{TXT.fromAppearingOnTheCustomer}
                   </p>
                 </div>
                 <label className="switch-toggle">
@@ -437,9 +438,9 @@ export const SettingsView: React.FC = () => {
               {/* Show Estimated Delivery Window */}
               <div className="toggle-setting-row">
                 <div className="toggle-info">
-                  <strong>Display Estimated Delivery Windows Publicly</strong>
+                  <strong>{TXT.displayEstimatedDeliveryWindowsPublicly}</strong>
                   <p>
-                    Shows the estimated delivery date and time bracket (e.g. <i>"Estimated delivery: 2 October 2026, by 5:00 PM (Lagos time)"</i>, in the destination's time zone) on public tracking.
+                    {TXT.showsTheEstimatedDeliveryDate} <i>{TXT.estimatedDelivery2October2026}</i>{TXT.inTheDestinationSTime}
                   </p>
                 </div>
                 <label className="switch-toggle">
@@ -454,7 +455,7 @@ export const SettingsView: React.FC = () => {
 
               {/* Public Map Visibility Mode */}
               <div className="settings-field pt-2">
-                <label>Public Route Map Display Mode</label>
+                <label>{TXT.publicRouteMapDisplayMode}</label>
                 <div className="radio-options-vertical">
                   <label className={`radio-card ${mapVisibility === 'CITY' ? 'selected' : ''}`}>
                     <input
@@ -464,8 +465,8 @@ export const SettingsView: React.FC = () => {
                       onChange={() => setMapVisibility('CITY')}
                     />
                     <div>
-                      <strong>City-to-City Route Corridor (Recommended)</strong>
-                      <span>Shows high-level transit route between metro areas (e.g. New York → Chicago → Los Angeles).</span>
+                      <strong>{TXT.cityToCityRouteCorridor}</strong>
+                      <span>{TXT.showsHighLevelTransitRoute}</span>
                     </div>
                   </label>
 
@@ -477,8 +478,8 @@ export const SettingsView: React.FC = () => {
                       onChange={() => setMapVisibility('EXACT')}
                     />
                     <div>
-                      <strong>Exact Facility & Hub Pins</strong>
-                      <span>Displays individual warehouse sorting pins on the interactive map.</span>
+                      <strong>{TXT.exactFacilityHubPins}</strong>
+                      <span>{TXT.displaysIndividualWarehouseSortingPins}</span>
                     </div>
                   </label>
 
@@ -490,8 +491,8 @@ export const SettingsView: React.FC = () => {
                       onChange={() => setMapVisibility('HIDDEN')}
                     />
                     <div>
-                      <strong>Hide Interactive Map</strong>
-                      <span>Replaces the map with a text-based milestone progress bar.</span>
+                      <strong>{TXT.hideInteractiveMap}</strong>
+                      <span>{TXT.replacesTheMapWithA}</span>
                     </div>
                   </label>
                 </div>
@@ -510,15 +511,15 @@ export const SettingsView: React.FC = () => {
                 <DollarSign size={20} />
               </div>
               <div>
-                <h3>Tariff & Pricing Parameters</h3>
-                <p>Default parameters used when an administrator reviews and calculates customer quote requests.</p>
+                <h3>{TXT.tariffPricingParameters}</h3>
+                <p>{TXT.defaultParametersUsedWhenAn}</p>
               </div>
             </div>
 
             <div className="settings-card-body">
               <div className="form-row-2">
                 <div className="settings-field">
-                  <label>National Fuel Surcharge Index (%)</label>
+                  <label>{TXT.nationalFuelSurchargeIndex}</label>
                   <div className="input-with-icon">
                     <input
                       type="number"
@@ -528,24 +529,24 @@ export const SettingsView: React.FC = () => {
                       className="settings-input font-mono"
                     />
                   </div>
-                  <small>Current baseline fuel index applied across domestic linehaul operations.</small>
+                  <small>{TXT.currentBaselineFuelIndexApplied}</small>
                 </div>
 
                 <div className="settings-field">
-                  <label>Default Quote Offer Validity Window (Days)</label>
+                  <label>{TXT.defaultQuoteOfferValidityWindow}</label>
                   <input
                     type="number"
                     value={quoteValidityDays}
                     onChange={e => setQuoteValidityDays(e.target.value)}
                     className="settings-input font-mono"
                   />
-                  <small>Guarantees quoted shipping tariffs for the specified number of calendar days (e.g. 14 days).</small>
+                  <small>{TXT.guaranteesQuotedShippingTariffsFor}</small>
                 </div>
               </div>
 
               <div className="form-row-2">
                 <div className="settings-field">
-                  <label htmlFor="settings-currency">Display Currency</label>
+                  <label htmlFor="settings-currency">{TXT.displayCurrency}</label>
                   <select
                     id="settings-currency"
                     value={displayCurrency}
@@ -556,12 +557,12 @@ export const SettingsView: React.FC = () => {
                       <option key={c} value={c}>{c} — {CURRENCY_NAMES[c]}</option>
                     ))}
                   </select>
-                  <small>Prices are stored in USD and shown to customers and staff in this currency.</small>
+                  <small>{TXT.pricesAreStoredInUsd}</small>
                 </div>
 
                 {displayCurrency !== 'USD' && (
                   <div className="settings-field">
-                    <label htmlFor="settings-rate">Exchange Rate (1 USD = ? {displayCurrency})</label>
+                    <label htmlFor="settings-rate">{TXT.exchangeRate1Usd} {displayCurrency})</label>
                     <input
                       id="settings-rate"
                       type="number"
@@ -572,9 +573,9 @@ export const SettingsView: React.FC = () => {
                       className="settings-input font-mono"
                     />
                     {currencyPreview.missingRate ? (
-                      <small className="settings-warning-text">Enter the rate to switch prices to {displayCurrency}. Until then they stay in USD.</small>
+                      <small className="settings-warning-text">{TXT.enterTheRateToSwitch} {displayCurrency}{TXT.untilThenTheyStayIn}</small>
                     ) : (
-                      <small>Example: $350.00 is shown as {formatMoney(350, currencyPreview)}. Update the rate when it changes.</small>
+                      <small>{TXT.example35000IsShown} {formatMoney(350, currencyPreview)}{TXT.updateTheRateWhenIt}</small>
                     )}
                   </div>
                 )}
@@ -582,7 +583,7 @@ export const SettingsView: React.FC = () => {
 
               <div className="form-row-2">
                 <div className="settings-field">
-                  <label>Oversize Cargo Dimension Threshold ({units.length})</label>
+                  <label>{TXT.oversizeCargoDimensionThreshold}{units.length})</label>
                   <MeasureInput
                     kind="length"
                     min="0"
@@ -590,18 +591,18 @@ export const SettingsView: React.FC = () => {
                     onChange={setOversizeLengthThreshold}
                     className="settings-input font-mono"
                   />
-                  <small>Items longer than this (e.g. 150 cm / 60 in truck bumpers) trigger oversize flags.</small>
+                  <small>{TXT.itemsLongerThanThisE}</small>
                 </div>
 
                 <div className="settings-field">
-                  <label>Operating Currency & Billing Code</label>
+                  <label>{TXT.operatingCurrencyBillingCode}</label>
                   <input
                     type="text"
                     disabled
                     value="USD ($) — United States Dollar"
                     className="settings-input disabled-bg"
                   />
-                  <small>Prices are stored in US dollars; the display currency setting converts them for customers.</small>
+                  <small>{TXT.pricesAreStoredInUs}</small>
                 </div>
               </div>
             </div>
@@ -618,27 +619,27 @@ export const SettingsView: React.FC = () => {
                 <BarcodeIcon size={20} />
               </div>
               <div>
-                <h3>Barcode & Document Generation Rules</h3>
-                <p>Configure automated documentation generation and barcode standards.</p>
+                <h3>{TXT.barcodeDocumentGenerationRules}</h3>
+                <p>{TXT.configureAutomatedDocumentationGenerationAnd}</p>
               </div>
             </div>
 
             <div className="settings-card-body">
               <div className="settings-field">
-                <label>Carrier Barcode Standard (Strict Policy)</label>
+                <label>{TXT.carrierBarcodeStandardStrictPolicy}</label>
                 <input
                   type="text"
                   disabled
                   value={barcodeStandard}
                   className="settings-input font-mono disabled-bg"
                 />
-                <small>{COMPANY_SHORT} uses linear Code 128 barcodes across all Shipping Labels, Receipts, and BOLs.</small>
+                <small>{COMPANY_SHORT} {TXT.usesLinearCode128Barcodes}</small>
               </div>
 
               <div className="toggle-setting-row">
                 <div className="toggle-info">
-                  <strong>Auto-Generate Shipping Label on Consignment Creation</strong>
-                  <p>Automatically registers a 4x6 courier shipping label whenever a new shipment or quote is converted.</p>
+                  <strong>{TXT.autoGenerateShippingLabelOn}</strong>
+                  <p>{TXT.automaticallyRegistersA4x6Courier}</p>
                 </div>
                 <label className="switch-toggle">
                   <input
@@ -652,8 +653,8 @@ export const SettingsView: React.FC = () => {
 
               <div className="toggle-setting-row">
                 <div className="toggle-info">
-                  <strong>Auto-Generate Shipment Receipt on Payment Tender</strong>
-                  <p>Issues an official payment and intake receipt immediately upon consignment registration.</p>
+                  <strong>{TXT.autoGenerateShipmentReceiptOn}</strong>
+                  <p>{TXT.issuesAnOfficialPaymentAnd}</p>
                 </div>
                 <label className="switch-toggle">
                   <input
@@ -666,55 +667,55 @@ export const SettingsView: React.FC = () => {
               </div>
 
               <div className="settings-field pt-2">
-                <label>Authorized Signature / Company Stamp</label>
+                <label>{TXT.authorizedSignatureCompanyStamp}</label>
                 <div className="stamp-upload-row">
                   <div className="stamp-preview-box">
                     {signatureStampUrl ? (
-                      <img src={signatureStampUrl} alt="Authorized signature preview" />
+                      <img src={signatureStampUrl} alt={TXT.authorizedSignaturePreview} />
                     ) : (
-                      <span className="stamp-preview-empty">No stamp uploaded</span>
+                      <span className="stamp-preview-empty">{TXT.noStampUploaded}</span>
                     )}
                   </div>
                   <div className="stamp-upload-controls">
                     <label className="btn-upload-stamp">
                       <input type="file" accept="image/*" onChange={handleStampFileChange} hidden />
-                      <span>{signatureStampUrl ? 'Replace Image' : 'Upload Image'}</span>
+                      <span>{signatureStampUrl ? TXT.replaceImage : TXT.uploadImage}</span>
                     </label>
                     {signatureStampUrl && (
                       <button type="button" className="btn-remove-stamp" onClick={() => setSignatureStampUrl('')}>
-                        Remove
+                        {TXT.remove}
                       </button>
                     )}
                   </div>
                 </div>
                 {stampError && <small className="stamp-error-text">{stampError}</small>}
                 <small>
-                  Uploaded as your own authorized representative's signature — Insurance Certificates and Bills of Lading are signed "for and on behalf of" the underwriter/carrier using this image, not the underwriter's own signature. PNG with a transparent background works best. Max 2MB.
+                  {TXT.uploadedAsYourOwnAuthorized}
                 </small>
               </div>
 
               <div className="form-row-2">
                 <div className="settings-field">
-                  <label>Signatory Name</label>
+                  <label>{TXT.signatoryName}</label>
                   <input
                     type="text"
                     value={signatoryName}
                     onChange={e => setSignatoryName(e.target.value)}
-                    placeholder="e.g. Marcus Alvarado"
+                    placeholder={TXT.eGMarcusAlvarado}
                     className="settings-input"
                   />
-                  <small>Printed beneath the signature on certificates and manifests.</small>
+                  <small>{TXT.printedBeneathTheSignatureOn}</small>
                 </div>
                 <div className="settings-field">
-                  <label>Signatory Title</label>
+                  <label>{TXT.signatoryTitle}</label>
                   <input
                     type="text"
                     value={signatoryTitle}
                     onChange={e => setSignatoryTitle(e.target.value)}
-                    placeholder="e.g. Director of Cargo Operations"
+                    placeholder={TXT.eGDirectorOfCargo}
                     className="settings-input"
                   />
-                  <small>Job title printed alongside the signatory's name.</small>
+                  <small>{TXT.jobTitlePrintedAlongsideThe}</small>
                 </div>
               </div>
             </div>
@@ -731,8 +732,8 @@ export const SettingsView: React.FC = () => {
                 <Server size={20} />
               </div>
               <div>
-                <h3>National Gateway Hub Telemetry</h3>
-                <p>Real-time status and throughput monitoring across major national transit hubs.</p>
+                <h3>{TXT.nationalGatewayHubTelemetry}</h3>
+                <p>{TXT.realTimeStatusAndThroughput}</p>
               </div>
             </div>
 
@@ -758,9 +759,9 @@ export const SettingsView: React.FC = () => {
                         value={status}
                         onChange={(e) => setHubSortStatus(prev => ({ ...prev, [hub.code]: e.target.value as 'NORMAL' | 'HIGH_VOLUME' | 'DELAYED' }))}
                       >
-                        <option value="NORMAL">Normal Flow</option>
-                        <option value="HIGH_VOLUME">High Volume</option>
-                        <option value="DELAYED">Delayed</option>
+                        <option value="NORMAL">{TXT.normalFlow}</option>
+                        <option value="HIGH_VOLUME">{TXT.highVolume}</option>
+                        <option value="DELAYED">{TXT.delayed}</option>
                       </select>
                     </div>
                   );
@@ -774,11 +775,11 @@ export const SettingsView: React.FC = () => {
         <div className="settings-footer-save-bar">
           <div className="save-bar-info">
             <Shield size={16} className="text-emerald" />
-            <span>All modifications take effect across live dispatch and public tracking instantly.</span>
+            <span>{TXT.allModificationsTakeEffectAcross}</span>
           </div>
           <button type="submit" className="btn-save-settings-primary">
             <Save size={15} />
-            <span>Save All Settings</span>
+            <span>{TXT.saveAllSettings}</span>
           </button>
         </div>
       </form>

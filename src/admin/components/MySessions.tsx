@@ -46,7 +46,7 @@ export const MySessions: React.FC = () => {
     try {
       setSessions(await api.getMySessions());
     } catch (err: any) {
-      setNotice({ kind: 'error', text: err?.message || 'Could not load.' });
+      setNotice({ kind: 'error', text: err?.message || T.loadFailed });
     }
   }, []);
 
@@ -63,7 +63,7 @@ export const MySessions: React.FC = () => {
       setNotice({ kind: 'ok', text: T.signedOut(n) });
       await load();
     } catch (err: any) {
-      setNotice({ kind: 'error', text: err?.message || 'Could not sign out.' });
+      setNotice({ kind: 'error', text: err?.message || T.signOutFailed });
     } finally {
       setBusy(false);
     }

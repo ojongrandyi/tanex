@@ -8,6 +8,7 @@ import { ProofViewer } from './ProofViewer';
 import { ProofReviewControls } from './ProofReviewControls';
 import { ProofFacts, formatProofReceived, proofAmountMismatch, proofMethodView } from './ProofFacts';
 import './NewProofsPanel.css';
+import { NEW_PROOFS_PANEL_TEXT as TXT } from './NewProofsPanel.text';
 
 /** How many proofs the dashboard lists before pointing to the Payments page. */
 const PANEL_LIMIT = 6;
@@ -38,7 +39,7 @@ export const NewProofsPanel: React.FC<NewProofsPanelProps> = ({ newProofsCount, 
     try {
       setProofs(await api.getPaymentProofs('SUBMITTED'));
     } catch (err: any) {
-      setError(err?.message || 'Could not load payment proofs.');
+      setError(err?.message || TXT.couldNotLoadPaymentProofs);
     } finally {
       setLoading(false);
     }
@@ -77,17 +78,17 @@ export const NewProofsPanel: React.FC<NewProofsPanelProps> = ({ newProofsCount, 
     <section className="ops-section-card tx-new-proofs" aria-labelledby="tx-new-proofs-title">
       <div className="ops-table-header-block">
         <div className="table-title-row">
-          <h2 id="tx-new-proofs-title" ref={headingRef} tabIndex={-1} className="ops-section-title">New payment proofs</h2>
+          <h2 id="tx-new-proofs-title" ref={headingRef} tabIndex={-1} className="ops-section-title">{TXT.newPaymentProofs}</h2>
           <span className={`ops-shipment-count-pill${proofs.length > 0 ? ' new-proofs-pill-active' : ''}`}>
-            {proofs.length} to review
+            {proofs.length} {TXT.toReview}
           </span>
         </div>
         <div className="new-proofs-head-actions">
-          <button type="button" className="new-proofs-icon-btn" onClick={load} disabled={loading} aria-label="Refresh payment proofs">
+          <button type="button" className="new-proofs-icon-btn" onClick={load} disabled={loading} aria-label={TXT.refreshPaymentProofs}>
             <RefreshCw size={14} className={loading ? 'spin' : ''} aria-hidden="true" />
           </button>
           <button type="button" className="ops-btn-secondary" onClick={onOpenPayments}>
-            All Payments →
+            {TXT.allPayments}
           </button>
         </div>
       </div>
@@ -103,8 +104,8 @@ export const NewProofsPanel: React.FC<NewProofsPanelProps> = ({ newProofsCount, 
         <div className="new-proofs-empty">
           <CheckCircle2 size={22} aria-hidden="true" />
           <div>
-            <strong>Nothing to review</strong>
-            <p>Proofs of payment customers send from the track page will appear here.</p>
+            <strong>{TXT.nothingToReview}</strong>
+            <p>{TXT.proofsOfPaymentCustomersSend}</p>
           </div>
         </div>
       )}
@@ -120,7 +121,7 @@ export const NewProofsPanel: React.FC<NewProofsPanelProps> = ({ newProofsCount, 
                   type="button"
                   className="new-proof-thumb"
                   onClick={(e) => openViewer(p, e.currentTarget)}
-                  aria-label={`Review the payment proof for ${p.trackingNumber}`}
+                  aria-label={TXT.reviewThePaymentProofFor(p.trackingNumber)}
                 >
                   <img src={p.fileUrl} alt="" loading="lazy" width={72} height={72} />
                   <span className="new-proof-thumb-zoom" aria-hidden="true"><Maximize2 size={12} /></span>
@@ -132,18 +133,18 @@ export const NewProofsPanel: React.FC<NewProofsPanelProps> = ({ newProofsCount, 
                   </div>
                   <div className="new-proof-amounts">
                     <span>
-                      Due <b>{p.payment ? formatPaymentAmount(p.payment.amount, p.payment.currency) : '—'}</b>
+                      {TXT.due} <b>{p.payment ? formatPaymentAmount(p.payment.amount, p.payment.currency) : '—'}</b>
                     </span>
                     <span className={mismatch ? 'new-proof-mismatch' : undefined}>
-                      Sent <b>{p.amountSent !== null ? formatPaymentAmount(p.amountSent, p.payment?.currency ?? 'USD') : '—'}</b>
-                      {mismatch && <><AlertTriangle size={12} aria-hidden="true" /><em>differs</em></>}
+                      {TXT.sent} <b>{p.amountSent !== null ? formatPaymentAmount(p.amountSent, p.payment?.currency ?? 'USD') : '—'}</b>
+                      {mismatch && <><AlertTriangle size={12} aria-hidden="true" /><em>{TXT.differs}</em></>}
                     </span>
                   </div>
                   <div className="new-proof-meta">
                     <span className="new-proof-method">
-                      {method ? <><PaymentIcon type={method.type} size={14} /><span>{method.label}</span></> : <><Wallet size={14} aria-hidden="true" /><span>Account not recorded</span></>}
+                      {method ? <><PaymentIcon type={method.type} size={14} /><span>{method.label}</span></> : <><Wallet size={14} aria-hidden="true" /><span>{TXT.accountNotRecorded}</span></>}
                     </span>
-                    <span className="new-proof-ref font-mono" title={p.reference || undefined}>Ref: {p.reference || '—'}</span>
+                    <span className="new-proof-ref font-mono" title={p.reference || undefined}>{TXT.ref} {p.reference || '—'}</span>
                   </div>
                 </div>
               </li>
@@ -154,18 +155,18 @@ export const NewProofsPanel: React.FC<NewProofsPanelProps> = ({ newProofsCount, 
 
       {proofs.length > PANEL_LIMIT && (
         <button type="button" className="new-proofs-more" onClick={onOpenPayments}>
-          View all {proofs.length} proofs waiting in Payments →
+          {TXT.viewAll} {proofs.length} {TXT.proofsWaitingInPayments}
         </button>
       )}
 
       {viewing && (
-        <ProofViewer src={viewing.fileUrl} title={`Payment screenshot · ${viewing.trackingNumber}`} onClose={closeViewer}>
+        <ProofViewer src={viewing.fileUrl} title={TXT.paymentScreenshot(viewing.trackingNumber)} onClose={closeViewer}>
           <ProofFacts proof={viewing} />
           {viewing.status === 'APPROVED' && (
-            <p className="new-proofs-outcome" role="status">Approved. The payment is marked as paid.</p>
+            <p className="new-proofs-outcome" role="status">{TXT.approvedThePaymentIsMarked}</p>
           )}
           {viewing.status === 'REJECTED' && viewing.adminNote && (
-            <p className="proof-note" role="status">Rejected: {viewing.adminNote}</p>
+            <p className="proof-note" role="status">{TXT.rejected} {viewing.adminNote}</p>
           )}
           <ProofReviewControls proof={viewing} onReviewed={handleReviewed} />
         </ProofViewer>
