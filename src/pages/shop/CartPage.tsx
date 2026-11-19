@@ -363,7 +363,7 @@ export const CartPage: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => 
                 {placed.items.map((i) => (
                   <li key={i.code}>
                     <span className="tx-cart__placed-name">{i.qty} × {i.name}</span>
-                    <span className="tx-cart__code">{t('product.productId', { code: i.code })}</span>
+                    <span className="tx-cart__code">{withNodes(t('product.productId', { code: MARK_A }), <span className="tx-cart__nowrap">{i.code}</span>)}</span>
                     <span className="tx-cart__money">{money(i.lineTotal, placed.currency)}</span>
                   </li>
                 ))}
@@ -468,7 +468,7 @@ export const CartPage: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => 
                   </a>
                   <div className="tx-cart__line-info">
                     <Link page="shop" param={l.slug} onNavigate={onNavigate} className="tx-cart__name">{l.name}</Link>
-                    <span className="tx-cart__code">{t('product.productId', { code: l.code })}</span>
+                    <span className="tx-cart__code">{withNodes(t('product.productId', { code: MARK_A }), <span className="tx-cart__nowrap">{l.code}</span>)}</span>
                     <Price price={l.price} salePrice={l.salePrice} currency={l.currency} />
                   </div>
                   <div className="tx-cart__line-qty">
@@ -622,7 +622,7 @@ export const CartPage: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => 
             <ul className="tx-cart__summary-lines">
               {lines.map((l) => (
                 <li key={l.id}>
-                  <span>{l.qty} × {l.name}<span className="tx-cart__code">{l.code}</span></span>
+                  <span>{l.qty} × {l.name}<span className="tx-cart__code tx-cart__nowrap">{l.code}</span></span>
                   <span className="tx-cart__money">{money(unitPrice(l) * l.qty, l.currency)}</span>
                 </li>
               ))}
