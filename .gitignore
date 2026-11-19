@@ -8,3 +8,9 @@ dist-server/
 
 # Photo originals stay out of git (repo size); licences in images/services/SOURCES.md.
 images/services/*.jpg
+
+# Office lock files and graphify per-session/snapshot output
+~$*
+graphify-out/20*/
+graphify-out/cache/hook_sessions/
+graphify-out/cache/last_query_stamp
