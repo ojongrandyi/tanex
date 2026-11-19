@@ -49,6 +49,7 @@ function footerColumns(t: TFunction): { title: string; links: SiteLink[] }[] {
         { label: t('footer.links.about'), page: 'about' },
         { label: t('footer.links.network'), page: 'locations' },
         { label: t('footer.links.blog'), page: 'blog' },
+        { label: t('footer.links.shop'), page: 'shop' },
         { label: t('footer.links.careers'), page: 'careers' },
         { label: t('footer.links.csr'), page: 'csr' },
       ],

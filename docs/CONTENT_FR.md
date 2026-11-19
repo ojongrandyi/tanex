@@ -64,7 +64,7 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 3. **Preuve en photo.** Chaque livraison est enregistrée avec une photo et un nom.
 4. **Anglais et français.** Notre équipe vous répond dans les deux langues.
 
-**Colonnes :** *Services* Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale — *Entreprise* À propos de TanEx · Notre réseau · Blog · Contact — *Assistance* Suivre un envoi · Réserver un envoi · Réserver une livraison à moto · Centre d'aide · Demander un devis — *Mentions légales* Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Retours et remboursements · Politique de cookies (Accessibilité passe à la ligne du bas avec M.8, SHOP_SPEC §18)
+**Colonnes :** *Services* Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale — *Entreprise* À propos de TanEx · Notre réseau · Boutique · Blog · Contact — *Assistance* Suivre un envoi · Réserver un envoi · Réserver une livraison à moto · Centre d'aide · Demander un devis — *Mentions légales* Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Retours et remboursements · Politique de cookies (Accessibilité passe à la ligne du bas avec M.8, SHOP_SPEC §18)
 
 **Bureaux :** `Buea (siège)` : `{{HQ_ADDRESS}}` · `Douala` : `{{DOUALA_OFFICE}}` · `Appelez le {{PHONE}} · {{PHONE_2}}` · `Ouvert de {{HOURS}}`
 

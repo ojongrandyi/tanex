@@ -70,6 +70,7 @@ const common = {
       about: 'À propos de TanEx',
       network: 'Notre réseau',
       blog: 'Blog',
+      shop: 'Boutique',
       careers: 'Carrières',
       csr: 'Politique RSE',
       contact: 'Contact',
