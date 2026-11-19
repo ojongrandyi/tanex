@@ -121,6 +121,8 @@ export interface PlacedOrder {
   deliveryMethod: DeliveryMethod;
   pickupOffice: string | null;
   paymentMethod: ShopPaymentMethod;
+  /** The confirmation email was queued (the customer gave an email and mail is on). */
+  confirmationSent: boolean;
 }
 
 const post = (body: unknown): RequestInit => ({

@@ -355,6 +355,9 @@ export const CartPage: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => 
                 <Check aria-hidden="true" />
                 <span>{withNodes(t('placed.number', { order: MARK_A }), <span className="tx-cart__nowrap">{placed.orderNumber}</span>)}</span>
               </h2>
+              {placed.confirmationSent && email.trim() && (
+                <p className="tx-cart__muted tx-cart__sent">{t('placed.confirmation', { email: email.trim() })}</p>
+              )}
               <h3 className="tx-cart__legend">{t('placed.items')}</h3>
               <ul className="tx-cart__placed-items">
                 {placed.items.map((i) => (

@@ -391,6 +391,12 @@ limits on every field, `idempotency_key` from the form so a double tap or a retr
 That is all ("keep it simple"). Customer emails use the order's language; the staff alert is in English. Every
 email sent is a timeline event.
 
+*Built with M.6:* `server/shop/orderEmails.ts` queues the two order-placed emails as the last step of the order
+transaction and records each one queued as an `EMAIL` event (`to_value` = template key); M.7 calls
+`queueOrderDispatchedEmail` / `queueOrderCancelledEmail`. Reply-To is stored per message (`email_outbox.reply_to`).
+The staff alert is not under the hourly staff-alert cap (the order endpoint has its own limit); the customer
+confirmation is under the per-address cap. The console link is `/private-user/#order=<number>`, opened by M.7.
+
 ## 13. Link to dispatch (DISPATCH_SPEC)
 
 `Send to dispatch` (order READY, delivery method DELIVERY, `orders.manage` and `dispatch.manage` or a

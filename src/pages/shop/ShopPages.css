@@ -608,3 +608,4 @@
 .tx-cart__actions .tx-btn svg { width: 18px; height: 18px; }
 @media (max-width: 767px) { .tx-cart__actions .tx-btn { flex: 1 1 100%; } }
 .tx-cart__nowrap { white-space: nowrap; }
+.tx-cart__sent { margin: 0; overflow-wrap: anywhere; }

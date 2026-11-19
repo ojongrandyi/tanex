@@ -47,6 +47,9 @@ export function createMailTables(conn: DatabaseSync): void {
     CREATE INDEX IF NOT EXISTS idx_outbox_due ON email_outbox (status, next_attempt_at_ts);
     CREATE INDEX IF NOT EXISTS idx_outbox_to ON email_outbox (to_addr, created_at_ts);
   `);
+  // Added with M.6: the shop staff alert answers the customer directly (Reply-To).
+  const cols = conn.prepare('PRAGMA table_info(email_outbox)').all() as { name: string }[];
+  if (!cols.some((c) => c.name === 'reply_to')) conn.exec('ALTER TABLE email_outbox ADD COLUMN reply_to TEXT');
 }
 
 export interface QueueOptions<K extends TemplateKey> {
@@ -55,6 +58,8 @@ export interface QueueOptions<K extends TemplateKey> {
   locale: MailLocale;
   vars: TemplateVars[K];
   related?: { type: string; id: string };
+  /** Reply-To for this message (instead of MAIL_REPLY_TO); ignored unless a single valid address. */
+  replyTo?: string | null;
   now?: number;
 }
 
@@ -93,14 +98,15 @@ export function queueEmail<K extends TemplateKey>(opts: QueueOptions<K>, conn: D
       }
     }
 
+    const replyTo = opts.replyTo && isDeliverableAddress(opts.replyTo.trim()) ? opts.replyTo.trim() : null;
     const rendered = renderTemplate(opts.template, opts.locale, opts.vars);
     const id = 'mail_' + crypto.randomBytes(12).toString('hex');
     conn.prepare(`
       INSERT INTO email_outbox (id, to_addr, subject, html, text, template_key, locale, status, attempts,
-        related_type, related_id, created_at_ts, next_attempt_at_ts)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'QUEUED', 0, ?, ?, ?, ?)
+        related_type, related_id, created_at_ts, next_attempt_at_ts, reply_to)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'QUEUED', 0, ?, ?, ?, ?, ?)
     `).run(id, to, rendered.subject, rendered.html, rendered.text, opts.template, opts.locale,
-      opts.related?.type ?? null, opts.related?.id ?? null, now, now);
+      opts.related?.type ?? null, opts.related?.id ?? null, now, now, replyTo);
     kickWorker();
     return id;
   } catch (err) {
@@ -118,6 +124,7 @@ interface OutboxRow {
   template_key: string;
   status: string;
   attempts: number;
+  reply_to: string | null;
 }
 
 /** Short, single-line error text for the console; nothing that could hold a password. */
@@ -137,7 +144,7 @@ export async function deliver(row: OutboxRow, conn: DatabaseSync = db, now: numb
   // Claim the row first, so a second pass can't pick it up while this send is in flight.
   conn.prepare(`UPDATE email_outbox SET attempts = ?, status = 'SENDING' WHERE id = ?`).run(attempts, row.id);
   try {
-    await sendMessage({ to: row.to_addr, subject: row.subject, html: row.html, text: row.text });
+    await sendMessage({ to: row.to_addr, subject: row.subject, html: row.html, text: row.text, replyTo: row.reply_to });
     // A reset link is a secret: once delivered, the stored copy is no longer needed.
     const blank = isSensitive(row.template_key);
     conn.prepare(`
@@ -169,7 +176,7 @@ export async function deliver(row: OutboxRow, conn: DatabaseSync = db, now: numb
  */
 export async function deliverNow(id: string, conn: DatabaseSync = db): Promise<{ sent: boolean; error: string | null }> {
   const row = conn.prepare(`
-    SELECT id, to_addr, subject, html, text, template_key, status, attempts FROM email_outbox WHERE id = ? AND status = 'QUEUED'
+    SELECT id, to_addr, subject, html, text, template_key, status, attempts, reply_to FROM email_outbox WHERE id = ? AND status = 'QUEUED'
   `).get(id) as OutboxRow | undefined;
   if (!row) {
     const done = conn.prepare('SELECT status, last_error FROM email_outbox WHERE id = ?').get(id) as { status: string; last_error: string | null } | undefined;
@@ -190,7 +197,7 @@ export async function processOutbox(conn: DatabaseSync = db, now: number = Date.
   try {
     if (!mailEnabled()) return 0;
     const rows = conn.prepare(`
-      SELECT id, to_addr, subject, html, text, template_key, status, attempts FROM email_outbox
+      SELECT id, to_addr, subject, html, text, template_key, status, attempts, reply_to FROM email_outbox
       WHERE status = 'QUEUED' AND next_attempt_at_ts <= ? ORDER BY created_at_ts LIMIT 20
     `).all(now) as unknown as OutboxRow[];
     for (const row of rows) {

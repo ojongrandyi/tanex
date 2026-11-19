@@ -181,6 +181,8 @@ const shop = {
     // CONTENT §17.6 sentence is used without "({accountName})".
     mobileMoney: 'Pay by {method} to {number} after we confirm your order, with {order} as the reference. We will never ask for your PIN.',
     items: 'Your order',
+    // Shown once the confirmation email is queued (M.6, CONTENT §17.6).
+    confirmation: 'A confirmation has been sent to {email}.',
     whatsAppMessage: 'Hello {company}, I have a question about my order {order}.',
   },
 };

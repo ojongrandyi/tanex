@@ -46,6 +46,8 @@ export interface OutgoingMessage {
   subject: string;
   html: string;
   text: string;
+  /** Overrides MAIL_REPLY_TO for this message. */
+  replyTo?: string | null;
 }
 
 type SendFn = (msg: OutgoingMessage) => Promise<void>;
@@ -90,7 +92,7 @@ export async function sendMessage(msg: OutgoingMessage): Promise<void> {
   await getTransport(cfg).sendMail({
     from: cfg.from,
     to: msg.to,
-    replyTo: cfg.replyTo || undefined,
+    replyTo: msg.replyTo || cfg.replyTo || undefined,
     subject: msg.subject,
     html: msg.html,
     text: msg.text

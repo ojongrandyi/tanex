@@ -670,6 +670,8 @@ Les prix s'affichent `15 000 FCFA`.
 - `shop.order_dispatched` : objet `Votre commande {order} est en route` · `Bonne nouvelle, {name} : votre commande est en route. Numéro de suivi : {id}. Suivez-la ici : {link}`
 - `shop.order_cancelled` : objet `Votre commande {order} a été annulée` · `Votre commande {order} a été annulée. Motif : {reason}. Si vous avez déjà payé, nous vous rembourserons comme le prévoit notre politique de Retours et remboursements. Des questions ? {{EMAIL}} · {{PHONE}}`
 
+- *Ajouté avec M.6 (à confirmer, #187) :* `Numéro de commande : {order}` · titre `Votre commande` · lignes `Sous-total` / `Livraison` / `Total` et mots des frais comme au panier · titre `Comment allez-vous payer ?` avec la phrase mobile money du §17.6 (sans nom de compte, #189) ou, pour le paiement à la livraison et en agence, `{méthode} : {aide}` du formulaire de commande · signature standard `— {{COMPANY}}` au lieu de `L'équipe {{COMPANY}}` · `Des questions ?` suivi de l'e-mail et du premier numéro.
+
 ### 17.8 Console
 La console reste en anglais jusqu'à la tâche I.2 ; la traduction de CONTENT §17.8 sera faite avec I.2.
 

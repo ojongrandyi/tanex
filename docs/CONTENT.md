@@ -1059,6 +1059,8 @@ Prices show as `15,000 FCFA` (EN) / `15 000 FCFA` (FR), as elsewhere.
 | `shop.order_dispatched` (customer) | Subject `Your order {order} is on its way` · `Good news, {name}: your order is on its way. Tracking ID: {id}. Follow it here: {link}` |
 | `shop.order_cancelled` (customer) | Subject `Your order {order} has been cancelled` · `Your order {order} has been cancelled. Reason: {reason}. If you have already paid, we will refund you as our Returns & Refunds policy explains. Questions? {{EMAIL}} · {{PHONE}}` |
 
+- *Added with M.6 (owner to confirm, #187):* staff alert row labels `Name` · `Phone` · `WhatsApp` · `Email` · `City` · `Area` · `Address or landmark` · `Chat on WhatsApp: {link}` · `Free (pickup)` · `Total (delivery fee to confirm)`; `{n} items` / `1 item` in the subject. Customer confirmation also shows `Order number: {order}`, heading `Your order`, the checkout's `Subtotal` / `Delivery` / `Total` rows and fee words, heading `How will you pay?` with the mobile money sentence of §17.6 (no account name yet, #189) or, for cash and office payment, `{method}: {help}` from the checkout. Emails end with the standard signature `— {{COMPANY}}` (NOTIFICATIONS_SPEC §3) instead of `The {{COMPANY}} team`. Cancellation: `Questions?` is followed by the email and the first phone number.
+
 ### 17.8 Console (Shop)
 - Sidebar `Shop` · `Products` · `Categories` · `Orders` · `Shop settings` · dashboard tiles `New orders` · `Low stock`
 - Product statuses `Draft` · `In review` · `Published` · `Hidden` · `Archived` · filter `Needs review` · stock filter `All` · `Low` · `Out of stock`

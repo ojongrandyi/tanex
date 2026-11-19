@@ -53,16 +53,87 @@ function paragraphHtml(p: Paragraph): string {
     .join('');
 }
 
-/** Builds the HTML and text bodies from paragraphs; the signature `— TanEx` is added (CONTENT §14). */
-export function renderEmail(locale: MailLocale, subject: string, paragraphs: Paragraph[]): RenderedEmail {
+/** One line of an order (shop emails): "2 × Name (TX-PRD-123456) · 9,000 FCFA", with an optional picture. */
+export interface EmailItem {
+  qty: number;
+  name: string;
+  code: string;
+  /** Already formatted with its currency. */
+  amount: string;
+  /** Absolute https URL of a JPEG on the site's own domain. */
+  imageUrl?: string | null;
+}
+
+/**
+ * A block of the email body. A plain array is a paragraph (every existing template uses only
+ * those); the other blocks were added for the shop emails (M.6).
+ */
+export type Block =
+  | Paragraph
+  | { heading: string }
+  | { items: EmailItem[] }
+  /** Label/value pairs, e.g. totals; `strong` makes the row bold (the total). */
+  | { rows: { label: string; value: string; strong?: boolean }[] }
+  | { button: { label: string; url: string } };
+
+const isHttpUrl = (url: string | null | undefined): url is string => !!url && /^https?:\/\//i.test(url);
+
+export const itemLine = (i: EmailItem): string => `${i.qty} × ${i.name} (${i.code}) · ${i.amount}`;
+
+function blockText(b: Block, locale: MailLocale): string {
+  // French puts a space before the colon.
+  const sep = locale === 'fr' ? ' : ' : ': ';
+  if (Array.isArray(b)) return paragraphText(b);
+  if ('heading' in b) return b.heading.toUpperCase();
+  if ('items' in b) return b.items.map((i) => `- ${itemLine(i)}`).join('\n');
+  if ('rows' in b) return b.rows.map((r) => `${r.label}${sep}${r.value}`).join('\n');
+  return `${b.button.label}${sep}${b.button.url}`;
+}
+
+const P_STYLE = `margin:0 0 16px 0;font-size:16px;line-height:24px;color:${CHOC_900};`;
+
+function blockHtml(b: Block): string {
+  if (Array.isArray(b)) return `<p style="${P_STYLE}">${paragraphHtml(b)}</p>`;
+  if ('heading' in b) {
+    return `<h2 style="margin:24px 0 8px 0;font-size:17px;line-height:24px;color:${CHOC_950};">${escapeHtml(b.heading)}</h2>`;
+  }
+  if ('items' in b) {
+    // The picture column only when at least one line has a picture.
+    const anyPic = b.items.some((i) => isHttpUrl(i.imageUrl));
+    const rows = b.items.map((i) => {
+      const pic = isHttpUrl(i.imageUrl)
+        ? `<img src="${escapeHtml(i.imageUrl)}" width="56" height="56" alt="" style="display:block;border:0;width:56px;height:56px;border-radius:4px;background:${CREAM_100};">`
+        : '';
+      return `<tr>
+${anyPic ? `<td width="64" valign="top" style="padding:8px 8px 8px 0;border-bottom:1px solid #EDE1DA;">${pic}</td>` : ''}
+<td valign="top" style="padding:8px 0;border-bottom:1px solid #EDE1DA;font-size:15px;line-height:22px;color:${CHOC_900};word-break:break-word;overflow-wrap:anywhere;">${i.qty} × ${escapeHtml(i.name)}<br><span style="font-size:13px;color:${CHOC_600};">${escapeHtml(i.code)}</span></td>
+<td valign="top" align="right" style="padding:8px 0 8px 8px;border-bottom:1px solid #EDE1DA;font-size:15px;line-height:22px;color:${CHOC_900};white-space:nowrap;">${escapeHtml(i.amount)}</td>
+</tr>`;
+    }).join('');
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px 0;">${rows}</table>`;
+  }
+  if ('rows' in b) {
+    const rows = b.rows.map((r) => {
+      const weight = r.strong ? 'font-weight:bold;' : '';
+      return `<tr>
+<td valign="top" style="padding:4px 12px 4px 0;font-size:15px;line-height:22px;color:${CHOC_600};${weight}">${escapeHtml(r.label)}</td>
+<td valign="top" align="right" style="padding:4px 0;font-size:15px;line-height:22px;color:${CHOC_900};word-break:break-word;overflow-wrap:anywhere;${weight}">${escapeHtml(r.value)}</td>
+</tr>`;
+    }).join('');
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px 0;">${rows}</table>`;
+  }
+  if (!isHttpUrl(b.button.url)) return `<p style="${P_STYLE}">${escapeHtml(b.button.label)}</p>`;
+  return `<p style="margin:8px 0 20px 0;"><a href="${escapeHtml(b.button.url)}" style="display:inline-block;background:${CHOC_950};color:#FFFFFF;font-size:15px;line-height:20px;font-weight:bold;text-decoration:none;padding:12px 20px;border-radius:6px;">${escapeHtml(b.button.label)}</a></p>`;
+}
+
+/** Builds the HTML and text bodies from blocks; the signature `— TanEx` is added (CONTENT §14). */
+export function renderEmail(locale: MailLocale, subject: string, blocks: Block[]): RenderedEmail {
   const signature = `— ${COMPANY}`;
   // Same base as the links (APP_URL or the live site), so a staging copy shows its own logo.
   const base = appUrl();
-  const text = [...paragraphs.map(paragraphText), signature, `${LEGAL_NAME} · ${DOMAIN}`].join('\n\n') + '\n';
+  const text = [...blocks.map((b) => blockText(b, locale)), signature, `${LEGAL_NAME} · ${DOMAIN}`].join('\n\n') + '\n';
 
-  const body = paragraphs
-    .map((p) => `<p style="margin:0 0 16px 0;font-size:16px;line-height:24px;color:${CHOC_900};">${paragraphHtml(p)}</p>`)
-    .join('');
+  const body = blocks.map(blockHtml).join('');
 
   const html = `<!doctype html>
 <html lang="${locale}">

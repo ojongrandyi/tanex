@@ -179,6 +179,7 @@ const shop = {
     // Ajouté avec M.5 (à confirmer) : sans « ({accountName}) », le nom du compte n'étant pas encore connu.
     mobileMoney: 'Payez par {method} au {number} après notre confirmation, avec {order} comme référence. Nous ne vous demanderons jamais votre code PIN.',
     items: 'Votre commande',
+    confirmation: 'Une confirmation a été envoyée à {email}.',
     whatsAppMessage: 'Bonjour {company}, j’ai une question sur ma commande {order}.',
   },
 } satisfies Translation<ShopMessages>;

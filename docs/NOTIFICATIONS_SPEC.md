@@ -57,6 +57,10 @@ Upgrade path (§5) keeps the same templates.
 | `contact.received` | email | contact/callback/support form | customer (+ staff alert) |
 | `payment.proof_received` | email | proof uploaded | staff alert |
 | `payment.confirmed` | email | payment approved | customer |
+| `shop.order_staff_alert` | email (English, Reply-To the customer) | shop order placed | order email in Shop settings (SHOP_SPEC §12) |
+| `shop.order_received` | email | shop order placed | customer (if email; hourly per-address cap) |
+| `shop.order_dispatched` | email | shop order sent to dispatch (M.7) | customer (if email) |
+| `shop.order_cancelled` | email | shop order cancelled (M.7) | customer (if email) |
 
 ## 5. Later upgrade (not in v1, needs owner approval and budget)
 

@@ -2,7 +2,8 @@
 // public routes in server/routes/publicShop.ts. Prices, stock and the fee always come from the
 // database: anything the browser says about prices is only compared, never used. An order is
 // written in one transaction that reserves stock with a conditional UPDATE per line, so two
-// customers can never buy the last item twice. Emails come with M.6.
+// customers can never buy the last item twice. The order emails are queued in the same
+// transaction (server/shop/orderEmails.ts, M.6).
 import crypto from 'node:crypto';
 import type { Request } from 'express';
 import type { DatabaseSync } from 'node:sqlite';
@@ -24,6 +25,7 @@ import { effectivePrice } from '../../src/shared/shopPublic.js';
 import type { ShopSettings } from '../../src/shared/shopSettings.js';
 import type { ProductRow } from './catalog.js';
 import { PUBLIC_PRODUCT, formatPublicCard, type PublicProductCard } from './publicCatalog.js';
+import { confirmationQueued, queueOrderPlacedEmails } from './orderEmails.js';
 
 export interface Fail {
   status: number;
@@ -269,6 +271,8 @@ export function orderSummary(conn: DatabaseSync, id: string) {
     deliveryMethod: o.delivery_method,
     pickupOffice: o.pickup_office,
     paymentMethod: o.payment_method,
+    /** The customer's confirmation email was queued (the page then says so; the address itself is not sent back). */
+    confirmationSent: confirmationQueued(conn, id),
   };
 }
 export type OrderSummary = ReturnType<typeof orderSummary>;
@@ -377,6 +381,9 @@ export function placeOrder(
         subtotal, deliveryFee: fee.fee, deliveryFeeStatus: fee.status, total, currency,
         deliveryMethod: input.deliveryMethod, paymentMethod: input.paymentMethod, email: input.email ? 'given' : 'none',
       }, { actor: { userId: null, name: 'Online order' }, conn });
+
+      // Last step of the transaction: the emails exist only if the order does (SHOP_SPEC §10.2, §12).
+      queueOrderPlacedEmails(conn, orderId, settings, now);
 
       return orderId;
     });

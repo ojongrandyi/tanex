@@ -31,3 +31,21 @@ export function trackUrl(id: string, lang: 'en' | 'fr' = 'en'): string {
 export function consoleUrl(): string {
   return `${appUrl()}${ADMIN_PATH}`;
 }
+
+/**
+ * One shop order in the console (staff alert). The console opens the order from the fragment once
+ * the orders screen exists (M.7); until then the link opens the console.
+ */
+export function consoleOrderUrl(orderNumber: string): string {
+  return `${consoleUrl()}#order=${encodeURIComponent(orderNumber)}`;
+}
+
+/** The Returns & Refunds tab of the Legal page, in the customer's language (SHOP_SPEC §18). */
+export function returnsUrl(lang: 'en' | 'fr' = 'en'): string {
+  return `${appUrl()}${pagePath('legal', 'returns', lang)}`;
+}
+
+/** Absolute address of a stored shop picture file (`/media/shop/<file>`). */
+export function shopMediaAbsoluteUrl(fileName: string): string {
+  return `${appUrl()}/media/shop/${encodeURIComponent(fileName)}`;
+}

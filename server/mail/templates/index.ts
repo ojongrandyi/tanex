@@ -23,6 +23,14 @@ import quoteReadyEn from './quote.ready.en.js';
 import quoteReadyFr from './quote.ready.fr.js';
 import paymentConfirmedEn from './payment.confirmed.en.js';
 import paymentConfirmedFr from './payment.confirmed.fr.js';
+import shopStaffAlertEn from './shop.order_staff_alert.en.js';
+import shopReceivedEn from './shop.order_received.en.js';
+import shopReceivedFr from './shop.order_received.fr.js';
+import shopDispatchedEn from './shop.order_dispatched.en.js';
+import shopDispatchedFr from './shop.order_dispatched.fr.js';
+import shopCancelledEn from './shop.order_cancelled.en.js';
+import shopCancelledFr from './shop.order_cancelled.fr.js';
+import type { ShopOrderCancelledVars, ShopOrderDispatchedVars, ShopOrderReceivedVars, ShopStaffAlertVars } from './shop.vars.js';
 
 export interface TemplateVars {
   'auth.reset': { url: string };
@@ -36,6 +44,10 @@ export interface TemplateVars {
   'local.delivered': { id: string; masked: string; time: string; link: string };
   'quote.ready': { ref: string; url: string };
   'payment.confirmed': { id: string; reason: string };
+  'shop.order_staff_alert': ShopStaffAlertVars;
+  'shop.order_received': ShopOrderReceivedVars;
+  'shop.order_dispatched': ShopOrderDispatchedVars;
+  'shop.order_cancelled': ShopOrderCancelledVars;
 }
 
 export type TemplateKey = keyof TemplateVars;
@@ -65,7 +77,16 @@ export const TEMPLATES: { [K in TemplateKey]: TemplateEntry<K> } = {
   'booking.confirmed': { render: { en: bookingConfirmedEn, fr: bookingConfirmedFr }, sensitive: false, customer: false },
   'local.delivered': { render: { en: localDeliveredEn, fr: localDeliveredFr }, sensitive: false, customer: false },
   'quote.ready': { render: { en: quoteReadyEn, fr: quoteReadyFr }, sensitive: false, customer: false },
-  'payment.confirmed': { render: { en: paymentConfirmedEn, fr: paymentConfirmedFr }, sensitive: false, customer: false }
+  'payment.confirmed': { render: { en: paymentConfirmedEn, fr: paymentConfirmedFr }, sensitive: false, customer: false },
+  // Shop (SHOP_SPEC §12). The staff alert is English only (both languages render the English).
+  // It is not capped like the form alerts: every order is real business and the order endpoint
+  // has its own limit (5 per 10 min per address), a honeypot and stock reservation.
+  'shop.order_staff_alert': { render: { en: shopStaffAlertEn, fr: shopStaffAlertEn }, sensitive: false, customer: false },
+  // Straight from the public checkout: the per-address hourly cap applies.
+  'shop.order_received': { render: { en: shopReceivedEn, fr: shopReceivedFr }, sensitive: false, customer: true },
+  // After a staff step (M.7): no per-address cap.
+  'shop.order_dispatched': { render: { en: shopDispatchedEn, fr: shopDispatchedFr }, sensitive: false, customer: false },
+  'shop.order_cancelled': { render: { en: shopCancelledEn, fr: shopCancelledFr }, sensitive: false, customer: false }
 };
 
 export function renderTemplate<K extends TemplateKey>(key: K, locale: MailLocale, vars: TemplateVars[K]): RenderedEmail {
