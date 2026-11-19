@@ -65,11 +65,11 @@ export const ROUTES: readonly RouteDef[] = [
   { id: 'blog-category', en: '/blog/category', fr: '/fr/blog/categorie', param: true, paramRequired: true },
   { id: 'blog', en: '/blog', fr: '/fr/blog', param: true },
   // Shop (SHOP_SPEC §8): the shop, a product at /shop/<slug>, category pages listed first as for
-  // the blog. The server answers 404 for all of them while the shop is switched off. The cart
-  // page comes with M.5.
+  // the blog. The server answers 404 for all of them while the shop is switched off. The cart and
+  // checkout page (M.5) is served but kept out of search.
   { id: 'shop-category', en: '/shop/category', fr: '/fr/boutique/categorie', param: true, paramRequired: true },
   { id: 'shop', en: '/shop', fr: '/fr/boutique', param: true },
-  { id: 'cart', en: '/cart', fr: '/fr/panier', live: false },
+  { id: 'cart', en: '/cart', fr: '/fr/panier', noindex: true },
   // Footer-only company pages (owner's note 2026-11-09).
   { id: 'careers', en: '/careers', fr: '/fr/carrieres' },
   { id: 'csr', en: '/csr-policy', fr: '/fr/politique-rse' },

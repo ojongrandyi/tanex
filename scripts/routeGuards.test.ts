@@ -123,6 +123,11 @@ const PUBLIC = new Set([
   'GET /api/shop/categories',
   'GET /api/shop/products',
   'GET /api/shop/products/:slug',
+  // Cart check, delivery fee and placing an order (SHOP_SPEC §10.2; M.5): prices from the database
+  // only; orders rate-limited (5 per 10 min), idempotent, with a honeypot field.
+  'POST /api/shop/cart/check',
+  'POST /api/shop/delivery-fee',
+  'POST /api/shop/orders',
   // A signed, short-lived preview link from the studio (the token is the credential; F.2).
   'GET /api/blog/preview/:token',
   // Staff profile photos (blog authors; F.2).

@@ -57,3 +57,13 @@ export const shopBrowseLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, code: 'RATE_LIMITED', error: 'Too many requests. Please try again in a few minutes.' }
 });
+
+// Shop orders (POST /api/shop/orders, SHOP_SPEC §10.2): 5 per 10 minutes per address. The message
+// is the one the customer sees (CONTENT §17.5).
+export const shopOrderLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, code: 'RATE_LIMITED', error: 'Too many orders from this connection. Please wait a few minutes and try again.' }
+});

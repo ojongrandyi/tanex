@@ -10,7 +10,7 @@
 // an article's head comes from the post, an unknown or unpublished article or an empty category
 // is a real 404, and an old slug of a public article gets a 301 to its current address.
 //
-// Shop pages (/shop, /shop/<slug>, /shop/category/<slug>, SHOP_SPEC §8) are a 404 while the shop is
+// Shop pages (/shop, /shop/<slug>, /shop/category/<slug>, /cart, SHOP_SPEC §8) are a 404 while the shop is
 // switched off, and for a product or category the public shop doesn't show (server/shop/pageData.ts).
 // Without a shop resolver (an admin-only deployment) they are always a 404.
 import { Request, Response, NextFunction, RequestHandler } from 'express';
@@ -61,7 +61,7 @@ export function publicPages(render: IndexRenderer, indexHtmlPath: string, resolv
       sendIndex(res, next, render, { kind: 'page', match, blog: result.blog }, indexHtmlPath);
       return;
     }
-    if (match.id === 'shop' || match.id === 'shop-category') {
+    if (match.id === 'shop' || match.id === 'shop-category' || match.id === 'cart') {
       if (!resolveShop) return next();
       let result: ShopPageResult;
       try {

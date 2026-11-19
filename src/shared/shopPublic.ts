@@ -7,6 +7,8 @@
 export const SHOP_PAGE_SIZE = 24;
 /** Related products on a product page: same category, in stock first. */
 export const SHOP_RELATED_MAX = 4;
+/** Different products one order (and so one cart) may hold (SHOP_SPEC §10.2). */
+export const ORDER_MAX_LINES = 20;
 /** Longest search text the API reads; anything longer is cut. */
 export const SHOP_SEARCH_MAX = 100;
 

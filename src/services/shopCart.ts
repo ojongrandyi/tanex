@@ -3,9 +3,11 @@
 // server (the cart page, M.5). Survives a refused or broken storage: the cart then lasts for the
 // visit only. Other tabs see changes through the storage event.
 
+import { ORDER_MAX_LINES } from '../shared/shopPublic';
+
 export const CART_KEY = 'tx_cart';
-/** Different products one cart may hold. */
-export const CART_MAX_LINES = 50;
+/** Different products one cart may hold: as many as one order (SHOP_SPEC §10.2). */
+export const CART_MAX_LINES = ORDER_MAX_LINES;
 
 export interface CartLine {
   id: string;
@@ -99,4 +101,34 @@ export function subscribeCart(fn: () => void): () => void {
     listeners.delete(fn);
     if (typeof window !== 'undefined') window.removeEventListener('storage', onStorage);
   };
+}
+
+/** Sets a product's quantity (0 removes it). */
+export function setCartQuantity(id: string, qty: number): void {
+  const lines = readCart();
+  const n = Math.max(0, Math.floor(qty));
+  const next = n === 0 ? lines.filter((l) => l.id !== id) : lines.map((l) => (l.id === id ? { ...l, qty: n } : l));
+  writeCart(next);
+}
+
+/** Replaces the cart, e.g. with the quantities the server allows after a cart check. */
+export function replaceCart(lines: CartLine[]): void {
+  writeCart(clean(lines));
+}
+
+export function clearCart(): void {
+  writeCart([]);
+}
+
+// Prices the customer has seen in this visit, per product (memory only, never stored): the cart
+// page says "The price of … is now …" when a check finds another price, and the order sends them
+// so the server can refuse an order whose price changed since (it never uses them as prices).
+const seen = new Map<string, number>();
+
+export function seenPrice(id: string): number | undefined {
+  return seen.get(id);
+}
+
+export function rememberPrice(id: string, price: number): void {
+  seen.set(id, price);
 }

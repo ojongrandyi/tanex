@@ -4,6 +4,7 @@ import { fetchApi, handleResponse } from './api';
 import type { Locale } from '../i18n/types';
 import type { PublicStock, ShopSort } from '../shared/shopPublic';
 import type { ShopImageSlotKey } from '../shared/shopImages';
+import type { DeliveryMethod, ShopPaymentMethod } from '../shared/shopOrderStatus';
 
 export type ShopImageUrls = Record<ShopImageSlotKey, string>;
 
@@ -65,6 +66,69 @@ export interface ProductListParams {
   page?: number;
 }
 
+// ---- Cart and checkout (M.5) ----
+
+export interface CheckedCartLine extends PublicProductCard {
+  requested: number;
+  qty: number;
+  lineTotal: number;
+}
+
+export interface CartCheckResult {
+  lines: CheckedCartLine[];
+  removed: { id: string; name: string | null }[];
+  subtotal: number;
+  currency: string;
+  options: { paymentMethods: ShopPaymentMethod[]; pickupOffices: string[] };
+}
+
+export type DeliveryFeeResult =
+  | { status: 'NONE'; fee: 0; currency: string }
+  | { status: 'QUOTED'; fee: number; currency: string }
+  | { status: 'TO_CONFIRM'; fee: null; currency: string };
+
+export interface OrderRequest {
+  idempotencyKey: string;
+  lines: { id: string; qty: number }[];
+  seenPrices: Record<string, number>;
+  name: string;
+  phone: string;
+  sameAsPhone: boolean;
+  whatsapp: string;
+  email: string;
+  locale: Locale;
+  deliveryMethod: DeliveryMethod;
+  cityId: string | null;
+  zoneId: string | null;
+  address: string;
+  pickupOffice: string | null;
+  note: string;
+  paymentMethod: ShopPaymentMethod;
+  acceptTerms: boolean;
+  /** Hidden field; people leave it empty. */
+  website: string;
+}
+
+export interface PlacedOrder {
+  orderNumber: string;
+  firstName: string;
+  items: { code: string; name: string; qty: number; unitPrice: number; lineTotal: number }[];
+  subtotal: number;
+  deliveryFee: number | null;
+  deliveryFeeStatus: 'QUOTED' | 'TO_CONFIRM' | 'NONE';
+  total: number;
+  currency: string;
+  deliveryMethod: DeliveryMethod;
+  pickupOffice: string | null;
+  paymentMethod: ShopPaymentMethod;
+}
+
+const post = (body: unknown): RequestInit => ({
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body),
+});
+
 const BASE = '/api/shop';
 
 export const shopPublicApi = {
@@ -94,4 +158,15 @@ export const shopPublicApi = {
 
   product: async (locale: Locale, slug: string): Promise<PublicProduct> =>
     handleResponse<PublicProduct>(await fetchApi(`${BASE}/products/${encodeURIComponent(slug)}?locale=${locale}`, { cache: 'no-cache' })),
+
+  checkCart: async (locale: Locale, lines: { id: string; qty: number }[]): Promise<CartCheckResult> =>
+    handleResponse<CartCheckResult>(await fetchApi(`${BASE}/cart/check`, post({ locale, lines }))),
+
+  deliveryFee: async (req: {
+    lines: { id: string; qty: number }[]; deliveryMethod: DeliveryMethod; cityId: string | null; zoneId: string | null;
+  }): Promise<DeliveryFeeResult> =>
+    handleResponse<DeliveryFeeResult>(await fetchApi(`${BASE}/delivery-fee`, post(req))),
+
+  placeOrder: async (order: OrderRequest): Promise<PlacedOrder> =>
+    handleResponse<PlacedOrder>(await fetchApi(`${BASE}/orders`, post(order))),
 };

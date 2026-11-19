@@ -663,6 +663,8 @@ Les prix s'affichent `15 000 FCFA`.
 - Mobile money : `Payez par {method} au {number} ({accountName}) après notre confirmation, avec {order} comme référence. Nous ne vous demanderons jamais votre code PIN.`
 - Boutons `Nous écrire sur WhatsApp` · `Continuer vos achats`
 
+- *Ajouté avec M.5 (à confirmer) :* panier `Retirer {product}` · `Un produit n'est plus disponible et a été retiré de votre panier.` · `Vous pouvez commander jusqu’à {n} {product} : nous avons modifié la quantité.` · `Quantité de {product}` · `Nous n'avons pas pu vérifier votre panier. Veuillez réessayer.` · étapes `Étapes de la commande`, `Panier`, `Vos coordonnées` · `Choisissez votre ville` · `Choisissez votre quartier` · `Choisissez la livraison ou le retrait.` · `Choisissez votre ville pour voir les frais de livraison.` · `Calcul des frais de livraison…` · `Retour au panier` · `{n} articles` / `1 article` · `Veuillez vérifier les champs signalés en rouge.` · `Votre panier a changé. Vérifiez-le avant de passer votre commande.` · `Votre commande` · `Bonjour {{COMPANY}}, j’ai une question sur ma commande {order}.` · ligne mobile money sans `({accountName})` (#189).
+
 ### 17.7 E-mails client (l'alerte interne est en anglais, CONTENT §17.7)
 - `shop.order_received` : objet `Nous avons bien reçu votre commande {order}` · `Merci, {name}. Nous avons bien reçu votre commande et vous appellerons au {phone} pour la confirmer.` · articles avec références · totaux · paiement comme §17.6 · `Retours et remboursements : {link}` · `L'équipe {{COMPANY}}`
 - `shop.order_dispatched` : objet `Votre commande {order} est en route` · `Bonne nouvelle, {name} : votre commande est en route. Numéro de suivi : {id}. Suivez-la ici : {link}`

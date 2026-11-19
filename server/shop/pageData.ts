@@ -1,6 +1,6 @@
 // Shop pages as the server sees them (SHOP_SPEC §8): whether /shop, a category or a product is a
 // page at all. Everything is a 404 while the shop is switched off; a category is a page while it is
-// visible and lists a published product; a product while it is PUBLISHED. A shop list past its
+// visible and lists a published product; a product while it is PUBLISHED; the cart while the shop is on. A shop list past its
 // last page is a 404, as for the blog. Titles, descriptions and Product JSON-LD come with M.8.
 import type { DatabaseSync } from 'node:sqlite';
 import type { RouteMatch } from '../../src/router/routes.js';
@@ -15,6 +15,7 @@ const NOT_FOUND: ShopPageResult = { kind: 'not-found' };
 
 export function resolveShopPage(conn: DatabaseSync, match: RouteMatch, query: Record<string, unknown>): ShopPageResult {
   if (!loadShopSettings(conn).enabled) return NOT_FOUND;
+  if (match.id === 'cart') return PAGE;
   const page = shopListPage(query.page);
 
   if (match.id === 'shop' && match.param === undefined) {

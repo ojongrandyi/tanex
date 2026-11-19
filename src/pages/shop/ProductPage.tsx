@@ -6,7 +6,7 @@ import { setAlternateTargets } from '../../router/navigation';
 import { buildPath } from '../../router/routes';
 import { useAreaT, useLocale } from '../../i18n/I18nProvider';
 import { whatsAppDigits } from '../../shared/whatsapp';
-import { addToCart, cartQuantity, subscribeCart } from '../../services/shopCart';
+import { addToCart, cartQuantity, rememberPrice, subscribeCart } from '../../services/shopCart';
 import { shopPublicApi, type PublicProduct } from '../../services/shopPublic';
 import { NotFoundPage } from '../NotFoundPage';
 import { ProductGallery } from './ProductGallery';
@@ -54,6 +54,7 @@ export const ProductView: React.FC<ProductViewProps> = ({ product: p, onNavigate
   const add = () => {
     if (preview) return;
     const now = addToCart(p.id, qty, p.maxQty);
+    if (now !== null) rememberPrice(p.id, p.salePrice ?? p.price);
     setNotice(now === null ? { kind: 'limit', max: p.maxQty } : { kind: 'added' });
     if (now !== null) setQty(1);
   };

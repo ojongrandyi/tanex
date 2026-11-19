@@ -117,7 +117,8 @@ test('routes: shop, category and product addresses in both languages; reserved w
   // /shop/category alone reads as a product slug, as /blog/category does; "category" is a reserved
   // slug (shopProduct.ts), so no product has it and the page is a 404 (tested below).
   assert.equal(matchPath('/shop/category')?.id, 'shop');
-  assert.equal(matchPath('/cart'), null, 'the cart page comes with M.5');
+  assert.equal(matchPath('/cart')?.id, 'cart', 'the cart page is live since M.5');
+  assert.equal(matchPath('/fr/panier')?.id, 'cart');
   assert.equal(pagePath('shop-product', 'bag', 'fr'), '/fr/boutique/bag');
   assert.equal(buildPath('shop-category', 'bags', 'en'), '/shop/category/bags');
   const sitemap = sitemapPaths().flatMap((p) => [p.en, p.fr]);

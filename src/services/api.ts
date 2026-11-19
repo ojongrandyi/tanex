@@ -232,6 +232,8 @@ export async function handleResponse<T>(res: Response): Promise<T> {
     if (typeof json.code === 'string') err.code = json.code;
     // Per-field messages from form endpoints (e.g. payment methods), keyed by field name.
     if (json.fieldErrors) err.fieldErrors = json.fieldErrors;
+    // Extra facts about a refusal (e.g. the quantity still in stock for a shop order).
+    if (json.details && typeof json.details === 'object') err.details = json.details;
     throw err;
   }
   return json.data !== undefined ? json.data : json;

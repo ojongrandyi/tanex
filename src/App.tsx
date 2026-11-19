@@ -68,6 +68,9 @@ const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then((m) => ({ de
 const loadShop = () => import('./pages/shop');
 const ShopPage = lazy(() => loadShop().then((m) => ({ default: m.ShopPage })));
 const ProductPage = lazy(() => loadShop().then((m) => ({ default: m.ProductPage })));
+// The cart and checkout is a chunk of its own (with the phone number checks), so browsing the
+// shop never loads it.
+const CartPage = lazy(() => import('./pages/shop/CartPage').then((m) => ({ default: m.CartPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 // Admin lives at ADMIN_PATH (/private-user/, src/config/brand.ts) on the same host, app and API
@@ -551,6 +554,10 @@ function MainAppContent() {
 
         {currentPage === 'shop-product' && route?.id === 'shop' && route.param && (
           <ProductPage key={route.canonical} slug={route.param} onNavigate={handleNavigate} />
+        )}
+
+        {currentPage === 'cart' && (
+          <CartPage onNavigate={handleNavigate} />
         )}
 
         {currentPage === 'careers' && (

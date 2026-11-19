@@ -3,7 +3,7 @@ import { Check, ShoppingCart, X } from 'lucide-react';
 import { Link } from '../../router/Link';
 import { useAreaT, useLocale } from '../../i18n/I18nProvider';
 import { formatMoney } from '../../i18n/format';
-import { addToCart } from '../../services/shopCart';
+import { addToCart, rememberPrice } from '../../services/shopCart';
 import type { PublicProductCard } from '../../services/shopPublic';
 import type { PublicStock } from '../../shared/shopPublic';
 import { ShopImage } from './ShopImage';
@@ -77,6 +77,7 @@ function useQuickAdd(product: PublicProductCard, onNotice: (n: CartNotice) => vo
       onNotice({ kind: 'limit', max: product.maxQty });
       return;
     }
+    rememberPrice(product.id, product.salePrice ?? product.price);
     setAdded(true);
     onNotice({ kind: 'added' });
   };

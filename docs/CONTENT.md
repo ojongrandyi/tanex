@@ -1049,6 +1049,8 @@ Prices show as `15,000 FCFA` (EN) / `15 000 FCFA` (FR), as elsewhere.
 - Mobile money: `Pay by {method} to {number} ({accountName}) after we confirm your order, with {order} as the reference. We will never ask for your PIN.`
 - Buttons `Message us on WhatsApp` · `Continue shopping`
 
+- *Added with M.5 (owner to confirm):* cart `Remove {product}` (screen readers) · `A product is no longer available and was removed from your cart.` · `You can order up to {n} of {product}: we've changed the quantity.` · `Quantity of {product}` · `We couldn't check your cart. Please try again.` · steps `Checkout steps`, `Cart`, `Your details` · checkout `Choose your city` · `Choose your area` · `Choose delivery or pickup.` · `Choose your city to see the delivery fee.` · `Checking the delivery fee…` · `Back to your cart` · `{n} items` / `1 item` · `Please check the fields marked in red.` · `Your cart has changed. Please check it before placing your order.` · order placed `Your order` · WhatsApp message `Hello {{COMPANY}}, I have a question about my order {order}.` · the mobile money line is shown **without `({accountName})`** until the operator account names are on file (#189); `A confirmation has been sent to {email}.` appears only once the emails exist (M.6).
+
 ### 17.7 Emails (SHOP_SPEC §12)
 | Template | Text |
 |---|---|
