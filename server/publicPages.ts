@@ -70,6 +70,8 @@ export function publicPages(render: IndexRenderer, indexHtmlPath: string, resolv
         return next(err);
       }
       if (result.kind === 'not-found') return next();
+      sendIndex(res, next, render, { kind: 'page', match, shop: result.shop }, indexHtmlPath);
+      return;
     }
     sendIndex(res, next, render, { kind: 'page', match }, indexHtmlPath);
   };

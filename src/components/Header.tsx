@@ -20,7 +20,7 @@ import './Header.css';
 
 // Public site header (CONTENT §1.2, design/direction.html): dark utility bar on desktop, then a
 // sticky cream bar with a backdrop blur: logo, main navigation with the Services menu, the
-// EN | FR language switch and Get a Quote. Below 1100 px the navigation moves into a drawer
+// EN | FR language switch and Shop Now. Below 1100 px the navigation moves into a drawer
 // (dialog with focus trap; Escape, backdrop and every link close it). Text: src/i18n common.
 
 /** A link to an App.tsx page, with an optional param (service tier ID, legal section ID). */
@@ -65,13 +65,14 @@ export function servicesLinks(t: TFunction): SiteLink[] {
 }
 
 // The owner's menu (2026-11-09): Home, About Us, Track Shipment, Our Services, Blog, Contact Us.
-// Ship and Network moved to the footer. A Marketplace button joins once the owner supplies its URL.
+// Ship and Network moved to the footer. Shop added 2026-11-19; the header button is Shop Now.
 function navItems(t: TFunction): NavItem[] {
   return [
     { key: 'home', label: t('header.home'), page: 'home', pages: ['home'] },
     { key: 'about', label: t('header.about'), page: 'about', pages: ['about'] },
     { key: 'track', label: t('header.track'), page: 'track', pages: ['track', 'track-result'] },
     { key: 'services', label: t('header.services'), page: 'services', pages: ['services'], menu: servicesLinks(t), allLabel: t('header.allServices') },
+    { key: 'shop', label: t('header.shop'), page: 'shop', pages: ['shop', 'shop-product'] },
     { key: 'blog', label: t('header.blog'), page: 'blog', pages: ['blog'] },
     { key: 'contact', label: t('header.contact'), page: 'contact', pages: ['contact'] },
   ];
@@ -383,8 +384,8 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
             <div className="tx-header__lang">
               <LanguageSwitch />
             </div>
-            <a href={hrefFor('quote')} className={buttonClass('primary', 'sm', false, 'tx-header__quote')} onClick={go('quote')}>
-              {t('header.quote')}
+            <a href={hrefFor('shop')} className={buttonClass('primary', 'sm', false, 'tx-header__quote')} onClick={go('shop')}>
+              {t('header.shopNow')}
             </a>
             <button
               ref={toggleRef}
@@ -471,8 +472,8 @@ export const Header: React.FC<HeaderProps> = ({ activePage = 'home', onNavigate 
               </ul>
             </nav>
 
-            <a href={hrefFor('quote')} className={buttonClass('primary', 'lg', true)} onClick={go('quote')}>
-              {t('header.quote')}
+            <a href={hrefFor('shop')} className={buttonClass('primary', 'lg', true)} onClick={go('shop')}>
+              {t('header.shopNow')}
             </a>
 
             <div className="tx-drawer__lang">

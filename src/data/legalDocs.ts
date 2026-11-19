@@ -1,4 +1,4 @@
-// Legal pages (docs/CONTENT.md §13.1, docs/CONTENT_FR.md §13): plain-language drafts in English and
+// Legal pages (docs/CONTENT.md §13.1–13.2, docs/CONTENT_FR.md §13–13.2): plain-language drafts in English and
 // French. LAWYER REVIEW UNDER CAMEROONIAN LAW REQUIRED BEFORE LAUNCH (tracker #112); the French text
 // also needs the native review (#108). Items marked [confirm] in CONTENT §13 are shown as written
 // until the owner confirms them (dimensional divisor 5000, 7-day claims window).
@@ -7,11 +7,15 @@
 // the browser-storage keys of the public pages. Update it whenever a cookie, storage key or
 // third-party service is added or removed, and bump LEGAL_LAST_UPDATED.
 
-import { COMPANY_SHORT, DOMAIN, LEGAL_NAME } from '../config/brand';
+import { COMPANY_SHORT, DOMAIN, LEGAL_NAME, PHONE, PHONE_2, formatPhone } from '../config/brand';
 import { pagePath } from '../router/routes';
 
-export type LegalDocId = 'privacy' | 'terms' | 'shipping-terms' | 'cookies' | 'accessibility';
-export const LEGAL_DOC_IDS: readonly LegalDocId[] = ['privacy', 'terms', 'shipping-terms', 'cookies', 'accessibility'];
+export type LegalDocId = 'privacy' | 'terms' | 'shipping-terms' | 'returns' | 'cookies' | 'accessibility';
+export const LEGAL_DOC_IDS: readonly LegalDocId[] = ['privacy', 'terms', 'shipping-terms', 'returns', 'cookies', 'accessibility'];
+
+// Cities where riders deliver and collect (CLAUDE.md §2; the Returns & Refunds policy names them).
+const LOCAL_CITIES = { en: 'Buea, Limbe and Douala', fr: 'Buea, Limbe et Douala' };
+const phones = () => [formatPhone(PHONE), formatPhone(PHONE_2)];
 
 /** A paragraph, or a bulleted list when it is an array. */
 export type LegalBlock = string | string[];
@@ -30,7 +34,7 @@ export interface LegalDoc {
 }
 
 /** Date of the current text (ISO); pages format it per language. Update with every change. */
-export const LEGAL_LAST_UPDATED = '2026-11-10';
+export const LEGAL_LAST_UPDATED = '2026-11-19';
 
 interface LegalContact {
   email: string;
@@ -72,6 +76,9 @@ function legalDocsEn({ email, address }: LegalContact): LegalDoc[] {
         ] },
         { heading: 'International transfers', body: [
           'Because we move goods across borders, shipment details travel with them to the countries on the route. We share only what carriage and customs require.',
+        ] },
+        { heading: 'Shop orders', body: [
+          'When you order from our shop, we collect your name, phone and WhatsApp numbers, your email if you give it, your delivery address or chosen office, and what you ordered. We use them to confirm, prepare and deliver your order, to handle returns, and to keep our accounts. We keep order and payment records for 10 years, as accounting rules require; your phone numbers, email and address are removed from the order 2 years after it is completed.',
         ] },
         { heading: 'How long we keep it', body: [
           'We keep personal data only as long as we need it for the purposes above, including the periods set by tax, customs and transport record-keeping rules.',
@@ -127,6 +134,33 @@ function legalDocsEn({ email, address }: LegalContact): LegalDoc[] {
       ],
     },
     {
+      id: 'returns',
+      label: 'Returns & Refunds',
+      title: 'Returns and refunds',
+      sections: (() => {
+        const [p1, p2] = phones();
+        return [
+          { heading: 'About this policy', body: [`This policy covers products you buy from the ${COMPANY_SHORT} shop on ${DOMAIN}. It does not cover the deliveries and shipments you book with us; those follow our Shipping Terms. Nothing in this policy limits the rights you have under the consumer protection law that applies to you.`] },
+          { heading: 'Check your order when it arrives', body: ['Please check your items when you receive them, in front of the courier if you can. If anything is missing, damaged or not what you ordered, tell the courier and contact us within 48 hours of delivery or pickup, with your order number and photos of the problem.'] },
+          { heading: 'Wrong, damaged or faulty items', body: [`If we sent the wrong item, or it arrived damaged or faulty, we will put it right at no cost to you. We collect the item free of charge in ${LOCAL_CITIES.en} and arrange its return from other cities at our expense. You then choose a replacement (if we have one in stock) or a full refund of the item and of the delivery fee you paid for it.`] },
+          { heading: 'If you change your mind', body: ['You can return an item within 7 days of receiving it if it is unused, complete, and in its original packaging with all labels and accessories. Bring it to one of our offices, or we can collect it for our usual delivery fee. We refund the price you paid for the item; the original delivery fee is not refunded.'] },
+          { heading: 'Items we cannot take back', body: ['Unless they are wrong, damaged or faulty, we cannot take back:', [
+            'items that have been used, worn, washed or assembled;',
+            'cosmetics, personal care and hygiene products once their seal or packaging has been opened;',
+            'food and other perishable goods;',
+            'items made, cut or changed to your request;',
+            'items marked "Final sale" on their product page.',
+          ]] },
+          { heading: 'How to return an item', body: [`Contact us before sending anything back: write to ${email}, or call or WhatsApp ${p1} or ${p2}. Give your order number, the product ID of each item (it starts with TX-PRD and is shown in your order confirmation), the reason, and photos if the item is damaged. We will confirm whether the item can be returned and arrange a collection or a drop-off at our office.`] },
+          { heading: 'When we receive your return', body: ['We check every returned item when it reaches us. If it meets the conditions above, we start your refund or send the replacement. If it does not, we tell you why and arrange to give the item back to you.'] },
+          { heading: 'Refunds', body: ['We refund within 7 days of receiving and checking the item, using the way you paid: MTN MoMo or Orange Money to the number you paid from, or cash at our office if you paid in cash. We send you the refund reference. We never ask for your PIN or any password to make a refund.'] },
+          { heading: 'Exchanges', body: ['To swap an item for another product or size, tell us when you contact us. If the new item is in stock we exchange it directly and you pay or receive the price difference; otherwise we refund the returned item and you can place a new order.'] },
+          { heading: 'Cancelling an order', body: ['You can cancel free of charge at any time before your order leaves our office. Call, WhatsApp or email us with your order number. If you have already paid, we refund you in full as described under Refunds. If you refuse a delivery at your door for a reason not covered under Wrong, damaged or faulty items, we may charge the delivery fee.'] },
+          { heading: 'Contact', body: [`Questions about a return or a refund: ${email} · ${p1} · ${p2}. ${LEGAL_NAME}${address ? `, ${address}` : ''}.`] },
+        ];
+      })(),
+    },
+    {
       id: 'cookies',
       label: 'Cookie Policy',
       title: 'Cookie Policy',
@@ -143,6 +177,7 @@ function legalDocsEn({ email, address }: LegalContact): LegalDoc[] {
             'tx_units: whether you prefer metric or imperial units.',
             'tx_live_shipment_stream: the latest update for a shipment you are viewing, so other open tabs stay in step.',
             'tx_motion_paused: that you paused the motion on our home page, so it stays paused.',
+            'tx_cart: the products and quantities in your shopping cart. It holds no personal details.',
           ],
           'You can clear these at any time in your browser settings.',
         ] },
@@ -202,6 +237,9 @@ function legalDocsFr({ email, address }: LegalContact): LegalDoc[] {
         { heading: 'Transferts internationaux', body: [
           "Comme nous transportons des marchandises à travers les frontières, les informations d'envoi voyagent avec elles vers les pays du trajet. Nous ne partageons que ce qu'exigent le transport et la douane.",
         ] },
+        { heading: 'Commandes en boutique', body: [
+          "Lorsque vous commandez dans notre boutique, nous collectons votre nom, vos numéros de téléphone et WhatsApp, votre e-mail si vous le donnez, votre adresse de livraison ou l'agence choisie, et le contenu de votre commande. Nous les utilisons pour confirmer, préparer et livrer votre commande, traiter les retours et tenir notre comptabilité. Nous conservons les commandes et paiements pendant 10 ans, comme l'exigent les règles comptables ; vos numéros de téléphone, votre e-mail et votre adresse sont supprimés de la commande 2 ans après sa clôture.",
+        ] },
         { heading: 'Durée de conservation', body: [
           'Nous conservons les données personnelles uniquement le temps nécessaire aux finalités ci-dessus, y compris les durées imposées par les règles fiscales, douanières et de transport.',
         ] },
@@ -256,6 +294,33 @@ function legalDocsFr({ email, address }: LegalContact): LegalDoc[] {
       ],
     },
     {
+      id: 'returns',
+      label: 'Retours et remboursements',
+      title: 'Retours et remboursements',
+      sections: (() => {
+        const [p1, p2] = phones();
+        return [
+          { heading: 'À propos de cette politique', body: [`Cette politique s'applique aux produits achetés dans la boutique ${COMPANY_SHORT} sur ${DOMAIN}. Elle ne concerne pas les livraisons et les envois que vous réservez chez nous, qui relèvent de nos Conditions d'expédition. Rien dans cette politique ne limite les droits que vous accorde la loi sur la protection des consommateurs qui vous est applicable.`] },
+          { heading: 'Vérifiez votre commande à la réception', body: ["Vérifiez vos articles à la réception, si possible devant le livreur. S'il manque quelque chose, si un article est endommagé ou ne correspond pas à votre commande, dites-le au livreur et contactez-nous dans les 48 heures suivant la livraison ou le retrait, avec votre numéro de commande et des photos du problème."] },
+          { heading: 'Article erroné, endommagé ou défectueux', body: [`Si nous vous avons envoyé le mauvais article, ou s'il est arrivé endommagé ou défectueux, nous corrigeons la situation sans frais pour vous. Nous récupérons l'article gratuitement à ${LOCAL_CITIES.fr} et organisons son retour depuis les autres villes à nos frais. Vous choisissez ensuite un remplacement (si nous en avons en stock) ou le remboursement complet de l'article et des frais de livraison payés pour celui-ci.`] },
+          { heading: 'Si vous changez d\'avis', body: ["Vous pouvez retourner un article dans les 7 jours suivant sa réception s'il n'a pas été utilisé, s'il est complet et dans son emballage d'origine avec toutes ses étiquettes et ses accessoires. Déposez-le dans l'une de nos agences, ou nous pouvons le récupérer au tarif de livraison habituel. Nous remboursons le prix payé pour l'article ; les frais de livraison initiaux ne sont pas remboursés."] },
+          { heading: 'Articles non repris', body: ['Sauf s\'ils sont erronés, endommagés ou défectueux, nous ne pouvons pas reprendre :', [
+            'les articles utilisés, portés, lavés ou montés ;',
+            "les cosmétiques et produits d'hygiène et de soin dont le scellé ou l'emballage a été ouvert ;",
+            'les denrées alimentaires et autres produits périssables ;',
+            'les articles fabriqués, coupés ou modifiés à votre demande ;',
+            'les articles marqués « Vente finale » sur leur fiche produit.',
+          ]] },
+          { heading: 'Comment retourner un article', body: [`Contactez-nous avant tout renvoi : écrivez à ${email}, ou appelez-nous ou écrivez-nous sur WhatsApp au ${p1} ou au ${p2}. Indiquez votre numéro de commande, la référence produit de chaque article (elle commence par TX-PRD et figure dans votre confirmation de commande), le motif du retour et des photos si l'article est endommagé. Nous vous confirmerons si l'article peut être retourné et organiserons son enlèvement ou son dépôt dans notre agence.`] },
+          { heading: 'À la réception de votre retour', body: ["Nous vérifions chaque article retourné à son arrivée. S'il remplit les conditions ci-dessus, nous lançons votre remboursement ou envoyons le remplacement. Sinon, nous vous en expliquons la raison et organisons la restitution de l'article."] },
+          { heading: 'Remboursements', body: ["Nous remboursons dans les 7 jours suivant la réception et la vérification de l'article, par le moyen utilisé pour payer : MTN MoMo ou Orange Money vers le numéro qui a servi au paiement, ou en espèces dans notre agence si vous avez payé en espèces. Nous vous communiquons la référence du remboursement. Nous ne vous demanderons jamais votre code PIN ni aucun mot de passe pour un remboursement."] },
+          { heading: 'Échanges', body: ["Pour échanger un article contre un autre produit ou une autre taille, dites-le-nous en nous contactant. Si le nouvel article est en stock, nous l'échangeons directement et vous payez ou recevez la différence de prix ; sinon, nous remboursons l'article retourné et vous pouvez passer une nouvelle commande."] },
+          { heading: 'Annuler une commande', body: ["Vous pouvez annuler gratuitement à tout moment avant que votre commande ne quitte notre agence. Appelez-nous, écrivez-nous sur WhatsApp ou par e-mail avec votre numéro de commande. Si vous avez déjà payé, nous vous remboursons intégralement comme indiqué à la rubrique Remboursements. Si vous refusez une livraison à votre porte pour une raison non prévue à la rubrique Article erroné, endommagé ou défectueux, nous pouvons facturer les frais de livraison."] },
+          { heading: 'Contact', body: [`Questions sur un retour ou un remboursement : ${email} · ${p1} · ${p2}. ${LEGAL_NAME}${address ? `, ${address}` : ''}.`] },
+        ];
+      })(),
+    },
+    {
       id: 'cookies',
       label: 'Politique de cookies',
       title: 'Politique de cookies',
@@ -272,6 +337,7 @@ function legalDocsFr({ email, address }: LegalContact): LegalDoc[] {
             "tx_units : votre préférence entre unités métriques et impériales.",
             "tx_live_shipment_stream : la dernière mise à jour d'un envoi que vous consultez, pour que vos autres onglets restent à jour.",
             "tx_motion_paused : que vous avez mis en pause l'animation de notre page d'accueil, pour qu'elle le reste.",
+            'tx_cart : les produits et quantités de votre panier. Aucune donnée personnelle.',
           ],
           'Vous pouvez les effacer à tout moment dans les réglages de votre navigateur.',
         ] },

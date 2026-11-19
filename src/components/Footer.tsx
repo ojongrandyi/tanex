@@ -70,6 +70,8 @@ function footerColumns(t: TFunction): { title: string; links: SiteLink[] }[] {
         { label: t('footer.links.privacy'), page: 'legal', param: 'privacy' },
         { label: t('footer.links.terms'), page: 'legal', param: 'terms' },
         { label: t('footer.links.shippingTerms'), page: 'legal', param: 'shipping-terms' },
+        // Returns & Refunds takes the fifth row; Accessibility moves to the bottom line (SHOP_SPEC §18).
+        { label: t('footer.links.returns'), page: 'legal', param: 'returns' },
         { label: t('footer.links.cookies'), page: 'legal', param: 'cookies' },
         { label: t('footer.links.accessibility'), page: 'legal', param: 'accessibility' },
       ],

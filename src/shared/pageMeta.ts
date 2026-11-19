@@ -133,4 +133,4 @@ export function pageName(id: RouteId, lang: Lang = 'en'): string {
  * Legal sub-pages with content of their own (src/data/legalDocs.ts ids). `privacy` is what
  * /legal shows, so /legal/privacy points its canonical at /legal; any other tab falls back there too.
  */
-export const LEGAL_TABS = ['terms', 'shipping-terms', 'cookies', 'accessibility'] as const;
+export const LEGAL_TABS = ['terms', 'shipping-terms', 'returns', 'cookies', 'accessibility'] as const;

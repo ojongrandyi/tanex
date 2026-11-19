@@ -46,9 +46,9 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 - **Boutons :** `Retour à l'accueil` · `Suivre un envoi` · **Aide :** `Besoin d'aide ?` → `Contactez-nous`
 
 ### 1.2 En-tête
-- Navigation (menu du propriétaire, 2026-11-09, **à confirmer**) : **Accueil** · **À propos** · **Suivre un envoi** · **Nos services** (Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale · Tous les services) · **Blog** · **Contactez-nous**. « Réserver un envoi » et « Notre réseau » passent dans le pied de page.
+- Navigation (menu du propriétaire, 2026-11-09, **à confirmer**) : **Accueil** · **À propos** · **Suivre un envoi** · **Nos services** (Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale · Tous les services) · **Boutique** · **Blog** · **Contactez-nous**. « Réserver un envoi » et « Notre réseau » passent dans le pied de page.
 - Page Blog en attendant F.3 (**à confirmer**) : `Blog` · `Articles bientôt disponibles` · `Nous préparons des actualités, des guides et des conseils d'expédition de l'équipe {{COMPANY}}. Revenez bientôt.` · `Suivre un envoi` · `Nous contacter`
-- Bouton principal : **Demander un devis** · Langue : `EN | FR`
+- Bouton principal : **Acheter maintenant** (vers la boutique, depuis le 2026-11-19, **à confirmer**) · Langue : `EN | FR`
 - Bandeau mobile : `Besoin d'aide ? {{EMAIL}}`
 - Libellés d'interface ajoutés avec C.3 (**à confirmer**, relecture native #108) : `Accueil` · `Tous les services` ·
   `Menu` / `Ouvrir le menu` / `Fermer le menu` · `Aller au contenu principal` · `Coordonnées` · `Langue` · titres
@@ -64,7 +64,7 @@ dans les tâches D.3 / E.x (PROMPTS.md) et ajoutées ici **avant** d'être utili
 3. **Preuve en photo.** Chaque livraison est enregistrée avec une photo et un nom.
 4. **Anglais et français.** Notre équipe vous répond dans les deux langues.
 
-**Colonnes :** *Services* Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale — *Entreprise* À propos de TanEx · Notre réseau · Blog · Contact — *Assistance* Suivre un envoi · Réserver un envoi · Réserver une livraison à moto · Centre d'aide · Demander un devis — *Mentions légales* Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Politique de cookies · Accessibilité
+**Colonnes :** *Services* Transport aérien · Transport routier · Entreposage · Transport maritime · Transport ferroviaire · Livraison locale — *Entreprise* À propos de TanEx · Notre réseau · Blog · Contact — *Assistance* Suivre un envoi · Réserver un envoi · Réserver une livraison à moto · Centre d'aide · Demander un devis — *Mentions légales* Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Retours et remboursements · Politique de cookies (Accessibilité passe à la ligne du bas avec M.8, SHOP_SPEC §18)
 
 **Bureaux :** `Buea (siège)` : `{{HQ_ADDRESS}}` · `Douala` : `{{DOUALA_OFFICE}}` · `Appelez le {{PHONE}} · {{PHONE_2}}` · `Ouvert de {{HOURS}}`
 
@@ -357,7 +357,7 @@ Johannesburg · New York · Houston. Pays : noms français via `Intl.DisplayName
 
 ## 13. Mentions légales (ajouté avec E.4, **relecture par un juriste et un locuteur natif requise**)
 
-H1 : `Mentions légales`. Onglets : **Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Politique de cookies · Accessibilité**. Chaque onglet affiche `Dernière mise à jour : {date}` (10 novembre 2026). Le droit applicable est celui de la République du Cameroun (à confirmer par le juriste, #112). Le texte est rendu depuis `src/data/legalDocs.ts` (version française dans le même fichier).
+H1 : `Mentions légales`. Onglets : **Politique de confidentialité · Conditions d'utilisation · Conditions d'expédition · Retours et remboursements · Politique de cookies · Accessibilité** (Retours : §13.2, M.8). Chaque onglet affiche `Dernière mise à jour : {date}` (10 novembre 2026). Le droit applicable est celui de la République du Cameroun (à confirmer par le juriste, #112). Le texte est rendu depuis `src/data/legalDocs.ts` (version française dans le même fichier).
 
 **Politique de confidentialité**
 1. *Qui nous sommes.* Tanex SARL (« TanEx », « nous ») exploite ce site et transporte les envois qui y sont réservés. Notre siège est situé {{HQ_ADDRESS}}. Pour toute question sur vos données personnelles, écrivez à {{EMAIL}}.

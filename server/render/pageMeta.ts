@@ -41,8 +41,33 @@ export type BlogPageData =
   | { type: 'category'; name: string; description: string; versions: Partial<Record<Lang, string>>; page: number }
   | { type: 'post'; post: BlogPostMeta };
 
+/** A product page's head data, read from the database by server/shop/pageData.ts (SHOP_SPEC §15). */
+export interface ShopProductMeta {
+  /** The product's name (breadcrumb, JSON-LD). */
+  name: string;
+  /** SEO title, or the name. */
+  title: string;
+  description: string;
+  /** Product ID (TX-PRD-…), the JSON-LD sku. */
+  sku: string;
+  /** Root-relative 1200 px JPEG of the main picture, or null. */
+  image: { url: string; width: number; height: number; alt: string } | null;
+  /** The price a customer pays (the sale price when on sale). */
+  price: number;
+  currency: string;
+  inStock: boolean;
+  /** Root-relative path of each language version. */
+  versions: Partial<Record<Lang, string>>;
+}
+
+/** What the database knows about a shop page (SHOP_SPEC §15). */
+export type ShopPageData =
+  | { type: 'index'; hasProducts: boolean; page: number }
+  | { type: 'category'; name: string; description: string; versions: Partial<Record<Lang, string>>; page: number }
+  | { type: 'product'; product: ShopProductMeta };
+
 export type PageContext =
-  | { kind: 'page'; match: RouteMatch; blog?: BlogPageData }
+  | { kind: 'page'; match: RouteMatch; blog?: BlogPageData; shop?: ShopPageData }
   | { kind: 'not-found'; lang: Lang }
   | { kind: 'admin' };
 
@@ -146,6 +171,10 @@ function breadcrumbs(match: RouteMatch, canonical: string, last?: string) {
   if (match.id === 'blog-category' || (match.id === 'blog' && match.param !== undefined)) {
     // Home → Blog → category or article.
     items.push({ name: pageName('blog', lang), item: absolute(buildPath('blog', undefined, lang)) });
+    items.push({ name: last ?? pageName(match.id, lang), item: canonical });
+  } else if (match.id === 'shop-category' || (match.id === 'shop' && match.param !== undefined)) {
+    // Home → Shop → category or product.
+    items.push({ name: pageName('shop', lang), item: absolute(buildPath('shop', undefined, lang)) });
     items.push({ name: last ?? pageName(match.id, lang), item: canonical });
   } else {
     items.push({ name: pageName(match.id, lang), item: canonical });
@@ -268,6 +297,74 @@ function blogHead(match: RouteMatch, data: BlogPageData): PageHead {
   };
 }
 
+/** Head for the shop, a category or a product, from the database's data (SHOP_SPEC §15). */
+function shopHead(match: RouteMatch, data: ShopPageData): PageHead {
+  const lang = match.lang;
+  const indexable = lang === 'en' || FRENCH_PAGES_INDEXABLE;
+  if (data.type === 'index') {
+    const base = pageMetaText('shop', lang);
+    const canonical = absolute(buildPath('shop', undefined, lang)) + pageQuery(data.page);
+    const en = absolute(buildPath('shop', undefined, 'en'));
+    return {
+      lang,
+      title: pagedTitle(base.title, data.page),
+      description: base.description,
+      canonical,
+      // A shop without products is an empty page: kept out of search until the first one.
+      robots: indexable && data.hasProducts ? undefined : 'noindex',
+      alternates: data.page > 1 ? undefined : { en, fr: absolute(buildPath('shop', undefined, 'fr')), 'x-default': en },
+      jsonLd: breadcrumbs(match, canonical),
+    };
+  }
+  if (data.type === 'category') {
+    const canonical = absolute(buildPath('shop-category', match.param, lang)) + pageQuery(data.page);
+    return {
+      lang,
+      title: pagedTitle(`${data.name} | ${pageName('shop', lang)} | ${COMPANY}`, data.page),
+      description: data.description || pageMetaText('shop', lang).description,
+      canonical,
+      robots: indexable ? undefined : 'noindex',
+      alternates: data.page > 1 ? undefined : versionAlternates(data.versions),
+      jsonLd: breadcrumbs(match, canonical, data.name),
+    };
+  }
+  const p = data.product;
+  const canonical = absolute(buildPath('shop', match.param, lang));
+  const image = p.image ? { ...p.image, url: absolute(p.image.url) } : undefined;
+  // No ratings or reviews: TanEx has none (SHOP_SPEC §15).
+  const product = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': `${canonical}#product`,
+    name: p.name,
+    sku: p.sku,
+    url: canonical,
+    description: p.description,
+    image: [image ? image.url : OG_IMAGE],
+    offers: {
+      '@type': 'Offer',
+      url: canonical,
+      price: String(p.price),
+      priceCurrency: p.currency,
+      availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: LEGAL_NAME },
+    },
+  };
+  return {
+    lang,
+    title: `${p.title} | ${COMPANY}`,
+    description: p.description,
+    canonical,
+    robots: indexable ? undefined : 'noindex',
+    alternates: versionAlternates(p.versions),
+    jsonLd: [product, breadcrumbs(match, canonical, p.name)],
+    ogTitle: p.title,
+    ogImage: image,
+    noscript: { title: p.name, text: p.description },
+  };
+}
+
 /** Everything that goes into <head> for one request. */
 export function pageHead(ctx: PageContext): PageHead {
   if (ctx.kind === 'admin') {
@@ -278,6 +375,7 @@ export function pageHead(ctx: PageContext): PageHead {
   }
   const { match } = ctx;
   if (ctx.blog) return blogHead(match, ctx.blog);
+  if (ctx.shop) return shopHead(match, ctx.shop);
   const { title, description } = pageMetaText(match.id, match.lang);
   const param = canonicalParam(match);
   const canonical = absolute(buildPath(match.id, param, match.lang));
@@ -398,8 +496,8 @@ export function createIndexRenderer(indexHtmlPath: string): (ctx: PageContext) =
 /**
  * Every public page in both languages, each with its alternates. The blog is listed from the
  * database instead (server/blog/pageData.ts `blogSitemapEntries`): its index only for a language
- * with a public post, then each category and post. The shop's pages join with M.8, from the
- * database and only while the shop is on. Result pages, service tiers and the console never appear.
+ * with a public post, then each category and post. The shop's pages come from the database too
+ * (server/shop/pageData.ts `shopSitemapEntries`), only while the shop is on. Result pages, service tiers and the console never appear.
  */
 export function sitemapPaths(): { en: string; fr: string }[] {
   const out: { en: string; fr: string }[] = [];

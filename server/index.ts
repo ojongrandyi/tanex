@@ -16,7 +16,8 @@ import { ensureUploadDirs, uploadsDir } from './uploads.js';
 import { seoRouter, setSitemapExtras } from './seo.js';
 import { publicPages, sendIndex } from './publicPages.js';
 import { blogSitemapEntries, resolveBlogPage } from './blog/pageData.js';
-import { resolveShopPage } from './shop/pageData.js';
+import { resolveShopPage, shopSitemapEntries } from './shop/pageData.js';
+import { startShopRetention } from './shop/retention.js';
 import { blogFeedsRouter } from './blog/feeds.js';
 import { createIndexRenderer } from './render/pageMeta.js';
 import { registerApiRoutes } from './apiRoutes.js';
@@ -58,8 +59,10 @@ if (!ADMIN_PROXY_TARGET) {
   startBlogScheduler(db);
   // Removes courier positions older than 30 days, hourly (DISPATCH_SPEC §3).
   startLocationPurge(db);
-  // Blog index, categories and posts in sitemap.xml (BLOG_SPEC §7).
-  setSitemapExtras(() => blogSitemapEntries(db));
+  // Removes customer contact details from shop orders closed over 2 years ago, daily (SHOP_SPEC §17).
+  startShopRetention(db);
+  // Blog and shop pages from the database in sitemap.xml (BLOG_SPEC §7, SHOP_SPEC §15).
+  setSitemapExtras(() => [...blogSitemapEntries(db), ...shopSitemapEntries(db)]);
 }
 
 // Middleware

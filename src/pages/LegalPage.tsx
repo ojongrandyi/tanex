@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Cookie, Eye, FileText, Lock, Shield } from 'lucide-react';
+import { Cookie, Eye, FileText, Lock, RotateCcw, Shield } from 'lucide-react';
 import { useCompanyContact } from '../utils/useCompanyContact';
 import { HQ_ADDRESS, HQ_ADDRESS_FR } from '../config/brand';
 import { LEGAL_LAST_UPDATED, legalDocs, type LegalDocId } from '../data/legalDocs';
@@ -9,7 +9,7 @@ import { hrefFor } from '../router/navigation';
 import { isPlainClick } from '../router/Link';
 import './LegalPage.css';
 
-// Legal (CONTENT §13.1 / CONTENT_FR §13): Privacy · Terms · Shipping Terms · Cookies · Accessibility,
+// Legal (CONTENT §13.1–13.2 / CONTENT_FR §13–13.2): Privacy · Terms · Shipping Terms · Returns & Refunds · Cookies · Accessibility,
 // one address per policy (/legal/<id>, /fr/mentions-legales/<id>). Drafts pending the lawyer (#112).
 
 interface LegalPageProps {
@@ -21,6 +21,7 @@ const DOC_ICONS: Record<LegalDocId, React.ElementType> = {
   privacy: Lock,
   terms: FileText,
   'shipping-terms': Shield,
+  returns: RotateCcw,
   cookies: Cookie,
   accessibility: Eye,
 };

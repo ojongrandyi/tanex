@@ -66,10 +66,11 @@ unless the owner confirms them. Items marked **[confirm]** are best-knowledge dr
 
 ### 1.2 Header
 - Nav (**owner's menu, 2026-11-09**): **Home** · **About Us** · **Track Shipment** · **Our Services** (menu: Air transport ·
-  Road transport · Warehousing · Maritime transport · Rail transport · Local delivery · All services) · **Blog** · **Contact Us**.
+  Road transport · Warehousing · Maritime transport · Rail transport · Local delivery · All services) · **Shop** · **Blog** · **Contact Us**.
   Ship (`Book a shipment`) and Network moved to the footer. The owner's note lists "Road Transport" twice; the second is read
   as **Rail transport** (owner to confirm).
-- Primary button: **Get a Quote** · Language switch: `EN | FR`. A **Marketplace** button joins the header once the owner
+- Primary button: **Shop Now** (links to the shop; replaced Get a Quote on 2026-11-19) · Language switch: `EN | FR`.
+  Earlier note: a **Marketplace** button was to join the header once the owner
   supplies its link (tracker #140).
 - Utility bar (desktop): `{{PHONE}}` · `{{EMAIL}}` · `Open {{HOURS}}` · `Buea · Douala`
 - Mobile drawer footer: `Need help? {{EMAIL}}`
@@ -93,7 +94,7 @@ unless the owner confirms them. Items marked **[confirm]** are best-knowledge dr
 - *Services:* Air transport · Road transport · Warehousing · Maritime transport · Rail transport · Local delivery
 - *Company:* About TanEx · Our network · Blog · Contact
 - *Support:* Track a shipment · Book a shipment · Book a bike delivery · Help centre · Get a Quote
-- *Legal:* Privacy Policy · Terms of Service · Shipping Terms · Cookie Policy · Accessibility
+- *Legal:* Privacy Policy · Terms of Service · Shipping Terms · Returns & Refunds · Cookie Policy (Accessibility moved to the bottom line with M.8, SHOP_SPEC §18)
 
 **Offices block:** `Buea (head office)`: `{{HQ_ADDRESS}}` · `Douala`: `{{DOUALA_OFFICE}}` · `Call {{PHONE}} · {{PHONE_2}}` · `Open {{HOURS}}`
 
@@ -790,7 +791,7 @@ company's branding. Every slot keeps explicit width/height. Sources and licences
 ---
 
 ## 13. Legal pages: structure (plain-language draft; **lawyer review under Cameroonian law required before launch**, tracker #11)
-Tabs: **Privacy Policy · Terms of Service · Shipping Terms · Cookie Policy · Accessibility**
+Tabs: **Privacy Policy · Terms of Service · Shipping Terms · Returns & Refunds · Cookie Policy · Accessibility** (Returns & Refunds: §13.2, M.8)
 
 - **Privacy Policy:** who we are ({{LEGAL_NAME}}, {{HQ_ADDRESS}}, {{EMAIL}}) · what we collect (sender/recipient details, shipment data, contact messages, basic analytics) · why (to carry shipments, customs, support, legal duties) · public tracking masks names and addresses · who we share with (carriers, agents, customs authorities, only as needed) · international transfers · how long we keep it · your rights (access, correction, deletion, objection) under applicable law, e.g. Cameroon's Law No. 2024/017 on personal data protection, EU/UK GDPR · contact for privacy requests.
 - **Terms of Service:** acceptance · use of the website and tracking · accounts and quotes · payment and invoicing · limitation of liability · governing law: {{JURISDICTION}}.
