@@ -18,6 +18,7 @@ import { requirePermission } from '../middleware/auth.js';
 import { getRequestAuth } from '../auth/permissions.js';
 import { inTransaction } from '../auth/schema.js';
 import { serverError } from '../errors.js';
+import { applyCashReviewToShopOrder } from '../shop/orderSync.js';
 import { allocateCashRef } from '../dispatch/cashRef.js';
 import { balancesFromLines, readCashLines } from '../dispatch/cash.js';
 import { readMoney, isFail, NOTE_MAX } from '../dispatch/jobs.js';
@@ -150,6 +151,8 @@ function review(req: Request, res: Response, to: 'CONFIRMED' | 'REJECTED') {
           method: entry.method, ...(entry.momo_reference ? { momoReference: entry.momo_reference } : {}), ...(reason ? { reason } : {}),
           ...(charge ? { chargedToCourier: true } : {}) },
         { conn: db });
+      // Cash collected for a shop order's job pays the order once confirmed (SHOP_SPEC §11).
+      applyCashReviewToShopOrder(db, entry, to, { req, userId: user.id, reason: reason ?? null, at: now });
       if (charge) {
         const adjId = 'csh_' + crypto.randomBytes(9).toString('hex');
         const adjRef = allocateCashRef(db);

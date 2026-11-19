@@ -1,6 +1,6 @@
 // Console shop API (docs/SHOP_SPEC.md §7, §14), mounted at /api/admin/shop. Every route checks a
 // Shop permission on the server and every write is audited. M.2: pictures. M.3: products, review
-// (submit, publish, send back, proposed changes), stock and categories. Orders join in M.7.
+// (submit, publish, send back, proposed changes), stock and categories. M.7: orders and shop settings.
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { db } from '../db.js';
@@ -23,6 +23,10 @@ import {
   missingForPublish, type ProductRole,
 } from '../../src/shared/shopProduct.js';
 import { loadShopSettings } from '../shop/settings.js';
+import {
+  OrderError, addOrderNote, changeOrderStatus, findOrder, listOrders, loadOrder, markUnpaid, orderDetail, ordersSummary,
+  recordPayment, recordRefund, saveSettings, sendSettingsTestEmail, sendToDispatch, setDeliveryFee, settingsView,
+} from '../shop/orderAdmin.js';
 import type { PermissionKey } from '../../src/shared/permissions.js';
 
 export const shopAdminRouter = Router();
@@ -395,5 +399,171 @@ shopAdminRouter.delete('/categories/:id', requirePermission('shop.categories'), 
     res.json({ success: true });
   } catch (err) {
     serverError(res, err);
+  }
+});
+
+// ---- Orders (M.7, SHOP_SPEC §7.6, §10, §11, §13) ----
+// Customer details are only ever sent to orders.view. Status, fee and dispatch need orders.manage
+// (Send to dispatch also dispatch.manage); payments and refunds need orders.payment.
+
+/** Turns an OrderError into its response; anything else is a server error. */
+function handleOrder(res: Response, err: unknown) {
+  if (err instanceof OrderError) return fail(res, { status: err.status, code: err.code, error: err.message, field: err.field });
+  return serverError(res, err);
+}
+const orderBody = (req: Request) => (req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>;
+const noStore = (res: Response) => res.set('Cache-Control', 'no-store');
+const orderOut = (res: Response, id: string) => {
+  noStore(res);
+  res.json({ success: true, data: orderDetail(db, loadOrder(db, id)!) });
+};
+
+// GET /api/admin/shop/orders?tab=NEW|CONFIRMED|READY|OUT_FOR_DELIVERY|COMPLETED|CLOSED|ALL&q=
+shopAdminRouter.get('/orders', requirePermission('orders.view'), (req: Request, res: Response) => {
+  try {
+    const { data, counts } = listOrders(db, { tab: req.query.tab, q: req.query.q });
+    noStore(res);
+    res.json({ success: true, data, counts });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// GET /api/admin/shop/orders-summary: badge, bell and dashboard numbers (no customer data).
+shopAdminRouter.get('/orders-summary', requirePermission('orders.view'), (_req: Request, res: Response) => {
+  try {
+    noStore(res);
+    res.json({ success: true, data: ordersSummary(db) });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// GET /api/admin/shop/orders/:id (an id, or an order number from the staff alert email)
+shopAdminRouter.get('/orders/:id', requirePermission('orders.view'), (req: Request, res: Response) => {
+  try {
+    const o = findOrder(db, req.params.id as string);
+    if (!o) return notFound(res, 'Order');
+    orderOut(res, o.id);
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+// POST /api/admin/shop/orders/:id/status { status, reason?, putBackInStock? }
+shopAdminRouter.post('/orders/:id/status', requirePermission('orders.manage'), (req: Request, res: Response) => {
+  try {
+    const o = loadOrder(db, req.params.id as string);
+    if (!o) return notFound(res, 'Order');
+    changeOrderStatus(db, req, o, orderBody(req), me(req));
+    orderOut(res, o.id);
+  } catch (err) {
+    handleOrder(res, err);
+  }
+});
+
+// POST /api/admin/shop/orders/:id/fee { fee }
+shopAdminRouter.post('/orders/:id/fee', requirePermission('orders.manage'), (req: Request, res: Response) => {
+  try {
+    const o = loadOrder(db, req.params.id as string);
+    if (!o) return notFound(res, 'Order');
+    setDeliveryFee(db, req, o, orderBody(req), me(req));
+    orderOut(res, o.id);
+  } catch (err) {
+    handleOrder(res, err);
+  }
+});
+
+// POST /api/admin/shop/orders/:id/payment { method, amount, reference? }
+shopAdminRouter.post('/orders/:id/payment', requirePermission('orders.payment'), (req: Request, res: Response) => {
+  try {
+    const o = loadOrder(db, req.params.id as string);
+    if (!o) return notFound(res, 'Order');
+    recordPayment(db, req, o, orderBody(req), me(req));
+    orderOut(res, o.id);
+  } catch (err) {
+    handleOrder(res, err);
+  }
+});
+
+// POST /api/admin/shop/orders/:id/unpaid { reason }
+shopAdminRouter.post('/orders/:id/unpaid', requirePermission('orders.payment'), (req: Request, res: Response) => {
+  try {
+    const o = loadOrder(db, req.params.id as string);
+    if (!o) return notFound(res, 'Order');
+    markUnpaid(db, req, o, orderBody(req), me(req));
+    orderOut(res, o.id);
+  } catch (err) {
+    handleOrder(res, err);
+  }
+});
+
+// POST /api/admin/shop/orders/:id/refund { method, amount, reference?, reason }
+shopAdminRouter.post('/orders/:id/refund', requirePermission('orders.payment'), (req: Request, res: Response) => {
+  try {
+    const o = loadOrder(db, req.params.id as string);
+    if (!o) return notFound(res, 'Order');
+    recordRefund(db, req, o, orderBody(req), me(req));
+    orderOut(res, o.id);
+  } catch (err) {
+    handleOrder(res, err);
+  }
+});
+
+// POST /api/admin/shop/orders/:id/notes { note }: internal, never shown to the customer.
+shopAdminRouter.post('/orders/:id/notes', requirePermission('orders.manage', 'orders.payment'), (req: Request, res: Response) => {
+  try {
+    const o = loadOrder(db, req.params.id as string);
+    if (!o) return notFound(res, 'Order');
+    addOrderNote(db, req, o, orderBody(req), me(req));
+    orderOut(res, o.id);
+  } catch (err) {
+    handleOrder(res, err);
+  }
+});
+
+// POST /api/admin/shop/orders/:id/dispatch { sizeClass?, weightKg? }: creates the delivery job.
+shopAdminRouter.post('/orders/:id/dispatch', requirePermission('orders.manage'), (req: Request, res: Response) => {
+  try {
+    if (!requestHasPermission(req, 'dispatch.manage')) {
+      return fail(res, { status: 403, code: 'FORBIDDEN', error: 'Sending to dispatch also needs the dispatch permission (dispatch.manage).' });
+    }
+    const o = loadOrder(db, req.params.id as string);
+    if (!o) return notFound(res, 'Order');
+    const auth = getRequestAuth(req)!;
+    sendToDispatch(db, req, o, orderBody(req), { userId: auth.user.id, name: auth.user.displayName });
+    orderOut(res, o.id);
+  } catch (err) {
+    handleOrder(res, err);
+  }
+});
+
+// ---- Shop settings (M.7, SHOP_SPEC §7.7) ----
+
+shopAdminRouter.get('/settings', requirePermission('shop.settings'), (_req: Request, res: Response) => {
+  try {
+    noStore(res);
+    res.json({ success: true, data: settingsView(db) });
+  } catch (err) {
+    serverError(res, err);
+  }
+});
+
+shopAdminRouter.put('/settings', requirePermission('shop.settings'), (req: Request, res: Response) => {
+  try {
+    saveSettings(db, req, orderBody(req));
+    noStore(res);
+    res.json({ success: true, data: settingsView(db) });
+  } catch (err) {
+    handleOrder(res, err);
+  }
+});
+
+shopAdminRouter.post('/settings/test-email', requirePermission('shop.settings'), (req: Request, res: Response) => {
+  try {
+    sendSettingsTestEmail(db, req);
+    res.json({ success: true });
+  } catch (err) {
+    handleOrder(res, err);
   }
 });

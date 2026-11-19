@@ -20,6 +20,8 @@ import { WeightText } from '../../components/forms/UnitControls';
 import { shipmentStatusLabel, shipmentStatusTone, type StatusTone } from '../../shared/shipmentStatus';
 import { GATEWAYS } from '../../data/gateways';
 import { NewProofsPanel } from '../components/NewProofsPanel';
+import { ShopOrderTiles } from '../shop/ShopOrderTiles';
+import type { ShopOrdersSummary } from '../shop/ordersSummaryApi';
 import { BRAND_COLORS } from '../../config/brand';
 import { OPERATIONS_CENTER_TEXT as TXT } from './OperationsCenter.text';
 import { consoleIntlLocale, consoleLang } from '../i18n/consoleText';
@@ -42,6 +44,10 @@ interface OperationsCenterProps {
   /** Proofs of payment waiting for review, from the console's poll (update G.1/G.2). */
   newProofsCount?: number;
   onProofsChanged?: () => void;
+  /** Shop orders numbers (M.7), when the user may see orders. */
+  shopSummary?: ShopOrdersSummary | null;
+  onOpenShopOrders?: () => void;
+  onOpenShopProducts?: () => void;
 }
 
 export const OperationsCenter: React.FC<OperationsCenterProps> = ({
@@ -49,7 +55,10 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
   onOpenShipmentDetail,
   onQuickUpdateStatus,
   newProofsCount = 0,
-  onProofsChanged
+  onProofsChanged,
+  shopSummary = null,
+  onOpenShopOrders,
+  onOpenShopProducts
 }) => {
   const { shipments, quoteRequests, updateShipmentFull } = useAdminData();
   const { can } = useAuth();
@@ -337,6 +346,9 @@ export const OperationsCenter: React.FC<OperationsCenterProps> = ({
         </div>
       </div>
       )}
+
+      {/* Shop orders (M.7): only with orders.view */}
+      {shopSummary && onOpenShopOrders && <ShopOrderTiles summary={shopSummary} onOpen={onOpenShopOrders} onOpenProducts={onOpenShopProducts} />}
 
       {/* New payment proofs waiting for review (update G.2) */}
       {can('payments.view') && (

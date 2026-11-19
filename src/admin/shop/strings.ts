@@ -28,7 +28,7 @@ export const SHOP_TEXT = {
     queue: 'Picture {n} of {total}',
   },
   menu: 'Shop',
-  tabs: { products: 'Products', categories: 'Categories' },
+  tabs: { products: 'Products', categories: 'Categories', orders: 'Orders', settings: 'Shop settings' },
   status: {
     DRAFT: 'Draft', IN_REVIEW: 'In review', PUBLISHED: 'Published', HIDDEN: 'Hidden', ARCHIVED: 'Archived',
   } satisfies Record<ProductStatus, string>,

@@ -14,6 +14,7 @@ import { inTransaction } from '../auth/schema.js';
 import { allocateCashRef } from './cashRef.js';
 import { queueJobEmails } from './notify.js';
 import { createPodDocument } from './podDocument.js';
+import { syncShopOrderFromJob } from '../shop/orderSync.js';
 import { generateUniqueTrackingId } from '../trackingIds.js';
 import { normalizePhone } from '../../src/shared/identifier.js';
 import { maskName } from '../../src/shared/masking.js';
@@ -21,7 +22,7 @@ import { pieceLabel } from '../../src/shared/trackingId.js';
 import { shipmentStatusLabel } from '../../src/shared/shipmentStatus.js';
 import { eventTitleColumns } from '../../src/shared/eventTitles.js';
 import {
-  DISPATCH_PROGRESS, DISPATCH_TIMESTAMP_COLUMN, JOB_SCOPES, VEHICLE_TYPES, allowedActions, dispatchEventVars,
+  DISPATCH_PROGRESS, DISPATCH_TIMESTAMP_COLUMN, DISPATCH_TRANSITIONS, JOB_SCOPES, VEHICLE_TYPES, allowedActions, dispatchEventVars,
   type DispatchActor, type DispatchStatus, type DispatchTransition, type JobScope, type VehicleType,
 } from '../../src/shared/dispatchStatus.js';
 import {
@@ -626,6 +627,8 @@ export function writeTransition(conn: DatabaseSync, job: JobRow, t: DispatchTran
     { conn });
   // booking.confirmed / local.delivered to the sender when an email is known (G.8).
   queueJobEmails(conn, updated, t.to);
+  // A shop order sent with this job follows it (SHOP_SPEC §13), in the same transaction.
+  syncShopOrderFromJob(conn, updated, t.to, { req: ctx.req, actorUserId: ctx.actor.userId, at: ctx.at });
   return updated;
 }
 
@@ -644,3 +647,60 @@ export function actionTime(deviceTs: unknown, job: JobRow, now = Date.now()): nu
 
 /** A new job id ('job_' + random, DISPATCH_SPEC §3). */
 export const newJobId = () => 'job_' + crypto.randomBytes(9).toString('hex');
+
+/** A job created already confirmed (priced and agreed): by dispatch, or by Send to dispatch on a shop order. */
+export interface ConfirmedJobInput {
+  scope: JobScope;
+  /** FIRST_MILE / LAST_MILE: the shipment the leg belongs to. LOCAL / INTERCITY get a new shipment. */
+  trackingNumber?: string;
+  pickup: Place;
+  dropoff: Place;
+  sizeClass: string | null;
+  weightKg: number | null;
+  itemDescription: string | null;
+  isExpress: boolean;
+  scheduledForTs: number | null;
+  vehicleRequired: VehicleType | null;
+  price: number;
+  currency: string;
+  priceOverridden: boolean;
+  payer: 'SENDER' | 'RECIPIENT';
+  codAmount: number | null;
+  collectDeliveryFee: boolean;
+  deliveryCode: string | null;
+  notifyLocale: 'en' | 'fr';
+}
+
+/**
+ * Inserts a CONFIRMED job (and its shipment for LOCAL / INTERCITY) and writes the 'create'
+ * transition: tracking event, audit, emails. Not wrapped in a transaction: call it inside
+ * inTransaction with the caller's other writes. Returns the new row.
+ */
+export function insertConfirmedJob(
+  conn: DatabaseSync,
+  input: ConfirmedJobInput,
+  ctx: { req: Request; actor: { userId: string; name: string }; at: number; auditSummary?: string; auditAfter?: Record<string, unknown> },
+): JobRow {
+  const { scope, pickup, dropoff } = input;
+  const tracking = scope === 'LOCAL' || scope === 'INTERCITY'
+    ? createJobShipment(conn, scope, pickup, dropoff, { itemDescription: input.itemDescription, weightKg: input.weightKg, createdBy: ctx.actor.userId })
+    : input.trackingNumber!;
+  const id = newJobId();
+  conn.prepare(`
+    INSERT INTO dispatch_jobs (id, tracking_number, scope, status, vehicle_required, pickup_json, dropoff_json, size_class,
+      weight_kg, item_description, is_express, scheduled_for_ts, price, currency, price_overridden, payer, cod_amount,
+      collect_delivery_fee, delivery_code_hash, notify_locale, created_by, created_at_ts, updated_at_ts)
+    VALUES (?, ?, ?, 'CONFIRMED', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, tracking, scope, input.vehicleRequired ?? defaultVehicle(scope, pickup, dropoff, input.sizeClass),
+    JSON.stringify(pickup), JSON.stringify(dropoff), input.sizeClass, input.weightKg, input.itemDescription, input.isExpress ? 1 : 0,
+    input.scheduledForTs, input.price, input.currency, input.priceOverridden ? 1 : 0, input.payer, input.codAmount,
+    input.collectDeliveryFee ? 1 : 0, input.deliveryCode ? hashDeliveryCode(input.deliveryCode) : null,
+    input.notifyLocale, ctx.actor.userId, ctx.at, ctx.at);
+  const transition = DISPATCH_TRANSITIONS.find((t) => t.action === 'create')!;
+  return writeTransition(conn, loadJob(conn, id)!, transition, {
+    req: ctx.req, actor: ctx.actor, at: ctx.at,
+    auditSummary: ctx.auditSummary ?? `Delivery job created for ${tracking} (${scope.toLowerCase()})`,
+    auditBefore: { status: null },
+    auditAfter: ctx.auditAfter,
+  });
+}

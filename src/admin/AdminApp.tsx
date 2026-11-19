@@ -38,6 +38,8 @@ import { useAuth } from '../auth/AuthContext';
 import { canOpenView, firstAllowedView } from './views';
 import { api } from '../services/api';
 import { dispatchSummary } from './dispatch/boardApi';
+import { fetchShopOrdersSummary, orderFromHash, type ShopOrdersSummary } from './shop/ordersSummaryApi';
+import type { ShopOpenRequest } from './shop/ShopStudio';
 import { BOARD_REFRESH_MS } from '../shared/dispatchBoard';
 import type { ContactMessage } from '../types/admin';
 import { ShipmentControlModal } from './components/ShipmentControlModal';
@@ -140,6 +142,40 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
     }, BOARD_REFRESH_MS);
     return () => window.clearInterval(timer);
   }, [canViewDispatch, refreshDispatchCount]);
+
+  // Shop orders (SHOP_SPEC §7.6, M.7): new orders on the Shop menu and in the bell, the dashboard
+  // tiles, read every 30 s while the tab is visible. The staff alert email's button opens
+  // /private-user/#order=TX-ORD-…: the Shop view opens on that order (the fragment is then removed).
+  const canViewOrders = can('orders.view');
+  const [shopSummary, setShopSummary] = useState<ShopOrdersSummary | null>(null);
+  const [shopOpen, setShopOpen] = useState<ShopOpenRequest | null>(null);
+  const refreshShopSummary = useCallback(() => {
+    if (!canViewOrders) return;
+    fetchShopOrdersSummary().then(setShopSummary).catch(() => {});
+  }, [canViewOrders]);
+  useEffect(() => {
+    if (!canViewOrders) return;
+    refreshShopSummary();
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') refreshShopSummary();
+    }, 30_000);
+    return () => window.clearInterval(timer);
+  }, [canViewOrders, refreshShopSummary]);
+  const openShop = useCallback((tab: ShopOpenRequest['tab'], orderId?: string) => {
+    setShopOpen({ tab, orderId, nonce: Date.now() });
+    setCurrentView('shop');
+  }, [setCurrentView]);
+  useEffect(() => {
+    const fromHash = () => {
+      const number = orderFromHash(window.location.hash);
+      if (!number) return;
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      if (canViewOrders) openShop('orders', number);
+    };
+    fromHash();
+    window.addEventListener('hashchange', fromHash);
+    return () => window.removeEventListener('hashchange', fromHash);
+  }, [canViewOrders, openShop]);
 
   // Badge for proofs of payment waiting for review (update G.1): read from the stats call every
   // 30 s while the tab is visible, and again as soon as the console is shown or focused.
@@ -291,6 +327,8 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
       newMessagesCount={newMessagesCount}
       newProofsCount={newProofsCount}
       dispatchAttentionCount={dispatchAttention}
+      newShopOrdersCount={shopSummary?.newOrders ?? 0}
+      onOpenShopOrders={() => openShop('orders')}
     >
       {/* Toast Alert */}
       {toastMessage && (
@@ -327,6 +365,9 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
             onQuickUpdateStatus={handleQuickUpdateStatus}
             newProofsCount={newProofsCount}
             onProofsChanged={refreshProofsCount}
+            shopSummary={canViewOrders ? shopSummary : null}
+            onOpenShopOrders={() => openShop('orders')}
+            onOpenShopProducts={() => openShop('products')}
           />
         )}
 
@@ -406,7 +447,7 @@ const AdminConsole: React.FC<AdminAppProps> = ({ onNavigatePublic, onViewPublicT
         {/* SHOP (SHOP_SPEC §7) */}
         {currentView === 'shop' && (
           <Suspense fallback={<div className="tx-iam-muted" role="status">Loading…</div>}>
-            <ShopStudio />
+            <ShopStudio open={shopOpen} onOrdersChanged={refreshShopSummary} />
           </Suspense>
         )}
 

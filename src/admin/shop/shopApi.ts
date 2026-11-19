@@ -1,10 +1,12 @@
 // Console shop API client (server/routes/shopAdmin.ts, docs/SHOP_SPEC.md §14). Console-only:
 // imported from the lazy Shop chunk, never from public pages. M.2: pictures. M.3: products,
-// review, stock and categories.
+// review, stock and categories. M.7: orders and shop settings.
 import { fetchApi, handleResponse } from '../../services/api';
 import type { ShopImageSlotKey } from '../../shared/shopImages';
 import type { ProductStatus } from '../../shared/shopProduct';
 import type { DocNode } from '../blog/blogApi';
+import type { DeliveryFeeStatus, DeliveryMethod, OrderStatus, PaymentStatus, ShopPaymentMethod } from '../../shared/shopOrderStatus';
+import type { ShopSettings } from '../../shared/shopSettings';
 
 const BASE = '/api/admin/shop';
 
@@ -146,4 +148,80 @@ export const shopApi = {
   updateCategory: (categoryId: string, input: CategoryInput) => call<ShopCategory>(`${BASE}/categories/${id(categoryId)}`, json('PUT', input)),
   deleteCategory: (categoryId: string) => call<unknown>(`${BASE}/categories/${id(categoryId)}`, json('DELETE')),
   orderCategories: (ids: string[]) => call<unknown>(`${BASE}/categories-order`, json('PUT', { ids })),
+};
+
+// ---- Orders and shop settings (M.7) ----
+
+export type OrderTab = 'ALL' | 'NEW' | 'CONFIRMED' | 'READY' | 'OUT_FOR_DELIVERY' | 'COMPLETED' | 'CLOSED';
+
+export interface OrderSummaryRow {
+  id: string; orderNumber: string; createdAt: number; customerName: string | null;
+  deliveryMethod: DeliveryMethod; cityName: string | null; pickupOffice: string | null; itemCount: number;
+  total: number; currency: string; deliveryFeeStatus: DeliveryFeeStatus;
+  paymentMethod: ShopPaymentMethod; paymentStatus: PaymentStatus; status: OrderStatus; deliveryProblem: boolean;
+}
+
+export interface OrdersSummary {
+  newOrders: number; feeToConfirm: number; ready: number; outForDelivery: number; deliveryProblems: number;
+  unpaidCompleted: number; lowStock: number; latestNewAt: number | null;
+}
+
+export interface OrderEvent { kind: string; from: string | null; to: string | null; note: string | null; by: string | null; at: number }
+
+export interface ShopOrder {
+  id: string; orderNumber: string; status: OrderStatus; createdAt: number; updatedAt: number; locale: string; anonymised: boolean;
+  customer: { name: string; phone: string | null; whatsapp: string | null; email: string | null };
+  deliveryMethod: DeliveryMethod; city: { id: string; name: string } | null; zone: { id: string; name: string } | null;
+  pickupOffice: string | null; address: string | null; customerNote: string | null;
+  items: { productId: string; code: string; nameEn: string; nameFr: string | null; unitPrice: number; qty: number; lineTotal: number; image: string | null }[];
+  subtotal: number; deliveryFee: number | null; deliveryFeeStatus: DeliveryFeeStatus; total: number; currency: string;
+  payment: {
+    method: ShopPaymentMethod; status: PaymentStatus; reference: string | null; amount: number | null; paidAt: number | null; paidBy: string | null;
+    refund: { amount: number | null; method: string | null; reference: string | null; at: number | null; by: string | null } | null;
+  };
+  job: { id: string; trackingId: string | null; status: string | null } | null;
+  cancelReason: string | null;
+  deliveryProblem: boolean;
+  nextStatuses: OrderStatus[];
+  canSetFee: boolean;
+  dispatch: { ok: boolean; blockers: string[]; scope: 'LOCAL' | 'INTERCITY' | null; sizeClass: string; weightKg: number | null; price: number | null; codAmount: number | null } | null;
+  events: OrderEvent[];
+}
+
+export interface ShopSettingsView {
+  settings: ShopSettings;
+  cities: { id: string; name: string }[];
+  zones: { id: string; cityId: string; name: string }[];
+  pickupOfficeKeys: string[];
+  paymentMethods: ShopPaymentMethod[];
+  limits: { lowStockMax: number; maxPerOrderMax: number; landmarkMax: number };
+  mailEnabled: boolean;
+}
+
+export const shopOrdersApi = {
+  async list(tab: OrderTab, q: string): Promise<{ data: OrderSummaryRow[]; counts: Record<OrderTab, number> }> {
+    const params = new URLSearchParams({ tab });
+    if (q) params.set('q', q);
+    const res = await fetchApi(`${BASE}/orders?${params}`, json('GET'));
+    const body = await res.clone().json().catch(() => null);
+    const data = await handleResponse<OrderSummaryRow[]>(res);
+    return { data, counts: (body?.counts ?? {}) as Record<OrderTab, number> };
+  },
+  summary: () => call<OrdersSummary>(`${BASE}/orders-summary`, json('GET')),
+  get: (idOrNumber: string) => call<ShopOrder>(`${BASE}/orders/${id(idOrNumber)}`, json('GET')),
+  setStatus: (orderId: string, body: { status: OrderStatus; reason?: string; putBackInStock?: boolean }) =>
+    call<ShopOrder>(`${BASE}/orders/${id(orderId)}/status`, json('POST', body)),
+  setFee: (orderId: string, fee: number) => call<ShopOrder>(`${BASE}/orders/${id(orderId)}/fee`, json('POST', { fee })),
+  pay: (orderId: string, body: { method: ShopPaymentMethod; amount: number; reference?: string }) =>
+    call<ShopOrder>(`${BASE}/orders/${id(orderId)}/payment`, json('POST', body)),
+  unpay: (orderId: string, reason: string) => call<ShopOrder>(`${BASE}/orders/${id(orderId)}/unpaid`, json('POST', { reason })),
+  refund: (orderId: string, body: { method: string; amount: number; reference?: string; reason: string }) =>
+    call<ShopOrder>(`${BASE}/orders/${id(orderId)}/refund`, json('POST', body)),
+  note: (orderId: string, note: string) => call<ShopOrder>(`${BASE}/orders/${id(orderId)}/notes`, json('POST', { note })),
+  dispatch: (orderId: string, body: { sizeClass?: string; weightKg?: number | null }) =>
+    call<ShopOrder>(`${BASE}/orders/${id(orderId)}/dispatch`, json('POST', body)),
+
+  getSettings: () => call<ShopSettingsView>(`${BASE}/settings`, json('GET')),
+  saveSettings: (s: ShopSettings) => call<ShopSettingsView>(`${BASE}/settings`, json('PUT', s)),
+  testEmail: () => call<unknown>(`${BASE}/settings/test-email`, json('POST', {})),
 };

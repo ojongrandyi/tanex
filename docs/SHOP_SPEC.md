@@ -413,6 +413,11 @@ Job **FAILED_ATTEMPT / RETURNED / CANCELLED** → the order stays OUT_FOR_DELIVE
 flag and a timeline note, for staff to decide (retry, cancel, return). One writer applies these, in the job's
 transaction.
 
+*Built with M.7:* `server/shop/orderAdmin.ts` (console order actions, Send to dispatch, settings) and
+`server/shop/orderSync.ts` (job → order inside `writeTransition`; confirmed cash → PAID inside the cash review).
+When the job ends without a delivery (returned or cancelled), staff may put the order back to READY (job unlinked,
+sent again later) or cancel it. The job price is the agreed delivery fee; payer TanEx; COD as above.
+
 ## 14. API (summary)
 
 Public (rate-limited, only PUBLISHED products in visible categories, only while the shop is on):

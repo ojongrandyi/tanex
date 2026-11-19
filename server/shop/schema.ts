@@ -176,7 +176,7 @@ export function createShopTables(conn: DatabaseSync): void {
     CREATE INDEX IF NOT EXISTS idx_shop_order_items_order ON shop_order_items (order_id);
     CREATE INDEX IF NOT EXISTS idx_shop_order_items_product ON shop_order_items (product_id);
 
-    -- The order's timeline in the console. kind: STATUS | PAYMENT | FEE | NOTE | EMAIL.
+    -- The order's timeline in the console. kind: STATUS | PAYMENT | FEE | NOTE | EMAIL | DISPATCH (M.7: job sent, job steps).
     CREATE TABLE IF NOT EXISTS shop_order_events (
       id TEXT PRIMARY KEY,
       order_id TEXT NOT NULL,
@@ -189,6 +189,29 @@ export function createShopTables(conn: DatabaseSync): void {
     );
     CREATE INDEX IF NOT EXISTS idx_shop_order_events_order ON shop_order_events (order_id, at_ts);
   `);
+  addOrderColumns(conn);
+}
+
+/**
+ * Columns added with the console orders (M.7): what was actually paid and refunded, and the
+ * "Delivery problem" flag set when the dispatch job fails, is returned or is cancelled (§13).
+ * Added only when missing, so older databases gain them on start.
+ */
+const ORDER_COLUMNS_M7: readonly [string, string][] = [
+  ['paid_amount', 'INTEGER'],
+  ['refund_amount', 'INTEGER'],
+  ['refund_method', 'TEXT'],
+  ['refund_reference', 'TEXT'],
+  ['refunded_at_ts', 'INTEGER'],
+  ['refunded_by', 'TEXT'],
+  ['delivery_problem_at_ts', 'INTEGER'],
+];
+
+function addOrderColumns(conn: DatabaseSync): void {
+  const have = new Set((conn.prepare('PRAGMA table_info(shop_orders)').all() as { name: string }[]).map((c) => c.name));
+  for (const [name, type] of ORDER_COLUMNS_M7) {
+    if (!have.has(name)) conn.exec(`ALTER TABLE shop_orders ADD COLUMN ${name} ${type}`);
+  }
 }
 
 /** Settings row that records the one-time grant below, so it never runs twice. */

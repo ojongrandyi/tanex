@@ -127,13 +127,18 @@ export interface OrderMoveContext {
   deliveryMethod: DeliveryMethod;
   deliveryFeeStatus: DeliveryFeeStatus;
   reason?: string | null;
+  /**
+   * The order's dispatch job ended without a delivery (returned or cancelled, SHOP_SPEC §13). Only
+   * then can staff take an order out for delivery back to Ready (to send it again) or cancel it.
+   */
+  jobClosed?: boolean;
 }
 
 const ORDER_MOVES: Record<OrderStatus, readonly OrderStatus[]> = {
   NEW: ['CONFIRMED', 'CANCELLED'],
   CONFIRMED: ['READY', 'CANCELLED'],
   READY: ['OUT_FOR_DELIVERY', 'COLLECTED', 'CANCELLED'],
-  OUT_FOR_DELIVERY: ['DELIVERED'],
+  OUT_FOR_DELIVERY: ['DELIVERED', 'READY', 'CANCELLED'],
   DELIVERED: ['RETURNED'],
   COLLECTED: ['RETURNED'],
   CANCELLED: [],
@@ -145,6 +150,8 @@ const SYSTEM_ONLY: readonly OrderStatus[] = ['OUT_FOR_DELIVERY', 'DELIVERED'];
 
 export function checkOrderTransition(from: OrderStatus, to: OrderStatus, ctx: OrderMoveContext): ShopRuleResult {
   if (!ORDER_MOVES[from].includes(to)) return no('ILLEGAL_TRANSITION');
+  // While the courier still has the parcel, only the dispatch job moves the order.
+  if (from === 'OUT_FOR_DELIVERY' && to !== 'DELIVERED' && !ctx.jobClosed) return no('ILLEGAL_TRANSITION');
   if (SYSTEM_ONLY.includes(to) && ctx.actor !== 'system') return no('SYSTEM_ONLY');
   if (to === 'CONFIRMED' && ctx.deliveryFeeStatus === 'TO_CONFIRM') return no('FEE_TO_CONFIRM');
   if (to === 'OUT_FOR_DELIVERY' && ctx.deliveryMethod !== 'DELIVERY') return no('WRONG_DELIVERY_METHOD');
@@ -158,6 +165,7 @@ export function staffNextStatuses(
   from: OrderStatus,
   ctx: Omit<OrderMoveContext, 'actor' | 'reason'>,
 ): OrderStatus[] {
+  // DELIVERED and OUT_FOR_DELIVERY are made by the server (dispatch), never by a status button.
   return ORDER_MOVES[from].filter((to) => {
     const r = checkOrderTransition(from, to, { ...ctx, actor: 'staff', reason: 'x' });
     return r.ok || r.code === 'FEE_TO_CONFIRM';

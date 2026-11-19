@@ -42,8 +42,8 @@ export const VIEW_PERMISSION: Record<AdminViewType, PermissionKey | readonly Per
   'document-center': 'documents.view',
   // Blog studio (BLOG_SPEC §2): a writer, an editor, a publisher or a category manager.
   'blog': ['blog.view', 'blog.write', 'blog.edit_any', 'blog.publish', 'blog.categories'],
-  // Shop (SHOP_SPEC §3, §7): products and categories; orders join in M.7.
-  'shop': ['shop.view', 'shop.write', 'shop.publish', 'shop.stock', 'shop.categories'],
+  // Shop (SHOP_SPEC §3, §7): products and categories, orders (M.7) and shop settings.
+  'shop': ['shop.view', 'shop.write', 'shop.publish', 'shop.stock', 'shop.categories', 'orders.view', 'shop.settings'],
   'settings': 'settings.view',
   'users': 'users.view',
   'roles': 'roles.manage',

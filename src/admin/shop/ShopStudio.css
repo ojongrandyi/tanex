@@ -225,3 +225,70 @@
   .tx-shop-actionbar { padding: 0.6rem; }
   .tx-shop-cat.is-child { padding-left: 1rem; }
 }
+
+/* ---- Orders and settings (M.7) ---- */
+.tx-shop-tab__count {
+  display: inline-block; min-width: 1.4em; margin-left: 0.4rem; padding: 0 0.35rem; border-radius: 999px;
+  background: var(--tx-cream-200); color: var(--tx-choc-800); font-size: 0.72rem; font-weight: 700; text-align: center;
+}
+.tx-shop-nowrap { white-space: nowrap; }
+.tx-shop-paycell { display: block; font-size: 0.8rem; margin-bottom: 0.2rem; }
+.tx-shop-studio .tx-iam-chip.danger { background: var(--tx-danger-50); color: var(--tx-danger-700); }
+.tx-shop-studio .tx-iam-chip.danger svg { vertical-align: -2px; }
+.tx-shop-studio .tx-iam-notice.success { background: var(--tx-success-50); color: var(--tx-success-700); border-color: var(--tx-success-700); }
+.tx-shop-studio .tx-iam-notice svg { vertical-align: -3px; margin-right: 0.25rem; }
+.tx-shop-studio .has-error input,
+.tx-shop-studio .has-error select,
+.tx-shop-studio .has-error textarea { border-color: var(--tx-danger-700); }
+.tx-shop-studio fieldset.has-error { outline: 2px solid var(--tx-danger-700); outline-offset: 4px; border-radius: 4px; }
+.tx-shop-studio .tx-iam-field small { display: block; margin-top: 0.25rem; font-size: 0.78rem; }
+
+.tx-shop-order { display: grid; gap: 1rem; }
+.tx-shop-order .tx-shop-editor__head { align-items: center; }
+.tx-shop-order .tx-shop-editor__title { flex: 1 1 14rem; min-width: 0; }
+.tx-shop-order .tx-shop-editor__title p { margin: 0.35rem 0 0; }
+.tx-order-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 1024px) { .tx-order-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
+.tx-order-main, .tx-order-side { display: grid; gap: 1rem; min-width: 0; }
+.tx-order-name { margin: 0 0 0.5rem; font-weight: 700; font-size: 1.05rem; color: var(--tx-choc-950); overflow-wrap: anywhere; }
+.tx-order-dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.35rem 1rem; margin: 0 0 0.75rem; }
+.tx-order-dl dt { color: var(--tx-choc-600); font-size: 0.85rem; }
+.tx-order-dl dd { margin: 0; min-width: 0; }
+.tx-order-wrap { overflow-wrap: anywhere; white-space: pre-line; margin: 0; }
+.tx-order-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
+.tx-order-actions a.tx-iam-btn { text-decoration: none; }
+.tx-order-list { margin: 0.35rem 0 0; padding-left: 1.2rem; }
+.tx-order-totals { display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 0.35rem 1rem; margin: 1rem 0; max-width: 24rem; margin-left: auto; }
+.tx-order-totals dt { color: var(--tx-choc-600); }
+.tx-order-totals dd { margin: 0; text-align: right; white-space: nowrap; }
+.tx-order-totals .is-total { font-weight: 700; color: var(--tx-choc-950); border-top: 1px solid var(--tx-cream-300, #e8dcc8); padding-top: 0.35rem; }
+.tx-order-timeline { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.6rem; }
+.tx-order-timeline li { border-left: 3px solid var(--tx-cream-300, #e8dcc8); padding: 0.2rem 0 0.2rem 0.75rem; }
+.tx-order-timeline li.is-status { border-left-color: var(--tx-choc-600); }
+.tx-order-timeline li.is-payment { border-left-color: var(--tx-success-700); }
+.tx-order-timeline li.is-dispatch { border-left-color: var(--tx-warning-700); }
+.tx-order-timeline li.is-note { border-left-color: var(--tx-orange-500, #F48800); }
+.tx-order-timeline__head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; font-size: 0.85rem; }
+.tx-order-timeline__head .tx-iam-chip { margin: 0; }
+.tx-order-timeline p { margin: 0.2rem 0 0; }
+.tx-order-note { max-width: 40rem; }
+.tx-shop-settings { display: grid; gap: 1rem; }
+
+/* Packing slip: never on screen; the only thing printed from the order page. */
+.tx-order-slip { display: none; }
+@media print {
+  body * { visibility: hidden !important; }
+  .tx-order-slip, .tx-order-slip * { visibility: visible !important; }
+  .tx-order-slip {
+    display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 12mm;
+    color: #000; background: #fff; font: 11pt/1.4 Arial, Helvetica, sans-serif;
+  }
+  .tx-order-slip h1 { font-size: 18pt; margin: 0 0 6mm; }
+  .tx-order-slip table { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+  .tx-order-slip th, .tx-order-slip td { text-align: left; vertical-align: top; padding: 2mm; border: 1px solid #000; }
+  .tx-order-slip__meta th { width: 30%; }
+  .tx-order-slip__box { width: 10mm; }
+  .tx-order-slip__sign { margin-top: 10mm; }
+  @page { margin: 10mm; }
+}
+.tx-shop-settings .tx-shop-editor__meta { margin: 0.25rem 0 0.9rem; }

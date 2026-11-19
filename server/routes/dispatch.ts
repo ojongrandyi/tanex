@@ -12,7 +12,7 @@ import { inTransaction } from '../auth/schema.js';
 import { serverError } from '../errors.js';
 import { IMAGE_CONTENT_TYPES, resolveUploadPath } from '../uploads.js';
 import {
-  DELIVERY_CODE_TRIES, NOTE_MAX, applyTransition, checkJobShape, createJobShipment, defaultVehicle, fail, hashDeliveryCode, isFail, jobOut,
+  DELIVERY_CODE_TRIES, NOTE_MAX, applyTransition, checkJobShape, fail, hashDeliveryCode, insertConfirmedJob, isFail, jobOut,
   loadJob, newJobId, parsePlace, priceJob, readJobInput, writeTransition, type Fail, type JobRow, type Place,
 } from '../dispatch/jobs.js';
 import {
@@ -354,33 +354,20 @@ dispatchRouter.post('/jobs', canManage, (req: Request, res: Response) => {
       currency = quote.currency;
     }
     const actor = actorOf(req);
-    const transition = findTransition(null, 'create')!;
     const now = Date.now();
-    const id = newJobId();
-    const row = inTransaction(db, () => {
-      const tracking = scope === 'LOCAL' || scope === 'INTERCITY'
-        ? createJobShipment(db, scope, pickup, dropoff, { itemDescription: input.itemDescription ?? null, weightKg, createdBy: actor.userId })
-        : input.trackingNumber!;
-      db.prepare(`
-        INSERT INTO dispatch_jobs (id, tracking_number, scope, status, vehicle_required, pickup_json, dropoff_json, size_class,
-          weight_kg, item_description, is_express, scheduled_for_ts, price, currency, price_overridden, payer, cod_amount,
-          collect_delivery_fee, delivery_code_hash, notify_locale, created_by, created_at_ts, updated_at_ts)
-        VALUES (?, ?, ?, 'CONFIRMED', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(id, tracking, scope, input.vehicleRequired ?? defaultVehicle(scope, pickup, dropoff, sizeClass),
-        JSON.stringify(pickup), JSON.stringify(dropoff), sizeClass, weightKg, input.itemDescription ?? null, isExpress ? 1 : 0,
-        input.scheduledForTs ?? null, price, currency, overridden ? 1 : 0, input.payer ?? 'SENDER', input.codAmount ?? null,
-        input.collectDeliveryFee ? 1 : 0, input.deliveryCode ? hashDeliveryCode(input.deliveryCode) : null,
-        input.notifyLocale ?? 'en', actor.userId, now, now);
-      return writeTransition(db, loadJob(db, id)!, transition, {
-        req, actor, at: now,
-        auditSummary: `Delivery job created for ${tracking} (${scope.toLowerCase()})`,
-        auditBefore: { status: null },
-        auditAfter: {
-          scope, price, currency, priceOverridden: overridden, ...(overridden ? { priceReason: input.priceReason } : {}),
-          codAmount: input.codAmount ?? null, payer: input.payer ?? 'SENDER', deliveryCode: input.deliveryCode ? 'set' : 'none',
-        },
-      });
-    });
+    const row = inTransaction(db, () => insertConfirmedJob(db, {
+      scope, trackingNumber: input.trackingNumber, pickup, dropoff, sizeClass, weightKg,
+      itemDescription: input.itemDescription ?? null, isExpress, scheduledForTs: input.scheduledForTs ?? null,
+      vehicleRequired: input.vehicleRequired ?? null, price, currency, priceOverridden: overridden,
+      payer: input.payer ?? 'SENDER', codAmount: input.codAmount ?? null, collectDeliveryFee: !!input.collectDeliveryFee,
+      deliveryCode: input.deliveryCode ?? null, notifyLocale: input.notifyLocale ?? 'en',
+    }, {
+      req, actor, at: now,
+      auditAfter: {
+        scope, price, currency, priceOverridden: overridden, ...(overridden ? { priceReason: input.priceReason } : {}),
+        codAmount: input.codAmount ?? null, payer: input.payer ?? 'SENDER', deliveryCode: input.deliveryCode ? 'set' : 'none',
+      },
+    }));
     noStore(res);
     res.status(201).json({ success: true, data: jobOut(db, row, { view: 'dispatch' }) });
   } catch (err) {

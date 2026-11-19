@@ -11,7 +11,26 @@ export const blogMenu: Widen<ConsoleTextAreas['blogMenu']> = {
 // Boutique : libellé du bouton validé par le propriétaire (#180).
 export const shopMenu: Widen<ConsoleTextAreas['shopMenu']> = {
   menu: 'Boutique',
-  description: 'Produits, photos, stock et catégories.',
+  description: 'Produits, photos, stock, catégories et commandes.',
+  newBadge: (n: number) => (n === 1 ? '1 nouvelle' : `${n} nouvelles`),
+  newOrdersLabel: (n: number) => (n === 1 ? '1 nouvelle commande boutique' : `${n} nouvelles commandes boutique`),
+  bellTitle: (n: number) => (n === 1 ? '1 nouvelle commande boutique' : `${n} nouvelles commandes boutique`),
+  bellBody: 'Appelez le client pour confirmer la commande et les frais de livraison.',
+  dashboard: {
+    title: 'Commandes boutique',
+    newOrders: 'Nouvelles commandes',
+    feeToConfirm: (n: number) => (n === 1 ? '1 avec des frais à confirmer' : `${n} avec des frais à confirmer`),
+    allFeesSet: 'Tous les frais de livraison sont fixés',
+    ready: 'Prêtes à envoyer',
+    readyHint: 'Emballées, en attente de livraison ou de retrait',
+    out: 'En cours de livraison',
+    problems: (n: number) => (n === 1 ? '1 avec un problème de livraison' : `${n} avec un problème de livraison`),
+    noProblems: 'Aucun problème de livraison',
+    unpaid: 'Terminées, non payées',
+    unpaidHint: 'Livrées ou retirées, paiement non enregistré',
+    lowStock: 'Stock bas',
+    lowStockHint: 'Produits publiés au niveau de stock bas ou en dessous',
+  },
 };
 
 export const dispatchMenu: Widen<ConsoleTextAreas['dispatchMenu']> = {

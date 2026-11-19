@@ -60,6 +60,9 @@ interface AdminLayoutProps {
   newProofsCount?: number;
   /** Dispatch jobs waiting for dispatch: requested, to assign, problems (G.5). */
   dispatchAttentionCount?: number;
+  /** Shop orders waiting to be confirmed (M.7). */
+  newShopOrdersCount?: number;
+  onOpenShopOrders?: () => void;
   children: React.ReactNode;
 }
 
@@ -72,6 +75,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   newMessagesCount = 0,
   newProofsCount = 0,
   dispatchAttentionCount = 0,
+  newShopOrdersCount = 0,
+  onOpenShopOrders,
   children
 }) => {
   const { notifications, markNotificationRead, quoteRequests, shipments } = useAdminData();
@@ -102,7 +107,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   // Quote/delay alerts come from lists the user may not be allowed to see; keep only theirs.
   const visibleNotifications = notifications.filter((n) =>
     n.type === 'QUOTE' ? can('quotes.view') : can('shipments.view'));
-  const unreadCount = visibleNotifications.filter(n => !n.read).length + newProofsCount;
+  const unreadCount = visibleNotifications.filter(n => !n.read).length + newProofsCount + newShopOrdersCount;
+  const openShopOrders = () => { if (onOpenShopOrders) onOpenShopOrders(); else onSelectView('shop'); };
   const pendingQuotesCount = quoteRequests.filter(q => q.status === 'NEW' || q.status === 'UNDER_REVIEW').length;
 
   const currentMeta = TXT.views[currentView] || TXT.views['operations-center'];
@@ -349,6 +355,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   <Store size={18} />
                 </div>
                 <span className="nav-title">{SHOP_MENU.menu}</span>
+                {newShopOrdersCount > 0 && (
+                  <span className="nav-badge-amber font-mono" aria-label={SHOP_MENU.newOrdersLabel(newShopOrdersCount)}>{SHOP_MENU.newBadge(newShopOrdersCount)}</span>
+                )}
               </button>
             )}
 
@@ -535,7 +544,28 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                         </div>
                       </div>
                     )}
-                    {visibleNotifications.length === 0 && newProofsCount === 0 ? (
+                    {newShopOrdersCount > 0 && (
+                      <div
+                        className="popover-item unread"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => { openShopOrders(); setShowNotifications(false); }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            openShopOrders();
+                            setShowNotifications(false);
+                          }
+                        }}
+                      >
+                        <div className="item-dot payment" />
+                        <div className="item-content">
+                          <strong>{SHOP_MENU.bellTitle(newShopOrdersCount)}</strong>
+                          <p>{SHOP_MENU.bellBody}</p>
+                        </div>
+                      </div>
+                    )}
+                    {visibleNotifications.length === 0 && newProofsCount === 0 && newShopOrdersCount === 0 ? (
                       <div className="popover-empty">
                         <CheckCircle2 size={24} className="text-emerald" />
                         <span>{TXT.allCorridorsOperatingNominally}</span>
